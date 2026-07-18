@@ -49,6 +49,7 @@ sdist/
 # Environment variables
 .env
 .env.*
+!.env.example
 
 # Logs
 logs/
@@ -72,5 +73,9 @@ migrations/versions/__pycache__/
 wallet_stub/
 user_stub/
 
-rasa/.rasa/ 
+rasa/.rasa/
 rasa/models/
+
+# Config machine-locale (Rasa/Keras, generee automatiquement, pas du projet)
+rasa/.config/
+rasa/.keras/
