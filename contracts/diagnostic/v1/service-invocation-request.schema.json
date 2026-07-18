@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.ngoni.internal/diagnostic/v1/service-invocation-request.schema.json",
+  "title": "DiagnosticInvocationRequest",
+  "description": "Requete envoyee par le Diagnostic Engine a un microservice metier, sur la route POST {base_url}/diagnostic/{problem_id} declaree dans son Capability Manifest. C'est le seul format de requete que les microservices doivent savoir lire, quel que soit le probleme.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["session_id", "trace_id", "user_id", "problem_id", "entities"],
+  "properties": {
+    "session_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Identique au session_id recu dans le DiagnosticResolveRequest, propage tel quel."
+    },
+    "trace_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Identifiant de correlation genere par le Diagnostic Engine pour cet appel precis, a reutiliser dans le header X-Request-ID et dans les logs du microservice."
+    },
+    "user_id": {
+      "type": "string",
+      "description": "Identifiant de l'utilisateur authentifie, resolu par le Diagnostic Engine avant l'appel (jamais fourni tel quel par le Dialogue Manager)."
+    },
+    "problem_id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "description": "Rappel du probleme cible, identique a la cle utilisee pour le lookup dans le Capability Manifest."
+    },
+    "entities": {
+      "type": "object",
+      "description": "Sous-ensemble des entites transmises par le client, filtre par le Diagnostic Engine sur les seules cles declarees en required_fields/optional_fields pour ce probleme.",
+      "additionalProperties": true
+    }
+  },
+  "examples": [
+    {
+      "session_id": "b3a1f9e0-6e2a-4b3a-9c3a-1f2e3d4c5b6a",
+      "trace_id": "9f8e7d6c-5b4a-3c2d-1e0f-a1b2c3d4e5f6",
+      "user_id": "usr_123",
+      "problem_id": "withdrawal_pending",
+      "entities": {
+        "transaction_reference": "WITHDRAW-abc123"
+      }
+    }
+  ]
+}

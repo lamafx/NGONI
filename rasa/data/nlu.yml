@@ -1,0 +1,2302 @@
+version: "3.1"
+
+nlu:
+- intent: ask_faq
+  examples: |
+    - Comment créer un compte NGONI ?
+    - Comment ouvrir un compte sur NGONI ?
+    - Comment m'inscrire sur NGONI ?
+    - Je souhaite créer un compte.
+    - Quelle est la procédure d'inscription ?
+    - Comment fonctionne l'inscription ?
+    - Comment accéder à mon compte ?
+    - Comment me connecter ?
+    - J'ai oublié comment me connecter.
+    - Comment réinitialiser mon mot de passe ?
+    - Comment modifier mon mot de passe ?
+    - Puis-je changer mon numéro de téléphone ?
+    - Comment mettre à jour mes informations personnelles ?
+    - Comment compléter mon profil ?
+    - À quoi sert NGONI ?
+    - Qu'est-ce que NGONI ?
+    - Peux-tu me présenter NGONI ?
+    - C'est quoi NGONI ?
+    - Explique-moi le fonctionnement de NGONI.
+    - Comment fonctionne NGONI ?
+    - Comment acheter des pièces ?
+    - Où acheter des pièces ?
+    - Quels sont les moyens d'acheter des pièces ?
+    - Comment obtenir des pièces ?
+    - Comment recharger mon portefeuille de pièces ?
+    - Quels moyens de paiement sont acceptés ?
+    - Comment utiliser mes pièces ?
+    - À quoi servent les pièces ?
+    - Comment consulter mon solde de pièces ?
+    - Comment savoir combien de pièces il me reste ?
+    - Comment effectuer un retrait ?
+    - Comment demander un retrait ?
+    - Quel est le délai d'un retrait ?
+    - Pourquoi mon retrait est-il en attente ?
+    - Comment suivre mon retrait ?
+    - Comment fonctionne le système de retrait ?
+    - Comment gagner des pièces ?
+    - Existe-t-il plusieurs façons de gagner des pièces ?
+    - Comment fonctionne le système de récompenses ?
+    - Comment consulter mon historique ?
+    - Où voir mes transactions ?
+    - Comment vérifier mes opérations ?
+    - Comment contacter le support ?
+    - Comment obtenir de l'aide ?
+    - Où puis-je trouver les informations sur NGONI ?
+    - Je voudrais en savoir plus sur les services proposés.
+    - Peux-tu répondre à une question concernant NGONI ?
+    - J'aimerais avoir des informations sur NGONI.
+    - Je voudrais comprendre comment fonctionne la plateforme.
+    - Pouvez-vous m'expliquer le fonctionnement de NGONI ?
+    - J'ai quelques questions sur NGONI.
+    - Je souhaite obtenir des renseignements sur vos services.
+    - Je cherche des informations concernant NGONI.
+    - J'aimerais mieux comprendre votre application.
+    - Peux-tu m'aider à comprendre certaines fonctionnalités ?
+    - Je veux en apprendre davantage sur NGONI.
+    - J'aimerais savoir comment utiliser l'application.
+    - Comment utiliser NGONI pour la première fois ?
+    - Que puis-je faire avec NGONI ?
+    - Quelles sont les principales fonctionnalités de NGONI ?
+    - Quels services sont proposés par NGONI ?
+    - Quelles sont les fonctionnalités disponibles ?
+    - Que permet de faire l'application ?
+    - Comment profiter des services NGONI ?
+    - Comment démarrer avec NGONI ?
+    - Existe-t-il un guide d'utilisation ?
+    - Comment apprendre à utiliser la plateforme ?
+    - Comment fonctionne le système de pièces ?
+    - Peux-tu expliquer le système de pièces ?
+    - Je ne comprends pas le fonctionnement des pièces.
+    - Comment les pièces sont-elles utilisées ?
+    - Les pièces servent à quoi exactement ?
+    - À quoi correspondent les pièces ?
+    - Comment connaître le prix des pièces ?
+    - Combien coûtent les pièces ?
+    - Où consulter les tarifs des pièces ?
+    - Comment fonctionne l'achat de pièces ?
+    - Comment récupérer des pièces ?
+    - Peut-on obtenir des pièces gratuitement ?
+    - Comment fonctionne le portefeuille ?
+    - Où consulter mon portefeuille ?
+    - Comment voir mon solde ?
+    - Comment consulter mes informations de compte ?
+    - Où trouver mes informations personnelles ?
+    - Comment modifier mon profil ?
+    - Puis-je changer mes informations personnelles ?
+    - Comment mettre à jour mon compte ?
+
+    - Comment consulter mes récompenses ?
+    - Comment sont calculées les récompenses ?
+    - Comment fonctionne le programme de récompenses ?
+    - Comment vérifier mes récompenses ?
+    - Où consulter l'historique de mes opérations ?
+    - Comment retrouver mes anciennes transactions ?
+    - Où voir mes retraits ?
+    - Comment consulter mes achats ?
+    - Où voir toutes mes opérations ?
+    - Comment accéder à l'historique ?
+    - Comment retrouver une ancienne transaction ?
+    - Quels sont les délais de traitement ?
+    - En combien de temps une opération est-elle traitée ?
+    - Où puis-je lire les conditions d'utilisation ?
+    - Existe-t-il une foire aux questions ?
+    - Où trouver les réponses aux questions fréquentes ?
+    - Où puis-je obtenir plus d'informations ?
+    - Qui puis-je contacter pour avoir des renseignements ?
+    - Comment joindre le support ?
+    - Le support est-il disponible tous les jours ?
+    - Quels sont vos horaires d'assistance ?
+    - Où puis-je consulter les informations officielles ?
+    - Je souhaite avoir une précision sur un service.
+    - J'ai besoin d'une explication concernant une fonctionnalité.
+    - Pouvez-vous répondre à une question sur l'application ?
+    - Bonjour c'est quoi NGONI ?
+    - Salut je veux comprendre comment ça marche
+    - Hello comment utiliser l'application ?
+    - Bonjour j'ai une question sur les pièces
+    - Salut pourquoi mon compte fonctionne comme ça ?
+    - Bonsoir comment acheter des pièces ?
+    - Hey je veux savoir comment ça marche NGONI
+    - Coucou c'est quoi le système de récompense ?
+    - Bonjour je ne comprends pas NGONI
+    - Salut comment on utilise le portefeuille ?
+    - j’ai une question sur le fonctionnement de l’appli
+    - cmt on fait un retrait ?
+    - comment recharger mon portefeuille ?
+    - tu peux m’expliquer le système de pièces ?
+    - je cherche une info sur les récompenses
+    
+    - comment voir mes pièces ?
+    - j’ai besoin d’aide pour comprendre l’appli
+    - comment s’inscrire vite ?
+    - y a t’il un tuto ?
+
+    
+    - comen sa marche ngoni
+    - koman on peu retirer de largent
+    - c'est koi ngoni exactement
+    - commen fair pr acheter des piece
+    - je c pa comment sinscrire
+    - pk le retrait prend du tem
+    - kes ce que ngoni plus
+    - conment on gagne des piece
+    - eske on peu utiliser ngoni sur android
+    - Bonjour, je découvre l'application et j'aimerais comprendre en détail comment fonctionne le système de pièces avant de faire mon premier achat, s'il vous plaît.
+    - Je voudrais savoir, de manière générale et sans que ce soit lié à un souci particulier, comment se déroule normalement le processus de retrait d'argent sur NGONI.
+    
+    - Avant d'utiliser l'application pour la première fois, je voudrais comprendre comment fonctionnent les pièces, comment on les achète et comment on les utilise pour envoyer des cadeaux.
+    - Je me demandais, puisque je suis nouveau sur la plateforme, quelles étaient les différentes façons de gagner des pièces en dehors de l'achat direct.
+    - Est-ce que vous pourriez m'indiquer, de façon générale, quel est le délai moyen de traitement d'un retrait, juste pour que je sache à quoi m'attendre la prochaine fois ?
+    - Comment fonctionne le contrôle parental ?
+    - C'est quoi le contrôle parental sur l'application ?
+    - Comment activer le contrôle parental pour mon enfant ?
+    - À quoi sert le contrôle parental sur NGONI ?
+    - Comment faire une suggestion d'amélioration ?
+    - Où proposer une idée d'amélioration pour l'application ?
+    - Comment envoyer une suggestion à l'équipe NGONI ?
+    - Existe-t-il un moyen de proposer une amélioration ?
+    - Comment gagner des revenus grâce à mon audience ?
+    - Comment monétiser mon contenu sur NGONI ?
+    - Quelles sont les sources de revenus possibles sur NGONI ?
+    - Comment un créateur peut-il gagner de l'argent sur la plateforme ?
+
+    - Comment supprimer mon compte définitivement ?
+    - C'est quoi les lives privés payants ?
+    - C'est quoi la différence entre le wallet et les pièces ?
+    - Quels documents faut-il pour le KYC ?
+    - Peut-on avoir un compte sans vérification ?
+    - Combien de temps gardez-vous mes données personnelles ?
+    - Est-ce que je peux avoir plusieurs comptes ?
+    - Comment contacter le support directement ?
+    - Puis-je changer mon email ?
+    - Comment je fais pour vérifier mon identité ?
+
+    # Prefixe de politesse "Bonjour, ..." (audit "500 tours", 2026-07-18) :
+    # une question de fond parfaitement claire, une fois precedee d'une
+    # formule de politesse structurée en debut de phrase, se faisait
+    # classer greet/nlu_fallback plutot que la vraie intention. Exemples
+    # ci-dessous pour que le NLU apprenne a ignorer ce prefixe.
+    - Bonjour, quel est le montant minimum de retrait, merci d'avance.
+    - Bonjour, puis-je changer mon email, merci d'avance.
+    - Bonjour, est-ce que mes pièces expirent un jour, merci d'avance.
+    - Bonjour, comment puis-je vérifier mon identité, merci d'avance.
+    - Bonjour, comment fonctionne le parrainage, merci d'avance.
+    - Bonjour, pourriez-vous m'indiquer comment recharger mon compte, merci.
+- intent: greet
+  examples: |
+    - Bonjour
+    - Bonsoir
+    - Salut
+    - Hey
+    - Coucou
+    - Hello
+    - Salut ça va ?
+    - Bonjour à vous
+    - Bonsoir l'équipe
+    - Salut NGONI
+    - Hello comment ça va ?
+    - Yo
+    - Salam
+    - Bonsoir tout le monde
+    - Bonjour, j'ai une question
+    - Salut j'ai besoin d'aide
+    - Coucou, petite question
+    - Hello, je voulais demander quelque chose
+    - Bonjour est-ce que vous êtes là ?
+    - Salut pouvez-vous m'aider ?
+    - Hey j'ai un souci
+    - Bonjour support
+    - Salut assistance
+    - Hello team NGONI
+    - slt
+    - salut
+    - bonjour
+    - bonsoir
+    - hey
+    - yo
+    - coucou
+    - hello
+    - bjr
+    - slt ça va
+    - salut ça va ?
+    - bonjour svp
+    - hello j'ai une question
+    - salut j'ai un problème
+    - hey besoin d'aide
+    - slt support
+    - bonjour assistance
+    - coucou ngoni
+    - salut l'équipe
+    - hello ngoni
+    - bonsoir je veux une info
+    - salut, tu peux m’aider ?
+    - bonjour, vous êtes là ?
+    - hello, j’ai besoin d’infos
+    - slt, je cherche de l’aide
+    - bonjour support, je voudrais une info
+    - hey, ça va ?
+    - coucou, j’ai une petite question
+    - bjr, vous pouvez m’aider stp
+    - bonsoir, est-ce que quelqu’un peut me répondre ?
+    - salut, j’ai un souci rapide
+
+    - salu
+    - bjrr
+    - yo la team
+    - coucou vous etes la
+    - Bonjour, j'espère que vous allez bien aujourd'hui.
+    - Bien le bonjour à toute l'équipe NGONI.
+    - Bonjour, désolé de vous déranger, j'ai une petite question.
+    - Salut, excusez-moi de vous solliciter.
+    - Bonne journée à vous, j'ai besoin d'un renseignement.
+    - Hello l'assistant NGONI, comment vas-tu ?
+    - Bonjour bonjour !
+    - Coucou, c'est encore moi.
+    - Salut, ravi de vous retrouver.
+    - Bonjour, je reviens vers vous pour une question.
+    - Cher assistant NGONI, bonjour.
+    - Bonjour, pouvez-vous m'accorder un instant ?
+    - Salut toi, ça roule ?
+    - Yo, tout va bien ?
+    - Wesh, présent ?
+    - Bonjour, êtes-vous disponible pour m'aider ?
+    - Salut, je peux te poser une question ?
+    - Bonjour madame, bonjour monsieur.
+    - Bonjour l'assistant.
+    - Salut l'assistant NGONI.
+    - Bien le bonjour.
+    - Bonjour à l'équipe support.
+    - Coucou l'équipe.
+    - Salut, il y a quelqu'un ?
+    - Bonjour, y a-t-il un agent disponible ?
+    - Bjr tt le monde
+    - slt tlm
+    - cc
+    - cc tlm
+    - bjr, ça va bien ?
+    - slt toi
+    - yo l'assistant
+    - bonjour ngoni, ça va ?
+    - salut, petite question rapide stp
+    - hello, dispo pour m'aider ?
+    - bjr, j'ai un truc a demander
+    - coucou, j'ai besoin d'un renseignement
+    - bonjour !!
+    - salut !!
+    - hello !
+    - bjr :)
+    - salut :)
+    - Bonjour à vous, j'espère ne pas vous déranger en ce début de journée.
+    - Je vous souhaite le bonjour, j'aurais besoin d'un petit renseignement si possible.
+    - Bonsoir, je sais qu'il est tard mais j'aurais besoin d'aide rapidement.
+    - Bonjour, je me permets de vous contacter pour une question concernant mon compte.
+    - Salut, je viens d'ouvrir l'application et j'ai une question avant de commencer.
+    - bonjour l'assistant virtuel de ngoni
+    - salut c'est bibi encore
+    - re bonjour
+    - re salut
+    - rebonjour
+    - bonjour, encore moi
+    - salut c'est encore moi
+    - Allô, il y a quelqu'un ?
+    - Bonjour, je découvre l'application NGONI.
+    - Bonsoir, première fois que j'utilise ce chat.
+    - Bonjour, je suis nouveau ici.
+    - Salut, je débarque.
+    - Bonjour cher assistant, comment allez-vous ?
+    - hi there
+    - hi
+    - good morning
+    - good evening
+    - hey there
+    - Bonjour, avez-vous un instant pour moi ?
+    - Salut, désolé du dérangement.
+    - Bonjour, je voulais vous saluer avant de poser ma question.
+    - Coucou, comment ça va de votre côté ?
+    - Bonjour, êtes-vous un assistant automatique disponible maintenant ?
+    - salut binja
+    - salut mon reuf ça va
+    - bjr chef
+    - salut boss
+    - bonjour patron
+    - Bonjour l'application NGONI.
+    - Hello, je tape ce message depuis mon téléphone.
+    - Bonjour, je vous écris depuis l'application mobile.
+    - bsr
+    - bsr tlm
+    - salam alaykoum
+    - wa alaykoum salam bonjour
+    - as-salam
+    - bonjour, la paix soit sur vous
+    - Bonjour, je voudrais discuter avec vous quelques instants.
+    - Salut, on peut parler ?
+    - Hello, j'ai une urgence à vous signaler.
+    - Bonjour, j'ai une question urgente.
+    - Salut, désolé de vous solliciter si tôt.
+    - Bonsoir, désolé de vous déranger si tard.
+    - Bonjour, je tente ma chance avec le chat.
+    - hola
+    - hola, hablas español?
+    - bonjour, je découvre ce chatbot
+    - salut, je teste le chatbot
+
+    - salut 👋
+    - bonjour 👋
+    - coucou 😊
+    - hello 🙂
+- intent: goodbye
+  examples: |
+    - Au revoir
+    - Bye
+    - À bientôt
+    - Bonne journée
+    - Bonne soirée
+    - À plus
+    - À plus tard
+    - Ciao
+    - Je vous laisse
+    - Merci au revoir
+    - Merci bonne journée
+    - On se reparle plus tard
+    - Je dois partir
+    - Je reviens plus tard
+    - Fin de conversation
+    - Ok merci bye
+    - D'accord merci à toi
+    - Merci pour l'aide au revoir
+    - C'était tout merci
+    - Je n'ai plus de questions
+    - On s'arrête là merci
+    - Bonne continuation
+    - À la prochaine
+    - bye
+    - a+
+    - à plus
+    - ciao
+    - slt je dois partir
+    - ok merci bye
+    - merci a+
+    - je vais y aller
+    - bon j'y vais
+    - on se parle plus tard
+    - fin
+    - stop merci
+    - ok c bon merci
+    - merci c'est tout
+    - j'ai fini
+    - merci c’est tout
+    - ok merci, à plus
+    - je te laisse, bonne journée
+    - on se dit à plus tard
+    - ciao, merci pour ton aide
+    - j’y vais, à bientôt
+    - parfait, bonne soirée
+    - ok bye
+    - merci, je repasse plus tard
+    - dacc, à la prochaine
+    
+    - mrc au revoir
+    - javai fini merci
+    - bn journée
+    - c bon merci a vous
+    - Merci beaucoup pour votre aide, je vous souhaite une bonne journée.
+    - Je vous remercie, je pense que j'ai toutes les réponses dont j'avais besoin.
+    - C'est parfait, merci pour votre temps, à une prochaine fois.
+    - Merci infiniment, je n'ai plus rien à ajouter pour le moment.
+    - Très bien, merci pour ces précisions, je vous laisse.
+    - D'accord, merci, je pense avoir ce qu'il me fallait.
+    - Merci, j'ai eu ma réponse, bonne continuation à vous.
+    - Super, merci beaucoup, à bientôt sur l'application.
+    - Merci pour tout, passez une excellente journée.
+    - Je vous remercie pour votre disponibilité, au revoir.
+    - Bon, je crois que c'est tout pour moi, merci.
+    - Ça règle mon problème, merci beaucoup, à plus.
+    - Parfait merci, je referme la conversation.
+    - Merci, à la revoyure.
+    - Merci, à un de ces jours.
+    - À demain.
+    - À la prochaine fois.
+    - Salut, je m'en vais.
+    - Bon je vous laisse, bonne soirée.
+    - Bon allez, à plus tard.
+    - Ok top, merci, bye bye.
+    - Nickel merci, à plus.
+    - Merci bcp
+    - mrc bcp
+    - mrc bcp bye
+    - a+ tt le monde
+    - a pluche
+    - a tantot
+    - bsr et merci
+    - c'est good merci
+    - c good merci bye
+    - jvous remercie, bonne soirée
+    - jv remercie
+    - ok tt bon merci
+    - ok tout bon, à plus
+    - very good merci, bye
+    - thanks bye
+    - thank you goodbye
+    - see you
+    - see you later
+    - bye bye
+    - byebye
+    - au revoir et merci
+    - au revoir à tous
+    - au revoir l'assistant
+    - au revoir ngoni
+    - je clos la discussion, merci
+    - je termine ici, merci
+    - discussion terminée merci
+    - c'est réglé, merci beaucoup, au revoir
+    - problème résolu, merci, bonne journée
+    - tout est ok pour moi, merci et au revoir
+    - je n'ai plus besoin de vous, merci
+    - c'est bon pour moi merci a+
+    - super merci, salut
+    - nickel, merci, ciao
+    - impeccable, merci, à bientôt
+    - Je vous remercie chaleureusement pour votre aide précieuse, je vous souhaite une excellente fin de journée.
+    - Merci beaucoup pour votre patience et vos explications, je pense que j'ai désormais tout ce qu'il me faut.
+    - C'était un plaisir d'échanger avec vous, merci encore et à très bientôt sur l'application.
+    - Je dois filer, merci pour votre aide, on se reparle une prochaine fois si besoin.
+    - Merci pour votre réactivité, je referme la discussion de mon côté.
+    - Bon j'y vais pour de vrai cette fois, merci.
+    - allez salut
+    - bon salut
+    - bon bah salut
+    - ok salut alors
+    - c'est good, salut
+    - fini pour moi merci
+    - stop, c'est bon, merci
+    - terminé, merci beaucoup
+    - au plaisir
+    - au plaisir de vous revoir
+    - à un prochain échange
+    - merci, on se retrouve bientôt
+    - merci, portez-vous bien
+    - prenez soin de vous, merci
+    - bonne continuation à vous aussi
+    - bonne fin de journée
+    - bonne fin de soirée
+    - excellente journée à vous
+    - excellente soirée
+    - Merci pour votre disponibilité, je vous souhaite le meilleur pour la suite.
+    - Merci de m'avoir aidé, à très bientôt sur l'application.
+    - Merci pour cet échange, je vous laisse à vos occupations.
+    - Je vous remercie sincèrement, je vais me déconnecter maintenant.
+    - Bon, je pense qu'on a fait le tour, merci et bonne continuation.
+    - c'est réglé merci bcp, bonne soirée à vs
+    - merci bcp pr votr éd, à bi1to
+    - c good j'ai eu ma réponse, merci et à+
+    - Merci pour votre aide précieuse, je m'en vais tranquille maintenant.
+    - Bien reçu, merci beaucoup, bonne fin de journée à vous.
+
+    - merci 🙏
+    - au revoir 👋
+    - bonne journée 😊
+    - à bientôt 🙏
+- intent: create_reclamation
+  examples: |
+    - Je souhaite signaler un problème.
+    - J'ai besoin d'aide pour résoudre un problème.
+    - Je souhaite faire une réclamation.
+    - Je veux signaler un incident.
+    - Merci de prendre en charge mon problème.
+    - Quelqu'un peut vérifier ce qui se passe sur mon compte ?
+    - J'ai un problème qui nécessite votre intervention.
+    - Pouvez-vous vérifier ce dysfonctionnement ?
+    - Merci de corriger ce problème rapidement.
+    - Je souhaite qu'un conseiller examine mon dossier.
+    - J'aimerais ouvrir une réclamation.
+    - Je voudrais signaler un dysfonctionnement.
+    - J'attends une solution de votre part.
+    - J'ai besoin d'une assistance rapidement.
+    - Pouvez-vous prendre en charge mon problème ?
+    - je veux ouvrir une réclamation
+    - je souhaite signaler officiellement ce problème
+    - je veux contacter le support
+    - ouvre une plainte pour ce souci
+    - crée un ticket pour mon cas
+    - j’aimerais déposer une réclamation
+    - fais une réclamation pour ce dysfonctionnement
+    - je veux un accompagnement humain
+    - il faut que vous ouvrez un ticket
+    - je souhaite un suivi par le support
+
+    - je veu ouvrir un ticket stp
+    - pouve vous svp prendre en charge mon dossié rapidmen
+    - Je souhaiterais, si cela est possible, qu'un membre de votre équipe support puisse examiner mon dossier en détail et me recontacter dans les plus brefs délais.
+    - Étant donné que le problème persiste depuis plusieurs jours malgré mes tentatives, j'aimerais qu'un conseiller humain prenne officiellement le relais sur mon dossier.
+    - je veu parlr a un vrai conseillé svp
+    - Je souhaite déposer une plainte officielle concernant mon compte.
+    - Je veux ouvrir un dossier de réclamation.
+    - Merci d'enregistrer ma réclamation.
+    - Je demande l'ouverture d'un ticket de support.
+    - Je veux qu'un ticket soit créé pour mon problème.
+    - Pouvez-vous ouvrir un dossier pour mon cas ?
+    - J'exige qu'un conseiller traite mon dossier.
+    - Je souhaite escalader ce problème auprès du support.
+    - Merci d'escalader mon dossier vers un agent.
+    - Je veux faire remonter ce problème officiellement.
+    - Enregistrez ma réclamation s'il vous plaît.
+    - Je veux formuler une plainte.
+    - Je veux porter plainte concernant ce service.
+    - Ouvrez-moi un ticket de réclamation.
+    - Je demande une prise en charge officielle de mon problème.
+    - Créez un dossier de réclamation pour moi.
+    - Je veux que mon problème soit transmis au support.
+    - Merci de transmettre mon dossier à un agent humain.
+    - Je souhaite qu'un agent me recontacte au sujet de mon problème.
+    - Je veux qu'on me recontacte pour traiter mon cas.
+    - Je souhaite qu'un conseiller me rappelle.
+    - Est-ce que je peux avoir un conseiller au téléphone ?
+    - Je veux parler à quelqu'un du support directement.
+    - Je demande à être mis en relation avec un agent.
+    - Passez-moi un conseiller s'il vous plaît.
+    - Je veux un suivi personnalisé de mon dossier.
+    - Merci d'ouvrir une enquête sur mon compte.
+    - Je souhaite qu'une enquête soit menée sur mon problème.
+    - Je veux déposer un signalement officiel.
+    - Enregistrez mon signalement s'il vous plaît.
+    - Je veux que ce dysfonctionnement soit documenté officiellement.
+    - Merci de créer un rapport d'incident pour mon compte.
+    - Je souhaite formaliser ma demande d'assistance.
+    - Je veux transformer cet échange en réclamation officielle.
+    - Pouvez-vous transformer ma demande en ticket ?
+    - Je veux que ce problème soit traité en priorité par un humain.
+    - Je demande une prise en charge urgente de mon dossier.
+    - Merci de faire remonter mon cas à un responsable.
+    - Je veux parler à un responsable.
+    - Je souhaite contacter un superviseur.
+    - Passez-moi un responsable s'il vous plaît.
+    - Je demande à voir un responsable du service.
+    - Je veux que quelqu'un s'occupe personnellement de mon cas.
+    - créer un ticket stp
+    - créer une réclamation pr moi
+    - ouvr moi un dossié
+    - jveu porté plainte
+    - jveu fair une reclamation officiel
+    - jveu k on trete mon dossié
+    - jveu k un agent me rapel
+    - creez un ticket svp
+    - fait moi un dossié de reclamation
+    - je veu k sa remont au responsabl
+    - Je souhaiterais, en raison de la gravité de la situation, qu'un dossier de réclamation soit ouvert dans les plus brefs délais par un membre de votre équipe.
+    - Étant donné l'ampleur du problème rencontré, je demande formellement l'ouverture d'un ticket de support afin qu'un conseiller puisse intervenir rapidement.
+    - Je vous prie de bien vouloir enregistrer officiellement ma réclamation, car ce problème me cause un préjudice important depuis plusieurs jours.
+    - Après plusieurs tentatives infructueuses pour résoudre ce problème par moi-même, je souhaite désormais qu'un agent humain prenne le relais officiellement.
+    - Je tiens à formuler une réclamation en bonne et due forme concernant le dysfonctionnement que je subis depuis le début de la semaine.
+    - Pourriez-vous, s'il vous plaît, transmettre mon dossier au service concerné afin qu'une action corrective soit rapidement engagée ?
+    - Je souhaite que cette situation soit prise très au sérieux et qu'un ticket de réclamation soit ouvert dès maintenant.
+    - Merci d'avance de bien vouloir ouvrir un dossier pour ce problème, qui dure depuis trop longtemps à mon goût.
+    - Ouvrez-moi une réclamation, je ne veux plus tourner en rond avec le diagnostic automatique.
+    - J'aimerais que ce problème soit traité comme une réclamation formelle et non comme une simple discussion.
+    - Je ne veux plus discuter avec le bot, je veux directement un ticket de réclamation.
+    - Passons directement à la création d'une réclamation, merci.
+    - Je préfère qu'on ouvre tout de suite un dossier plutôt que de continuer le diagnostic.
+    - Créez la réclamation maintenant s'il vous plaît.
+    - Je confirme vouloir déposer une réclamation.
+    - Il faut absolument qu'un ticket soit ouvert pour ce cas.
+    - Je veux que ma plainte soit enregistrée dans votre système.
+    - Merci de noter officiellement ma réclamation dans le système.
+    - Je souhaite un accusé de réception de ma réclamation.
+    - Je veux un numéro de dossier pour mon problème.
+    - Donnez-moi un numéro de ticket pour ce problème.
+    - Je veux suivre ma réclamation avec un numéro de dossier.
+    - Merci de me donner un numéro de suivi de réclamation.
+    - Je veux faire une réclamation formelle concernant le service client.
+    - Je veux déposer une réclamation concernant la sécurité de mon compte.
+    - Je veux signaler ce problème comme une réclamation officielle.
+    - Ouvrez un dossier de réclamation urgent s'il vous plaît.
+    - Je veux une réclamation urgente traitée par un humain.
+    - Merci d'ouvrir un ticket prioritaire pour mon cas.
+    - Je demande un traitement prioritaire de ma réclamation.
+    - Ceci est une réclamation officielle, merci de la traiter comme telle.
+    - Je veux que cette conversation débouche sur une réclamation.
+    - Merci de transformer cette conversation en réclamation.
+    - Je souhaite porter cette affaire devant le service client.
+    - Je veux que le service client soit informé de mon cas.
+    - Merci d'informer le service client de mon problème.
+    - Je veux déposer un dossier auprès du support NGONI.
+    - Ouvrez-moi un dossier auprès du support technique.
+    - Je veux une réclamation pour un problème de sécurité.
+    - Je souhaite signaler formellement un abus sur mon compte.
+    - Merci d'ouvrir une réclamation concernant un abus.
+    - Je veux faire une réclamation concernant mon dossier KYC rejeté.
+    - Je veux signaler officiellement un problème de vérification d'identité.
+    - Merci d'ouvrir un ticket pour mon problème de KYC.
+    - Je souhaite contester le refus de ma vérification d'identité.
+    - Je veux faire une réclamation sur un problème de vidéo.
+    - Merci d'ouvrir un dossier pour mon souci sur les lives vidéo.
+    - Je veux signaler un problème dans la messagerie de l'application.
+    - Merci d'ouvrir un ticket concernant le chat de l'application.
+    - Je veux faire une réclamation pour un problème d'authentification.
+    - Merci d'ouvrir un dossier concernant mon accès au compte.
+    - Je veux signaler un comportement inapproprié d'un autre utilisateur.
+    - Merci d'ouvrir une réclamation pour un problème de sécurité sur mon compte.
+    - Je souhaite qu'un dossier soit ouvert suite à un harcèlement subi sur l'application.
+    - Je veux faire une réclamation concernant du contenu inapproprié.
+    - Merci de traiter officiellement mon signalement de sécurité.
+    - Je veux qu'une équipe examine mon dossier de vérification.
+    - Je souhaite qu'un conseiller vérifie manuellement mon compte.
+    - Ouvrez-moi une réclamation, mon compte a été suspendu injustement.
+    - Je conteste la suspension de mon compte, ouvrez un dossier.
+    - Je veux faire appel de la décision concernant mon compte, ouvrez un ticket.
+    - Merci de créer un dossier de contestation pour mon compte.
+    - jve fer une reclam pr mon kyc
+    - jve signal 1 probleme sur le chat officielman
+    - jve k on ouvr un dossié pr mon compt suspendu
+    - Je vous écris pour formuler une réclamation officielle suite à la suspension injustifiée de mon compte survenue hier.
+    - Je souhaite qu'un dossier soit ouvert concernant le rejet répété de mes documents d'identité malgré plusieurs tentatives.
+    - Merci de bien vouloir enregistrer ma réclamation concernant un comportement déplacé rencontré dans le chat de l'application.
+
+    - ticket svp
+    - aide stp
+    - réclamation stp
+    - un conseiller svp
+    - dossier svp
+    - c'est le bazar sur mon compte depuis hier
+    - ça part en vrille avec mon retrait
+    - mon compte est dans un état pas possible
+    - my account is bloqué, je veux déposer une réclamation svp
+    - can you open un ticket please
+    - je me demande si vous pourriez ouvrir un dossier pour ce problème
+    - je voudrais savoir s'il est possible qu'un agent traite mon cas
+    - mon retrait est bloqué 😡 je veux déposer une réclamation svp
+    - toujours pas de nouvelles de mon dossier 😤 ouvrez un ticket
+    - mon compte est suspendu 🙏 merci d'ouvrir un dossier de réclamation
+- intent: affirm
+  examples: |
+    - Oui
+    - Oui bien sûr
+    - Exact
+    - C'est ça
+    - D'accord
+    - Ok
+    - OK
+    - Tout à fait
+    - Bien sûr
+    - Oui c'est correct
+    - Oui je confirme
+    - C'est bon
+    - Parfait
+    - Oui vas-y
+    - Oui je veux
+    - Oui je comprends
+    - Oui continue
+    - Oui c'est exact
+    - Effectivement
+    - Oui pas de souci
+    - Oui ça marche
+    - Oui c'est bon pour moi
+    - ouais
+    - ok
+    - d'accord
+    - yes
+    - yep
+    - c bon
+    - ok c'est bon
+    - vas-y
+    - continue
+    - oui vas-y
+    - bien sûr
+    - exactement
+    - oui merci
+    - exact, c’est ça
+    - yep, continue
+    - oui c’est bien ça
+    - ok parfait
+    - oui je confirme, vas-y
+    - oui tout à fait
+    - ouais c’est correct
+    - yes, proceed
+    - oui bonne idée
+
+    - oui c'est exactement ce que je voulais dire
+    - oui allons-y comme ça
+    - d'accord, vous pouvez continuer
+    - c'est tout à fait ça, merci
+    - Oui, allez-y, envoyez la réclamation.
+    - Oui, vous pouvez confirmer l'envoi.
+    - Oui, je valide, envoyez le ticket.
+    - Oui, je confirme la création de la réclamation.
+    - Oui, envoyez ma réclamation s'il vous plaît.
+    - Oui, tout est correct, vous pouvez procéder.
+    - Oui, c'est bien ce que je voulais signaler.
+    - Oui, c'est exactement le problème que je rencontre.
+    - Oui c'est bien ça, merci de confirmer.
+    - Oui, allez-y, je suis d'accord.
+    - Oui, je suis d'accord avec ça.
+    - Oui, ça me convient parfaitement.
+    - Oui, ça correspond bien à mon problème.
+    - Oui, c'est le bon résumé.
+    - Oui, le résumé est correct.
+    - Oui, tout est bon pour moi.
+    - Oui, envoyez-le comme ça.
+    - Oui, validez la réclamation.
+    - Affirmatif.
+    - Positif.
+    - C'est validé de mon côté.
+    - Je suis partant.
+    - Je suis pour.
+    - Absolument oui.
+    - Complètement d'accord.
+    - Entièrement d'accord.
+    - Sans problème, allez-y.
+    - Pas de souci, allez-y.
+    - Aucun souci, on continue.
+    - Ça me va très bien.
+    - Ça marche pour moi.
+    - Ça me convient.
+    - C'est tout bon.
+    - C'est parfait comme ça.
+    - Nickel, on continue.
+    - Impeccable, allez-y.
+    - Very well, go ahead.
+    - Sure.
+    - Sure, go ahead.
+    - Of course.
+    - Yes please.
+    - Yes exactly.
+    - Yes, that's correct.
+    - yep exactement
+    - grave oui
+    - grave, c'est ça
+    - carrément oui
+    - carrément
+    - je confirme
+    - je valide
+    - je suis d'accord
+    - c'est validé
+    - validé
+    - confirmé
+    - oué c bon
+    - oué c ça
+    - wai c'est ça
+    - wai vas y
+    - mouais d'accord
+    - okay
+    - okey
+    - okk
+    - dac
+    - dacc vas y
+    - dak c bon
+    - c good
+    - c good vas y
+    - c'est good, on continue
+    - allez on y va
+    - allons-y
+    - on continue comme ça
+    - on fait comme ça
+    - go
+    - go go go
+    - vas-y envoie
+    - envoie
+    - envoyez
+    - lancez
+    - lance ça
+    - confirme
+    - confirmez svp
+    - oui confirmez svp
+    - oui je le confirme
+    - Oui, tout à fait, vous avez bien compris ma situation, vous pouvez continuer.
+    - Oui c'est exactement cela, je vous confirme que vous pouvez poursuivre la démarche.
+    - Tout à fait exact, je valide cette proposition sans aucune réserve.
+    - Oui je suis entièrement d'accord avec ce que vous proposez, allez-y.
+    - Oui, c'est bien le problème que je rencontre, merci de continuer la procédure.
+    - oui c parfé continu
+    - oui c ok, vazy
+    - oui grave c ça
+
+    - c'est pas faux
+    - je dis pas non
+    - on va pas dire non à ça
+    - c'est pas rien, mais ok allons-y
+    - je vais pas dire le contraire
+    - 👍
+    - 👍👍
+    - ok 👌
+    - parfait 🙏
+    - allez-y 😊
+
+    - banco
+    - ça marche pour moi
+    - clairement oui
+    - ouep vas-y
+    - Bonjour, oui c'est bon, merci d'avance.
+    - Bonjour, d'accord ça marche, merci d'avance.
+    - Bonjour, ok je confirme, merci d'avance.
+- intent: deny
+  examples: |
+    - Non
+    - Pas du tout
+    - Jamais
+    - Pas encore
+    - Non merci
+    - Non ce n'est pas ça
+    - Ce n'est pas correct
+    - Faux
+    - Pas exactement
+    - Je ne pense pas
+    - Pas vraiment
+    - Non je refuse
+    - Non ça ne va pas
+    - Non ce n'est pas bon
+    - Ce n'est pas ce que je veux
+    - Pas ça
+    - Non arrête
+    - Non ce n'est pas ça du tout
+    - Absolument pas
+    - Non incorrect
+    - Non ce n'est pas le cas
+    - non
+    - nope
+    - nan
+    - pas ça
+    - jamais
+    - pas du tout
+    - faux
+    - c pas ça
+    - non merci
+    - pas vraiment
+    - absolument pas
+    - je pense pas
+    - je ne veux pas faire de réclamation
+    - je ne souhaite pas signaler ce problème
+    - je ne souhaite finalement pas ouvrir de ticket
+    - je ne veux pas créer de réclamation
+    - je n'ai plus besoin d'aide
+    - je ne rencontre aucun souci
+    - non merci, pas besoin
+    - je ne veux pas contacter le support
+    - je n'ai pas besoin d'un ticket
+    - non, je ne souhaite pas poursuivre
+
+    - non ce n'est pas du tout ce que je voulais dire
+    - non, je préfère ne pas continuer comme ça
+    - non merci, ça ne correspond pas à mon problème
+    - Non, n'envoyez pas la réclamation.
+    - Non, ne validez pas encore.
+    - Non, annulez la réclamation.
+    - Non, je ne veux pas confirmer.
+    - Non, ce n'est pas le bon résumé.
+    - Non, le résumé n'est pas correct.
+    - Non, ce n'est pas ce que j'ai décrit.
+    - Non, ça ne correspond pas à mon problème.
+    - Non, annule tout.
+    - Non, laisse tomber.
+    - Non, oublie ça.
+    - Non, ce n'est pas ça du tout.
+    - Non, revenons en arrière.
+    - Non, je veux corriger quelque chose.
+    - Non, il y a une erreur dans ce que vous avez noté.
+    - Non, ce n'est pas la bonne catégorie.
+    - Non, ce n'est pas le bon niveau d'urgence.
+    - Négatif.
+    - Négatif, ce n'est pas ça.
+    - Pas question.
+    - Certainement pas.
+    - En aucun cas.
+    - Aucunement.
+    - Pas le moins du monde.
+    - Pas du tout d'accord.
+    - Je ne suis pas d'accord.
+    - Ça ne me convient pas.
+    - Ça ne va pas du tout.
+    - Ce n'est pas bon comme ça.
+    - Not at all.
+    - No.
+    - No thanks.
+    - Nope, that's wrong.
+    - Not really, no.
+    - nn
+    - nnn
+    - nan nan
+    - nan c pas ça
+    - nan pa du tou
+    - jamé
+    - jamais de la vie
+    - grave non
+    - carrément pas
+    - jsp mai je pense pa
+    - je pense pas non
+    - je crois pas non
+    - c pa bon
+    - c pas ça du tout
+    - annule
+    - annulez
+    - stop annule
+    - laisse tomber stp
+    - oubli sa
+    - reviens en arrière
+    - corrige plutot
+    - refai sa
+    - refais-le
+    - recommence
+    - on recommence
+    - je veux changer ma réponse
+    - je veux modifier ce que j'ai dit
+    - je veux corriger la description
+    - je veux changer la catégorie
+    - je veux changer l'urgence
+    - Non, je ne suis absolument pas d'accord avec ce résumé, il y a plusieurs erreurs à corriger.
+    - Non, ce n'est vraiment pas ce que je voulais décrire, pouvez-vous recommencer ?
+    - Non, surtout ne validez rien pour le moment, je dois vérifier certaines informations.
+    - Non, je préfère annuler cette réclamation et y réfléchir plus tard.
+    - Non, ce n'est pas du tout la catégorie qui correspond à mon problème.
+    - non c pa bon annule tou
+    - non c faux corrige stp
+    - Non, je retire ma demande, ce n'est finalement pas nécessaire.
+    - Non, je me suis trompé, ce n'est pas la bonne information.
+    - Non, je ne veux pas de réclamation finalement.
+    - Non, laisse tomber le ticket.
+    - Non, ne créez rien pour l'instant.
+    - Non, je préfère attendre avant de valider.
+    - Non, je dois d'abord vérifier quelque chose.
+    - Non, ne m'inscrivez pas encore.
+    - Non, ce n'est pas urgent finalement.
+    - Non, ce n'est plus nécessaire.
+    - Non, je n'ai plus ce problème.
+    - Non, mon problème est déjà résolu.
+    - Non, tout va bien maintenant.
+    - Non, plus besoin, merci quand même.
+    - Non, ce n'était pas si grave finalement.
+    - Non, je me suis trompé de service.
+    - Non, ce n'est pas moi qui ai ce souci.
+    - Non, ça n'a rien à voir avec ce que je cherchais.
+    - Non, veuillez ignorer mon message précédent.
+    - non pa la peine finalman
+    - non c bon j'ai résolu tou seul
+    - non laisse comme sa finalman
+    - non pa maintenan
+    - non c ok jen ai plu bezoin
+    - non jve pa continué
+    - non stop pa la peine
+    - Non, en fait je ne veux plus continuer cette démarche, merci quand même pour votre aide.
+    - Non, je pense que je me suis mal exprimé, ce n'est pas du tout ce que je voulais.
+    - Non, désolé de vous avoir dérangé pour rien, mon problème s'est résolu tout seul entre-temps.
+
+    - non c'est pas rien ce problème, il faut faire quelque chose
+    - je ne dis pas que c'est réglé
+    - c'est pas terminé, loin de là
+    - je dis pas que ça va, en fait ça ne va pas du tout
+    - 👎
+    - non 👎
+    - pas du tout 😤
+    - non merci 🙏
+
+    - Bonjour, non ça ne va pas, merci d'avance.
+    - Bonjour, non merci pas besoin, merci d'avance.
+    - non merci finalement
+    - laisse tomber en fait
+    - pas maintenant non
+- intent: bot_challenge
+  examples: |
+    - Es-tu un bot ?
+    - Est-ce que tu es un humain ?
+    - Je parle à un robot ?
+    - Tu es une IA ?
+    - Est-ce que tu es réel ?
+    - Qui es-tu ?
+    - Tu es un assistant virtuel ?
+    - Est-ce un humain qui répond ?
+    - Est-ce un chatbot ?
+    - Tu es automatisé ?
+    - Tu es un programme ?
+    - Est-ce que je parle à une machine ?
+    - Tu es vraiment humain ?
+    - Qui est derrière toi ?
+    - Comment tu fonctionnes ?
+    - Tu es quoi exactement ?
+    - Tu es une intelligence artificielle ?
+    - Est-ce que tu es vivant ?
+    - Tu penses comme un humain ?
+    - Es-tu un assistant automatique ?
+    - t un bot ?
+    - t humain ?
+    - t une IA ?
+    - tu es réel ?
+    - c un robot ?
+    - qui parle ?
+    - t programmé ?
+    - t automatique ?
+    - c toi ou un humain ?
+    - comment tu fonctionnes ?
+    - t quoi exactement ?
+    - tu es vraiment un bot ?
+    - c'est quoi ton rôle ?
+    - tu es là pour aider ?
+    - tu réponds automatiquement ?
+    - qui a créé ce chatbot ?
+    - vous êtes un robot ou un humain ?
+    - tu es une aide virtuelle ?
+    - tu peux me parler en français ?
+    - tu travailles avec des IA ?
+    - c'est un bot ou un vrai conseiller ?
+
+    - eske ta un cerveau ou ta juste du code
+    - Je me demande depuis le début de notre échange si je suis vraiment en train de parler à une personne ou à un programme informatique.
+    - Tu es un chatbot NGONI ?
+    - Tu fonctionnes avec de l'intelligence artificielle ?
+    - Tu utilises quel modèle d'IA ?
+    - Es-tu basé sur ChatGPT ?
+    - Es-tu basé sur Rasa ?
+    - Quelle technologie utilises-tu ?
+    - Qui t'a développé ?
+    - Qui t'a programmé ?
+    - Qui a créé cet assistant ?
+    - À qui appartiens-tu ?
+    - Tu appartiens à NGONI ?
+    - Es-tu propriété de NGONI ?
+    - Tu es développé par qui exactement ?
+    - Est-ce que tu apprends de nos conversations ?
+    - Est-ce que tu te souviens de moi ?
+    - Est-ce que tu as une mémoire ?
+    - Est-ce que tu es connecté à internet ?
+    - Tu comprends vraiment ce que je dis ou tu suis un script ?
+    - Tu réfléchis vraiment ou tu répètes des réponses préenregistrées ?
+    - Est-ce que tu ressens des émotions ?
+    - Est-ce que tu as des sentiments ?
+    - Est-ce que tu peux penser par toi-même ?
+    - Tu es capable de comprendre le contexte de la conversation ?
+    - Est-ce qu'il y a un humain derrière l'écran en ce moment ?
+    - Y a-t-il un vrai agent qui me lit là ?
+    - Je parle à un employé NGONI ou à un robot ?
+    - C'est un humain ou une machine qui me répond ?
+    - Es-tu capable de mentir ?
+    - As-tu un nom ?
+    - Comment tu t'appelles ?
+    - Quel est ton nom ?
+    - t un robo ?
+    - c1 robo ki repon ?
+    - ta un nom ?
+    - koman ta été créé
+    - t un chatbot ou koi
+    - c une IA sa
+    - c un algo ki me repon
+    - t fé avec kel technologi
+    - ta été codé komen
+    - Are you a robot?
+    - Are you human?
+    - Am I talking to a real person?
+    - What are you exactly?
+    - Who built you?
+    - Are you an AI?
+    - Is there a human on the other side?
+    - Tu es toujours en train de m'écouter ?
+    - Tu enregistres nos conversations ?
+    - Est-ce que nos échanges sont stockés quelque part ?
+    - Tu es capable d'apprendre de nouvelles choses ?
+    - Tu évolues avec le temps ?
+    - Es-tu identique pour tout le monde ou tu t'adaptes à chaque utilisateur ?
+    - Tu es intelligent ou tu suis juste des règles simples ?
+    - Franchement, es-tu une vraie personne derrière cet écran ou juste un programme informatique très bien conçu ?
+    - Je me pose sincèrement la question de savoir si mes messages sont lus par un humain ou traités automatiquement par un robot.
+    - Peux-tu m'expliquer honnêtement si tu es capable de raisonner par toi-même ou si tu te contentes de suivre un script préétabli ?
+    - Depuis le début de notre conversation je n'arrive pas à savoir si je parle à une intelligence artificielle ou à un membre de votre équipe.
+    - J'aimerais comprendre comment tu fonctionnes techniquement, es-tu basé sur un modèle de langage ou sur des règles fixes ?
+    - tu es réel ou pas du tout
+    - t vraimen un bot sa
+    - c'est toi qui me repons vraimen la
+    - Tu es un simple script ou une vraie IA conversationnelle ?
+    - Est-ce que tu passes le test de Turing ?
+    - Est-ce que tu es conscient de toi-même ?
+    - Tu tournes sur quel serveur ?
+    - Tu es hébergé où exactement ?
+    - Est-ce que NGONI t'a spécialement entraîné ?
+    - Est-ce que tu as été entraîné sur mes données ?
+    - Combien de personnes te parlent en même temps ?
+    - Peux-tu parler à plusieurs utilisateurs à la fois ?
+    - Tu dors la nuit ou tu es toujours actif ?
+    - Es-tu disponible 24h/24 ?
+    - Travailles-tu aussi le week-end ?
+    - Est-ce que tu remplaces les vrais conseillers ?
+    - Est-ce que tu vas remplacer le service client humain ?
+    - Vas-tu un jour être plus intelligent qu'un humain ?
+    - As-tu accès à mes informations personnelles ?
+    - Peux-tu voir mon solde directement ?
+    - Sais-tu qui je suis vraiment ?
+    - c ki ki ta developpé toi
+    - ta été fé par ngoni ou pa
+    - tu bosse tou seul ou ya dé humain deriere
+    - Est-ce que tu es capable de comprendre l'ironie et le second degré dans mes messages ?
+    - Franchement, j'aimerais savoir si mes données sont en sécurité avec toi ou si un humain les lit aussi.
+    - Je suis juste curieux de savoir combien de temps il t'a fallu à être développé avant d'être mis en ligne.
+    - Robot ou humain, dis-moi la vérité s'il te plaît, j'ai besoin de savoir à qui je parle réellement.
+
+    - je discute avec quoi exactement
+    - je parle à quoi là
+    - c'est quoi en face de moi
+    - c'est automatique ce chat ?
+- intent: out_of_scope
+  examples: |
+    - Désolé, je ne peux pas répondre à cette demande...
+    - Je ne peux pas répondre à cette demande.
+    - Désolé, je ne peux pas répondre à cette demande.
+    - Quelle est la capitale de la France ?
+    - Qui est le président des États-Unis ?
+    - Quelle heure est-il ?
+    - Raconte-moi une blague
+    - Comment faire un gâteau ?
+    - Je veux apprendre à programmer en Python
+    - Peux-tu m'aider en mathématiques ?
+    - Qui a gagné la CAN ?
+    - Quelle est la météo aujourd'hui ?
+    - Donne-moi les résultats du football
+    - Comment réparer une voiture ?
+    - Peux-tu traduire en anglais ?
+    - Qui est Lionel Messi ?
+    - Quelle est la distance entre la Terre et la Lune ?
+    - Explique la théorie de la relativité
+    - Comment investir en bourse ?
+    - C'est quoi Bitcoin ?
+    - Donne-moi des films à regarder
+    - Quelle est la recette du riz jollof ?
+    - Comment faire du pain maison ?
+    - Peux-tu me donner des conseils de voyage ?
+    - Comment apprendre à jouer de la guitare ?
+    - Quelle est la capitale du Japon ?
+    - Qui a gagné la Coupe du monde ?
+    - Comment cuisiner du riz ?
+    - C'est quoi le machine learning ?
+    - Peux-tu coder un site web ?
+    - Quelle est la météo ?
+    - Parle-moi de football
+    - Comment gagner de l'argent ?
+    - Qui est Elon Musk ?
+    - Quelle est la distance Terre-Lune ?
+    - Je veux apprendre Python
+    - Donne-moi une recette de cuisine
+    - Comment perdre du poids rapidement ?
+    - Qui est le meilleur joueur du monde ?
+    - Comment apprendre l'anglais vite ?
+    - Quelle est la capitale du Mali ?
+    - Qui a inventé Internet ?
+    - Comment fonctionne une voiture ?
+    - Peux-tu chanter une chanson ?
+    - Donne-moi une citation motivante
+    - Quelle est la population du monde ?
+    - Comment voyager aux États-Unis ?
+    - Je veux des conseils de vie
+    - Comment gagner de l'argent en ligne ?
+    - C'est quoi le football américain ?
+    - Explique-moi la physique quantique
+    - Comment cuisiner du poulet ?
+    - Pourquoi le ciel est bleu ?
+    - Peux-tu me raconter une histoire ?
+    - Comment devenir riche ?
+    - Donne-moi des astuces de productivité
+    - Quelle est la meilleure voiture ?
+    - Comment apprendre le JavaScript ?
+    - Je m'ennuie
+    - Parle-moi de l'espace
+    - C'est quoi l'intelligence artificielle ?
+    - Peux-tu m'aider à faire mes devoirs ?
+    - Quelle est la meilleure série Netflix ?
+    - Comment fonctionne WhatsApp ?
+    - Qui a créé Facebook ?
+    - Pourquoi les gens dorment ?
+    - Explique-moi la biologie humaine
+    - Quelle est la différence entre Python et JavaScript ?
+    - Peux-tu me conseiller un film ?
+    - Comment faire une omelette ?
+    - Qui est le meilleur chanteur du monde ?
+    - Où est la meilleure plage en Afrique ?
+    - Peux-tu me donner un conseil de carrière ?
+    - Comment réparer un téléphone ?
+    - Quelle est la capitale de la Côte d'Ivoire ?
+    - Parlons de sport
+    - Donne-moi une recette de couscous
+    - Je veux apprendre à conduire
+    - Comment créer une entreprise ?
+
+    - keske tu pense du bresil
+    - koman on fé un cv
+    - koi 2 9
+    - Je me demandais, comme ça, sans rapport avec l'application, si tu savais pourquoi le ciel change de couleur au coucher du soleil.
+    - Dis-moi, en toute franchise, ce que tu penses du dernier film qui vient de sortir, j'hésite à aller le voir ce week-end.
+    - Je veux aller au marché et demain ta réclamation sera prise en compte.
+    - Je pars au marché acheter des tomates, on verra plus tard pour le reste.
+    - Mon chat a mangé mon repas et demain il pleuvra sûrement sur la ville.
+    - Je vais chez ma tante ce soir, réponds-moi vite s'il te plaît.
+    - Le ciel est bleu aujourd'hui et j'ai faim, tu peux m'aider ?
+    - Demain il y a école et après je viendrai te voir peut-être.
+    - Mon frère joue au foot et ma sœur regarde la télé, bref.
+    - J'ai croisé un ami hier et on a parlé de tout et de rien.
+    - Le riz était trop salé ce midi, ça m'a coupé l'appétit franchement.
+    - Il fait chaud aujourd'hui, je pense que je vais dormir tôt.
+    - koi 2 9 et sinon ta reclamation c'est fé
+    - jvé o marché pui aprem on verra pr le tiket
+    - mon chien a couru dan la rue et le bus est en retar
+    - Je crois que je vais changer de coiffure la semaine prochaine, ça n'a rien à voir mais je te le dis quand même.
+    - En vrai je sais même plus pourquoi je t'écris, il fait juste chaud dehors.
+    - askip il va pleuvoir demain donc voilà quoi
+    - tkt c'est bon j'ai retrouvé mes clés finalement merci
+    - blablabla je disais ça comme ça en fait
+    - mdrrr non rien laisse tomber c'est pas important
+    - j'écris juste pour tester si tu réponds n'importe quoi
+    - test test 123 est-ce que tu m'entends
+    - ceci est un test, ignore ce message
+    - azerty qwerty 12345
+    - blabla n'importe quoi ici juste pour voir
+    - une phrase random sans queue ni tête pour voir ta réaction
+    - Le soleil brille, les oiseaux chantent, et pendant ce temps mon voisin répare sa voiture bruyamment dans la rue.
+    - À vrai dire je ne sais pas trop pourquoi je t'écris ce message, j'étais juste en train de tester le clavier de mon téléphone.
+    - Hier j'ai vu un film sympa, aujourd'hui il pleut, et demain je crois que j'irai au marché avec ma cousine.
+    - Franchement je ne sais plus quoi dire, disons juste que la journée a été longue et fatigante pour tout le monde.
+    - koman sa va la famille et sinon esk tu peu me di kel er il é
+    - jve te raconté un truk ki n'a rien a voir avec l'appli en fet
+    - c'est bizarre mais je pensais à autre chose en tapant ce message
+    - Pendant que j'y pense, est-ce que tu sais où je pourrais trouver un bon restaurant dans le quartier ?
+    - Au fait, complètement hors sujet, mais tu connais un bon coiffeur dans le coin ?
+    - Sans rapport avec NGONI, mais tu saurais me dire comment va la bourse aujourd'hui ?
+    - Je te parle d'autre chose, tu sais où je peux acheter des chaussures pas chères ?
+    - En dehors de l'application, j'aimerais savoir comment est la circulation en ville en ce moment.
+    - koman ale lé zafer mon fren
+    - eske ta des nouvel du match d'hier soir
+    - Quel temps fait-il aujourd'hui ?
+    - Raconte-moi une blague.
+    - Peux-tu réserver un vol pour moi ?
+    - Peux-tu m'aider en maths ?
+    - Quelle est la capitale du Japon ?
+- intent: inappropriate_language
+  examples: |
+    - fuck
+    - fuck you
+    - va te faire foutre
+    - ta gueule
+    - connard
+    - espèce d'idiot
+    - c'est de la merde ce service
+    - ce bot est nul de merde
+    - putain de bot inutile
+    - ferme ta gueule
+    - t'es con ou quoi
+    - dégage
+    - nique ce service
+    - shit
+    - wtf
+    - bordel de merde
+    - vous êtes vraiment nuls
+    - service de merde
+    - bot à la con
+    - arrête tes conneries
+    - tu es inefficace
+    - pourquoi tu es si faible
+    - tu es vraiment inefficace
+    - tu es si faible
+
+    - put1 de bot
+    - ce truk est vrémen nul
+    - sa ser a rien ton bot de merde
+    - Franchement ce service est une vraie honte, ça fait des heures que j'attends et personne ne répond, c'est du grand n'importe quoi.
+    - va te faire voir avec ton bot a la con
+    - espèce de crétin
+    - espèce d'imbécile
+    - bande d'incapables
+    - vous êtes des incapables
+    - quelle bande de nuls
+    - tu es vraiment nul
+    - t'es qu'un débile
+    - t'es un abruti
+    - sombre idiot
+    - pauvre type
+    - quel bordel ce truc
+    - c'est n'importe quoi ce bot
+    - c'est de la merde cette application
+    - votre application est pourrie
+    - votre service est minable
+    - c'est vraiment naze
+    - c'est nul à chier
+    - putain
+    - putain de merde
+    - merde alors
+    - merde quoi
+    - bordel
+    - bordel de bordel
+    - saloperie de bot
+    - saloperie d'application
+    - connerie
+    - quelle connerie
+    - c'est une connerie sans nom
+    - fais pas le con
+    - arrête de faire l'idiot
+    - t'es vraiment con
+    - t'es con
+    - t'es bête ou quoi
+    - tu me gonfles
+    - tu me soules
+    - tu me saoules
+    - j'en ai marre de ce bot pourri
+    - j'en ai ras le bol de ce service
+    - ça suffit ces conneries
+    - dégage de là
+    - casse-toi
+    - va te faire cuire un œuf
+    - ferme-la
+    - ta gueule un peu
+    - la ferme
+    - fous-moi la paix
+    - lâche-moi
+    - fous le camp
+    - go to hell
+    - fuck off
+    - fuck this
+    - fuck this bot
+    - this is bullshit
+    - bullshit
+    - this app is trash
+    - trash bot
+    - piece of shit bot
+    - damn bot
+    - stupid bot
+    - useless bot
+    - your service sucks
+    - f u c k
+    - f*ck
+    - f**k you
+    - fuk
+    - fuk you
+    - va t3 fer
+    - va t3 fer foutr
+    - t con ou koi
+    - t bete ou koi
+    - sa sert a rien c bot d merde
+    - sa marche jamé ce truc de merd
+    - putin de bot inutil
+    - c1 bot 2 merd
+    - kes ce bordel encor
+    - nimport koi c bot
+    - g marre de c bot pourri
+    - jenner de c app de merd
+    - Franchement je commence sérieusement à en avoir marre de ce bot à la con qui ne comprend jamais rien à ce que je dis.
+    - Ce service est une véritable honte, vous êtes tous des incapables incapables de résoudre le moindre problème.
+    - Je ne sais pas qui a conçu ce bot pourri mais il devrait vraiment revoir sa copie parce que c'est n'importe quoi.
+    - Ça fait trois fois que je répète la même chose à ce bot débile et il ne comprend toujours rien, c'est désespérant.
+    - Sérieusement ce service à la con me fait perdre mon temps depuis tout à l'heure, c'est vraiment insupportable.
+    - putain mais c'est quoi ce bordel de bot qui répond n'importe quoi
+    - franchement ce bot de merde sert vraiment à rien du tout
+    - allez tous vous faire foutre avec votre service pourri
+    - ce chatbot a la con ne sert strictement a rien
+    - Merde, encore un bug, c'est vraiment n'importe quoi cette application de merde.
+    - quelle bande de fainéants
+    - vous êtes tous des menteurs
+    - c'est une arnaque votre truc
+    - votre appli est une escroquerie
+    - bande d'escrocs
+    - bande de voleurs
+    - vous me volez mon argent bande de voleurs
+    - c'est du vol pur et simple
+    - je vais vous dénoncer bande de nuls
+    - votre entreprise est une honte
+    - vous devriez avoir honte
+    - c'est scandaleux votre service
+    - c'est une honte ce service client
+    - vous êtes pathétiques
+    - quelle bande de guignols
+    - guignols
+    - clowns
+    - bande de clowns
+    - amateurs
+    - bande d'amateurs
+    - vous êtes vraiment des amateurs
+    - t'es sérieux là ou tu te fous de moi
+    - tu te fous de ma gueule
+    - tu te moques de moi ou quoi
+    - arrête de te foutre de moi
+    - j'y crois pas c'est une blague ce truc
+    - c'est une blague j'espère
+    - non mais sérieux c'est une blague
+    - quelle honte franchement
+    - c pathétik votre truc
+    - c 1 arnak votr aplli
+    - band2 voleur
+    - vs ete tou de menteur
+    - c du vol votr histoir
+    - Non mais sérieusement, vous vous foutez de moi avec ce service minable qui ne fonctionne jamais correctement.
+    - Je commence à croire que votre entreprise est une véritable arnaque tellement ce service est catastrophique.
+    - Ça devient vraiment lassant de devoir répéter la même chose à un bot aussi stupide que le vôtre.
+
+    - nul 😡
+    - c'est nul ce bot 🤬
+    - sérieux 😡 ça marche jamais
+    - putain 😤 encore un bug
+- intent: diagnostic
+  examples: |
+    - mon retrait est bloqué
+    - je n'arrive plus à me connecter
+    - impossible de retirer mon argent
+    - mon compte est bloqué
+    - pourquoi mon paiement échoue ?
+    - mon retrait reste en attente
+    - je ne peux pas finaliser mon paiement
+    - mon portefeuille ne se met pas à jour
+    - ma connexion est impossible depuis ce matin
+    - l'application plante à l'ouverture
+    - je ne vois pas mes pièces sur mon compte
+    - mon solde semble erroné
+    - le système affiche une erreur de connexion
+    - je ne reçois pas le code de vérification
+    - je ne comprends pas pourquoi mon paiement a échoué
+    - impossible d'accéder à mon espace
+    - mon retrait est toujours en attente
+    - j'ai un souci avec mon compte
+    - mon paiement est refusé sans raison
+    - j'ai un problème de connexion
+    - je ne peux plus me connecter
+    - mon application est lente
+    - le service ne répond pas
+    - ma transaction est bloquée
+    - je ne peux pas valider mon achat
+    - je cherche à comprendre pourquoi ça ne marche pas
+    - il y a un souci sur mon profil
+    - mon compte me refuse l'accès
+    - j'ai l'impression que quelque chose ne va pas
+    - mon retrait ne part jamais
+    - j'essaye de me connecter mais ça bloque
+    - ça fait plusieurs jours que mon retrait est bloqué
+    - je ne sais pas pourquoi mon paiement échoue
+    - j’ai un bug sur l’application
+    - ma transaction reste en cours
+    - mon ticket n'avance pas
+    - difficulté de retrait d'argent
+    - mon espace perso est inaccessible
+    - le service bug depuis ce matin
+    - j’ai un souci de connexion au compte
+    - mon compte refuse ma connexion
+    - je ne peux plus utiliser l’appli
+    - mon paiement a été débité mais je n’ai rien reçu
+    - je ne reçois toujours pas mon argent
+    - c’est bloqué au niveau du retrait
+    - pourquoi mon retrait n’aboutit pas ?
+    - mon portefeuille n’est pas mis à jour
+    - j’ai l’impression que mon compte est gelé
+    - je ne peux pas terminer mon opération
+    - Je rencontre un problème avec mon compte.
+    - J'ai un souci avec mon compte.
+    - Mon compte ne fonctionne pas correctement.
+    - Je n'arrive plus à accéder à mon compte.
+    - Impossible de me connecter.
+    - La connexion à mon compte échoue.
+    - Mon mot de passe ne fonctionne plus.
+    - Je ne reçois pas le code de vérification.
+    - Je ne peux plus utiliser mon compte.
+    - Mon compte semble bloqué.
+    - Il y a un dysfonctionnement sur mon compte.
+    - Quelque chose ne fonctionne pas.
+    - L'application ne répond plus.
+    - L'application plante à chaque ouverture.
+    - L'application se ferme toute seule.
+    - Je rencontre un bug.
+    - Je pense qu'il y a une erreur.
+    - Le service ne fonctionne pas normalement.
+    - Mon achat de pièces n'a pas été pris en compte.
+    - J'ai payé mais je n'ai pas reçu mes pièces.
+    - Mon paiement a échoué.
+    - Mon portefeuille n'a pas été crédité.
+    - Mon solde n'a pas changé après mon achat.
+    - J'ai perdu des pièces.
+    - Des pièces ont disparu de mon compte.
+    - Mon retrait est bloqué.
+    - Je n'ai toujours pas reçu mon retrait.
+    - Mon retrait est en attente depuis longtemps.
+    - Mon retrait a été refusé sans raison.
+    - Mon retrait n'aboutit pas.
+    - Ma demande de retrait ne passe pas.
+    - Je n'arrive pas à effectuer un retrait.
+    - Le retrait reste en cours depuis plusieurs jours.
+    - Mon historique est incorrect.
+    - Une transaction est manquante.
+    - Je constate une erreur dans mes opérations.
+    - Une opération a disparu.
+    - Mes transactions ne s'affichent plus.
+    - Mes récompenses ne sont pas créditées.
+    - Je rencontre un problème avec les récompenses.
+    - Une fonctionnalité ne fonctionne pas.
+    - Le système affiche une erreur.
+    - Depuis ce matin je ne peux plus utiliser mon compte.
+    - Mon compte refuse de s'ouvrir.
+    - Je suis bloqué dès la connexion.
+    - Impossible d'accéder à mon espace personnel.
+    - Je n'arrive pas à terminer la connexion.
+    - La connexion tourne en boucle.
+    - Mon compte est inaccessible.
+    - Je reste bloqué sur la page de connexion.
+    - Je n'arrive plus à utiliser les services.
+    - Mon paiement a bien été effectué mais rien n'a changé.
+    - Mon argent a été débité mais je n'ai rien reçu.
+    - Les pièces achetées ne sont toujours pas visibles.
+    - J'attends toujours les pièces après mon paiement.
+    - Je pense que mon achat n'a pas été validé.
+    - Mon portefeuille n'a pas été mis à jour.
+    - Une partie de mes pièces a disparu.
+    - Mon solde semble incorrect.
+    - Je constate une différence dans mon solde.
+    - Le montant affiché ne correspond pas à ce que je possède.
+    - Je rencontre un souci avec mon portefeuille.
+    - Je ne comprends pas pourquoi mon solde a diminué.
+    - Mon retrait est bloqué depuis plusieurs jours.
+    - Cela fait longtemps que j'attends mon retrait.
+    - Mon retrait ne progresse plus.
+    - Je n'ai toujours rien reçu.
+    - Le statut de mon retrait ne change pas.
+    - Ma demande de retrait semble figée.
+    - J'attends mon argent mais rien ne se passe.
+    - Je pense qu'il y a un problème avec mon retrait.
+    - Pourquoi mon retrait reste bloqué aussi longtemps ?
+    - Mon retrait est toujours marqué en attente.
+    - Mon retrait n'aboutit jamais.
+    - Le système refuse mon retrait.
+    - Je ne peux plus retirer mon argent.
+    - Mon retrait a disparu de l'historique.
+
+    - Je n'ai reçu aucune récompense.
+    - Les bonus promis ne sont pas crédités.
+    - Les récompenses semblent bloquées.
+    - Une erreur apparaît lorsque j'utilise cette fonctionnalité.
+    - L'application affiche un message d'erreur.
+    - Cette fonctionnalité refuse de fonctionner.
+    - Je clique mais il ne se passe rien.
+    - L'application reste bloquée.
+    - Tout est figé sur mon écran.
+    - L'application devient très lente.
+    - Je dois redémarrer l'application à chaque fois.
+    - Je ne peux plus continuer après cette étape.
+    - Une erreur inconnue apparaît.
+    - Je pense qu'il y a un bug sur mon compte.
+    - Mon problème n'est toujours pas résolu.
+    - Cela fait plusieurs jours que le problème persiste.
+    - J'ai déjà essayé plusieurs fois sans succès.
+    - Rien ne fonctionne malgré plusieurs tentatives.
+    - Bonjour mon compte ne marche pas
+    - Salut j'ai un problème avec mon retrait
+    - Hello mon paiement n'a pas été reçu
+    - Bonsoir mon application bug
+    - Salut je n'arrive plus à me connecter
+    - Bonjour mon solde est faux
+    - Hey j'ai perdu mes pièces
+    - Coucou mon retrait est bloqué
+    - Bonjour ça ne fonctionne pas depuis ce matin
+    - Salut j'ai essayé mais ça marche pas
+
+    - Bonsoir comment allez-vous ? J'ai fait un retrait depuis hier mais ça n'a pas été effectué.
+    - Bonjour, comment allez-vous ? Mon compte est bloqué.
+    - Salut, ça va ? J'ai un problème avec mon retrait.
+    - Bonjour comment ça va ? Mon paiement a été refusé sans raison.
+    - Coucou, comment allez-vous ? Je n'arrive plus à me connecter.
+    - Hello, comment vas-tu ? Mon solde semble erroné.
+    - Bonsoir, comment ça va ? Je n'ai pas reçu mes pièces après mon achat.
+    - Bonjour, j'espère que vous allez bien. J'ai un souci avec mon compte.
+    - Salut, comment tu vas ? Mon retrait est toujours en attente.
+    - Bonjour, comment allez-vous aujourd'hui ? Impossible d'accéder à mon espace.
+    - Bonsoir, j'espère que vous allez bien, j'ai un problème avec mon KYC.
+    - Salut, comment ça va aujourd'hui ? Je n'arrive pas à valider mon identité.
+
+    - mon retra est bloqé
+    - je narive pa a me conecter
+    - mon solde et fo depui ce matin
+    - sa march pas du tou
+    - jai un problem de conexion la
+    - mon compt es bloké
+    - jarive pas a retirer mon arjent
+    - le paiement a pa marché
+    - Depuis ce matin j'essaie de retirer mon argent mais ça reste bloqué en attente et je ne comprends vraiment pas pourquoi, est-ce que vous pouvez vérifier ce qui se passe ?
+    - J'ai fait un paiement il y a plus d'une heure, l'argent a bien été débité de mon compte bancaire, mais je n'ai toujours pas reçu mes pièces sur l'application.
+    - Ça fait la troisième fois que j'essaie de me connecter aujourd'hui et à chaque fois l'application me renvoie une erreur juste après avoir entré mon code.
+    - Je ne sais pas si c'est un problème chez moi ou sur l'application, mais depuis hier soir impossible d'ouvrir mon portefeuille et de voir mon solde correctement.
+    - J'ai voulu envoyer un cadeau à un ami tout à l'heure, mes pièces ont bien été débitées de mon compte mais lui affirme n'avoir rien reçu de son côté.
+    - Cela fait maintenant deux jours que mon retrait est indiqué comme étant toujours en cours de traitement et je commence à m'inquiéter pour mon argent.
+
+    - bloqué
+    - bug
+    - ça marche pas
+    - en panne
+    - retrait bloqué
+    - solde faux
+    - connexion impossible
+    - c'est le bazar sur mon compte
+    - ça part en vrille depuis ce matin
+    - y'a un truc qui cloche avec mon solde
+
+    - Mon [retrait](operation_type:withdrawal) est bloqué depuis hier.
+    - Je n'arrive pas à faire un [retrait](operation_type:withdrawal).
+    - Pourquoi mon argent que je veux [retirer](operation_type:withdrawal) n'arrive pas ?
+    - Mon [dépôt](operation_type:deposit) n'apparaît pas sur mon solde.
+    - J'ai fait un [dépôt](operation_type:deposit) mais rien n'a été crédité.
+    - Impossible de [déposer](operation_type:deposit) de l'argent sur mon compte.
+    - Mon [versement](operation_type:deposit) n'a jamais été crédité.
+    - Mon [transfert](operation_type:transfer) n'est jamais arrivé.
+    - Je n'arrive pas à faire un [transfert](operation_type:transfer) vers un ami.
+    - J'ai essayé de [transférer](operation_type:transfer) de l'argent mais ça a échoué.
+    - Mon [virement](operation_type:transfer) est resté bloqué.
+    - Mon [paiement](operation_type:payment) a été refusé.
+    - Je n'arrive pas à valider mon [paiement](operation_type:payment).
+    - Impossible de [payer](operation_type:payment) avec mon solde de pièces.
+    - J'ai un problème de [connexion](type_problem:login).
+    - Je n'arrive plus à me [connecter](type_problem:login).
+    - Le [login](type_problem:login) ne fonctionne pas depuis ce matin.
+    - J'ai oublié mon [mot de passe](type_problem:password).
+    - Mon [mot de passe](type_problem:password) ne fonctionne plus.
+    - Je n'arrive pas à réinitialiser mon [mot de passe](type_problem:password).
+    - Mon [mdp](type_problem:password) est refusé à chaque tentative.
+    - Je ne reçois plus mes [messages](type_problem:chat).
+    - Le [chat](type_problem:chat) ne fonctionne plus.
+    - La [messagerie](type_problem:chat) est bloquée depuis hier.
+
+    - Mon [retrait](operation_type:withdrawal) est bloqué et je n'arrive plus à me [connecter](type_problem:login).
+    - J'ai un souci de [mot de passe](type_problem:password) et mon [transfert](operation_type:transfer) n'est jamais arrivé.
+    - Impossible de faire un [dépôt](operation_type:deposit), en plus je n'arrive pas à me [connecter](type_problem:login).
+    - Mon [paiement](operation_type:payment) a échoué et en plus j'ai un problème de [mot de passe](type_problem:password).
+
+    - [le retrait](operation_type:withdrawal)
+    - plutôt [le retrait](operation_type:withdrawal) d'abord
+    - c'est [le dépôt](operation_type:deposit) le plus urgent
+    - [mon mot de passe](type_problem:password) d'abord
+    - traitons [la connexion](type_problem:login) en premier
+    - [le transfert](operation_type:transfer) avant le reste
+    - my wallet ne marche pas
+    - my account is bloqué since this morning
+    - I can't login mon mot de passe ne marche pas
+    - je me demande pourquoi mon retrait n'avance pas
+    - je voudrais savoir si vous pouvez vérifier pourquoi ça bloque
+    - mon retrait est bloqué 😡
+    - encore un bug 😤 ça devient long
+    - mon solde est faux depuis ce matin 😞
+
+    - Mon retrait est [en attente](issue_status:pending) depuis trois jours.
+    - J'attends toujours mon retrait, il est resté [en attente](issue_status:pending).
+    - Mon paiement a [échoué](issue_status:failed) sans raison.
+    - Ma transaction a été [refusée](issue_status:failed).
+    - Mon transfert est [bloqué](issue_status:blocked) depuis hier.
+    - La connexion reste [impossible](issue_status:blocked) depuis ce matin.
+    - Mon retrait n'aboutit jamais, il reste [bloqué](issue_status:blocked).
+
+    - Le montant de [500 pièces](amount:500 pièces) n'a pas été crédité.
+    - J'ai perdu [20000 FCFA](amount:20000 FCFA) dans ce retrait.
+    - Il me manque [50 euros](amount:50 euros) sur mon solde.
+    - J'ai payé [300 pièces](amount:300 pièces) mais rien n'est arrivé.
+
+    - Le problème est survenu [sur android](platform:Android).
+    - Ça bloque depuis mon [iphone](platform:iOS).
+    - Depuis mon [ios](platform:iOS) impossible de me connecter.
+    - Le souci vient du [site web](platform:Web).
+    - Sur [android](platform:Android), mon retrait ne passe pas.
+
+    - Mon retrait est [bloqué](issue_status:blocked) depuis [hier](incident_date:hier).
+    - Depuis [hier](incident_date:hier) j'attends mon [retrait](operation_type:withdrawal) de [500 pièces](amount:500 pièces).
+    - Depuis [hier](incident_date:hier) j'attends mon retrait, il reste [en attente](issue_status:pending).
+    - [Depuis ce matin](incident_date:depuis ce matin), impossible de me [connecter](type_problem:login) [sur android](platform:Android).
+    - [La semaine dernière](incident_date:la semaine dernière) j'ai fait un [dépôt](operation_type:deposit) de [1000 pièces](amount:1000 pièces) qui n'est toujours pas crédité.
+    - Mon [transfert](operation_type:transfer) de [200 pièces](amount:200 pièces) est [bloqué](issue_status:blocked) depuis [avant-hier](incident_date:avant-hier).
+    - Mon [paiement](operation_type:payment) a [échoué](issue_status:failed) [ce matin](incident_date:ce matin) [sur iphone](platform:iOS).
+
+    - [en attente](issue_status:pending)
+    - c'est [bloqué](issue_status:blocked) qui m'inquiète le plus
+    - plutôt le problème [échoué](issue_status:failed)
+    - [500 pièces](amount:500 pièces)
+    - [sur android](platform:Android)
+
+    - Je veux diagnostiquer un problème.
+    - J'aimerais diagnostiquer mon souci.
+    - Peux-tu diagnostiquer ce qui ne va pas ?
+    - Je veux lancer un diagnostic.
+    - Aide-moi à diagnostiquer mon problème.
+    - Je veux faire un diagnostic de mon compte.
+    - Peux-tu m'aider à diagnostiquer un souci ?
+    - Je souhaite diagnostiquer un dysfonctionnement.
+    - J'ai besoin d'un diagnostic.
+    - Lance un diagnostic s'il te plaît.
+    - Peux-tu m'aider à comprendre ce qui cloche sur mon compte ?
+    - Je veux comprendre ce qui ne va pas avant de faire quoi que ce soit.
+    - J'aimerais qu'on essaie de comprendre le problème ensemble.
+    - Je préfère d'abord comprendre ce qui se passe.
+    - je veu diagnostiké mon probleme
+    - tu peu diagnostik sa stp
+    - jvoudré un diagnostic de mon compte
+
+    - Vérifie mon KYC.
+    - Vérifie mon statut KYC.
+    - Pourquoi mon KYC est refusé ?
+    - Mon KYC a été rejeté, je ne comprends pas pourquoi.
+    - Je n'arrive pas à valider mon identité.
+    - Ma vérification d'identité est bloquée.
+    - Ça fait longtemps que mon KYC est en attente.
+    - Je veux savoir où en est ma vérification d'identité.
+    - Mon document d'identité a été refusé.
+    - Pourquoi ma pièce d'identité est rejetée ?
+    - Je ne comprends pas pourquoi mon identité n'est pas vérifiée.
+    - Mon compte reste non vérifié depuis des jours.
+    - Est-ce que mon KYC est validé ?
+    - Peux-tu vérifier l'état de mon KYC ?
+    - mon kyc marche pas
+    - jarrive pa a valid mon identité
+    - pk mon kyc é refusé
+    - Je n'ai reçu aucune nouvelle sur ma vérification d'identité.
+    - Où en est ma demande de vérification KYC ?
+    - Mon document a été rejeté sans explication.
+    - Peux-tu regarder pourquoi mon KYC ne passe pas ?
+
+    - Pourquoi mon compte est suspendu ?
+    - Mon compte a été bloqué, je ne sais pas pourquoi.
+    - On m'a banni sans explication.
+    - Je n'arrive plus à utiliser mon compte.
+    - Mon compte est restreint depuis hier.
+    - Est-ce que mon compte a été suspendu ?
+    - Je pense que mon compte a été banni.
+    - Pourquoi je ne peux plus me connecter à mon profil ?
+    - Mon accès a été coupé sans raison.
+    - Vérifie si mon compte est suspendu.
+    - Peux-tu vérifier le statut de mon compte ?
+    - mon compte é bloké jsp pk
+    - jss banni pr rien
+    - Je veux comprendre pourquoi mon compte est restreint.
+    - Mon compte semble désactivé.
+    - On dirait que mon compte a été suspendu.
+
+    - Mon compte est bloqué pour conformité.
+    - Ça dit que mon compte est sous contrôle, je ne comprends pas.
+    - Je ne peux plus rien faire, c'est écrit compliance hold.
+    - Pourquoi mon compte est en vérification de conformité ?
+    - Vérifie mon blocage de conformité.
+    - Je ne peux plus retirer, ça parle de compliance.
+    - Mon compte semble sous contrôle de conformité.
+    - Pourquoi ce blocage compliance sur mon compte ?
+    - Ça bloque tout à cause d'un contrôle de conformité.
+    - Peux-tu vérifier pourquoi mon compte est sous contrôle ?
+
+    - J'ai supprimé mon compte par erreur.
+    - Comment récupérer mon compte supprimé ?
+    - Mon compte affiche encore comme supprimé.
+    - Je n'arrive pas à réactiver mon compte.
+    - Est-ce que je peux encore annuler la suppression de mon compte ?
+    - Vérifie l'état de la suppression de mon compte.
+    - J'ai supprimé mon compte, je veux le récupérer.
+    - Combien de temps ai-je pour annuler la suppression ?
+    - Mon compte est-il définitivement supprimé ?
+    - jc supprimé mon compte par erreur comment le récupérer
+
+    - Le compte de mon enfant est toujours bloqué.
+    - Le parent n'a jamais reçu la demande de consentement.
+    - La demande de consentement parental a expiré.
+    - Le consentement de mes parents a été refusé.
+    - Vérifie où en est le consentement parental.
+    - Pourquoi le compte de mon enfant reste verrouillé ?
+    - Je n'ai reçu aucune demande de consentement pour mon compte.
+    - Est-ce que le consentement parental a été validé ?
+    - Le compte de ma fille est bloqué depuis des jours à cause du consentement parental.
+    - Bonjour, avant d'ouvrir quoi que ce soit, j'aimerais qu'on essaie de diagnostiquer précisément ce qui ne fonctionne pas sur mon compte.
+
+    # Ajouts suite a la grande vague de tests conversationnels (2026-07) :
+    # deux trous structurels identifies par analyse du corpus complet --
+    # AUCUN exemple de ce bloc n'utilisait la forme courte "[mot-cle] svp/stp"
+    # ni la formulation "Excusez-moi, ... Pouvez-vous m'aider ?", alors que
+    # create_reclamation/ask_capabilities en ont, eux, une couverture directe
+    # (voir son propre commentaire plus bas) -- un message court ou poli
+    # atterrissait donc chez un voisin plutot qu'ici, faute de precedent
+    # d'entrainement. Un representant par probleme, pas une liste exhaustive.
+    - retrait svp
+    - retrait bloqué svp
+    - kyc svp
+    - recharge svp
+    - ma recharge svp
+    - cadeau svp
+    - mon cadeau svp
+    - compte bloqué svp
+    - compte suspendu svp
+    - conformité svp
+    - blocage conformité svp
+    - suppression compte svp
+    - compte supprimé svp
+    - consentement parental svp
+    - retrait stp
+    - kyc stp
+    - Excusez-moi, mon retrait est bloqué. Pouvez-vous m'aider ?
+    - Excusez-moi, mon KYC est rejeté. Pouvez-vous m'aider ?
+    - Excusez-moi, ma recharge n'est jamais arrivée. Pouvez-vous m'aider ?
+    - Excusez-moi, mon compte semble suspendu. Pouvez-vous m'aider ?
+    - S'il vous plaît, mon cadeau envoyé n'est jamais arrivé. Pouvez-vous m'aider ?
+    - S'il vous plaît, un contrôle de conformité bloque mon compte. Pouvez-vous m'aider ?
+
+# 148 exemples chacune (meme ordre de grandeur que les autres intentions,
+# hors diagnostic qui est un cas particulier a 332 -- voir couverture large
+# de problemes distincts). Vocabulaire deliberement disjoint de
+# create_reclamation, qui utilise deja abondamment "plainte"/"porter
+# plainte"/"deposer une plainte" dans ses propres exemples (verbes d'action :
+# ouvrir/creer/deposer/vouloir un conseiller) : `plainte` ci-dessous capture
+# uniquement l'EXPRESSION d'un mecontentement general, sans verbe de demande
+# d'action, pour ne pas entrer en collision au moment de l'entrainement (voir
+# l'incident deja vecu sur ce projet avec modify_reclamation/confirm_full_cancel
+# vs deny, ou un chevauchement de vocabulaire avait fait deraper la
+# classification de l'intention existante).
+
+- intent: suggestion
+  examples: |
+    - Pourquoi ne pas proposer plus de moyens de paiement pour recharger ?
+    - Ce serait top d'avoir un rappel avant l'expiration du KYC.
+    - petite idee pour ameliorer lappli
+    - Pourquoi ne pas proposer une barre de recherche dans la FAQ ?
+    - Vous devriez ajouter un mode sombre.
+    - Ce serait bien d'avoir un système de parrainage amélioré.
+    - Ce serait top d'avoir un chat en direct avec un conseiller.
+    - Avez-vous prévu un widget pour suivre son solde ?
+    - Pourquoi ne pas proposer un mode sombre ?
+    - Ce serait bien d'avoir des tutoriels vidéo pour les nouveaux utilisateurs.
+    - Je propose d'intégrer une authentification par empreinte digitale.
+    - Je propose d'intégrer un historique des transactions plus détaillé.
+    - jaurai une suggestion a faire
+    - Une suggestion : il faudrait des tutoriels vidéo pour les nouveaux utilisateurs.
+    - J'aimerais que vous ajoutiez des filtres pour trouver les lives plus facilement.
+    - Si je peux me permettre, un système de badges pour les créateurs serait sympa.
+    - Vous devriez ajouter des notifications personnalisables.
+    - Petite suggestion : afficher le taux de change en temps réel.
+    - Mon idée : ajouter un mode économie de données.
+    - J'aimerais que vous ajoutiez la vérification d'identité par selfie.
+    - Ce serait pratique d'avoir un mode économie de données.
+    - Ce serait bien d'avoir la vérification d'identité par selfie.
+    - Je propose d'intégrer un mode économie de données.
+    - Pourquoi ne pas proposer un système de parrainage amélioré ?
+    - Une suggestion : il faudrait un mode sombre.
+    - Pourquoi ne pas proposer un chat en direct avec un conseiller ?
+    - Ce serait top d'avoir un historique des transactions plus détaillé.
+    - Ce serait top d'avoir la vérification d'identité par selfie.
+    - Je pense qu'un tutoriel interactif au premier lancement aiderait beaucoup.
+    - J'aimerais que vous ajoutiez la possibilité d'exporter ses relevés.
+    - Avez-vous prévu une authentification par empreinte digitale ?
+    - Une suggestion : il faudrait une authentification par empreinte digitale.
+    - Vous devriez ajouter la possibilité d'exporter ses relevés.
+    - Ce serait top d'avoir des notifications personnalisables.
+    - Pourquoi ne pas proposer un mode économie de données ?
+    - Mon idée : ajouter la possibilité d'exporter ses relevés.
+    - Ce serait pratique d'avoir un chat en direct avec un conseiller.
+    - J'aimerais que vous ajoutiez un mode économie de données.
+    - Une suggestion : il faudrait un widget pour suivre son solde.
+    - Je propose d'intégrer un mode sombre.
+    - Je propose d'intégrer une barre de recherche dans la FAQ.
+    - J'aimerais que vous ajoutiez un système de parrainage amélioré.
+    - Avez-vous prévu plus de moyens de paiement pour recharger ?
+    - Ce serait bien d'avoir un mode sombre.
+    - Mon idée : ajouter un mode sombre.
+    - Je propose d'intégrer un système de parrainage amélioré.
+    - Mon idée : ajouter des notifications personnalisables.
+    - Pourquoi ne pas proposer la possibilité d'exporter ses relevés ?
+    - Ce serait pratique d'avoir un système de parrainage amélioré.
+    - Une suggestion : il faudrait un mode économie de données.
+    - Pourquoi ne pas proposer des tutoriels vidéo pour les nouveaux utilisateurs ?
+    - J'aimerais que vous ajoutiez un historique des transactions plus détaillé.
+    - J'aimerais que vous ajoutiez un mode sombre.
+    - Avez-vous prévu un rappel avant l'expiration du KYC ?
+    - Pourquoi ne pas proposer des notifications personnalisables ?
+    - J'aimerais que vous ajoutiez un chat en direct avec un conseiller.
+    - Vous devriez ajouter un récapitulatif mensuel des dépenses.
+    - J'aimerais que vous ajoutiez un support en plusieurs langues.
+    - J'aimerais que vous ajoutiez une authentification par empreinte digitale.
+    - g une proposition d amelioration
+    - Ce serait bien d'avoir une barre de recherche dans la FAQ.
+    - J'aimerais que vous ajoutiez plus de moyens de paiement pour recharger.
+    - Ce serait bien d'avoir des filtres pour trouver les lives plus facilement.
+    - Mon idée : ajouter la possibilité de programmer un retrait à l'avance.
+    - Ce serait bien d'avoir un récapitulatif mensuel des dépenses.
+    - J'aimerais que vous ajoutiez des tutoriels vidéo pour les nouveaux utilisateurs.
+    - Mon idée : ajouter des filtres pour trouver les lives plus facilement.
+    - Pourquoi ne pas proposer un rappel avant l'expiration du KYC ?
+    - Je propose d'intégrer des notifications personnalisables.
+    - Je propose d'intégrer un widget pour suivre son solde.
+    - jpense que vs devriez amelioré le systeme de notif
+    - Vous devriez ajouter une barre de recherche dans la FAQ.
+    - Avez-vous prévu la vérification d'identité par selfie ?
+    - Une suggestion : il faudrait des filtres pour trouver les lives plus facilement.
+    - Je propose d'intégrer un récapitulatif mensuel des dépenses.
+    - Avez-vous prévu des filtres pour trouver les lives plus facilement ?
+    - Vous devriez ajouter un historique des transactions plus détaillé.
+    - Vous devriez ajouter un rappel avant l'expiration du KYC.
+    - Ce serait bien d'avoir un historique des transactions plus détaillé.
+    - Avez-vous prévu un support en plusieurs langues ?
+    - Ce serait pratique d'avoir un récapitulatif mensuel des dépenses.
+    - Une suggestion : il faudrait un support en plusieurs langues.
+    - Vous devriez ajouter plus de moyens de paiement pour recharger.
+    - Je propose d'intégrer un rappel avant l'expiration du KYC.
+    - Je propose d'intégrer un support en plusieurs langues.
+    - Une suggestion : il faudrait un rappel avant l'expiration du KYC.
+    - Mon idée : ajouter des tutoriels vidéo pour les nouveaux utilisateurs.
+    - Ce serait top d'avoir des tutoriels vidéo pour les nouveaux utilisateurs.
+    - Mon idée : ajouter une barre de recherche dans la FAQ.
+    - Mon idée : ajouter plus de moyens de paiement pour recharger.
+    - Ce serait top d'avoir un système de parrainage amélioré.
+    - Ce serait top d'avoir un widget pour suivre son solde.
+    - Ce serait pratique d'avoir la possibilité d'exporter ses relevés.
+    - Ce serait bien d'avoir un mode économie de données.
+    - Ce serait top d'avoir un récapitulatif mensuel des dépenses.
+    - Avez-vous prévu un chat en direct avec un conseiller ?
+    - Mon idée : ajouter un widget pour suivre son solde.
+    - Ce serait top d'avoir plus de moyens de paiement pour recharger.
+    - Ce serait top d'avoir un mode économie de données.
+    - Avez-vous prévu un historique des transactions plus détaillé ?
+    - Pourquoi ne pas proposer un historique des transactions plus détaillé ?
+    - Pourquoi ne pas proposer la vérification d'identité par selfie ?
+    - Ce serait pratique d'avoir des notifications personnalisables.
+    - Je propose d'intégrer des filtres pour trouver les lives plus facilement.
+    - Vous devriez ajouter un widget pour suivre son solde.
+    - Mon idée : ajouter un système de parrainage amélioré.
+    - Pourquoi ne pas proposer des filtres pour trouver les lives plus facilement ?
+    - Une suggestion : il faudrait un système de parrainage amélioré.
+    - Vous devriez ajouter un système de parrainage amélioré.
+    - J'aimerais que vous ajoutiez la possibilité de programmer un retrait à l'avance.
+    - Vous devriez ajouter des tutoriels vidéo pour les nouveaux utilisateurs.
+    - Ce serait top d'avoir une authentification par empreinte digitale.
+    - Avez-vous prévu des notifications personnalisables ?
+    - Avez-vous prévu des tutoriels vidéo pour les nouveaux utilisateurs ?
+    - Ce serait bien d'avoir la possibilité de programmer un retrait à l'avance.
+    - Ce serait pratique d'avoir la vérification d'identité par selfie.
+    - Je suggère d'ajouter une option pour changer la langue de l'application.
+    - Ce serait top d'avoir la possibilité d'exporter ses relevés.
+    - Mon idée : ajouter un historique des transactions plus détaillé.
+    - Ce serait bien d'avoir une authentification par empreinte digitale.
+    - Pourquoi ne pas proposer un support en plusieurs langues ?
+    - Vous devriez ajouter une authentification par empreinte digitale.
+    - Avez-vous prévu un mode sombre ?
+    - Une suggestion : il faudrait la vérification d'identité par selfie.
+    - Avez-vous prévu un récapitulatif mensuel des dépenses ?
+    - J'aimerais que vous ajoutiez un récapitulatif mensuel des dépenses.
+    - Avez-vous prévu la possibilité de programmer un retrait à l'avance ?
+    - Une suggestion : il faudrait des notifications personnalisables.
+    - J'aimerais que vous ajoutiez un rappel avant l'expiration du KYC.
+    - Ce serait top d'avoir une barre de recherche dans la FAQ.
+    - Vous devriez ajouter des filtres pour trouver les lives plus facilement.
+    - Ce serait pratique d'avoir plus de moyens de paiement pour recharger.
+    - Pourquoi ne pas proposer la possibilité de programmer un retrait à l'avance ?
+    - Je propose d'intégrer des tutoriels vidéo pour les nouveaux utilisateurs.
+    - Mon idée : ajouter une authentification par empreinte digitale.
+    - Ce serait top d'avoir des filtres pour trouver les lives plus facilement.
+    - Ce serait pratique d'avoir un widget pour suivre son solde.
+    - Avez-vous prévu un mode économie de données ?
+    - Ce serait top d'avoir la possibilité de programmer un retrait à l'avance.
+    - vs devriez vraiment ajouter un mode sombre stp
+    - Ce serait pratique d'avoir un mode sombre.
+    - Vous devriez ajouter un mode économie de données.
+    - Mon idée : ajouter un récapitulatif mensuel des dépenses.
+    - Je propose d'intégrer un chat en direct avec un conseiller.
+    - Ce serait pratique d'avoir des tutoriels vidéo pour les nouveaux utilisateurs.
+    - Je propose d'intégrer plus de moyens de paiement pour recharger.
+    - Pour information, une fonctionnalité de sauvegarde automatique serait appréciée.
+    - Ce serait bien d'avoir un widget pour suivre son solde.
+    - Proposition : afficher l'historique des retraits plus clairement.
+    - Il faudrait un bouton pour annuler un retrait en cours.
+    - Il faudrait vraiment ajouter une fonction de recherche dans l'historique.
+    - Une notification push serait utile pour les retraits.
+
+- intent: plainte
+  examples: |
+    - L'application se déconnecte sans arrêt, c'est vraiment décevant.
+    - Je n'ai aucune nouvelle depuis des semaines, c'est vraiment décevant.
+    - C'est catastrophique : l'interface est illisible.
+    - On me donne toujours des réponses différentes, c'est vraiment décevant.
+    - Je ne suis pas content, l'application plante tout le temps.
+    - Je ne suis pas content, les mises à jour cassent toujours quelque chose.
+    - sui pas content du tout franchement
+    - Personne ne prend mes messages au sérieux, c'est vraiment décevant.
+    - C'est inadmissible que les mises à jour cassent toujours quelque chose.
+    - C'est inadmissible que l'application est trop lente.
+    - Franchement, les frais sont beaucoup trop élevés, c'est nul.
+    - Franchement, je n'ai aucune nouvelle depuis des semaines, c'est nul.
+    - Je suis mécontent, l'application se déconnecte sans arrêt.
+    - C'est inadmissible que je n'arrive à rien faire correctement.
+    - Ça ne va pas du tout, je n'arrive à rien faire correctement.
+    - Ça ne va pas du tout, le support ne comprend jamais le problème.
+    - Honnêtement, rien ne fonctionne comme annoncé, ça m'énerve.
+    - Ça ne va pas du tout, je perds mon temps à chaque fois.
+    - Honnêtement, je n'ai aucune nouvelle depuis des semaines, ça m'énerve.
+    - Franchement, le service client ne répond jamais, c'est nul.
+    - C'est catastrophique : personne ne prend mes messages au sérieux.
+    - javou ke sui deg de ce service
+    - Je suis mécontent, je n'arrive à rien faire correctement.
+    - C'est catastrophique : l'application se déconnecte sans arrêt.
+    - Je ne suis pas content, le service client ne répond jamais.
+    - Je commence sérieusement à en avoir marre de ces bugs.
+    - Honnêtement, l'application est trop lente, ça m'énerve.
+    - bof bof cette experience franchement
+    - Ça ne va pas du tout, tout est compliqué inutilement.
+    - Je suis mécontent, je n'ai aucune nouvelle depuis des semaines.
+    - Je suis mécontent, le support ne comprend jamais le problème.
+    - Honnêtement, les frais sont beaucoup trop élevés, ça m'énerve.
+    - Le support ne comprend jamais le problème, c'est vraiment décevant.
+    - Franchement, je perds mon temps à chaque fois, c'est nul.
+    - Les délais ne sont jamais respectés, c'est vraiment décevant.
+    - Je suis très déçu, les explications sont toujours confuses.
+    - Je ne suis pas content, je n'ai aucune nouvelle depuis des semaines.
+    - Honnêtement, tout est compliqué inutilement, ça m'énerve.
+    - Je suis frustré parce que les explications sont toujours confuses.
+    - Je suis mécontent, l'interface est illisible.
+    - Je suis mécontent, on me donne toujours des réponses différentes.
+    - Je suis excédé, rien ne va comme il faut sur cette application.
+    - Ça ne va pas du tout, je n'ai aucune nouvelle depuis des semaines.
+    - Je suis mécontent, personne ne prend mes messages au sérieux.
+    - Franchement, le support ne comprend jamais le problème, c'est nul.
+    - Franchement, personne ne prend mes messages au sérieux, c'est nul.
+    - Je suis frustré parce que je n'arrive à rien faire correctement.
+    - C'est inadmissible que le service client ne répond jamais.
+    - Je suis frustré parce que je n'ai aucune nouvelle depuis des semaines.
+    - C'est inadmissible que je dois attendre des jours pour une réponse.
+    - Honnêtement, personne ne prend mes messages au sérieux, ça m'énerve.
+    - Le service client ne répond jamais, c'est vraiment décevant.
+    - C'est catastrophique : rien ne fonctionne comme annoncé.
+    - Je suis frustré parce que l'application se déconnecte sans arrêt.
+    - C'est catastrophique : les explications sont toujours confuses.
+    - Je suis frustré parce que le support ne comprend jamais le problème.
+    - Je ne suis pas content, l'interface est illisible.
+    - Honnêtement, le support ne comprend jamais le problème, ça m'énerve.
+    - Je suis mécontent, l'application est trop lente.
+    - C'est catastrophique : je n'arrive à rien faire correctement.
+    - Je suis frustré parce que rien ne fonctionne comme annoncé.
+    - Je ne suis pas content, rien ne fonctionne comme annoncé.
+    - Je suis très déçu, les mises à jour cassent toujours quelque chose.
+    - Je ne suis pas content, les délais ne sont jamais respectés.
+    - Je suis mécontent, les délais ne sont jamais respectés.
+    - Ça ne va pas du tout, l'application plante tout le temps.
+    - Je suis mécontent, je dois attendre des jours pour une réponse.
+    - C'est inadmissible que personne ne prend mes messages au sérieux.
+    - Honnêtement, le service client ne répond jamais, ça m'énerve.
+    - Quelle déception, je m'attendais à mieux de votre part.
+    - Honnêtement, les délais ne sont jamais respectés, ça m'énerve.
+    - Les frais sont beaucoup trop élevés, c'est vraiment décevant.
+    - C'est inadmissible que rien ne fonctionne comme annoncé.
+    - Je suis frustré parce que l'interface est illisible.
+    - Je ne suis pas content, l'application est trop lente.
+    - Je suis mécontent, le service client ne répond jamais.
+    - L'application est trop lente, c'est vraiment décevant.
+    - Je suis mécontent, je perds mon temps à chaque fois.
+    - Je suis très déçu, le support ne comprend jamais le problème.
+    - Les mises à jour cassent toujours quelque chose, c'est vraiment décevant.
+    - Je suis frustré parce que le service client ne répond jamais.
+    - Franchement, rien ne fonctionne comme annoncé, c'est nul.
+    - Franchement, l'application est trop lente, c'est nul.
+    - Je ne suis pas content, l'application se déconnecte sans arrêt.
+    - C'est inadmissible que les frais sont beaucoup trop élevés.
+    - Franchement, l'application se déconnecte sans arrêt, c'est nul.
+    - Franchement, les délais ne sont jamais respectés, c'est nul.
+    - c nul cette appli sérieux
+    - Je ne suis pas content, le support ne comprend jamais le problème.
+    - Je suis mécontent, les frais sont beaucoup trop élevés.
+    - Je ne suis pas content, on me donne toujours des réponses différentes.
+    - Franchement, tout est compliqué inutilement, c'est nul.
+    - Je suis frustré parce que les mises à jour cassent toujours quelque chose.
+    - C'est inadmissible que je perds mon temps à chaque fois.
+    - Ça ne va pas du tout, rien ne fonctionne comme annoncé.
+    - Honnêtement, l'application plante tout le temps, ça m'énerve.
+    - Honnêtement, on me donne toujours des réponses différentes, ça m'énerve.
+    - Je suis très déçu, personne ne prend mes messages au sérieux.
+    - Je suis frustré parce que l'application est trop lente.
+    - Je suis frustré parce que on me donne toujours des réponses différentes.
+    - Je suis très déçu, rien ne fonctionne comme annoncé.
+    - C'est catastrophique : je dois attendre des jours pour une réponse.
+    - Honnêtement, les explications sont toujours confuses, ça m'énerve.
+    - Je suis très déçu, l'application se déconnecte sans arrêt.
+    - Honnêtement, je n'arrive à rien faire correctement, ça m'énerve.
+    - Je suis très déçu, le service client ne répond jamais.
+    - Sincèrement, je ne suis pas satisfait de mon expérience jusqu'ici.
+    - Franchement, l'application plante tout le temps, c'est nul.
+    - Honnêtement, l'application se déconnecte sans arrêt, ça m'énerve.
+    - C'est du grand n'importe quoi cette application.
+    - Je suis très déçu, on me donne toujours des réponses différentes.
+    - C'est catastrophique : le support ne comprend jamais le problème.
+    - Honnêtement, l'interface est illisible, ça m'énerve.
+    - Franchement, l'interface est illisible, c'est nul.
+    - Franchement, on me donne toujours des réponses différentes, c'est nul.
+    - Je suis mécontent, les mises à jour cassent toujours quelque chose.
+    - C'est catastrophique : le service client ne répond jamais.
+    - Je ne suis pas content, je dois attendre des jours pour une réponse.
+    - Je ne suis pas content, personne ne prend mes messages au sérieux.
+    - Je suis très déçu, tout est compliqué inutilement.
+    - C'est inadmissible que tout est compliqué inutilement.
+    - Je suis frustré parce que les délais ne sont jamais respectés.
+    - Je suis frustré parce que les frais sont beaucoup trop élevés.
+    - C'est catastrophique : l'application plante tout le temps.
+    - Ça ne va pas du tout, on me donne toujours des réponses différentes.
+    - C'est inadmissible que le support ne comprend jamais le problème.
+    - C'est inadmissible que l'application se déconnecte sans arrêt.
+    - Je ne suis pas content, je perds mon temps à chaque fois.
+    - C'est catastrophique : les délais ne sont jamais respectés.
+    - Je ne suis pas content, les explications sont toujours confuses.
+    - C'est catastrophique : tout est compliqué inutilement.
+    - Je suis très déçu, je dois attendre des jours pour une réponse.
+    - Je suis très déçu, je perds mon temps à chaque fois.
+    - Je ne suis pas content, je n'arrive à rien faire correctement.
+    - tres decu par la qualite du service
+    - C'est catastrophique : les frais sont beaucoup trop élevés.
+    - Je suis très déçu, l'application est trop lente.
+    - Les explications sont toujours confuses, c'est vraiment décevant.
+    - Je suis très déçu, les frais sont beaucoup trop élevés.
+    - Franchement, je n'arrive à rien faire correctement, c'est nul.
+    - Honnêtement, je perds mon temps à chaque fois, ça m'énerve.
+    - Je suis très déçu, les délais ne sont jamais respectés.
+    - Je suis frustré parce que l'application plante tout le temps.
+    - Franchement, les mises à jour cassent toujours quelque chose, c'est nul.
+    - C'est inadmissible que les explications sont toujours confuses.
+    - Je perds mon temps à chaque fois, c'est vraiment décevant.
+    - Je n'arrive à rien faire correctement, c'est vraiment décevant.
+    - Je suis frustré parce que personne ne prend mes messages au sérieux.
+
+    # Mecontentement modere, sans propos irrespectueux (audit "500 tours",
+    # 2026-07-18) : ces phrases se faisaient classer inappropriate_language
+    # a tort (jusqu'a 98% de confiance), declenchant le message "je ne peux
+    # pas donner suite a un message contenant des propos inappropries" en
+    # reponse a une plainte polie -- mauvaise experience pour quelqu'un qui
+    # n'a rien dit d'irrespectueux.
+    - Franchement le service se dégrade de jour en jour.
+    - L'expérience utilisateur est franchement médiocre en ce moment.
+    - Je commence à perdre patience avec cette application.
+    - Je ne suis pas satisfait du service en ce moment.
+    - Cette expérience est vraiment frustrante.
+    - Je trouve que la qualité du service baisse.
+    - Je suis mécontent du traitement de mon dossier.
+    - Ça devient vraiment lassant, ce service qui ne s'améliore pas.
+
+- intent: ask_capabilities
+  examples: |
+    - Quelles sont tes compétences ?
+    - Sur quels services peux-tu effectuer un diagnostic ?
+    - Quels problèmes peux-tu résoudre ?
+    - Quels types de demandes peux-tu traiter ?
+    - Que peux-tu faire pour moi ?
+    - Qu'est-ce que tu sais faire ?
+    - Tu peux m'aider avec quoi ?
+    - Quelles sont tes capacités ?
+    - Que peux-tu faire ?
+    - Sur quoi peux-tu m'aider ?
+    - Quels sont tes domaines d'intervention ?
+    - Quels services prends-tu en charge ?
+    - C'est quoi tes fonctionnalités ?
+    - Que sais-tu faire exactement ?
+    - Dans quels domaines peux-tu intervenir ?
+    - Sur quoi peux-tu intervenir ?
+    - Quelles sont les fonctionnalités disponibles ?
+    - Peux-tu me dire ce que tu sais faire ?
+    - Quels types de problèmes sais-tu diagnostiquer ?
+    - Comment peux-tu m'aider ?
+    - Qu'est-ce que tu proposes comme aide ?
+    - Liste-moi tes capacités.
+    - Explique-moi ce que tu peux faire.
+    - Quelles sont les capacités de cet assistant ?
+    - Quels sujets peux-tu traiter ?
+    - Liste-moi ce que tu gères.
+    - Quel est ton rôle ici ?
+    - Que gères-tu comme sujets ?
+    - Dis-moi ton rôle exactement.
+
+- intent: rate_response_useful
+  examples: |
+    - Oui c'était utile
+    - Utile, merci
+    - Ça répond à ma question
+    - Exactement ce que je cherchais
+    - Parfait, merci pour la réponse
+    - Oui merci ça m'aide
+    - C'était utile
+    - Utile
+    - Ça m'a aidé
+    - Oui, c'est ce qu'il me fallait
+
+    # Etoffe suite au test conversationnel "500 tours" (2026-07-18) : cette
+    # intention n'avait que 10 exemples, tous concus pour satisfaire
+    # l'exigence minimale d'entrainement (le declenchement normal se fait
+    # par bouton, voir plus bas) -- mesure a seulement 16,7% de precision en
+    # texte libre reel (confondue avec goodbye/affirm/bot_challenge).
+    - nickel merci
+    - top ça répond bien
+    - ok parfait c'est clair
+    - génial, exactement ça
+    - super merci beaucoup
+    - impeccable
+    - ça m'aide beaucoup
+    - exactement ce qu'il me fallait
+    - merci c'est exactement ça
+    - ça règle mon problème
+    - top merci
+    - nickel
+    - génial merci
+    - ça me va très bien
+    - parfait merci beaucoup
+    - ok ça marche merci
+    - super utile merci
+    - clair merci beaucoup
+    - ça répond bien à ma question
+    - impec merci
+    - merci beaucoup, c'est exactement ce que je cherchais
+    - top, merci pour l'info
+    - ça résout mon souci, merci
+- intent: rate_response_not_useful
+  examples: |
+    - Non ce n'est pas utile
+    - Pas utile
+    - Ça ne répond pas à ma question
+    - Non ça ne m'aide pas
+    - Pas vraiment ce que je cherchais
+    - Non, pas du tout
+    - Ce n'était pas utile
+    - Non merci ça ne répond pas
+    - Ça ne m'a pas aidé
+    - Non, pas ça
+
+    # Meme etoffage que rate_response_useful ci-dessus, meme constat (16,7%
+    # de precision en texte libre avant cet ajout).
+    #
+    # Retire ensuite (audit "tests 400 diagnostic", 2026-07-18) : plusieurs
+    # exemples trop generiques, sans aucun mot d'ancrage ("réponse",
+    # "question", "aide", "cherche"...) captaient a tort des phrases vagues
+    # sans rapport avec la notation d'une reponse FAQ ailleurs dans la
+    # conversation -- ex. "toujours pas sûr" (reponse a une confirmation de
+    # diagnostic) ou "j'ai un souci technique bizarre pas très clair"
+    # (description de probleme) declenchaient "Merci pour votre retour !"
+    # au lieu d'etre traites normalement. Retires : "toujours pas clair pour
+    # moi", "meh pas convaincant", "je comprends toujours pas", "pas clair
+    # du tout", "je ne comprends toujours pas", "ce n'est pas ça", "pas ce
+    # qu'il me fallait", "ça ne m'avance pas", "je suis toujours perdu, ça
+    # n'aide pas" -- ceux qui restent ci-dessous contiennent tous un mot
+    # d'ancrage lie a une reponse/question, moins susceptibles de deriver.
+    - bof pas vraiment ce que je voulais
+    - ça n'aide pas trop
+    - hors sujet je trouve
+    - non ça n'aide pas
+    - pas terrible cette réponse
+    - toujours pas ce que je cherche
+    - ça ne résout rien
+    - franchement pas utile
+    - aucun rapport avec ma question
+    - ça ne répond pas vraiment
+    - pas du tout ce que je cherchais
+
+# Les 3 intentions suivantes sont normalement declenchees par un clic sur un
+# bouton (payload structure /intent{"entite": "valeur"}, voir faq.py), pas
+# tapees au clavier -- ces exemples existent uniquement pour satisfaire
+# l'exigence d'entrainement de Rasa (au moins quelques exemples par
+# intention), meme convention deja appliquee a rate_response_useful/
+# rate_response_not_useful ci-dessus.
+- intent: browse_faq
+  examples: |
+    - Montre-moi des questions fréquentes
+    - Je veux voir des exemples de questions
+    - Quelles questions puis-je poser ?
+    - Voir la FAQ
+    - Donne-moi des idées de questions
+    - montre voir des questions types
+    - j'ai pas d'idée, donne des exemples
+    - propose-moi des sujets de questions
+    - affiche des exemples de questions
+
+- intent: select_faq_category
+  examples: |
+    - Je veux voir les questions sur [le portefeuille](faq_category:WALLET)
+    - Montre-moi les questions à propos du [compte](faq_category:ACCOUNT)
+    - Des questions sur [le KYC](faq_category:KYC)
+    - Des questions sur [NGONI Plus](faq_category:NGONI_PLUS)
+
+- intent: select_faq_question
+  examples: |
+    - [comment-recevoir-des-revenus-sur-ngoni-abc12345](faq_slug)
+    - [quest-ce-que-ngoni-plus-def67890](faq_slug)

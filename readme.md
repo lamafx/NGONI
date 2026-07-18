@@ -1,0 +1,1 @@
+le nom de la db est devenu chatbotdb et voici les coordonnées CREATE USER chatbot_user WITH PASSWORD '***REDACTED***';

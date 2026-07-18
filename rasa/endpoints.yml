@@ -1,0 +1,26 @@
+action_endpoint:
+  url: "http://actions:5055/webhook"
+
+# Sans ceci, Rasa retombe sur l'InMemoryTrackerStore par defaut : tout
+# l'historique de conversation (slots, evenements) vit uniquement en RAM du
+# conteneur, perdu a chaque redemarrage -- constate en pratique plusieurs
+# fois au cours du developpement. Meme instance Postgres que FastAPI (voir
+# fastapi/app/database.py), schema dedie cree automatiquement par Rasa au
+# premier demarrage (table `events`). Valeurs fournies par rasa/.env (jamais
+# commite, voir .gitignore) -- ${VAR} est resolu nativement par Rasa via
+# os.path.expandvars (rasa/shared/utils/io.py::replace_environment_variables).
+tracker_store:
+  type: SQL
+  dialect: "postgresql"
+  # Pas de guillemets autour de ${VAR} : le resolveur d'env vars de Rasa
+  # (implicit_resolver, voir commentaire ci-dessus) ne s'applique qu'aux
+  # scalaires YAML NON quotes -- une valeur entre guillemets a deja un type
+  # explicite "str" et court-circuite la resolution implicite. Constate en
+  # pratique : avec guillemets, port (seul champ laisse sans guillemets a
+  # l'origine) etait le seul correctement resolu, les autres restaient
+  # litteralement "${VAR}".
+  url: ${TRACKER_DB_HOST}
+  port: ${TRACKER_DB_PORT}
+  username: ${TRACKER_DB_USER}
+  password: ${TRACKER_DB_PASSWORD}
+  db: ${TRACKER_DB_NAME}

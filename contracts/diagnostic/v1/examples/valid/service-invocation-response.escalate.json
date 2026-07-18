@@ -1,0 +1,15 @@
+{
+  "outcome": "ESCALATE",
+  "message": "Je transmets cela a notre equipe technique.",
+  "escalation_reason": "PENDING_BEYOND_SLA_NO_PROVIDER_RESPONSE",
+  "escalation_payload": {
+    "category": "Wallet",
+    "urgency": "high",
+    "context": {
+      "transaction_reference": "WITHDRAW-abc123",
+      "status": "PENDING",
+      "age_minutes": 187,
+      "provider_transaction_id": null
+    }
+  }
+}

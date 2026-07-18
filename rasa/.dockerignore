@@ -1,0 +1,9 @@
+.rasa/
+models/
+__pycache__/
+**/__pycache__/
+*.pyc
+.pytest_cache/
+.git/
+.venv/
+*.log

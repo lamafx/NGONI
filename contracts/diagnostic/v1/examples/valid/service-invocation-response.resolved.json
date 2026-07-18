@@ -1,0 +1,9 @@
+{
+  "outcome": "RESOLVED",
+  "message": "Votre recharge de 5000 FCFA vient d'etre creditee a l'instant.",
+  "resolution_code": "TOPUP_SETTLED_ON_DEMAND",
+  "data": {
+    "new_balance": 15000,
+    "currency": "XOF"
+  }
+}

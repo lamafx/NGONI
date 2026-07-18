@@ -1,0 +1,57 @@
+name: pfe
+
+services:
+
+  rasa:
+    build: ./rasa
+    ports:
+      - "5005:5005"
+    volumes:
+      - ./rasa:/app
+      - ./rasa/models:/app/models
+    env_file:
+      - ./rasa/.env
+
+  actions:
+    build: ./rasa/actions
+    ports:
+      - "5055:5055"
+    volumes:
+      - ./rasa/actions:/app/actions
+    env_file:
+      - ./rasa/actions/.env
+
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./fastapi/init_db.sql:/docker-entrypoint-initdb.d/init_db.sql
+
+  pgadmin:
+    image: dpage/pgadmin4:8.14
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+
+  fastapi:
+    build: ./fastapi
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+    depends_on:
+      - postgres
+      - rasa
+
+volumes:
+  postgres_data:

@@ -1,0 +1,203 @@
+version: "3.1"
+
+stories:
+- story: say goodbye
+  steps:
+  - intent: goodbye
+  - action: utter_goodbye
+
+- story: bot introduction
+  steps:
+  - intent: bot_challenge
+  - action: utter_iamabot
+
+- story: faq semantic search
+  steps:
+  - intent: ask_faq
+  - action: action_faq_search
+
+- story: create a reclamation
+  steps:
+  - intent: create_reclamation
+  - action: action_start_reclamation
+  - action: reclamation_form
+  - active_loop: reclamation_form
+
+- story: diagnostic flow
+  steps:
+  - intent: diagnostic
+  - action: action_run_diagnostic_step
+
+- story: full reclamation flow confirmed
+  steps:
+  - intent: greet
+  - action: action_greet_with_time
+  - intent: create_reclamation
+  - action: action_start_reclamation
+  - action: reclamation_form
+  - active_loop: reclamation_form
+  - active_loop: null
+  - action: action_extract_reclamation_entities
+  - action: action_generate_reclamation_summary
+  - action: action_request_reclamation_confirmation
+  - intent: affirm
+  - action: action_create_ticket
+  - intent: goodbye
+  - action: utter_goodbye
+
+- story: full reclamation flow cancelled
+  steps:
+  - intent: create_reclamation
+  - action: action_start_reclamation
+  - action: reclamation_form
+  - active_loop: reclamation_form
+  - active_loop: null
+  - action: action_extract_reclamation_entities
+  - action: action_generate_reclamation_summary
+  - action: action_request_reclamation_confirmation
+  - slot_was_set:
+    - claim_requested: true
+  - intent: deny
+  - action: action_ask_cancel_clarification
+  - slot_was_set:
+    - claim_requested: false
+    - awaiting_cancel_choice: true
+  - action: reclamation_form
+  - active_loop: reclamation_form
+  - slot_was_set:
+    - awaiting_cancel_choice: false
+    - cancel_confirmed: true
+  - active_loop: null
+  - action: action_cancel_reclamation
+  - slot_was_set:
+    - claim_requested: false
+    - awaiting_cancel_choice: false
+    - cancel_confirmed: false
+    - cancel_choice: null
+    - editing_field: false
+    - field_to_edit: null
+    - ticket_source: null
+    - category: null
+    - description: null
+    - urgency: null
+    - incident_date: null
+    - summary: null
+    - extracted_entities: null
+
+- story: reclamation flow refused then edited
+  steps:
+  - intent: create_reclamation
+  - action: action_start_reclamation
+  - action: reclamation_form
+  - active_loop: reclamation_form
+  - active_loop: null
+  - action: action_extract_reclamation_entities
+  - action: action_generate_reclamation_summary
+  - action: action_request_reclamation_confirmation
+  - slot_was_set:
+    - claim_requested: true
+  - intent: deny
+  - action: action_ask_cancel_clarification
+  - slot_was_set:
+    - claim_requested: false
+    - awaiting_cancel_choice: true
+  - action: reclamation_form
+  - active_loop: reclamation_form
+  - slot_was_set:
+    - awaiting_cancel_choice: false
+    - editing_field: true
+  - action: reclamation_form
+  - slot_was_set:
+    - editing_field: false
+  - active_loop: null
+  - action: action_extract_reclamation_entities
+  - action: action_generate_reclamation_summary
+  - action: action_request_reclamation_confirmation
+  - intent: affirm
+  - action: action_create_ticket
+
+- story: greet then faq then goodbye
+  steps:
+  - intent: greet
+  - action: action_greet_with_time
+  - intent: ask_faq
+  - action: action_faq_search
+  - intent: goodbye
+  - action: utter_goodbye
+
+- story: faq then reclamation
+  steps:
+  - intent: ask_faq
+  - action: action_faq_search
+  - intent: create_reclamation
+  - action: action_start_reclamation
+  - action: reclamation_form
+  - active_loop: reclamation_form
+
+- story: diagnostic then escalation to ticket
+  # Un seul tour suffit : action_run_diagnostic_step positionne deja
+  # diagnostic_state.status="in_progress" des qu'un champ requis manque
+  # encore. Repeter ce pas une 2e fois ici (sans nouveau message utilisateur
+  # entre les deux) apprenait a TEDPolicy que rejouer action_run_diagnostic_step
+  # sans intent declencheur est un enchainement plausible -- ce qui lui
+  # faisait ensuite rejouer cette action en trop juste apres qu'une regle
+  # l'ait deja executee une fois (voir le commentaire sur ActionRunDiagnosticStep
+  # dans actions.py).
+  steps:
+  - intent: greet
+  - action: action_greet_with_time
+  - intent: diagnostic
+  - action: action_run_diagnostic_step
+  - slot_was_set:
+    - diagnostic_state: '{"status": "in_progress"}'
+  - intent: create_reclamation
+  - action: action_decide_escalation
+
+- story: diagnostic then resolved by denial
+  steps:
+  - intent: diagnostic
+  - action: action_run_diagnostic_step
+  - intent: deny
+  - action: action_handle_negation
+
+- story: bot challenge interrupts reclamation then resumes
+  steps:
+  - intent: create_reclamation
+  - action: action_start_reclamation
+  - action: reclamation_form
+  - active_loop: reclamation_form
+  - intent: bot_challenge
+  - action: utter_iamabot
+  - active_loop: reclamation_form
+  - active_loop: null
+  - action: action_extract_reclamation_entities
+  - action: action_generate_reclamation_summary
+  - action: action_request_reclamation_confirmation
+  - intent: affirm
+  - action: action_create_ticket
+
+- story: out of scope then real question
+  steps:
+  - intent: out_of_scope
+  - action: action_out_of_scope
+  - intent: ask_faq
+  - action: action_faq_search
+
+- story: inappropriate language then normal reclamation
+  steps:
+  - intent: inappropriate_language
+  - action: utter_please_be_respectful
+  - intent: create_reclamation
+  - action: action_start_reclamation
+  - action: reclamation_form
+  - active_loop: reclamation_form
+
+- story: greet then bot challenge then faq
+  steps:
+  - intent: greet
+  - action: action_greet_with_time
+  - intent: bot_challenge
+  - action: utter_iamabot
+  - intent: ask_faq
+  - action: action_faq_search
+

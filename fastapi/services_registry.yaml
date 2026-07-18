@@ -1,0 +1,29 @@
+# Registre des microservices connus du Diagnostic Engine (Phase 5, voir
+# docs/diagnostic-roadmap.md, etapes 23-24).
+#
+# Ajouter un service = ajouter une entree ici -- rien a modifier cote code
+# Python, aucun redemarrage du Engine necessaire : ce fichier est relu a
+# chaque cycle de rafraichissement periodique (voir REGISTRY_POLL_INTERVAL_SECONDS
+# dans app/main.py, et CapabilityRegistry.poll_forever). Le CONTENU de chaque
+# manifeste (quels problemes, quels champs...) n'est jamais duplique ici : il
+# est recupere reellement via GET {base_url}/diagnostic/manifest a chaque
+# rafraichissement.
+#
+# base_url_env / internal_secret_env : NOM de la variable d'environnement a
+# lire (pas la valeur elle-meme) -- la valeur reste fournie par
+# l'environnement d'execution (docker-compose, .env, shell...), ce fichier ne
+# fait que declarer quels services existent et quelles variables les
+# configurent. base_url_default sert de repli pratique pour le developpement
+# local (voir README des stubs) quand la variable d'environnement n'est pas
+# definie.
+
+services:
+  - name: wallet
+    base_url_env: WALLET_SERVICE_BASE_URL
+    base_url_default: http://localhost:3103/api/v1
+    internal_secret_env: WALLET_SERVICE_INTERNAL_SECRET
+
+  - name: user
+    base_url_env: USER_SERVICE_BASE_URL
+    base_url_default: http://localhost:3104/api/v1
+    internal_secret_env: USER_SERVICE_INTERNAL_SECRET

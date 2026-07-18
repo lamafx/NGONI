@@ -1,0 +1,427 @@
+version: "3.1"
+
+rules:
+- rule: Greeting response
+  # Meme garde que "Bot presentation response"/"Capabilities description
+  # response"/"Suggestion response" juste en dessous (active_loop: null),
+  # etendue ici avec claim_requested/pending_field : sans elle, un "greet"
+  # mal classe (ex. "aujourd'hui", "allo ?", classes greet a confiance 1.0
+  # par le NLU) survenant pendant une confirmation de reclamation en attente
+  # (claim_requested: true) ou un diagnostic en cours (pending_field non nul)
+  # rejoue tout le message d'accueil au lieu de laisser la confirmation/le
+  # diagnostic se poursuivre. Trouve par test conversationnel (505 tours,
+  # 2026-07-18) : une reponse "aujourd'hui" en pleine demande de confirmation
+  # ("Confirmez-vous l'envoi ?") relancait l'accueil complet, hors contexte.
+  condition:
+  - active_loop: null
+  - slot_was_set:
+    - claim_requested: false
+    - pending_field: null
+  steps:
+  - intent: greet
+  - action: action_greet_with_time
+
+- rule: Goodbye response
+  # Meme garde que "Greeting response" juste au-dessus, meme raison : trouve
+  # en VERIFIANT le correctif de "Greeting response" (test conversationnel,
+  # 2026-07-18) -- "allo ?" classe goodbye (et non plus greet) par le modele
+  # reentraine declenchait exactement le meme symptome ("Merci et a bientot
+  # sur NGONI !" au lieu de laisser la confirmation de reclamation se
+  # poursuivre) : la classe de bug n'est pas propre a greet, elle touche
+  # toute intention "meta" sans garde pendant une confirmation/un diagnostic
+  # en attente.
+  condition:
+  - active_loop: null
+  - slot_was_set:
+    - claim_requested: false
+    - pending_field: null
+  steps:
+  - intent: goodbye
+  - action: utter_goodbye
+
+- rule: Bot presentation response
+  # Sans cette condition, cette regle s'applique aussi pendant reclamation_form
+  # et contredit la story "bot challenge interrupts reclamation then resumes"
+  # (qui reprend le formulaire apres utter_iamabot au lieu d'ecouter).
+  condition:
+  - active_loop: null
+  steps:
+  - intent: bot_challenge
+  - action: utter_iamabot
+
+- rule: Capabilities description response
+  # Meme garde-fou que "Bot presentation response" juste au-dessus (meme
+  # famille de question meta sur l'agent) : sans active_loop: null, une
+  # reponse mal classee ask_capabilities pendant reclamation_form couperait
+  # le formulaire en cours au lieu de continuer a l'ecouter.
+  condition:
+  - active_loop: null
+  steps:
+  - intent: ask_capabilities
+  - action: action_describe_capabilities
+
+- rule: Out of scope response
+  # action_out_of_scope (pas utter_out_of_scope directement) : une reponse
+  # mal classee out_of_scope pendant qu'une question de diagnostic est en
+  # attente doit etre traitee comme une tentative de reponse, pas un vrai
+  # hors-sujet -- voir ActionOutOfScope dans diagnostic.py.
+  steps:
+  - intent: out_of_scope
+  - action: action_out_of_scope
+
+- rule: Inappropriate language response
+  # pending_field:null (audit cas 21) : sans cette condition, cette regle
+  # entre en conflit avec "Ignore nlu_fallback/deny/affirm misclassification
+  # while diagnostic dialogue is pending" plus bas, qui doit prendre le
+  # dessus pendant un diagnostic en cours (continuer plutot que couper court
+  # avec le message generique).
+  condition:
+  - slot_was_set:
+    - pending_field: null
+  steps:
+  - intent: inappropriate_language
+  - action: utter_please_be_respectful
+
+- rule: Suggestion response
+  # Meme garde-fou que "Bot presentation response" (active_loop: null) : sans
+  # ça, une reponse mal classee suggestion pendant reclamation_form couperait
+  # le formulaire en cours au lieu de continuer a l'ecouter.
+  # action_store_suggestion (voir feedback.py) persiste la suggestion cote
+  # FastAPI (feedback.entries) ET declenche la creation d'un ticket de suivi
+  # (complaints.complaints) avant de repondre -- voir
+  # docs/suggestion-plainte-flow.md pour le detail.
+  condition:
+  - active_loop: null
+  steps:
+  - intent: suggestion
+  - action: action_store_suggestion
+
+- rule: Complaint acknowledgement
+  # plainte capture l'expression d'un mecontentement general (voir nlu.yml) :
+  # aucun formulaire de reclamation n'est ouvert automatiquement, la reponse
+  # invite toujours a passer par create_reclamation pour un suivi
+  # personnalise -- pas de duplication de logique avec le formulaire de
+  # reclamation. action_acknowledge_complaint (voir feedback.py) journalise
+  # neanmoins le mecontentement cote FastAPI (feedback.entries) ET declenche
+  # la creation d'un ticket de suivi (complaints.complaints), en best-effort,
+  # avant de repondre -- voir docs/suggestion-plainte-flow.md.
+  condition:
+  - active_loop: null
+  steps:
+  - intent: plainte
+  - action: action_acknowledge_complaint
+
+- rule: FAQ semantic search
+  steps:
+  - intent: ask_faq
+  - action: action_faq_search
+
+- rule: FAQ response rated useful
+  # action_record_response_rating (feedback.py) lit le NOM de l'intention
+  # courante (tracker.get_intent_of_latest_message) pour savoir si la
+  # notation est positive ou negative -- une seule action pour les deux
+  # regles, plutot que deux actions quasi identiques.
+  condition:
+  - active_loop: null
+  steps:
+  - intent: rate_response_useful
+  - action: action_record_response_rating
+
+- rule: FAQ response rated not useful
+  condition:
+  - active_loop: null
+  steps:
+  - intent: rate_response_not_useful
+  - action: action_record_response_rating
+
+- rule: Browse FAQ suggestions
+  steps:
+  - intent: browse_faq
+  - action: action_browse_faq
+
+- rule: Select FAQ category
+  steps:
+  - intent: select_faq_category
+  - action: action_select_faq_category
+
+- rule: Select FAQ question
+  steps:
+  - intent: select_faq_question
+  - action: action_select_faq_question
+
+- rule: Complete reclamation form and request confirmation
+  condition:
+  - active_loop: reclamation_form
+  steps:
+  - action: reclamation_form
+  - active_loop: null
+  - action: action_extract_reclamation_entities
+  - action: action_generate_reclamation_summary
+  - action: action_request_reclamation_confirmation
+
+- rule: Create ticket after explicit confirmation
+  # pending_field:null par coherence avec "Block claim creation on negation"
+  # (voir plus bas) : en theorie claim_requested:true et un champ de
+  # diagnostic en attente ne devraient jamais coexister (action_run_diagnostic_step
+  # remet toujours pending_field a null au moment ou il pose claim_requested
+  # a true), mais on le rend explicite pour eviter toute ambiguite de regle.
+  # slot_was_set claim_requested:false + action_listen explicites en derniers
+  # pas : cause reelle du bug de relance (trouvee par inspection du tracker,
+  # les 3 tentatives precedentes qui ne touchaient qu'a action_listen seul
+  # echouaient toutes) -- action_create_ticket remet lui-meme claim_requested
+  # a False dans ses events de retour (evite qu'un vieux "true" traine apres
+  # coup). Sans le declarer ICI comme un pas attendu de la regle, ce
+  # changement d'etat survenu PENDANT l'execution de la regle ne correspond
+  # plus a la condition "claim_requested:true" sous laquelle la regle a ete
+  # entrainee : RulePolicy perd alors sa confiance de 1.0 pour predire le pas
+  # suivant (action_listen), et TEDPolicy reprend la main avec sa propre
+  # prediction (utter_reclamation_start/action_start_reclamation, ~0.75),
+  # rejouant tout le formulaire. Declarer ce slot_was_set rend le changement
+  # d'etat "attendu" par la regle, qui peut alors aller jusqu'au bout.
+  # Ne couvre QUE le succes (claim_requested:false en sortie) : voir la regle
+  # suivante pour l'echec/blocage (disjoncteur, anti-spam, panne reseau),
+  # ou action_create_ticket laisse desormais claim_requested a true pour
+  # permettre une nouvelle tentative sans tout ressaisir (voir l'audit sur
+  # la perte de donnees en cas d'echec). Les deux regles partagent le meme
+  # declencheur (intent:affirm + action_create_ticket) : RulePolicy ne
+  # differencie pas les deux AVANT l'execution de l'action (les deux
+  # predisent la meme chose a ce stade), seulement APRES, sur l'etat reel de
+  # claim_requested -- c'est le mecanisme normal de Rasa pour representer
+  # les issues divergentes d'une meme action (meme principe que la
+  # specificite utilisee entre "Complete reclamation form..." et "Cancel
+  # reclamation after clarification via form" plus bas).
+  condition:
+  - slot_was_set:
+    - claim_requested: true
+    - pending_field: null
+  steps:
+  - intent: affirm
+  - action: action_create_ticket
+  - slot_was_set:
+    - claim_requested: false
+  - action: action_listen
+
+- rule: Keep confirmation pending after failed or blocked ticket creation
+  # Contrepartie de la regle ci-dessus pour le cas ou action_create_ticket
+  # echoue ou est bloquee (service indisponible, disjoncteur ouvert, limite
+  # anti-spam atteinte) : claim_requested reste a true (aucun evenement slot
+  # retourne par l'action dans ces cas). Sans cette regle, seule la regle de
+  # succes existait, qui declare claim_requested:false -- constate en
+  # pratique (tracker inspecte) : la divergence entre cette declaration et
+  # l'etat reel (claim_requested toujours true) faisait perdre sa confiance
+  # a RulePolicy pour le pas suivant, et TEDPolicy reprenait la main en
+  # reactivant reclamation_form (tous les champs deja remplis -> le
+  # formulaire se terminait aussitot et rejouait extraction/resume/
+  # confirmation en boucle, sans nouveau message utilisateur).
+  condition:
+  - slot_was_set:
+    - claim_requested: true
+    - pending_field: null
+  steps:
+  - intent: affirm
+  - action: action_create_ticket
+  - slot_was_set:
+    - claim_requested: true
+  - action: action_listen
+
+- rule: Ask cancel clarification when user refuses confirmation
+  # Remplace l'ancien enchainement direct "deny -> action_cancel_reclamation" :
+  # un "non" a la confirmation ne precise pas si l'utilisateur veut tout
+  # abandonner ou juste corriger un champ (ex. mauvaise urgence saisie par
+  # erreur). On demande explicitement plutot que de supposer l'annulation
+  # totale. La reponse (modifier/annuler) est capturee par reclamation_form
+  # en from_text (voir cancel_choice dans domain.yml), pas par une intention
+  # NLU dediee : une premiere version utilisait deux intents
+  # (modify_reclamation/confirm_full_cancel), mais leur vocabulaire
+  # ("annule", "corrige", "modifier") chevauchait fortement celui deja
+  # couvert par deny, ce qui faisait deriver la classification du simple
+  # "non" lui-meme vers ces nouveaux intents apres entrainement -- constate
+  # en pratique ("non" classe a >99% confirm_full_cancel au lieu de deny),
+  # cassant la question de clarification des le premier "non". Reactiver le
+  # formulaire ici evite tout risque de ce type, comme pour field_to_edit.
+  condition:
+  - slot_was_set:
+    - claim_requested: true
+  steps:
+  - intent: deny
+  - action: action_ask_cancel_clarification
+  - slot_was_set:
+    - claim_requested: false
+    - awaiting_cancel_choice: true
+  # action: reclamation_form (pas seulement "active_loop: reclamation_form"
+  # en pas isole) : c'est cette invocation de l'action qui active reellement
+  # la boucle et pose utter_ask_cancel_choice -- meme mecanique que
+  # "action_start_reclamation" -> "action: reclamation_form" ->
+  # "active_loop: reclamation_form" dans la story "create a reclamation".
+  # Une premiere version ne declarait que "active_loop: reclamation_form"
+  # sans appeler l'action : ca decrit un etat attendu pour l'entrainement,
+  # ca ne declenche rien a l'execution (meme categorie d'erreur que
+  # "slot_was_set" sans evenement reel, deja rencontree sur cette meme
+  # fonctionnalite) -- constate en pratique : le formulaire ne se
+  # reactivait jamais, "non" tombait dans le fallback generique.
+  - action: reclamation_form
+  - active_loop: reclamation_form
+
+- rule: Cancel reclamation after clarification via form
+  # Suite de la regle ci-dessus : une fois "annuler" resolu par
+  # validate_cancel_choice (cancel_confirmed:true), reclamation_form se
+  # termine de lui-meme (category/description/urgency/incident_date restent
+  # tous remplis, rien a redemander) -- cette regle, plus specifique que
+  # "Complete reclamation form and request confirmation" (meme declencheur
+  # action:reclamation_form/active_loop:null, mais condition supplementaire
+  # ici), prend le dessus pour executer l'annulation reelle au lieu de
+  # relancer extraction/resume/confirmation comme le ferait normalement la
+  # fin du formulaire.
+  # action_listen final explicite : sans lui, constate en pratique, la
+  # politique de secours (core fallback) declenchait action_default_fallback
+  # juste apres action_cancel_reclamation (aucun nouveau message utilisateur
+  # entre les deux) -- et son evenement "rewind" (UserUtteranceReverted, voir
+  # ActionDefaultFallback dans diagnostic.py) annulait purement et simplement
+  # tout le nettoyage qu'on venait de faire : claim_requested/category
+  # repassaient a leurs valeurs d'AVANT l'annulation. Meme categorie de bug
+  # que "Route diagnostic requests"/"Create ticket after explicit
+  # confirmation" plus bas.
+  # Contrairement a "Create ticket after explicite confirmation" (qui ne
+  # declare que claim_requested), TOUS les slots reinitialises par
+  # action_cancel_reclamation sont declares ici : premiere version qui ne
+  # declarait rien du tout laissait l'etat reel (13 slots changes d'un coup)
+  # diverger de ce que la regle a appris a l'entrainement, RulePolicy perdait
+  # alors sa confiance de 1.0 pour predire ce action_listen final -- constate
+  # en pratique via le tracker (action_default_fallback predit par
+  # RulePolicy a confidence 0.4, exactement core_fallback_threshold : son
+  # propre filet de securite interne, pas une vraie regle qui matche).
+  condition:
+  - active_loop: reclamation_form
+  - slot_was_set:
+    - cancel_confirmed: true
+  steps:
+  - action: reclamation_form
+  - active_loop: null
+  - action: action_cancel_reclamation
+  - slot_was_set:
+    - claim_requested: false
+    - awaiting_cancel_choice: false
+    - cancel_confirmed: false
+    - cancel_choice: null
+    - editing_field: false
+    - field_to_edit: null
+    - ticket_source: null
+    - category: null
+    - description: null
+    - urgency: null
+    - incident_date: null
+    - summary: null
+    - extracted_entities: null
+  - action: action_listen
+
+- rule: Route diagnostic requests
+  # action_listen explicite en dernier pas : sans lui, TEDPolicy (entrainee
+  # sur la story "diagnostic then escalation to ticket", qui enchaine deux
+  # tours identiques) peut reprendre la main juste apres cette regle et
+  # rejouer action_run_diagnostic_step une 2e fois sans nouveau message
+  # utilisateur. Un pas explicite donne a RulePolicy une prediction a
+  # confiance 1.0 pour CE pas precis, qui l'emporte sur TEDPolicy.
+  steps:
+  - intent: diagnostic
+  - action: action_run_diagnostic_step
+  - action: action_listen
+
+- rule: Ignore nlu fallback while reclamation form is active
+  # Une reponse courte et hors-contexte pour le NLU (ex. juste "KYC" en
+  # reponse a utter_ask_category) peut n'avoir une confiance suffisante pour
+  # aucune intention entrainee -> nlu_fallback (FallbackClassifier,
+  # threshold 0.6 dans config.yml). Sans cette regle, RulePolicy declenche
+  # action_default_fallback et interrompt le formulaire au lieu de laisser
+  # reclamation_form traiter le texte brut via son mapping from_text (qui ne
+  # depend pas de l'intention reconnue).
+  condition:
+  - active_loop: reclamation_form
+  steps:
+  - intent: nlu_fallback
+  - action: reclamation_form
+  - active_loop: reclamation_form
+
+- rule: Ignore nlu_fallback/deny/affirm misclassification while diagnostic dialogue is pending
+  # Meme probleme que ci-dessus, mais pour le flux de diagnostic (qui ne
+  # repose pas sur un Form Rasa) : une reponse courte de clarification (ex.
+  # "le retrait d'abord"), ou une chaine alphanumerique inedite (ex. une
+  # reference de transaction), peut tomber sous le seuil de confiance
+  # (-> nlu_fallback) ou etre classee a tort "deny"/"affirm" (le
+  # CountVectorsFeaturizer char_wb, tolerant aux fautes de frappe, rapproche
+  # parfois par coincidence une chaine alphanumerique des (rares et tres
+  # courts) exemples de ces deux intentions -- constate en pratique sur de
+  # vraies references de transaction, ex. "WDR-HJCOZRCVCOAY" classee "affirm"
+  # a 0.9999 : sans cette regle, aucune regle ne matchait ce cas precis
+  # -claim_requested:false + intent:affirm- et TEDPolicy predisait alors
+  # librement action_create_ticket en s'appuyant sur la story "full
+  # reclamation flow confirmed", hors contexte).
+  # On rejoue la meme action que pour l'intention diagnostic plutot que de
+  # laisser le fallback global, "Block claim creation on negation" ou
+  # TEDPolicy couper la conversation. Les trois intents sont rassembles dans
+  # UNE seule regle (via `or`) : une seule action (action_run_diagnostic_step)
+  # est appelee, donc pas de risque d'ambiguite entre plusieurs regles a la
+  # sequence identique (voir le commentaire sur ActionRunDiagnosticStep dans
+  # actions.py pour l'incident que cela causait avec l'ancienne version en 4
+  # actions).
+  #
+  # Limite residuelle connue (reproduite en pratique, tracker inspecte) : si
+  # la reponse mal classee resout ou escalade le diagnostic DANS ce meme
+  # appel, action_run_diagnostic_step remet pending_field a null -- ce qui
+  # casse la condition ci-dessus pour son propre dernier pas (action_listen)
+  # et laisse le fallback natif de Rasa (action_default_fallback, cf.
+  # core_fallback_threshold dans config.yml) prendre la main a la place,
+  # affichant "je n'ai pas compris" alors que la demande a bien ete traitee.
+  # Tenter de declarer ce changement d'etat ici (comme pour "Create ticket
+  # after explicit confirmation") echoue a l'entrainement : Rasa exige alors
+  # que TOUTES les regles utilisant action_run_diagnostic_step (dont "Route
+  # diagnostic requests", sans rapport avec ce cas precis) declarent le meme
+  # slot de façon coherente ("Incomplete rules"). Corrige plutot cote action
+  # : voir ActionDefaultFallback dans diagnostic.py, qui detecte ce cas
+  # precis et n'affiche pas le message de fallback quand il ne correspond a
+  # rien de reel.
+  #
+  # inappropriate_language ajoute ici (audit "robustesse comportementale",
+  # cas 21) : ce meme intent capte deja un registre tres large, de
+  # l'insulte pure ("connard") a une accusation de colere legitime ("vous
+  # me volez mon argent bande de voleurs") -- volontairement PAS un nouvel
+  # intent "frustration" separe, qui aurait chevauche ce vocabulaire deja
+  # couvert et risque exactement la meme derive que modify_reclamation/
+  # confirm_full_cancel avaient causee sur deny. Pendant un diagnostic en
+  # cours, couper court avec le message generique "restez poli" perdrait le
+  # fil (cas 8 : le hors-sujet doit se resoudre brievement puis reprendre le
+  # diagnostic, pas l'interrompre) -- ActionRunDiagnosticStep reconnait cet
+  # intent et adapte son accuse de reception (voir son commentaire) avant de
+  # continuer normalement.
+  condition:
+  - slot_was_set:
+    - pending_field
+  steps:
+  - or:
+    - intent: nlu_fallback
+    - intent: deny
+    - intent: affirm
+    - intent: inappropriate_language
+  - action: action_run_diagnostic_step
+  - action: action_listen
+
+- rule: Block claim creation on negation
+  # Sans cette condition, cette regle contredit "Ask cancel clarification when
+  # user refuses confirmation" : les deux reagissent a intent:deny mais avec
+  # une action differente. claim_requested:false = aucune confirmation de
+  # reclamation en attente. pending_field:null = aucun champ de diagnostic en
+  # attente (sinon c'est la regle correspondante qui doit s'appliquer : le
+  # NLU classe parfois a tort en "deny" une reference/valeur alphanumerique
+  # inedite, ce n'est pas un vrai refus de l'utilisateur).
+  # active_loop:null suffit a exclure la fenetre "modifier ou annuler ?" :
+  # awaiting_cancel_choice n'est vrai que pendant reclamation_form (voir
+  # "Ask cancel clarification..." ci-dessus, qui reactive le formulaire), donc
+  # active_loop y vaut toujours reclamation_form, jamais null, a ce moment.
+  condition:
+  - active_loop: null
+  - slot_was_set:
+    - claim_requested: false
+    - pending_field: null
+  steps:
+  - intent: deny
+  - action: action_handle_negation
+
