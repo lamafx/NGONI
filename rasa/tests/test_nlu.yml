@@ -199,3 +199,58 @@ nlu:
     - my account got suspended, ouvrez un dossier svp
     - je me demande s'il est possible qu'un agent reprenne mon cas
     - aide stp j'ai un souci grave avec mon compte
+
+# Audit qualite NLU : ces 6 intentions etaient totalement absentes du jeu de
+# test (intent_report.json ne couvrait donc que 12 des 18 intentions du
+# domaine) -- une regression sur l'une d'elles passait inapercue en CI.
+# Exemples nouveaux (pas de simple copie des exemples d'entrainement) pour
+# mesurer une vraie generalisation, pas juste un rappel par coeur.
+- intent: ask_capabilities
+  examples: |
+    - Dis-moi tout ce que tu sais faire
+    - Tu peux m'aider sur quels sujets exactement ?
+    - Quelles sont les choses que tu gères ?
+    - C'est quoi ton champ d'action ?
+    - Sur quoi es-tu compétent ?
+    - Peux-tu résumer tes fonctions ?
+    - Qu'est-ce que je peux te demander ?
+    - Quel type d'assistance proposes-tu ?
+
+- intent: rate_response_useful
+  examples: |
+    - Super, ça répond parfaitement
+    - Merci, c'était exactement ça
+    - Nickel, j'ai ma réponse
+    - Ça m'a bien aidé merci
+    - Parfait, c'est clair maintenant
+    - Oui exactement ce qu'il me fallait
+    - Top merci pour l'explication
+
+- intent: rate_response_not_useful
+  examples: |
+    - Non ça ne m'avance pas du tout
+    - Ce n'est pas la réponse que j'attendais
+    - Pas clair, ça ne répond pas à ma question
+    - Bof, ça ne m'aide pas vraiment
+    - Aucun rapport avec ce que je demandais
+    - Franchement pas convaincant comme réponse
+
+- intent: browse_faq
+  examples: |
+    - Fais-moi voir des questions types
+    - J'aimerais des exemples de questions à poser
+    - Propose-moi quelques questions fréquentes
+    - Tu peux m'afficher la liste de questions ?
+    - J'ai besoin d'idées de questions
+
+- intent: select_faq_category
+  examples: |
+    - Plutôt les questions sur [les retraits](faq_category:WITHDRAWAL)
+    - Je voudrais des questions à propos de [NGONI Plus](faq_category:NGONI_PLUS)
+    - Des questions sur [mon compte](faq_category:ACCOUNT) s'il vous plaît
+    - Montre les questions liées aux [pièces](faq_category:COINS)
+
+- intent: select_faq_question
+  examples: |
+    - [comment-fonctionne-le-parrainage-xyz98765](faq_slug)
+    - [pourquoi-mon-retrait-est-il-en-attente-ghi54321](faq_slug)

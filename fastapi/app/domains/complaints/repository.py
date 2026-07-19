@@ -22,6 +22,7 @@ class ComplaintRepository:
             incident_date=payload.incident_date,
             context=payload.context,
             created_by=payload.created_by,
+            idempotency_key=payload.idempotency_key,
         )
         self.session.add(complaint)
         self.session.commit()
@@ -30,6 +31,9 @@ class ComplaintRepository:
 
     def get_by_ticket_id(self, ticket_id: str) -> Complaint | None:
         return self.session.query(Complaint).filter_by(ticket_id=ticket_id).first()
+
+    def get_by_idempotency_key(self, idempotency_key: str) -> Complaint | None:
+        return self.session.query(Complaint).filter_by(idempotency_key=idempotency_key).first()
 
     def list_tickets(
         self,

@@ -23,6 +23,8 @@ import time
 import uuid
 from typing import Union
 
+from app.shared.logging_utils import redact_entities
+
 from .adapter import DiagnosticInvocationError, HttpDiagnosticAdapter
 from .audit_repository import DiagnosticAuditRepository
 from .contracts import (
@@ -173,7 +175,7 @@ class DiagnosticPipeline:
 
         logger.info(
             "[DIAG][ENGINE] session=%s trace_id=%s stage=invoke target=%s entities=%s",
-            request.session_id, invocation.trace_id, called_endpoint, filtered_entities,
+            request.session_id, invocation.trace_id, called_endpoint, redact_entities(filtered_entities),
         )
 
         # 3. Invocation du microservice proprietaire du probleme + normalisation

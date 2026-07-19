@@ -789,6 +789,11 @@ nlu:
     - dacc vas y
     - dak c bon
     - c good
+    - c'est good
+    - c good la
+    - ça va c good
+    - ok c good
+    - nickel
     - c good vas y
     - c'est good, on continue
     - allez on y va
@@ -1621,8 +1626,6 @@ nlu:
     - retrait bloqué
     - solde faux
     - connexion impossible
-    - c'est le bazar sur mon compte
-    - ça part en vrille depuis ce matin
     - y'a un truc qui cloche avec mon solde
 
     - Mon [retrait](operation_type:withdrawal) est bloqué depuis hier.
@@ -1649,6 +1652,16 @@ nlu:
     - Je ne reçois plus mes [messages](type_problem:chat).
     - Le [chat](type_problem:chat) ne fonctionne plus.
     - La [messagerie](type_problem:chat) est bloquée depuis hier.
+    # Audit qualite NLU : "de" precedant l'entite mal etiquete par le modele
+    # entraine (DIETClassifier_errors.json, confiance 0.57-0.70 sur "problème
+    # de mot de passe"/"problème de connexion") malgre des annotations deja
+    # correctement delimitees ci-dessus -- ces variantes SANS "de" avant
+    # l'entite, et avec d'autres prepositions, diversifient le contexte
+    # d'entrainement pour aider le modele a mieux isoler la frontiere reelle.
+    - Souci avec mon [mot de passe](type_problem:password).
+    - Un souci avec la [connexion](type_problem:login) depuis ce matin.
+    - Impossible de me connecter, ça vient du [login](type_problem:login).
+    - Ma [messagerie](type_problem:chat) plante à chaque ouverture.
 
     - Mon [retrait](operation_type:withdrawal) est bloqué et je n'arrive plus à me [connecter](type_problem:login).
     - J'ai un souci de [mot de passe](type_problem:password) et mon [transfert](operation_type:transfer) n'est jamais arrivé.
@@ -1696,6 +1709,20 @@ nlu:
     - [La semaine dernière](incident_date:la semaine dernière) j'ai fait un [dépôt](operation_type:deposit) de [1000 pièces](amount:1000 pièces) qui n'est toujours pas crédité.
     - Mon [transfert](operation_type:transfer) de [200 pièces](amount:200 pièces) est [bloqué](issue_status:blocked) depuis [avant-hier](incident_date:avant-hier).
     - Mon [paiement](operation_type:payment) a [échoué](issue_status:failed) [ce matin](incident_date:ce matin) [sur iphone](platform:iOS).
+    # Audit qualite NLU : seulement 7 occurrences avant ce fix (recall 0.917
+    # sur 12 exemples de test seulement, DIETClassifier_report.json), aucune
+    # date absolue ni formulation relative variee -- ajoute des formes
+    # supplementaires (date absolue, jour de semaine, duree ecoulee,
+    # week-end) pour couvrir des reponses courtes, isolees, comme celles
+    # tapees directement en reponse a utter_ask_incident_date.
+    - Mon retrait est bloqué depuis [le 15 juillet](incident_date:le 15 juillet).
+    - C'est arrivé [mardi dernier](incident_date:mardi dernier).
+    - Ça a commencé [il y a trois jours](incident_date:il y a trois jours).
+    - Le problème date [du 3 juillet](incident_date:du 3 juillet).
+    - C'est survenu [ce week-end](incident_date:ce week-end).
+    - Mon compte est bloqué depuis [lundi](incident_date:lundi).
+    - Le souci a commencé [le mois dernier](incident_date:le mois dernier).
+    - Ça a débuté [il y a une semaine](incident_date:il y a une semaine).
 
     - [en attente](issue_status:pending)
     - c'est [bloqué](issue_status:blocked) qui m'inquiète le plus

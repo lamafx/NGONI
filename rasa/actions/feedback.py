@@ -1,3 +1,4 @@
+import json
 from os import getenv
 from typing import Any, Dict, List, Optional, Text
 
@@ -82,10 +83,16 @@ class ActionAcknowledgeComplaint(Action):
     # app/domains/feedback/service.py), une plainte cree desormais un ticket
     # de suivi (complaints.complaints) en plus de l'entree feedback.entries.
     # Le message reste best-effort : sa formulation depend de la presence
-    # d'un ticket_id reel dans la reponse, jamais d'une supposition -- si la
-    # persistance echoue completement (service indisponible ou creation de
-    # ticket en echec), on retombe sur le message d'origine, qui n'a jamais
-    # pretendu qu'un ticket existait.
+    # d'un ticket_id reel dans la reponse, jamais d'une supposition -- si SEULE
+    # la creation de ticket echoue (feedback.entries bien enregistre), on
+    # retombe sur le message d'origine, qui n'a jamais pretendu qu'un ticket
+    # existait.
+    #
+    # Audit robustesse : distinct desormais d'un echec TOTAL (service
+    # indisponible, _submit_feedback renvoie None) -- contrairement a
+    # ActionStoreSuggestion (utter_suggestion_storage_failed), les deux cas
+    # produisaient auparavant le MEME message rassurant, laissant croire a
+    # une plainte enregistree alors que rien n'avait ete persiste.
     def name(self) -> Text:
         return "action_acknowledge_complaint"
 
@@ -96,7 +103,10 @@ class ActionAcknowledgeComplaint(Action):
         domain: Dict[Text, Any],
     ) -> List[Dict[Text, Any]]:
         result = _submit_feedback(tracker, "complaint_sentiment")
-        ticket_id = (result or {}).get("ticket_id")
+        if result is None:
+            dispatcher.utter_message(response="utter_complaint_storage_failed")
+            return []
+        ticket_id = result.get("ticket_id")
         if ticket_id:
             # Memes raisons que ActionStoreSuggestion ci-dessus : ce message
             # revenait identique sur 103 plaintes distinctes lors du test
@@ -127,6 +137,12 @@ class ActionRecordResponseRating(Action):
     # /rate_response_useful et /rate_response_not_useful -- une seule action
     # pour les deux, qui lit l'intention du tour courant pour savoir laquelle
     # a ete cliquee, plutot que deux actions quasi identiques.
+    #
+    # Audit robustesse : lit desormais rating_ref (entite du payload, voir
+    # _present_answer/faq.py) pour retrouver LA notation precise dans le dict
+    # pending_ratings, au lieu de 3 slots uniques ecrasables par la reponse
+    # FAQ suivante -- voir le commentaire du slot pending_ratings (domain.yml)
+    # pour le bug que ca corrige.
     def name(self) -> Text:
         return "action_record_response_rating"
 
@@ -136,24 +152,33 @@ class ActionRecordResponseRating(Action):
         tracker: Tracker,
         domain: Dict[Text, Any],
     ) -> List[Dict[Text, Any]]:
-        interaction_type = tracker.get_slot("pending_rating_type")
-        question = tracker.get_slot("pending_rating_question")
-        answer = tracker.get_slot("pending_rating_answer")
+        entities = tracker.latest_message.get("entities") or []
+        rating_ref = next((e["value"] for e in entities if e.get("entity") == "rating_ref"), None)
 
+        try:
+            pending_ratings = json.loads(tracker.get_slot("pending_ratings") or "{}")
+            if not isinstance(pending_ratings, dict):
+                pending_ratings = {}
+        except ValueError:
+            pending_ratings = {}
+
+        entry = pending_ratings.pop(rating_ref, None) if rating_ref else None
         reset_events = [
-            {"event": "slot", "name": "pending_rating_type", "value": None},
-            {"event": "slot", "name": "pending_rating_question", "value": None},
-            {"event": "slot", "name": "pending_rating_answer", "value": None},
+            {"event": "slot", "name": "pending_ratings", "value": json.dumps(pending_ratings, ensure_ascii=False)}
         ]
 
-        if not interaction_type or not question or not answer:
+        if not entry:
             # Notation recue hors contexte (ex. l'utilisateur tape "c'etait
             # utile" sans qu'aucune reponse recente n'attende de retour, ou
-            # un bouton perime clique apres qu'une autre notation ait deja
-            # vide ces slots) : rien de precis a persister, mais on reste
-            # courtois plutot que de laisser le message sans reponse.
+            # un bouton perime clique apres que CETTE reference precise ait
+            # deja ete notee/retiree) : rien de precis a persister, mais on
+            # reste courtois plutot que de laisser le message sans reponse.
             dispatcher.utter_message(response="utter_thanks_for_rating")
             return reset_events
+
+        interaction_type = entry.get("type")
+        question = entry.get("question")
+        answer = entry.get("answer")
 
         # Meme convention que le reste du pipeline diagnostic/reclamation
         # pour lire l'intention du tour courant (voir diagnostic.py).

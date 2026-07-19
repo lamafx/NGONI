@@ -3,11 +3,15 @@ from pathlib import Path
 
 import asyncio
 import logging
+import uuid
 import httpx
 from dotenv import load_dotenv
+from typing import Optional
+
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.concurrency import run_in_threadpool
 from fastapi.responses import HTMLResponse
+from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 # Configure au tout debut de l'import : uvicorn ne configure QUE ses propres
@@ -38,6 +42,8 @@ from .domains.faq.repository import FaqRepository
 from .domains.complaints.schemas import TicketCreateResponse
 from .database import get_db
 
+logger = logging.getLogger(__name__)
+
 app = FastAPI(title="NGONI FastAPI", version="1.0.0")
 
 RASA_WEBHOOK_URL = getenv("RASA_WEBHOOK_URL", "http://127.0.0.1:5005/webhooks/rest/webhook")
@@ -54,21 +60,21 @@ app.include_router(audit_router)
 app.include_router(embeddings_router)
 
 
-async def call_rasa_with_retry(url: str, json_body: dict) -> httpx.Response:
+async def call_rasa_with_retry(url: str, json_body: dict, headers: dict | None = None) -> httpx.Response:
     last_error = None
     for attempt in range(1, RASA_RETRY_COUNT + 1):
         try:
             async with httpx.AsyncClient() as client:
-                response = await client.post(url, json=json_body, timeout=10.0)
+                response = await client.post(url, json=json_body, headers=headers, timeout=10.0)
                 response.raise_for_status()
                 return response
         except httpx.RequestError as exc:
             last_error = exc
-            print(f"[FastAPI] Rasa request failed (attempt {attempt}/{RASA_RETRY_COUNT}) to {url}: {exc}")
+            logger.warning("Rasa request failed (attempt %s/%s) to %s: %s", attempt, RASA_RETRY_COUNT, url, exc)
             if attempt < RASA_RETRY_COUNT:
                 await asyncio.sleep(RASA_RETRY_DELAY)
         except httpx.HTTPStatusError as exc:
-            print(f"[FastAPI] Rasa HTTP error (attempt {attempt}/{RASA_RETRY_COUNT}) to {url}: {exc}")
+            logger.warning("Rasa HTTP error (attempt %s/%s) to %s: %s", attempt, RASA_RETRY_COUNT, url, exc)
             raise
 
     raise HTTPException(status_code=502, detail=f"Impossible de contacter Rasa après {RASA_RETRY_COUNT} tentatives: {last_error}")
@@ -80,7 +86,7 @@ _registry_poll_task: asyncio.Task | None = None
 @app.on_event("startup")
 async def startup():
     global _registry_poll_task
-    print("[FastAPI] Starting service initialization...")
+    logger.info("Starting service initialization...")
     warn_if_admin_secret_missing()
     await wait_for_rasa()
 
@@ -91,9 +97,9 @@ async def startup():
     # par Rasa a _fetch_capabilities/_embed_message, provoquant un faux
     # "service indisponible" -- constate en pratique a deux reprises. On paie
     # ce cout ici, une seule fois au demarrage, avant d'accepter du trafic.
-    print("[FastAPI] Pré-chargement du modèle d'embeddings...")
+    logger.info("Pré-chargement du modèle d'embeddings...")
     get_embedding_model()
-    print("[FastAPI] Pré-chauffage du Capability Registry...")
+    logger.info("Pré-chauffage du Capability Registry...")
     registry = get_registry()
     await registry.ensure_loaded()
 
@@ -104,16 +110,39 @@ async def startup():
     # Engine. La tache tourne pour toute la duree de vie du process ;
     # reference gardee dans _registry_poll_task pour pouvoir l'annuler
     # proprement a l'arret (voir shutdown() plus bas).
-    print(f"[FastAPI] Démarrage du rafraîchissement périodique du Capability Registry (toutes les {REGISTRY_POLL_INTERVAL_SECONDS:.0f}s)...")
+    logger.info(
+        "Démarrage du rafraîchissement périodique du Capability Registry (toutes les %.0fs)...",
+        REGISTRY_POLL_INTERVAL_SECONDS,
+    )
     _registry_poll_task = asyncio.create_task(registry.poll_forever())
 
-    # Pas d'emoji dans ce print (contrairement a une version precedente) :
+    # Avertissement operationnel (audit robustesse) : get_registry()/get_adapter()
+    # (diagnostic/router.py) et les compteurs de rate-limiting/circuit-breaker
+    # (rasa/actions/reclamation.py) sont TOUS un etat en memoire d'UN SEUL
+    # process Python -- corrects avec `uvicorn ...` (sans --workers), mais
+    # divergent silencieusement des qu'on lance plusieurs workers/replicas
+    # (chacun avec son propre disjoncteur/compteur/cache independant). Aucun
+    # moyen fiable de detecter le nombre de workers depuis l'interieur du
+    # process (uvicorn --workers ne pose pas de variable d'environnement
+    # dediee) -- ce log rend la contrainte visible au demarrage via la
+    # variable WEB_CONCURRENCY (convention gunicorn/uvicorn courante), plutot
+    # que de la laisser purement documentaire dans le code.
+    if int(getenv("WEB_CONCURRENCY", "1")) > 1:
+        logger.warning(
+            "WEB_CONCURRENCY=%s : ce service suppose un SEUL worker (Capability Registry, "
+            "circuit breakers et rate-limiters sont en memoire de process, non partages). "
+            "Deployer plusieurs workers/replicas sans etat partage (Redis) casse silencieusement "
+            "ces garanties.",
+            getenv("WEB_CONCURRENCY"),
+        )
+
+    # Pas d'emoji dans ce message (contrairement a une version precedente) :
     # la console Windows par defaut (codepage cp1252) ne peut pas l'encoder,
     # ce qui fait planter le process au demarrage avec un UnicodeEncodeError
     # -- constate en pratique, un simple redemarrage suffisait a le
     # reproduire des que la sortie standard n'etait pas explicitement en
     # UTF-8 (ex. redirigee vers un fichier sans PYTHONIOENCODING=utf-8).
-    print("[FastAPI] Service initialized - Rasa connected")
+    logger.info("Service initialized - Rasa connected")
 
 
 @app.on_event("shutdown")
@@ -128,18 +157,18 @@ async def shutdown():
 
 
 async def wait_for_rasa():
-    print("[FastAPI] Waiting for Rasa to become available...")
+    logger.info("Waiting for Rasa to become available...")
     for attempt in range(1, RASA_RETRY_COUNT + 1):
         try:
             async with httpx.AsyncClient() as client:
                 response = await client.get(RASA_PARSE_URL, timeout=5.0)
                 if response.status_code == 405 or response.status_code == 200:
-                    print("[FastAPI] Rasa is available.")
+                    logger.info("Rasa is available.")
                     return
         except Exception as exc:
-            print(f"[FastAPI] Rasa not ready yet (attempt {attempt}/{RASA_RETRY_COUNT}): {exc}")
+            logger.warning("Rasa not ready yet (attempt %s/%s): %s", attempt, RASA_RETRY_COUNT, exc)
         await asyncio.sleep(RASA_RETRY_DELAY)
-    print(f"[FastAPI] Warning: Rasa did not become available after {RASA_RETRY_COUNT} attempts.")
+    logger.warning("Rasa did not become available after %s attempts.", RASA_RETRY_COUNT)
 
 
 # Alias de /complaints/create (meme fonction, pas une reimplementation) :
@@ -394,7 +423,7 @@ def chat_page():
           for (const sibling of el.querySelectorAll('button')) {
             sibling.disabled = true;
           }
-          sendMessage(button.payload);
+          sendMessage(button.payload, button.title);
         });
         el.appendChild(btnEl);
       }
@@ -436,21 +465,27 @@ def chat_page():
     // issu d'un clic sur un bouton (addButtons ci-dessus) -- les deux doivent
     // suivre exactement le meme chemin (/api/parse puis /api/chat) pour que
     // cliquer une question suggeree se comporte comme si elle avait ete tapee.
-    async function sendMessage(text) {
-      addMessage(text, 'user');
+    // `payload` est ce qui est envoye a Rasa (peut etre une commande technique
+    // du type /select_faq_question{"faq_slug": "..."} pour un c lic de bouton) ;
+    // `displayText` est ce qui est affiche dans la bulle utilisateur -- le
+    // titre lisible du bouton (la vraie question), jamais le payload. Pour
+    // une saisie clavier, displayText est absent et on retombe sur payload
+    // (les deux sont deja identiques dans ce cas).
+    async function sendMessage(payload, displayText) {
+      addMessage(displayText ?? payload, 'user');
       updateParseInfo('En cours...', 0, []);
       submitButton.disabled = true;
       const typingEl = showTypingIndicator();
 
       try {
-        const parseResult = await postJson('/api/parse', { text });
+        const parseResult = await postJson('/api/parse', { text: payload });
         const intent = parseResult.intent?.name;
         const confidence = parseResult.intent?.confidence;
         const entities = parseResult.entities || [];
         updateParseInfo(intent, confidence, entities);
 
         const userId = userIdInput.value.trim() || getDefaultSenderId();
-        const chatResult = await postJson('/api/chat', { text, user_id: userId });
+        const chatResult = await postJson('/api/chat', { text: payload, user_id: userId });
         const messages = Array.isArray(chatResult.messages) ? chatResult.messages : [];
 
         typingEl.remove();
@@ -487,11 +522,28 @@ def chat_page():
 </html>"""
 
 
+class ParseRequest(BaseModel):
+    # Meme plafond que ChatRequest ci-dessous (voir son commentaire) : ce
+    # endpoint recoit exactement le meme texte utilisateur, juste envoye a
+    # une route Rasa differente (analyse d'intention plutot que webhook).
+    text: str = Field(min_length=1, max_length=4000)
+
+
+class ChatRequest(BaseModel):
+    # Avant ce schema, `request: dict` n'imposait ni type ni longueur : un
+    # texte demesurement long ou un champ non-string passait tel quel jusqu'a
+    # Rasa. 4000 caracteres laisse une marge confortable au-dessus du plus
+    # grand champ libre reellement valide plus loin dans le flux (description
+    # de reclamation, MAX_DESCRIPTION_LENGTH=2000 cote rasa/actions/reclamation.py)
+    # tout en bornant la requete des l'entree du systeme, pas seulement une
+    # fois arrivee dans le formulaire.
+    text: str = Field(min_length=1, max_length=4000)
+    user_id: Optional[str] = Field(default=None, max_length=200)
+
+
 @app.post("/api/parse")
-async def parse_message(request: dict):
-    text = request.get("text")
-    if not text:
-        raise HTTPException(status_code=400, detail="Le message est requis.")
+async def parse_message(request: ParseRequest):
+    text = request.text
 
     try:
         response = await call_rasa_with_retry(RASA_PARSE_URL, {"text": text})
@@ -500,23 +552,28 @@ async def parse_message(request: dict):
     except Exception as error:
         raise HTTPException(status_code=502, detail=f"Impossible de contacter Rasa: {error}")
 
-    print(f"[FastAPI] parse_message succeeded using {RASA_PARSE_URL}")
+    logger.info("parse_message succeeded using %s", RASA_PARSE_URL)
     return response.json()
 
 
 @app.post("/api/chat")
-async def send_to_bot(request: dict, db=Depends(get_db)):
-    text = request.get("text")
-    if not text:
-        raise HTTPException(status_code=400, detail="Le message est requis.")
-
-    sender_id = request.get("user_id") or "frontend_user"
+async def send_to_bot(request: ChatRequest, db=Depends(get_db)):
+    text = request.text
+    sender_id = request.user_id or "frontend_user"
+    # Audit observabilite : jusqu'ici, rien ne permettait de relier les logs
+    # FastAPI (cette requete) aux logs Rasa/action-server pour le MEME tour de
+    # conversation, hors reconstruction manuelle par timestamp. Un identifiant
+    # genere ici, journalise a chaque etape et transmis en header vers Rasa,
+    # rend cette correlation directe (grep sur trace_id).
+    trace_id = str(uuid.uuid4())
 
     repository = FaqRepository(db)
     faq_service = FaqService(repository)
 
     try:
-        parse_response = await call_rasa_with_retry(RASA_PARSE_URL, {"text": text})
+        parse_response = await call_rasa_with_retry(
+            RASA_PARSE_URL, {"text": text}, headers={"X-Trace-ID": trace_id}
+        )
     except HTTPException as error:
         raise HTTPException(status_code=502, detail=f"Impossible de parser le message Rasa: {error.detail}")
     except Exception as error:
@@ -531,7 +588,7 @@ async def send_to_bot(request: dict, db=Depends(get_db)):
 
     if intent_name:
         normalized_intent = intent_name.lower()
-        print(f"[FastAPI] Rasa parse intent: {normalized_intent}")
+        logger.info("[trace_id=%s] Rasa parse intent: %s", trace_id, normalized_intent)
         # Egalite stricte (pas "faq" in normalized_intent) : ce test large
         # capturait aussi browse_faq/select_faq_category/select_faq_question
         # (voir rasa/actions/faq.py), qui doivent passer par le webhook Rasa
@@ -559,9 +616,9 @@ async def send_to_bot(request: dict, db=Depends(get_db)):
                 session_id=sender_id,
             )
             if faq_match:
-                print(
-                    f"[FastAPI] FAQ answer returned for intent {intent_name} "
-                    f"with score={faq_match.score:.3f} (matched={faq_match.question!r})"
+                logger.info(
+                    "[trace_id=%s] FAQ answer returned for intent %s with score=%.3f (matched=%r)",
+                    trace_id, intent_name, faq_match.score, faq_match.question,
                 )
                 return {
                     "messages": [
@@ -571,17 +628,18 @@ async def send_to_bot(request: dict, db=Depends(get_db)):
                         }
                     ]
                 }
-            print(f"[FastAPI] Aucune réponse FAQ trouvée pour l'intent {intent_name}")
+            logger.info("[trace_id=%s] Aucune réponse FAQ trouvée pour l'intent %s", trace_id, intent_name)
 
     try:
         rasa_response = await call_rasa_with_retry(
             RASA_WEBHOOK_URL,
             {"sender": sender_id, "message": text},
+            headers={"X-Trace-ID": trace_id},
         )
     except HTTPException as error:
         raise HTTPException(status_code=502, detail=f"Impossible de contacter le bot Rasa: {error.detail}")
     except Exception as error:
         raise HTTPException(status_code=502, detail=f"Impossible de contacter le bot Rasa: {error}")
 
-    print(f"[FastAPI] send_to_bot succeeded using {RASA_WEBHOOK_URL}")
+    logger.info("[trace_id=%s] send_to_bot succeeded using %s", trace_id, RASA_WEBHOOK_URL)
     return {"messages": rasa_response.json()}

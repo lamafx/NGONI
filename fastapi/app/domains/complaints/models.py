@@ -29,6 +29,13 @@ class Complaint(Base):
     context = Column(JSONB, nullable=True)
     # Tracabilite : voir init_db.sql pour les valeurs possibles.
     created_by = Column(String, nullable=False)
+    # Dedoublonnage cote serveur (migrations/0009) : une relance reseau (ex.
+    # timeout apres un commit reussi mais reponse perdue) reutilise la meme
+    # cle plutot que de creer un second ticket -- voir
+    # ComplaintService.create_ticket. Nullable : les appelants qui n'en
+    # fournissent pas (anciens clients, appels API directs) ne sont pas
+    # affectes, une contrainte UNIQUE Postgres autorisant plusieurs NULL.
+    idempotency_key = Column(String, nullable=True, unique=True)
     # Identite de l'admin ayant modifie ce ticket en dernier (X-User-ID, voir
     # app/shared/admin_auth.py::get_admin_id et admin_router.py) -- None tant
     # qu'aucun admin n'a jamais touche le ticket depuis sa creation.

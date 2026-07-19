@@ -21,20 +21,26 @@ intents:
   - select_faq_question
 
 entities:
-  - category
+  # Audit qualite NLU : category/service/device/error_type/keyword retires
+  # (0 exemple annote pour aucun des 5 dans tout nlu.yml -- jamais extraits
+  # par le NLU en pratique ; device/error_type sont bien des CONCEPTS reels,
+  # mais calcules par similarite semantique sur texte brut, voir
+  # _best_semantic_match dans reclamation.py, jamais via une entite Rasa).
+  # Les declarer sans jamais les entrainer n'est pas neutre : ca laisse
+  # croire qu'une extraction existe la ou il n'y en a aucune.
   - urgency
   - incident_date
-  - service
   - platform
-  - device
-  - error_type
-  - keyword
   - operation_type
   - type_problem
   - issue_status
   - amount
   - faq_category
   - faq_slug
+  # Reference courte generee par _present_answer (faq.py), encodee dans le
+  # payload des boutons "Utile"/"Pas utile" -- voir pending_ratings plus bas
+  # (audit robustesse, fluidite de la conversation).
+  - rating_ref
 
 slots:
   category:
@@ -47,9 +53,13 @@ slots:
       - Chat
       - Safety
     influence_conversation: true
+    # Audit qualite NLU : le mapping from_entity (entity: category) est retire
+    # -- 0 exemple annote (category:...) dans tout nlu.yml, ce slot n'a donc
+    # jamais ete rempli par cette voie en pratique (la vraie logique passe
+    # entierement par best_keyword_match sur texte brut, voir reclamation.py).
+    # Mort de fait, retire plutot que documente comme limite : evite la
+    # confusion de maintenance ("pourquoi ce mapping ne marche jamais ?").
     mappings:
-      - type: from_entity
-        entity: category
       - type: from_text
         conditions:
           - active_loop: reclamation_form
@@ -71,9 +81,9 @@ slots:
       - medium
       - high
     influence_conversation: true
+    # Meme raison que category ci-dessus : mapping from_entity mort retire
+    # (0 exemple annote (urgency:...) dans nlu.yml).
     mappings:
-      - type: from_entity
-        entity: urgency
       - type: from_text
         conditions:
           - active_loop: reclamation_form
@@ -107,19 +117,16 @@ slots:
   # remis a None par ActionRecordResponseRating une fois la notation
   # enregistree, pour ne jamais notater deux fois la meme reponse par erreur
   # sur un tour de conversation ulterieur sans rapport.
-  pending_rating_type:
-    type: text
-    influence_conversation: false
-    mappings:
-      - type: custom
-
-  pending_rating_question:
-    type: text
-    influence_conversation: false
-    mappings:
-      - type: custom
-
-  pending_rating_answer:
+  # Remplace les 3 anciens slots pending_rating_type/question/answer (audit
+  # robustesse : un slot mutable UNIQUE ecrasait la notation en attente d'une
+  # reponse FAQ des qu'une SECONDE question FAQ etait posee avant que la
+  # premiere ne soit notee -- le clic sur un vieux bouton notait alors la
+  # MAUVAISE reponse, silencieusement). Dict JSON {rating_ref: {type,
+  # question, answer}} : plusieurs notations en attente peuvent desormais
+  # coexister, chacune identifiee par le rating_ref encode dans le payload de
+  # son propre bouton (voir _present_answer, faq.py, et
+  # ActionRecordResponseRating, feedback.py).
+  pending_ratings:
     type: text
     influence_conversation: false
     mappings:
@@ -455,7 +462,7 @@ responses:
     - text: "Je n'ai pas de réponse précise à vous apporter sur ce point, désolé."
 
   utter_faq_error:
-    - text: "Désolé, le service de recherche FAQ est momentanément indisponible."
+    - text: "Désolé, ce service est momentanément indisponible."
 
   utter_reclamation_start:
     - text: "Je peux vous aider à ouvrir une réclamation. Décrivez votre problème et je vais le structurer."
@@ -481,8 +488,8 @@ responses:
     - text: "Expliquez-moi ce qui ne va pas, en quelques phrases si possible."
 
   utter_ask_urgency:
-    - text: "Quel est le niveau d'urgence ? (low, medium, high)"
-    - text: "À quel point est-ce urgent pour vous ? (low, medium, high)"
+    - text: "Quel est le niveau d'urgence ? (faible, moyenne, élevée)"
+    - text: "À quel point est-ce urgent pour vous ? (faible, moyenne, élevée)"
 
   utter_ask_incident_date:
     - text: "À quelle date le problème s'est-il produit ?"
@@ -494,7 +501,7 @@ responses:
     - text: "Pouvez-vous préciser ? Par exemple : identité, portefeuille, vidéo, connexion, messagerie, ou sécurité."
 
   utter_wrong_description:
-    - text: "La description ne peut pas être vide. Peux-tu décrire ton problème plus précisément ?"
+    - text: "La description ne peut pas être vide. Pouvez-vous décrire votre problème plus précisément ?"
 
   # Distinct de utter_wrong_description (audit "500 tours", 2026-07-18) :
   # une description non vide mais trop courte/vague ("mon solde est faux")
@@ -505,11 +512,11 @@ responses:
     - text: "Pouvez-vous détailler un peu plus ? Quelques mots supplémentaires m'aideraient à bien cerner le problème."
 
   utter_wrong_urgency:
-    - text: "Le niveau d'urgence doit être : low, medium ou high."
-    - text: "Merci de préciser l'urgence avec l'un de ces mots : low, medium ou high."
+    - text: "Le niveau d'urgence doit être : faible, moyenne ou élevée."
+    - text: "Merci de préciser l'urgence avec l'un de ces mots : faible, moyenne ou élevée."
 
   utter_wrong_incident_date:
-    - text: "Je n'ai pas compris la date. Peux-tu préciser quand le problème est survenu ?"
+    - text: "Je n'ai pas compris la date. Pouvez-vous préciser quand le problème est survenu ?"
     - text: "Cette date ne m'est pas claire, pouvez-vous la reformuler ?"
 
   utter_reclamation_summary:
@@ -519,10 +526,6 @@ responses:
     - text: "Je peux préparer votre réclamation avec les informations collectées. Confirmez-vous l’envoi ?"
     - text: "Voici ce que j'ai retenu pour votre réclamation. Je confirme l'envoi ?"
     - text: "Je suis prêt à enregistrer votre réclamation avec ces informations. On y va ?"
-
-  utter_reclamation_confirmed:
-    - text: "Merci, votre réclamation est en cours de traitement."
-    - text: "C'est noté, votre réclamation est bien prise en compte et en cours de traitement."
 
   utter_reclamation_cancelled:
     - text: "Très bien, la réclamation n’a pas été créée. Je peux continuer à vous aider."
@@ -552,6 +555,13 @@ responses:
   utter_acknowledge_complaint:
     - text: "Je suis désolé que vous ne soyez pas satisfait. Si vous voulez que j'examine concrètement votre cas, dites-le-moi et j'ouvre une réclamation."
 
+  # Audit robustesse : symetrique a utter_suggestion_storage_failed --
+  # jusqu'ici, une panne de FEEDBACK_SERVICE_URL affichait le meme message
+  # que ci-dessus (utter_acknowledge_complaint), laissant croire que la
+  # plainte etait bien enregistree alors que rien n'avait ete persiste.
+  utter_complaint_storage_failed:
+    - text: "Je n'ai pas pu enregistrer votre remarque pour le moment, le service est indisponible. Vous pouvez réessayer un peu plus tard."
+
   utter_thanks_for_rating:
     - text: "Merci pour votre retour !"
     - text: "Merci, c'est noté !"
@@ -575,6 +585,7 @@ actions:
   - action_ask_cancel_clarification
   - action_request_reclamation_confirmation
   - action_run_diagnostic_step
+  - action_reask_pending_diagnostic_field
   - action_decide_escalation
   - action_handle_negation
   - action_default_fallback

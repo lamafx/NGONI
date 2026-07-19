@@ -81,7 +81,7 @@ class ActionGreetWithTime(Action):
         # reponse HTTP du webhook REST ne contient qu'un seul objet message
         # pour ce tour, rien qu'un client puisse etaler dans le temps pour
         # simuler un effet "streaming".
-        buttons, cache_events = fetch_faq_category_buttons()
+        buttons, cache_events = fetch_faq_category_buttons(tracker)
         dispatcher.utter_message(
             text=build_greeting_message(include_faq_closing=bool(buttons)),
             buttons=buttons or [],

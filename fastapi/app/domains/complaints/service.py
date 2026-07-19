@@ -30,6 +30,17 @@ class ComplaintService:
         if not payload.summary:
             raise ValueError("Le résumé est obligatoire")
 
+        # Dedoublonnage serveur (migrations/0009) : une relance apres un
+        # commit reussi mais reponse perdue (timeout reseau cote appelant,
+        # voir ActionCreateTicket) renvoie le ticket DEJA cree au lieu d'en
+        # generer un second pour la meme reclamation.
+        if self.repository is not None and payload.idempotency_key:
+            existing = self.repository.get_by_idempotency_key(payload.idempotency_key)
+            if existing is not None:
+                return TicketCreateResponse(
+                    ticket_id=existing.ticket_id, status=existing.status, message="Ticket déjà créé"
+                )
+
         ticket_id = _generate_ticket_id()
         if self.repository is not None:
             self.repository.create_ticket(ticket_id, payload)

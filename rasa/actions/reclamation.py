@@ -1,4 +1,5 @@
 import json
+import logging
 import re
 import threading
 import time
@@ -8,10 +9,19 @@ from typing import Any, Dict, List, Optional, Text
 
 import requests
 from rasa_sdk import Action, Tracker
+
+# Audit observabilite : voir le meme commentaire dans diagnostic.py.
+logger = logging.getLogger(__name__)
 from rasa_sdk.executor import CollectingDispatcher
 from rasa_sdk.forms import FormValidationAction
 
-from .common import _already_ran_since_last_user_message, _extract_trailing_faq_question, _search_faq, pick
+from .common import (
+    _already_ran_since_last_user_message,
+    _extract_trailing_faq_question,
+    _search_faq,
+    pick,
+    request_with_retry,
+)
 from .diagnostic import _call_diagnostic_engine, _cosine_similarity, _embed_message, _embed_messages
 
 TICKET_SERVICE_URL = getenv("TICKET_SERVICE_URL", "http://fastapi:8000/tickets/create")
@@ -230,6 +240,14 @@ _RELATIVE_DATE_KEYWORDS = {
     "la nuit dernière", "la nuit derniere", "le week-end dernier", "le weekend dernier",
     "ce week-end", "ce weekend", "tout à l'heure", "tout a l'heure",
     "en fin de journée", "en fin de journee", "en fin d'après-midi", "en fin d'apres-midi",
+    # Audit qualite NLU : nlu.yml enseigne desormais des exemples incident_date
+    # avec un jour de semaine seul ("lundi") ou qualifie ("mardi dernier") --
+    # sans cette entree, l'extraction NLU aurait reussi mais la validation
+    # aurait quand meme rejete la reponse, exactement le meme bug que celui
+    # deja corrige pour "la semaine derniere" (voir plus haut). Sous-chaine
+    # (comme le reste de cet ensemble) : couvre gratuitement "lundi dernier",
+    # "mardi prochain", etc.
+    "lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche",
 }
 _MONTH_NAMES = {
     "janvier", "fevrier", "février", "mars", "avril", "mai", "juin",
@@ -281,17 +299,35 @@ ALLOWED_CATEGORIES: Dict[Text, Text] = {
     "securite": "Safety",
 }
 
+# Audit ton/clarite : le statut backend (voir complaints/schemas.py::ALLOWED_STATUSES)
+# etait affiche brut a l'utilisateur ("OPEN" en majuscules anglaises) dans le
+# message de confirmation de ticket.
+TICKET_STATUS_LABELS: Dict[Text, Text] = {
+    "OPEN": "ouvert",
+    "IN_PROGRESS": "en cours",
+    "RESOLVED": "résolu",
+    "CLOSED": "clôturé",
+}
+
 # Le slot categoriel "category" (domain.yml) maintient sa propre liste de
 # valeurs autorisees, dupliquee par necessite (Rasa ne peut pas lire ce
-# dict Python au chargement du domaine). Cette assertion echoue au demarrage
-# de l'action server si les deux divergent, plutot que de laisser une
-# categorie ajoutee d'un cote seulement casser silencieusement soit la
+# dict Python au chargement du domaine). Cette verification echoue au
+# demarrage de l'action server si les deux divergent, plutot que de laisser
+# une categorie ajoutee d'un cote seulement casser silencieusement soit la
 # validation ici, soit le slot Rasa.
+#
+# Audit robustesse : un `assert` nu est desactive des que l'interpreteur
+# tourne avec -O/PYTHONOPTIMIZE=1 (la ligne est litteralement retiree du
+# bytecode) -- la garantie "echoue au demarrage plutot que de casser
+# silencieusement" ne tenait plus dans ce cas, sans qu'aucun test ne le
+# detecte. Une verification explicite qui leve elle-meme reste active quel
+# que soit le niveau d'optimisation Python.
 _DOMAIN_CATEGORY_VALUES = {"KYC", "Wallet", "Video", "Auth", "Chat", "Safety"}
-assert set(ALLOWED_CATEGORIES.values()) == _DOMAIN_CATEGORY_VALUES, (
-    "ALLOWED_CATEGORIES (reclamation.py) et les values: du slot 'category' "
-    "(domain.yml) ont diverge -- synchronisez les deux."
-)
+if set(ALLOWED_CATEGORIES.values()) != _DOMAIN_CATEGORY_VALUES:
+    raise RuntimeError(
+        "ALLOWED_CATEGORIES (reclamation.py) et les values: du slot 'category' "
+        "(domain.yml) ont diverge -- synchronisez les deux."
+    )
 
 
 class _TicketServiceCircuitBreaker:
@@ -316,24 +352,34 @@ class _TicketServiceCircuitBreaker:
     def __init__(self) -> None:
         self._consecutive_failures = 0
         self._opened_at: Optional[float] = None
+        # Audit robustesse : sans ce verrou, deux requetes concurrentes
+        # (deux utilisateurs distincts, meme process actions) qui echouent en
+        # meme temps peuvent toutes deux lire _consecutive_failures avant que
+        # l'une n'ecrive son incrementation -- un echec perdu (read-modify-write
+        # non atomique), retardant l'ouverture reelle du disjoncteur. Meme
+        # principe que _capabilities_lock (diagnostic.py).
+        self._lock = threading.Lock()
 
     def is_open(self) -> bool:
-        if self._opened_at is None:
-            return False
-        if time.monotonic() - self._opened_at >= self.COOLDOWN_SECONDS:
-            # Cooldown ecoule : on retente (etat "half-open" implicite) au
-            # lieu de rester ouvert indefiniment jusqu'a un redemarrage.
-            return False
-        return True
+        with self._lock:
+            if self._opened_at is None:
+                return False
+            if time.monotonic() - self._opened_at >= self.COOLDOWN_SECONDS:
+                # Cooldown ecoule : on retente (etat "half-open" implicite) au
+                # lieu de rester ouvert indefiniment jusqu'a un redemarrage.
+                return False
+            return True
 
     def record_success(self) -> None:
-        self._consecutive_failures = 0
-        self._opened_at = None
+        with self._lock:
+            self._consecutive_failures = 0
+            self._opened_at = None
 
     def record_failure(self) -> None:
-        self._consecutive_failures += 1
-        if self._consecutive_failures >= self.FAILURE_THRESHOLD:
-            self._opened_at = time.monotonic()
+        with self._lock:
+            self._consecutive_failures += 1
+            if self._consecutive_failures >= self.FAILURE_THRESHOLD:
+                self._opened_at = time.monotonic()
 
 
 _ticket_circuit_breaker = _TicketServiceCircuitBreaker()
@@ -370,15 +416,24 @@ class _TicketRateLimiter:
 
     def __init__(self) -> None:
         self._timestamps_by_user: Dict[Text, List[float]] = {}
+        # Audit robustesse : sans ce verrou, deux requetes concurrentes pour
+        # le MEME sender_id (ex. double-clic, ou deux onglets) peuvent toutes
+        # deux appeler allow() avant que l'une n'appelle record() -- chacune
+        # lit le meme compte encore sous le plafond et l'autorise, permettant
+        # de depasser MAX_TICKETS_PER_WINDOW sur une seule instance, meme sans
+        # le probleme multi-replica documente ci-dessus.
+        self._lock = threading.Lock()
 
     def allow(self, user_id: Text) -> bool:
-        now = time.monotonic()
-        recent = [t for t in self._timestamps_by_user.get(user_id, []) if now - t < self.WINDOW_SECONDS]
-        self._timestamps_by_user[user_id] = recent
-        return len(recent) < self.MAX_TICKETS_PER_WINDOW
+        with self._lock:
+            now = time.monotonic()
+            recent = [t for t in self._timestamps_by_user.get(user_id, []) if now - t < self.WINDOW_SECONDS]
+            self._timestamps_by_user[user_id] = recent
+            return len(recent) < self.MAX_TICKETS_PER_WINDOW
 
     def record(self, user_id: Text) -> None:
-        self._timestamps_by_user.setdefault(user_id, []).append(time.monotonic())
+        with self._lock:
+            self._timestamps_by_user.setdefault(user_id, []).append(time.monotonic())
 
 
 _ticket_rate_limiter = _TicketRateLimiter()
@@ -389,7 +444,18 @@ def best_keyword_match(text: Text, keyword_map: Dict[Text, List[Text]], default:
     # s'arreter a la premiere qui matche : evite qu'une categorie plus haute
     # dans une chaine if/elif "gagne" a tort quand plusieurs mots-cles de
     # categories differentes apparaissent dans le meme message.
-    scores = {label: sum(1 for kw in keywords if kw in text) for label, keywords in keyword_map.items()}
+    #
+    # Audit robustesse : `kw in text` matchait par simple sous-chaine, sans
+    # limite de mot -- contrairement a _keyword_matches (diagnostic.py), qui
+    # utilise deja \b...\b precisement pour eviter ce probleme. Exemple reel :
+    # "j'ai fait un achat, mon solde n'a pas change" faisait matcher le
+    # mot-cle Chat "chat" dans la sous-chaine "achat", pouvant faire basculer
+    # `category` vers Chat au lieu de Wallet -- silencieusement, la categorie
+    # deduite n'est jamais reconfirmee a l'utilisateur.
+    scores = {
+        label: sum(1 for kw in keywords if re.search(rf"\b{re.escape(kw.lower())}\b", text))
+        for label, keywords in keyword_map.items()
+    }
     best_label, best_score = max(scores.items(), key=lambda item: item[1])
     return best_label if best_score > 0 else default
 
@@ -752,13 +818,26 @@ class ValidateReclamationForm(FormValidationAction):
         tracker: Tracker,
         domain: Dict[Text, Any],
     ) -> Dict[Text, Any]:
-        allowed = {"low", "medium", "high"}
+        # Audit ton/clarite : utter_wrong_urgency et utter_ask_urgency
+        # demandent desormais "faible/moyenne/élevée" (domain.yml) plutot que
+        # les mots anglais bruts "low/medium/high", incoherents pour un
+        # utilisateur francophone. La valeur INTERNE reste low/medium/high
+        # (deja utilisee partout ailleurs -- ticket, contrat diagnostic, voir
+        # complaints/schemas.py::Urgency) : seule cette table d'entree
+        # s'elargit, pour continuer d'accepter les mots anglais bruts aussi
+        # (compatibilite avec un appelant direct de l'API, ou un utilisateur
+        # qui les tape quand meme).
+        allowed = {
+            "low": "low", "faible": "low",
+            "medium": "medium", "moyenne": "medium", "moyen": "medium",
+            "high": "high", "élevée": "high", "élevee": "high", "elevee": "high", "élevé": "high", "eleve": "high",
+        }
         # Meme garde que validate_category (voir son commentaire) : slot_value
         # peut etre None lors d'une re-validation.
         if isinstance(slot_value, str):
             normalized = slot_value.strip().lower()
             if normalized in allowed:
-                return {"urgency": normalized}
+                return {"urgency": allowed[normalized]}
 
         dispatcher.utter_message(response="utter_wrong_urgency")
         return {"urgency": None}
@@ -770,18 +849,40 @@ class ValidateReclamationForm(FormValidationAction):
         tracker: Tracker,
         domain: Dict[Text, Any],
     ) -> Dict[Text, Any]:
+        # Repli sur le texte brut du tour (audit conversationnel 400 messages,
+        # 2026-07) : le mapping from_entity du slot incident_date (domain.yml,
+        # sans condition -- il s'applique donc aussi pendant ce formulaire, en
+        # plus du mapping from_text ci-dessous) peut fournir une valeur
+        # PARTIELLE quand le NLU extrait mal l'etendue de l'entite sur une
+        # reponse COURTE tapee directement en reponse a utter_ask_incident_date
+        # (constate en pratique : "la semaine derniere" tape seul -> entite
+        # extraite "semaine" uniquement, slot_value ne contient plus que ce
+        # fragment, rejete par _looks_like_a_date). Le meme entrainement
+        # fonctionne bien quand la date est mentionnee au milieu d'une phrase
+        # plus longue (son contexte d'entrainement habituel, voir nlu.yml) --
+        # seule la reponse courte et isolee degrade l'extraction. Sans ce
+        # repli, une date pourtant valide etait rejetee a tort parce que seul
+        # un fragment sans rapport avait ete retenu, jamais le texte complet
+        # reellement tape par l'utilisateur.
+        candidate = slot_value if isinstance(slot_value, str) else None
+        if not (candidate and _looks_like_a_date(candidate)):
+            raw_text = (tracker.latest_message or {}).get("text")
+            if isinstance(raw_text, str) and _looks_like_a_date(raw_text):
+                candidate = raw_text
+
         # Plafond AVANT _looks_like_a_date (cas 38/39) : celui-ci matche par
         # sous-chaine ("hier" n'importe ou dans le texte), un pave de
         # plusieurs milliers de caracteres contenant incidemment "hier"
         # passerait donc la validation existante sans ce garde-fou de
-        # longueur.
+        # longueur -- s'applique aussi au repli sur le texte brut ci-dessus,
+        # pas seulement a la valeur mappee.
         if (
-            isinstance(slot_value, str)
-            and slot_value.strip()
-            and len(slot_value.strip()) <= MAX_INCIDENT_DATE_LENGTH
-            and _looks_like_a_date(slot_value)
+            isinstance(candidate, str)
+            and candidate.strip()
+            and len(candidate.strip()) <= MAX_INCIDENT_DATE_LENGTH
+            and _looks_like_a_date(candidate)
         ):
-            return {"incident_date": slot_value.strip()}
+            return {"incident_date": candidate.strip()}
 
         dispatcher.utter_message(response="utter_wrong_incident_date")
         return {"incident_date": None}
@@ -822,7 +923,10 @@ class ActionCreateTicket(Action):
             return []
 
         if not tracker.get_slot("claim_requested"):
-            dispatcher.utter_message(text="Je dois d’abord confirmer la création de la réclamation avant de poursuivre.")
+            # Audit ton/clarite : "Je dois d'abord confirmer..." se lisait
+            # comme si c'etait le BOT qui devait confirmer, alors que c'est
+            # une demande de confirmation adressee a l'utilisateur.
+            dispatcher.utter_message(text="Confirmez d’abord la création de votre réclamation (oui/non) avant de continuer.")
             return []
 
         # Audit "robustesse comportementale", cas 40 : pour un ticket ne
@@ -884,9 +988,13 @@ class ActionCreateTicket(Action):
         # l'utilisateur restent intactes (aucun evenement slot retourne ici)
         # pour permettre un nouvel essai plus tard sans tout ressaisir.
         if _ticket_circuit_breaker.is_open():
+            logger.warning(
+                "Disjoncteur de tickets ouvert : creation refusee sans tentative reseau (session=%s)",
+                tracker.sender_id,
+            )
             dispatcher.utter_message(
                 text=(
-                    "Le service de tickets semble indisponible actuellement. "
+                    "Ce service semble indisponible actuellement. "
                     "Vos informations sont conservées : répondez « oui » dans quelques instants pour réessayer."
                 )
             )
@@ -913,18 +1021,17 @@ class ActionCreateTicket(Action):
             # une reclamation classique (formulaire, valeur absente) d'un
             # ticket ne d'une escalade de diagnostic confirmee par l'utilisateur.
             "created_by": tracker.get_slot("ticket_source") or "user_reclamation_form",
-            # Cote client uniquement pour l'instant (voir la generation dans
-            # ActionExtractReclamationEntities) : ne protege reellement contre
-            # les doublons que si le service de tickets deduplique lui-meme
-            # sur cette cle -- pas encore le cas cote fastapi/tickets/create,
-            # a ajouter separement. Sans ca, ce champ sert au moins de
-            # correlation dans les logs/l'audit.
+            # Generee cote client (voir ActionExtractReclamationEntities) et
+            # deduplique desormais cote serveur aussi (migrations/0009 +
+            # complaints/service.py::create_ticket, audit robustesse) : une
+            # relance apres un commit reussi mais reponse perdue (timeout
+            # juste apres ce requests.post, par ex.) renvoie le ticket deja
+            # cree au lieu d'en generer un second.
             "idempotency_key": idempotency_key,
         }
 
         try:
-            response = requests.post(TICKET_SERVICE_URL, json=payload, timeout=10)
-            response.raise_for_status()
+            response = request_with_retry("POST", TICKET_SERVICE_URL, json=payload, timeout=10)
             ticket = response.json()
             ticket_id = ticket.get("ticket_id")
             status = ticket.get("status")
@@ -934,7 +1041,30 @@ class ActionCreateTicket(Action):
                 # l'utilisateur comme si tout s'etait bien passe. Traite
                 # desormais comme un echec (meme chemin que RequestException).
                 raise ValueError(f"reponse de {TICKET_SERVICE_URL} sans ticket_id/status exploitable : {ticket!r}")
-        except (requests.RequestException, ValueError):
+        except requests.HTTPError as error:
+            # Audit robustesse : un 4xx (ex. payload malforme cote action
+            # server) est un bug DE CE COTE, pas une preuve que le service de
+            # tickets est en panne -- l'assimiler a une vraie panne reseau
+            # ouvrait le disjoncteur pour TOUS les utilisateurs a cause d'un
+            # seul payload invalide. Seul un 5xx (le service repond mais
+            # signale sa propre defaillance), ou l'absence de reponse
+            # exploitable, alimente le disjoncteur -- au meme titre qu'une
+            # RequestException reseau ci-dessous.
+            status_code = error.response.status_code if error.response is not None else None
+            if status_code is None or status_code >= 500:
+                _ticket_circuit_breaker.record_failure()
+            logger.warning(
+                "Echec de creation de ticket (HTTP %s) session=%s : %s", status_code, tracker.sender_id, error
+            )
+            dispatcher.utter_message(
+                text=(
+                    "Désolé, la création du ticket a échoué : le service est momentanément indisponible. "
+                    "Vos informations sont conservées, répondez « oui » pour réessayer."
+                )
+            )
+            return []
+        except (requests.RequestException, ValueError) as error:
+            logger.warning("Echec de creation de ticket session=%s : %s", tracker.sender_id, error)
             _ticket_circuit_breaker.record_failure()
             dispatcher.utter_message(
                 text=(
@@ -952,8 +1082,21 @@ class ActionCreateTicket(Action):
 
         _ticket_circuit_breaker.record_success()
         _ticket_rate_limiter.record(tracker.sender_id)
+        # Audit ton/clarite : ce message etait unique, sans variante, et
+        # affichait le statut backend brut ("OPEN") en anglais -- alors que
+        # utter_reclamation_confirmed (domain.yml), pense specifiquement pour
+        # ce moment avec un ton plus chaleureux, n'etait en realite jamais
+        # utilise. Remplace ce dernier plutot que de le router dynamiquement
+        # (meme pattern deja etabli ici pour ActionStoreSuggestion/
+        # ActionAcknowledgeComplaint : pick() avec la reference inline,
+        # jamais un response= statique sans placeholder).
+        status_label = TICKET_STATUS_LABELS.get(status, status)
         dispatcher.utter_message(
-            text=f"Réclamation créée avec succès. Numéro de ticket : {ticket_id} (statut : {status})."
+            text=pick(
+                f"Merci, votre réclamation est bien enregistrée et en cours de traitement (numéro de ticket : {ticket_id}, statut : {status_label}).",
+                f"C'est noté ! Votre réclamation a été créée avec succès (numéro de ticket : {ticket_id}, statut : {status_label}).",
+                f"Votre réclamation est bien prise en compte (numéro de ticket : {ticket_id}, statut : {status_label}).",
+            )
         )
 
         # Reinitialise aussi les champs du formulaire (pas seulement

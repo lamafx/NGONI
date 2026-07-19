@@ -43,22 +43,64 @@ rules:
   # Sans cette condition, cette regle s'applique aussi pendant reclamation_form
   # et contredit la story "bot challenge interrupts reclamation then resumes"
   # (qui reprend le formulaire apres utter_iamabot au lieu d'ecouter).
+  # pending_field:null (audit robustesse, fluidite de la conversation) :
+  # variante "diagnostic en cours" separee juste en dessous (meme intent,
+  # condition disjointe -- Rasa exige des conditions non ambigues pour un
+  # meme intent declencheur), qui rappelle la question de diagnostic apres
+  # coup au lieu de la laisser en suspens sans rappel.
   condition:
   - active_loop: null
+  - slot_was_set:
+    - pending_field: null
   steps:
   - intent: bot_challenge
   - action: utter_iamabot
+
+- rule: Bot presentation response while diagnostic is pending
+  # Repond d'abord a la question meta (comme la regle ci-dessus), PUIS
+  # rappelle la question de diagnostic en attente -- action_reask_pending_diagnostic_field
+  # ne retraite jamais le message courant comme une reponse (voir sa
+  # docstring, diagnostic.py), contrairement a action_run_diagnostic_step.
+  # action_listen explicite en dernier pas : meme raison que "Route
+  # diagnostic requests" plus bas (empecher TEDPolicy de rejouer une action
+  # supplementaire sans nouveau message utilisateur).
+  condition:
+  - active_loop: null
+  - slot_was_set:
+    - pending_field
+  steps:
+  - intent: bot_challenge
+  - action: utter_iamabot
+  - action: action_reask_pending_diagnostic_field
+  - action: action_listen
 
 - rule: Capabilities description response
   # Meme garde-fou que "Bot presentation response" juste au-dessus (meme
   # famille de question meta sur l'agent) : sans active_loop: null, une
   # reponse mal classee ask_capabilities pendant reclamation_form couperait
-  # le formulaire en cours au lieu de continuer a l'ecouter.
+  # le formulaire en cours au lieu de continuer a l'ecouter. pending_field:null
+  # : meme raison que "Bot presentation response" (variante diagnostic juste
+  # en dessous).
   condition:
   - active_loop: null
+  - slot_was_set:
+    - pending_field: null
   steps:
   - intent: ask_capabilities
   - action: action_describe_capabilities
+
+- rule: Capabilities description response while diagnostic is pending
+  # Meme mecanique que "Bot presentation response while diagnostic is
+  # pending" ci-dessus.
+  condition:
+  - active_loop: null
+  - slot_was_set:
+    - pending_field
+  steps:
+  - intent: ask_capabilities
+  - action: action_describe_capabilities
+  - action: action_reask_pending_diagnostic_field
+  - action: action_listen
 
 - rule: Out of scope response
   # action_out_of_scope (pas utter_out_of_scope directement) : une reponse
@@ -89,12 +131,29 @@ rules:
   # action_store_suggestion (voir feedback.py) persiste la suggestion cote
   # FastAPI (feedback.entries) ET declenche la creation d'un ticket de suivi
   # (complaints.complaints) avant de repondre -- voir
-  # docs/suggestion-plainte-flow.md pour le detail.
+  # docs/suggestion-plainte-flow.md pour le detail. pending_field:null :
+  # meme raison que "Bot presentation response" (variante diagnostic juste
+  # en dessous).
   condition:
   - active_loop: null
+  - slot_was_set:
+    - pending_field: null
   steps:
   - intent: suggestion
   - action: action_store_suggestion
+
+- rule: Suggestion response while diagnostic is pending
+  # Meme mecanique que "Bot presentation response while diagnostic is
+  # pending".
+  condition:
+  - active_loop: null
+  - slot_was_set:
+    - pending_field
+  steps:
+  - intent: suggestion
+  - action: action_store_suggestion
+  - action: action_reask_pending_diagnostic_field
+  - action: action_listen
 
 - rule: Complaint acknowledgement
   # plainte capture l'expression d'un mecontentement general (voir nlu.yml) :
@@ -104,50 +163,167 @@ rules:
   # reclamation. action_acknowledge_complaint (voir feedback.py) journalise
   # neanmoins le mecontentement cote FastAPI (feedback.entries) ET declenche
   # la creation d'un ticket de suivi (complaints.complaints), en best-effort,
-  # avant de repondre -- voir docs/suggestion-plainte-flow.md.
+  # avant de repondre -- voir docs/suggestion-plainte-flow.md. pending_field:null :
+  # meme raison que "Bot presentation response" (variante diagnostic juste
+  # en dessous).
   condition:
   - active_loop: null
+  - slot_was_set:
+    - pending_field: null
   steps:
   - intent: plainte
   - action: action_acknowledge_complaint
+
+- rule: Complaint acknowledgement while diagnostic is pending
+  # Meme mecanique que "Bot presentation response while diagnostic is
+  # pending".
+  condition:
+  - active_loop: null
+  - slot_was_set:
+    - pending_field
+  steps:
+  - intent: plainte
+  - action: action_acknowledge_complaint
+  - action: action_reask_pending_diagnostic_field
+  - action: action_listen
 
 - rule: FAQ semantic search
   steps:
   - intent: ask_faq
   - action: action_faq_search
 
+- rule: FAQ semantic search while reclamation form is active
+  # Audit robustesse (fluidite de la conversation) : aucune des 4 regles FAQ
+  # (celle-ci et les 3 suivantes) n'avait de garde -- une vraie question FAQ
+  # tapee ou cliquee en plein formulaire de reclamation etait traitee
+  # normalement (bien), mais rien ne reprenait ensuite le formulaire
+  # (l'utilisateur devait retaper sa reponse en attente). Repond a la
+  # question PUIS reactive reclamation_form dans le meme tour : re-invoquer
+  # le Form pose automatiquement sa PROCHAINE question requise (meme
+  # mecanique que la story "bot challenge interrupts reclamation then
+  # resumes", deja eprouvee sur ce meme formulaire).
+  condition:
+  - active_loop: reclamation_form
+  steps:
+  - intent: ask_faq
+  - action: action_faq_search
+  - action: reclamation_form
+  - active_loop: reclamation_form
+
 - rule: FAQ response rated useful
   # action_record_response_rating (feedback.py) lit le NOM de l'intention
   # courante (tracker.get_intent_of_latest_message) pour savoir si la
   # notation est positive ou negative -- une seule action pour les deux
-  # regles, plutot que deux actions quasi identiques.
+  # regles, plutot que deux actions quasi identiques. pending_field:null :
+  # meme raison que "Bot presentation response" (variantes diagnostic
+  # juste en dessous, une par sens de notation).
   condition:
   - active_loop: null
+  - slot_was_set:
+    - pending_field: null
   steps:
   - intent: rate_response_useful
   - action: action_record_response_rating
 
+- rule: FAQ response rated useful while diagnostic is pending
+  condition:
+  - active_loop: null
+  - slot_was_set:
+    - pending_field
+  steps:
+  - intent: rate_response_useful
+  - action: action_record_response_rating
+  - action: action_reask_pending_diagnostic_field
+  - action: action_listen
+
 - rule: FAQ response rated not useful
   condition:
   - active_loop: null
+  - slot_was_set:
+    - pending_field: null
   steps:
   - intent: rate_response_not_useful
   - action: action_record_response_rating
+
+- rule: FAQ response rated not useful while diagnostic is pending
+  condition:
+  - active_loop: null
+  - slot_was_set:
+    - pending_field
+  steps:
+  - intent: rate_response_not_useful
+  - action: action_record_response_rating
+  - action: action_reask_pending_diagnostic_field
+  - action: action_listen
+
+- rule: FAQ response rated useful while reclamation form is active
+  # Audit robustesse : les deux regles de notation ci-dessus exigent
+  # active_loop: null -- un clic sur un vieux bouton "Utile"/"Pas utile" en
+  # plein formulaire de reclamation (payload structure, jamais reclassifie
+  # par le NLU) ne correspondait donc a AUCUNE regle. Meme mecanique que
+  # "FAQ semantic search while reclamation form is active" : enregistre la
+  # notation PUIS reactive le formulaire dans le meme tour.
+  condition:
+  - active_loop: reclamation_form
+  steps:
+  - intent: rate_response_useful
+  - action: action_record_response_rating
+  - action: reclamation_form
+  - active_loop: reclamation_form
+
+- rule: FAQ response rated not useful while reclamation form is active
+  condition:
+  - active_loop: reclamation_form
+  steps:
+  - intent: rate_response_not_useful
+  - action: action_record_response_rating
+  - action: reclamation_form
+  - active_loop: reclamation_form
 
 - rule: Browse FAQ suggestions
   steps:
   - intent: browse_faq
   - action: action_browse_faq
 
+- rule: Browse FAQ suggestions while reclamation form is active
+  # Meme mecanique que "FAQ semantic search while reclamation form is active".
+  condition:
+  - active_loop: reclamation_form
+  steps:
+  - intent: browse_faq
+  - action: action_browse_faq
+  - action: reclamation_form
+  - active_loop: reclamation_form
+
 - rule: Select FAQ category
   steps:
   - intent: select_faq_category
   - action: action_select_faq_category
 
+- rule: Select FAQ category while reclamation form is active
+  # Meme mecanique que "FAQ semantic search while reclamation form is active".
+  condition:
+  - active_loop: reclamation_form
+  steps:
+  - intent: select_faq_category
+  - action: action_select_faq_category
+  - action: reclamation_form
+  - active_loop: reclamation_form
+
 - rule: Select FAQ question
   steps:
   - intent: select_faq_question
   - action: action_select_faq_question
+
+- rule: Select FAQ question while reclamation form is active
+  # Meme mecanique que "FAQ semantic search while reclamation form is active".
+  condition:
+  - active_loop: reclamation_form
+  steps:
+  - intent: select_faq_question
+  - action: action_select_faq_question
+  - action: reclamation_form
+  - active_loop: reclamation_form
 
 - rule: Complete reclamation form and request confirmation
   condition:
@@ -338,6 +514,35 @@ rules:
   - active_loop: reclamation_form
   steps:
   - intent: nlu_fallback
+  - action: reclamation_form
+  - active_loop: reclamation_form
+
+- rule: Ignore inappropriate_language misclassification while reclamation form is active
+  # Meme mecanique, meme raison que "Ignore nlu fallback while reclamation
+  # form is active" juste au-dessus (audit robustesse, fluidite de la
+  # conversation) : "Inappropriate language response" plus haut n'est
+  # gardee que par pending_field:null, jamais active_loop -- une reponse
+  # mal classee inappropriate_language en pleine reponse a une question du
+  # formulaire (ex. une description frustree mal etiquetee) coupait le
+  # formulaire avec le message generique "restez poli" au lieu de laisser
+  # reclamation_form la traiter normalement via son mapping from_text.
+  condition:
+  - active_loop: reclamation_form
+  steps:
+  - intent: inappropriate_language
+  - action: reclamation_form
+  - active_loop: reclamation_form
+
+- rule: Ignore out_of_scope misclassification while reclamation form is active
+  # Meme mecanique, meme raison : "Out of scope response" plus haut n'a
+  # AUCUNE garde (ni active_loop, ni pending_field) -- contrairement a
+  # action_out_of_scope, qui elle sait deja distinguer un diagnostic en
+  # attente (voir son commentaire), rien ne protegeait symetriquement le
+  # formulaire de reclamation.
+  condition:
+  - active_loop: reclamation_form
+  steps:
+  - intent: out_of_scope
   - action: reclamation_form
   - active_loop: reclamation_form
 

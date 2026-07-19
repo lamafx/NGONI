@@ -1,5 +1,6 @@
 import copy
 import json
+import logging
 import re
 import threading
 import time
@@ -10,14 +11,26 @@ import requests
 from rasa_sdk import Action, Tracker
 from rasa_sdk.executor import CollectingDispatcher
 
+# Audit observabilite : aucun logger n'existait dans rasa/actions -- chaque
+# echec reseau (embeddings, capacites, moteur de diagnostic, tracabilite
+# best-effort) etait capture puis silencieusement avale, invisible cote
+# exploitation jusqu'a ce qu'un utilisateur se plaigne. rasa_sdk configure
+# deja la sortie standard pour ses propres logs (voir "rasa_sdk.executor" /
+# "rasa_sdk.endpoint" dans les logs du conteneur actions) -- ce logger de
+# module s'y ajoute simplement, meme convention que le reste de la
+# plateforme (voir app.main cote FastAPI).
+logger = logging.getLogger(__name__)
+
 from .common import (
     FALLBACK_ESCALATION_THRESHOLD,
+    SimpleCircuitBreaker,
     _already_ran_since_last_user_message,
     _consecutive_fallback_count,
     _extract_trailing_faq_question,
     _human_support_message,
     _search_faq,
     _strip_greeting_preamble,
+    request_with_retry,
 )
 
 DIAGNOSTIC_SERVICE_URL = getenv("DIAGNOSTIC_SERVICE_URL", "http://fastapi:8000/diagnostic/resolve")
@@ -43,6 +56,9 @@ _capabilities_cached_at: float = 0.0
 # rapide (cache encore valide) reste sans verrou, seul le refresh est
 # serialise.
 _capabilities_lock = threading.Lock()
+
+# Audit robustesse : voir son usage dans _fetch_capabilities plus bas.
+_capabilities_circuit_breaker = SimpleCircuitBreaker()
 
 # Duree de vie du cache avant de retenter un appel a FastAPI : un nouveau
 # service/probleme cote Engine est desormais vu au plus tard apres ce delai,
@@ -123,13 +139,23 @@ def _fetch_capabilities() -> List[Dict[Text, Any]] | None:
         # attendait le verrou -- reverifier evite un second appel HTTP inutile.
         if _cache_is_fresh():
             return _capabilities_cache
+        # Disjoncteur (audit robustesse) : pendant une panne prolongee de
+        # FastAPI, ce cache expire toutes les CAPABILITIES_CACHE_TTL_SECONDS
+        # et chaque tour qui suit re-paie un timeout complet de 10s avant de
+        # retomber sur le cache perime. Le disjoncteur court-circuite cet
+        # appel des que la panne est averee (3 echecs consecutifs), le temps
+        # du cooldown.
+        if _capabilities_circuit_breaker.is_open():
+            return _capabilities_cache
         try:
-            response = requests.get(DIAGNOSTIC_CAPABILITIES_URL, timeout=10)
-            response.raise_for_status()
+            response = request_with_retry("GET", DIAGNOSTIC_CAPABILITIES_URL, timeout=10)
             _capabilities_cache = response.json().get("problems", [])
             _capabilities_cached_at = time.time()
+            _capabilities_circuit_breaker.record_success()
             return _capabilities_cache
-        except requests.RequestException:
+        except requests.RequestException as exc:
+            logger.warning("Echec de recuperation des capacites (%s) : %s", DIAGNOSTIC_CAPABILITIES_URL, exc)
+            _capabilities_circuit_breaker.record_failure()
             return _capabilities_cache
 
 
@@ -268,17 +294,31 @@ MIN_EMBEDDING_SIMILARITY = 0.84
 KEYWORD_RESCUE_MIN_EMBEDDING_SIMILARITY = 0.78
 
 
+# Audit robustesse : contrairement au disjoncteur de tickets (reclamation.py),
+# aucune protection n'existait ici alors que ces deux fonctions sont appelees
+# a CHAQUE tour (potentiellement plusieurs fois : message entier + repli par
+# clause + par segment, voir _score_capabilities) -- une panne prolongee du
+# service d'embeddings faisait payer un timeout de 10s par appel, a repetition,
+# plutot que d'echouer vite une fois la panne averee et de retomber
+# immediatement sur le repli mots-cles.
+_embeddings_circuit_breaker = SimpleCircuitBreaker()
+
+
 def _embed_message(text: Text) -> List[float] | None:
     # Le modele d'embeddings (intfloat/multilingual-e5-small) tourne cote
     # FastAPI (voir app.shared.embeddings), pas ici : un seul exemplaire du
     # modele pour toute la plateforme plutot que de le recharger dans ce
     # process actions. None = panne reseau, gere par le repli sur
     # _score_capabilities_keywords (voir _score_capabilities).
+    if _embeddings_circuit_breaker.is_open():
+        return None
     try:
-        response = requests.post(EMBEDDING_SERVICE_URL, json={"text": text}, timeout=10)
-        response.raise_for_status()
+        response = request_with_retry("POST", EMBEDDING_SERVICE_URL, json={"text": text}, timeout=10)
+        _embeddings_circuit_breaker.record_success()
         return response.json().get("embedding")
-    except requests.RequestException:
+    except requests.RequestException as exc:
+        logger.warning("Echec d'embedding (%s) : %s", EMBEDDING_SERVICE_URL, exc)
+        _embeddings_circuit_breaker.record_failure()
         return None
 
 
@@ -293,11 +333,18 @@ def _embed_messages(texts: List[Text]) -> List[List[float]] | None:
     # _embed_message (pas de rescue par clause dans ce cas, comme avant).
     if not texts:
         return []
+    # Meme disjoncteur que _embed_message (partage : les deux appellent le
+    # meme service d'embeddings cote FastAPI, une panne touche les deux
+    # identiquement).
+    if _embeddings_circuit_breaker.is_open():
+        return None
     try:
-        response = requests.post(EMBEDDING_BATCH_SERVICE_URL, json={"texts": texts}, timeout=10)
-        response.raise_for_status()
+        response = request_with_retry("POST", EMBEDDING_BATCH_SERVICE_URL, json={"texts": texts}, timeout=10)
+        _embeddings_circuit_breaker.record_success()
         return response.json().get("embeddings")
-    except requests.RequestException:
+    except requests.RequestException as exc:
+        logger.warning("Echec d'embedding en lot (%s, %d textes) : %s", EMBEDDING_BATCH_SERVICE_URL, len(texts), exc)
+        _embeddings_circuit_breaker.record_failure()
         return None
 
 
@@ -330,8 +377,13 @@ def _report_agent_action(
             },
             timeout=5,
         )
-    except requests.RequestException:
-        pass
+    except requests.RequestException as exc:
+        # Best-effort, non-bloquant (voir docstring) : une trace manquante
+        # reste sans consequence fonctionnelle, donc INFO plutot que WARNING
+        # -- mais desormais visible plutot qu'entierement avalee (audit
+        # observabilite), utile pour reperer une panne PROLONGEE de
+        # AGENT_ACTION_AUDIT_URL qui viderait silencieusement audit.agent_actions.
+        logger.info("Echec de tracabilite best-effort (%s) : %s", AGENT_ACTION_AUDIT_URL, exc)
 
 
 def _cosine_similarity(a: List[float], b: List[float]) -> float:
@@ -1033,24 +1085,48 @@ def _next_step(required_fields: List[Text], confirmed: Dict[Text, Any], diagnost
     return ""
 
 
+# Prefixe partage par les 2 placeholders de _handle_field_answer (refus /
+# incertitude) : marque un champ EXPLICITEMENT non repondu par l'utilisateur,
+# jamais une vraie valeur -- filtre juste en dessous avant envoi au
+# microservice externe, qui attend une valeur typee (montant, reference...)
+# pour ces memes champs, pas une phrase humaine.
+UNRESOLVED_FIELD_PLACEHOLDER_PREFIX = "Non communiqué"
+
+
+def _entities_for_engine(confirmed: Dict[Text, Any]) -> Dict[Text, Any]:
+    return {
+        key: value
+        for key, value in confirmed.items()
+        if not (isinstance(value, str) and value.startswith(UNRESOLVED_FIELD_PLACEHOLDER_PREFIX))
+    }
+
+
 def _call_diagnostic_engine(tracker: Tracker, state: Dict[Text, Any]) -> Dict[Text, Any] | None:
     payload = {
         "session_id": tracker.sender_id,
         "service": state.get("service_id"),
         "problem": state.get("template_id"),
-        "entities": state.get("confirmed", {}),
+        "entities": _entities_for_engine(state.get("confirmed") or {}),
     }
     try:
-        response = requests.post(
+        response = request_with_retry(
+            "POST",
             DIAGNOSTIC_SERVICE_URL,
             json=payload,
             headers={"X-User-ID": tracker.sender_id},
             timeout=10,
         )
-        response.raise_for_status()
         result = response.json()
         return result
-    except requests.RequestException:
+    except requests.RequestException as exc:
+        # Jamais les entities du payload ici (peuvent contenir des donnees
+        # sensibles -- montant, reference de transaction... -- voir
+        # app.shared.logging_utils.redact_entities cote FastAPI, meme
+        # principe) : seuls service/problem/session, jamais des valeurs.
+        logger.warning(
+            "Echec d'appel au moteur de diagnostic (%s) session=%s service=%s problem=%s : %s",
+            DIAGNOSTIC_SERVICE_URL, tracker.sender_id, payload.get("service"), payload.get("problem"), exc,
+        )
         return None
 
 
@@ -1077,7 +1153,32 @@ FIELD_QUESTIONS: Dict[Text, Text] = {
     "subscription_type": "Quel abonnement est concerné ?",
     "channel": "Sur quel canal recevez-vous (ou non) cette notification ?",
     "contact_channel": "Par quel canal souhaitez-vous être recontacté ?",
-    "urgency": "Quel est le niveau d’urgence : low, medium ou high ?",
+    "urgency": "Quel est le niveau d’urgence : faible, moyenne ou élevée ?",
+}
+
+# Libelles courts (pas des questions completes) pour le recapitulatif avant
+# verification (voir _respond_diagnostic_confirmation) -- audit ton/clarite :
+# ce recap affichait auparavant les noms de champs BRUTS du manifeste
+# ("transaction_reference : ...", "payment_method : ...") tels quels.
+FIELD_LABELS: Dict[Text, Text] = {
+    "issue_status": "statut",
+    "amount": "montant",
+    "date": "date",
+    "device": "plateforme",
+    "payment_method": "moyen de paiement",
+    "description": "description",
+    "transaction_reference": "référence",
+    "time": "heure",
+    "content_type": "type de contenu",
+    "video_id": "vidéo concernée",
+    "last_message": "dernier message",
+    "severity": "gravité",
+    "document_type": "type de document",
+    "country": "pays",
+    "subscription_type": "abonnement",
+    "channel": "canal",
+    "contact_channel": "canal de contact",
+    "urgency": "urgence",
 }
 
 
@@ -1250,17 +1351,23 @@ def _extract_field_answer(ctx: _DiagnosticContext) -> None:
     # Sentinelle non vide (pas None) stockee dans `confirmed` : _next_missing_field
     # ne redemande alors plus ce champ, contrairement a None qui boucle
     # indefiniment sur la meme question -- exactement le comportement que
-    # ce fix doit eviter.
+    # ce fix doit eviter. Prefixe UNRESOLVED_FIELD_PLACEHOLDER_PREFIX partage
+    # par les deux placeholders ci-dessous (audit robustesse) : _call_diagnostic_engine
+    # filtre desormais tout champ commencant par ce prefixe avant l'envoi au
+    # microservice externe, qui attend une valeur TYPEE (montant, reference...)
+    # pour ces memes champs -- sans ce filtre, cette phrase humaine partait
+    # telle quelle comme donnee metier, et un rejet 4xx du microservice sur ce
+    # champ mal type se confondait avec une vraie panne reseau.
     raw_text = (ctx.tracker.latest_message.get("text") or "").lower()
     if _looks_like_refusal(raw_text):
-        ctx.confirmed[waiting_for] = "Non communiqué (l'utilisateur a préféré ne pas répondre)"
+        ctx.confirmed[waiting_for] = f"{UNRESOLVED_FIELD_PLACEHOLDER_PREFIX} (l'utilisateur a préféré ne pas répondre)"
         ctx.state.pop("invalid_field_attempt", None)
         ctx.dispatcher.utter_message(
             text="Pas de souci, je n'insiste pas sur ce point et je continue avec le reste."
         )
         return
     if _looks_like_uncertain(raw_text):
-        ctx.confirmed[waiting_for] = "Non communiqué (information incertaine pour l'utilisateur)"
+        ctx.confirmed[waiting_for] = f"{UNRESOLVED_FIELD_PLACEHOLDER_PREFIX} (information incertaine pour l'utilisateur)"
         ctx.state.pop("invalid_field_attempt", None)
         ctx.dispatcher.utter_message(
             text="Pas de problème si vous n'êtes pas certain, je continue avec les informations disponibles."
@@ -1566,7 +1673,7 @@ def _respond_diagnostic_confirmation(
     confirmed = state.get("confirmed", {})
     template_name = state.get("template_name", "")
     if confirmed:
-        recap = ", ".join(f"{key} : {value}" for key, value in confirmed.items())
+        recap = ", ".join(f"{FIELD_LABELS.get(key, key)} : {value}" for key, value in confirmed.items())
         text = f"Récapitulatif — {template_name} : {recap}. Je lance la vérification, c'est bien ça ? (oui/non)"
     else:
         # Aucun champ a recapituler (cas des problemes resolubles a partir du
@@ -1627,7 +1734,7 @@ def _respond_no_capability_matched(
     reason = state.get("no_capability_matched_reason")
 
     if state.get("service_unavailable"):
-        message = "Le service de diagnostic est indisponible pour le moment. Voulez-vous que je crée un ticket de réclamation directement ?"
+        message = "Ce service est indisponible pour le moment. Voulez-vous que je crée un ticket de réclamation directement ?"
     elif reason == "user_reported_persistence":
         message = (
             "Vous indiquez que ce problème persiste malgré vos tentatives précédentes. "
@@ -1687,7 +1794,7 @@ def _respond_engine_outcome(
         return reset_events
 
     if outcome == "NEED_MORE_INFO":
-        missing = ", ".join(result.get("missing_fields", []))
+        missing = ", ".join(FIELD_LABELS.get(field, field) for field in result.get("missing_fields", []))
         dispatcher.utter_message(text=f"J’ai encore besoin de : {missing}.")
         return state_events
 
@@ -2033,6 +2140,55 @@ def _looks_like_uncertain(text: Text) -> bool:
     return any(phrase in text for phrase in _UNCERTAINTY_PHRASES)
 
 
+class ActionReaskPendingDiagnosticField(Action):
+    """Re-affiche la question de diagnostic en attente, SANS reinterpreter le
+    dernier message de l'utilisateur comme une tentative de reponse --
+    contrairement a action_run_diagnostic_step, qui retraite toujours
+    tracker.latest_message.text (voir son commentaire).
+
+    Audit robustesse (fluidite de la conversation) : les intentions "meta"
+    (bot_challenge, ask_capabilities, suggestion, plainte, notation...)
+    repondent deja a leur propre question meme en plein diagnostic (voir
+    rules.yml, gardees par active_loop: null uniquement), mais laissaient
+    ensuite la question de diagnostic en suspens sans jamais la rappeler --
+    l'utilisateur devait se souvenir seul de ce qui etait demande. Chainee
+    juste apres ces reponses meta (voir rules.yml), cette action se contente
+    de relire diagnostic_state/pending_field et de reposer la MEME question,
+    via le meme handler que le chemin normal (_respond_field_question) pour
+    ne jamais dupliquer sa logique de libelle.
+
+    Ne fait rien (silencieusement) si pending_field est vide ou l'etat
+    illisible : ce n'est qu'un rappel best-effort, jamais une etape requise
+    du flux.
+    """
+
+    def name(self) -> Text:
+        return "action_reask_pending_diagnostic_field"
+
+    def run(
+        self,
+        dispatcher: CollectingDispatcher,
+        tracker: Tracker,
+        domain: Dict[Text, Any],
+    ) -> List[Dict[Text, Any]]:
+        pending_field = tracker.get_slot("pending_field")
+        if not pending_field:
+            return []
+
+        raw_state = tracker.get_slot("diagnostic_state") or "{}"
+        try:
+            state = json.loads(raw_state) if isinstance(raw_state, str) else raw_state
+            if not isinstance(state, dict):
+                raise ValueError("diagnostic_state doit être un objet JSON")
+        except (json.JSONDecodeError, ValueError):
+            # Meme filet de securite que ActionRunDiagnosticStep : un slot
+            # corrompu ne doit jamais faire planter ce simple rappel.
+            return []
+
+        _respond_field_question(state, dispatcher, tracker, [], pending_field)
+        return []
+
+
 class ActionRunDiagnosticStep(Action):
     """Consolide en UNE seule action ce qui etait auparavant 4 actions
     chainees par une regle (classify -> extract -> update -> ask/resolve).
@@ -2206,10 +2362,16 @@ class ActionRunDiagnosticStep(Action):
         # probleme retenu une fois la decision prise -- l'annoncer ici en
         # plus, avant meme cette decision, etait redondant et confus des que
         # plusieurs candidats coexistaient.
-        if is_fresh_classification and service_unavailable:
-            dispatcher.utter_message(
-                text="Le service de diagnostic est momentanément indisponible, je vais transmettre votre demande directement à notre équipe."
-            )
+        #
+        # Audit ton/clarite : l'annonce "je vais transmettre votre demande
+        # DIRECTEMENT" qui etait ici a ete retiree -- service_unavailable=True
+        # mene, dans ce meme tour, a _respond_no_capability_matched (plus
+        # bas dans le fichier) qui demande explicitement la PERMISSION de
+        # creer un ticket ("Voulez-vous que je crée un ticket de réclamation
+        # directement ?"). Les deux messages se contredisaient (fait accompli
+        # puis demande de permission pour la meme chose) -- seul le second,
+        # qui reflete le VRAI comportement (une confirmation est requise),
+        # est conserve.
 
         # --- 2) Extraction (ex action_extract_diagnostic_entities) ---
         if waiting_for:

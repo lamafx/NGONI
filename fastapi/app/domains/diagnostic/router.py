@@ -11,6 +11,7 @@ from app.database import get_db
 from app.domains.complaints.schemas import TicketCreateResponse
 from app.domains.complaints.service import ComplaintService
 from app.shared.embeddings import cosine_similarity, embed_query
+from app.shared.logging_utils import redact_entities
 from .adapter import HttpDiagnosticAdapter
 from .audit_repository import DiagnosticAuditRepository
 from .contracts import (
@@ -33,13 +34,18 @@ router = APIRouter(prefix='/diagnostic', tags=['diagnostic'])
 
 
 @router.post('/search', response_model=DiagnosticResult)
-async def search_diagnostic(payload: DiagnosticQuery, db: AsyncSession = Depends(get_db)):
+def search_diagnostic(payload: DiagnosticQuery, db: Session = Depends(get_db)):
+    # get_db() (app/database.py) fournit une Session SQLAlchemy synchrone
+    # (create_engine, pas create_async_engine) -- ce endpoint declarait a tort
+    # AsyncSession/await, ce qui levait un TypeError a chaque appel (Session
+    # n'est pas awaitable). Aligne sur le meme pattern synchrone que le reste
+    # de ce fichier (escalate_diagnostic, get_pipeline...).
     query = text('SELECT symptom, diagnosis, next_steps FROM diagnostic_records WHERE symptom ILIKE :symptom LIMIT 1')
-    result = await db.execute(query, {'symptom': f'%{payload.symptom}%'})
+    result = db.execute(query, {'symptom': f'%{payload.symptom}%'})
     row = result.first()
     if row is None:
         raise HTTPException(status_code=404, detail='Diagnostic introuvable')
-    return DiagnosticResult(**dict(row))
+    return DiagnosticResult(**dict(row._mapping))
 
 
 @lru_cache
@@ -178,7 +184,7 @@ async def resolve_diagnostic(
     """
     logger.info(
         "[DIAG][ENGINE] session=%s stage=request_in service=%s problem=%s user=%s entities=%s",
-        payload.session_id, payload.service, payload.problem, x_user_id, payload.entities,
+        payload.session_id, payload.service, payload.problem, x_user_id, redact_entities(payload.entities),
     )
     try:
         outcome = await pipeline.resolve(x_user_id, payload)

@@ -1,10 +1,87 @@
 import random
 import re
+import threading
+import time
 from os import getenv
 from typing import Optional, Text
 
 import requests
 from rasa_sdk import Tracker
+
+
+class SimpleCircuitBreaker:
+    """Disjoncteur generique en memoire de process (verrou inclus) : ouvre
+    apres `failure_threshold` echecs consecutifs, se referme automatiquement
+    apres `cooldown_seconds` (etat "half-open" implicite, pas de sonde
+    active). Extrait du disjoncteur de tickets (reclamation.py) pour etre
+    reutilise par d'autres appels HTTP sujets a panne prolongee (embeddings,
+    capacites -- voir diagnostic.py) : jusqu'ici seul le service de tickets
+    en avait un, un service d'embeddings en panne faisait payer un timeout de
+    10s a CHAQUE appel (message entier + repli par clause + par segment) a
+    chaque tour, plutot que d'echouer vite une fois la panne averee.
+    """
+
+    def __init__(self, failure_threshold: int = 3, cooldown_seconds: float = 30.0) -> None:
+        self._failure_threshold = failure_threshold
+        self._cooldown_seconds = cooldown_seconds
+        self._consecutive_failures = 0
+        self._opened_at: Optional[float] = None
+        self._lock = threading.Lock()
+
+    def is_open(self) -> bool:
+        with self._lock:
+            if self._opened_at is None:
+                return False
+            if time.monotonic() - self._opened_at >= self._cooldown_seconds:
+                return False
+            return True
+
+    def record_success(self) -> None:
+        with self._lock:
+            self._consecutive_failures = 0
+            self._opened_at = None
+
+    def record_failure(self) -> None:
+        with self._lock:
+            self._consecutive_failures += 1
+            if self._consecutive_failures >= self._failure_threshold:
+                self._opened_at = time.monotonic()
+
+
+def request_with_retry(
+    method: Text, url: Text, *, retries: int = 2, backoff_seconds: float = 0.5, **kwargs
+) -> requests.Response:
+    """POST/GET avec un court retry (audit robustesse) : jusqu'ici, seules les
+    URLs des appels HTTP critiques (tickets, capacites, embeddings, moteur de
+    diagnostic) etaient configurables par environnement, jamais les delais --
+    une erreur reseau TRANSITOIRE (le cas le plus frequent en pratique, pas
+    une vraie panne prolongee) faisait immediatement echouer un tour entier
+    ou ouvrir un disjoncteur, sans la moindre nouvelle tentative.
+
+    `retries` tentatives SUPPLEMENTAIRES (donc `retries + 1` essais au
+    total), avec un court backoff fixe -- volontairement simple (pas de
+    jitter/backoff exponentiel) : le budget total doit rester largement sous
+    les 10s allouees par Rasa a une action avant que Core ne l'abandonne.
+
+    Ne reessaie PAS sur un 4xx : un payload invalide ne devient pas valide en
+    le renvoyant identique (voir ActionCreateTicket, meme raisonnement pour
+    le disjoncteur de tickets)."""
+    last_error: Exception = RuntimeError(f"request_with_retry: aucune tentative effectuee pour {url}")
+    for attempt in range(retries + 1):
+        try:
+            response = requests.request(method, url, **kwargs)
+            response.raise_for_status()
+            return response
+        except requests.HTTPError as error:
+            status_code = error.response.status_code if error.response is not None else None
+            if status_code is not None and status_code < 500:
+                raise
+            last_error = error
+        except requests.RequestException as error:
+            last_error = error
+        if attempt < retries:
+            time.sleep(backoff_seconds)
+    raise last_error
 
 
 def pick(*variants: Text) -> Text:
