@@ -2668,10 +2668,58 @@ class ActionOutOfScope(Action):
             # Core route reellement vers le diagnostic ensuite).
             return [{"event": "followup", "name": "action_run_diagnostic_step"}]
 
+        # Audit robustesse (test large 500+) : meme raison, mais pour
+        # reclamation_form -- une approche par REGLES distinctes selon
+        # active_loop ("Out of scope response" vs "Ignore out_of_scope
+        # misclassification while reclamation form is active") s'est averee
+        # peu fiable en pratique : apres le rejet interne du formulaire sur
+        # un intent liste dans reclamation_form.ignored_intents (domain.yml),
+        # RulePolicy ne matche pas toujours de facon deterministe l'etat
+        # post-rejet (action_execution_rejected + loop_interrupted), et
+        # TEDPolicy peut predire une action differente de celle voulue.
+        # Gerer ce cas ICI, dans l'action elle-meme (comme deja fait pour
+        # pending_field ci-dessus), evite totalement cette ambiguite de
+        # regles : deterministe, independant de RulePolicy/TEDPolicy.
+        if tracker.active_loop_name == "reclamation_form":
+            return [{"event": "followup", "name": "reclamation_form"}]
+
         # "+ 1" : voir le commentaire equivalent dans ActionDefaultFallback
         # ci-dessus -- meme decalage d'un cran, meme correctif.
         if _consecutive_fallback_count(tracker) + 1 >= FALLBACK_ESCALATION_THRESHOLD:
             dispatcher.utter_message(text=_human_support_message())
         else:
             dispatcher.utter_message(response="utter_out_of_scope")
+        return []
+
+
+class ActionRespectfulLanguage(Action):
+    """Remplace utter_please_be_respectful declenchee directement comme
+    action -- meme principe que ActionOutOfScope juste au-dessus (voir sa
+    docstring pour le detail de l'ambiguite RulePolicy/TEDPolicy observee en
+    pratique sur les intents listes dans reclamation_form.ignored_intents).
+
+    Ne dispatche PAS son propre message quand un diagnostic est en attente :
+    action_run_diagnostic_step a deja son propre accuse de reception adapte
+    au contexte ("Je comprends votre frustration, je fais le maximum...",
+    voir son commentaire "Colere/frustration... cas 21") et continue de
+    traiter le texte comme une reponse au champ en attente -- dispatcher
+    utter_please_be_respectful ICI EN PLUS produirait deux messages
+    empiles pour un seul tour.
+    """
+
+    def name(self) -> Text:
+        return "action_respectful_language_reminder"
+
+    def run(
+        self,
+        dispatcher: CollectingDispatcher,
+        tracker: Tracker,
+        domain: Dict[Text, Any],
+    ) -> List[Dict[Text, Any]]:
+        if tracker.get_slot("pending_field"):
+            return [{"event": "followup", "name": "action_run_diagnostic_step"}]
+
+        dispatcher.utter_message(response="utter_please_be_respectful")
+        if tracker.active_loop_name == "reclamation_form":
+            return [{"event": "followup", "name": "reclamation_form"}]
         return []

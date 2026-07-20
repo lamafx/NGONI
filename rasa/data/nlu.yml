@@ -193,6 +193,10 @@ nlu:
     - Bonjour
     - Bonsoir
     - Salut
+    # Audit qualite NLU (test large 500+) : formulations plus formelles,
+    # confondues avec nlu_fallback faute d'exemple proche.
+    - Salutations
+    - Bien le bonjour
     - Hey
     - Coucou
     - Hello
@@ -358,6 +362,10 @@ nlu:
     - Bonne journée
     - Bonne soirée
     - À plus
+    # Audit qualite NLU (test large 500+) : "bye" seul suffisait, mais combine
+    # a "c'est bon pour moi" (qui ressemble a une confirmation isolee)
+    # partait sur affirm au lieu de goodbye.
+    - C'est bon pour moi, bye
     - À plus tard
     - Ciao
     - Je vous laisse
@@ -845,6 +853,12 @@ nlu:
     - Jamais
     - Pas encore
     - Non merci
+    # Audit qualite NLU (test large 500+) : formulations de refus qui
+    # partaient vers nlu_fallback/inappropriate_language/affirm faute
+    # d'exemple proche.
+    - Non merci pas ça
+    - Hors de question
+    - Je dis non
     - Non ce n'est pas ça
     - Ce n'est pas correct
     - Faux
@@ -1006,6 +1020,14 @@ nlu:
   examples: |
     - Es-tu un bot ?
     - Est-ce que tu es un humain ?
+    # Audit qualite NLU (test large 500+) : formulations plus indirectes,
+    # confondues avec ask_faq/ask_capabilities/nlu_fallback/greet.
+    - T'es codé comment ?
+    - Sérieusement, IA ou pas ?
+    - Y'a quelqu'un de vrai qui me répond ?
+    - Dis-moi franchement si t'es humain
+    - T'es fait de quoi, du code ?
+    - Un vrai agent va me répondre un jour ?
     - Je parle à un robot ?
     - Tu es une IA ?
     - Est-ce que tu es réel ?
@@ -1145,6 +1167,13 @@ nlu:
     - Désolé, je ne peux pas répondre à cette demande...
     - Je ne peux pas répondre à cette demande.
     - Désolé, je ne peux pas répondre à cette demande.
+    # Audit qualite NLU (test large 500+) : questions hors-sujet concretes,
+    # confondues avec nlu_fallback/inappropriate_language faute d'exemple
+    # proche.
+    - Résous-moi cette équation
+    - Combien font douze fois douze ?
+    - Quel est ton plat préféré ?
+    - Aide-moi à choisir un prénom
     - Quelle est la capitale de la France ?
     - Qui est le président des États-Unis ?
     - Quelle heure est-il ?
@@ -1279,6 +1308,9 @@ nlu:
     - ta gueule
     - connard
     - espèce d'idiot
+    # Audit qualite NLU (test large 500+) : formulation devalorisante sans
+    # mot-cle grossier explicite, confondue avec goodbye.
+    - vous ne servez à rien du tout
     - c'est de la merde ce service
     - ce bot est nul de merde
     - putain de bot inutile
@@ -1294,9 +1326,9 @@ nlu:
     - bot à la con
     - arrête tes conneries
     - tu es inefficace
-    - pourquoi tu es si faible
+    - pourquoi tu es si nul
     - tu es vraiment inefficace
-    - tu es si faible
+    - tu es vraiment minable
 
     - put1 de bot
     - ce truk est vrémen nul
@@ -1438,6 +1470,10 @@ nlu:
     - mon retrait est bloqué
     - je n'arrive plus à me connecter
     - impossible de retirer mon argent
+    # Audit qualite NLU (test large 500+) : symptomes techniques concrets,
+    # confondus avec plainte/ask_faq/deny faute d'exemple proche.
+    - l'appli crash à chaque lancement
+    - je ne reçois plus aucune notification
     - mon compte est bloqué
     - pourquoi mon paiement échoue ?
     - mon retrait reste en attente
@@ -1868,6 +1904,9 @@ nlu:
     - Pourquoi ne pas proposer plus de moyens de paiement pour recharger ?
     - Ce serait top d'avoir un rappel avant l'expiration du KYC.
     - petite idee pour ameliorer lappli
+    # Audit qualite NLU (test large 500+) : idee tres courte sans marqueur
+    # de politesse ("ce serait bien"...), confondue avec ask_faq/nlu_fallback.
+    - idée : un raccourci pour les favoris
     - Pourquoi ne pas proposer une barre de recherche dans la FAQ ?
     - Vous devriez ajouter un mode sombre.
     - Ce serait bien d'avoir un système de parrainage amélioré.
@@ -2023,6 +2062,11 @@ nlu:
     - L'application se déconnecte sans arrêt, c'est vraiment décevant.
     - Je n'ai aucune nouvelle depuis des semaines, c'est vraiment décevant.
     - C'est catastrophique : l'interface est illisible.
+    # Audit qualite NLU (test large 500+) : mecontentement general sans
+    # marqueur emotionnel explicite ("déçu", "pas content"...), confondu
+    # avec suggestion/ask_faq.
+    - C'est lamentable, rien ne fonctionne comme prévu.
+    - C'est de pire en pire à chaque mise à jour.
     - On me donne toujours des réponses différentes, c'est vraiment décevant.
     - Je ne suis pas content, l'application plante tout le temps.
     - Je ne suis pas content, les mises à jour cassent toujours quelque chose.
@@ -2189,6 +2233,15 @@ nlu:
     - Quelles sont tes compétences ?
     - Sur quels services peux-tu effectuer un diagnostic ?
     - Quels problèmes peux-tu résoudre ?
+    # Audit qualite NLU (test large 500+) : formulations indirectes,
+    # confondues avec ask_faq/bot_challenge/out_of_scope/nlu_fallback.
+    - T'es utile pour quoi exactement ?
+    - Explique-moi ton périmètre d'action
+    - Sur quoi puis-je compter avec toi ?
+    - Tu es spécialisé en quoi ?
+    - Détaille-moi tes missions
+    - À quoi tu sers précisément ?
+    - Que peux-tu résoudre pour un utilisateur ?
     - Quels types de demandes peux-tu traiter ?
     - Que peux-tu faire pour moi ?
     - Qu'est-ce que tu sais faire ?
@@ -2221,6 +2274,11 @@ nlu:
     - Oui c'était utile
     - Utile, merci
     - Ça répond à ma question
+    # Audit qualite NLU (test large 500+) : approbation courte sans mot
+    # d'ancrage ("utile"/"répond"/"aide"), confondue avec affirm/goodbye --
+    # intent connu pour rester fragile en texte libre (usage normal = bouton).
+    - Super, c'est exactement ça
+    - Ça résout mon souci, merci beaucoup
     - Exactement ce que je cherchais
     - Parfait, merci pour la réponse
     - Oui merci ça m'aide
@@ -2262,6 +2320,12 @@ nlu:
     - Non ce n'est pas utile
     - Pas utile
     - Ça ne répond pas à ma question
+    # Audit qualite NLU (test large 500+) : chevauchement connu avec deny
+    # (rejeter une reponse ressemble lexicalement a un refus general) --
+    # intent fragile en texte libre, usage normal = bouton.
+    - Pas convaincant du tout comme réponse
+    - Aucun lien avec ce que je demandais
+    - Réponse trop vague pour m'aider
     - Non ça ne m'aide pas
     - Pas vraiment ce que je cherchais
     - Non, pas du tout
@@ -2309,6 +2373,11 @@ nlu:
     - Montre-moi des questions fréquentes
     - Je veux voir des exemples de questions
     - Quelles questions puis-je poser ?
+    # Audit qualite NLU (test large 500+) : formulations proches d'ask_faq
+    # (question directe) plutot que d'une demande de PARCOURIR des exemples.
+    - J'aimerais voir quelques questions fréquentes
+    - Je veux parcourir la foire aux questions
+    - Affiche-moi des sujets fréquents
     - Voir la FAQ
     - Donne-moi des idées de questions
     - montre voir des questions types

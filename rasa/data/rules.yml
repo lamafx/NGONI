@@ -74,6 +74,23 @@ rules:
   - action: action_reask_pending_diagnostic_field
   - action: action_listen
 
+- rule: Bot presentation response while reclamation form is active
+  # Audit robustesse (test large 500+, decouvert par regression) : sans
+  # cette regle, "Bot presentation response" ci-dessus ne s'applique pas
+  # pendant reclamation_form (active_loop: null exige) mais RIEN ne prenait
+  # le relais non plus -- le mapping from_text du slot demande (ex. urgency)
+  # capturait alors le texte de bot_challenge comme une tentative de reponse,
+  # rejetee par la validation ("Le niveau d'urgence doit être..."). Meme
+  # mecanique que "FAQ semantic search while reclamation form is active" :
+  # repond PUIS reactive le formulaire dans le meme tour.
+  condition:
+  - active_loop: reclamation_form
+  steps:
+  - intent: bot_challenge
+  - action: utter_iamabot
+  - action: reclamation_form
+  - active_loop: reclamation_form
+
 - rule: Capabilities description response
   # Meme garde-fou que "Bot presentation response" juste au-dessus (meme
   # famille de question meta sur l'agent) : sans active_loop: null, une
@@ -102,27 +119,47 @@ rules:
   - action: action_reask_pending_diagnostic_field
   - action: action_listen
 
+- rule: Capabilities description response while reclamation form is active
+  # Meme mecanique que "Bot presentation response while reclamation form is
+  # active" juste au-dessus.
+  condition:
+  - active_loop: reclamation_form
+  steps:
+  - intent: ask_capabilities
+  - action: action_describe_capabilities
+  - action: reclamation_form
+  - active_loop: reclamation_form
+
 - rule: Out of scope response
-  # action_out_of_scope (pas utter_out_of_scope directement) : une reponse
-  # mal classee out_of_scope pendant qu'une question de diagnostic est en
-  # attente doit etre traitee comme une tentative de reponse, pas un vrai
-  # hors-sujet -- voir ActionOutOfScope dans diagnostic.py.
+  # action_out_of_scope (pas utter_out_of_scope directement) : gere en
+  # interne pending_field (diagnostic en attente) ET active_loop ==
+  # reclamation_form -- voir ActionOutOfScope dans diagnostic.py.
+  #
+  # Audit robustesse (test large 500+) : une premiere version de ce fix
+  # tentait de disjoindre "Out of scope response" (active_loop:null) et une
+  # regle dediee "... while reclamation form is active" (active_loop:
+  # reclamation_form). Abandonne : constate en pratique (tracker inspecte)
+  # que RulePolicy ne matche pas de facon fiable l'etat juste apres qu'un
+  # intent liste dans reclamation_form.ignored_intents (domain.yml) se soit
+  # fait rejeter par le formulaire (evenements action_execution_rejected +
+  # loop_interrupted) -- TEDPolicy predisait alors une action differente de
+  # celle voulue. Une seule regle SANS condition, qui delegue toute la
+  # logique de reprise a l'action elle-meme (deterministe, independant de
+  # RulePolicy/TEDPolicy), evite cette ambiguite.
   steps:
   - intent: out_of_scope
   - action: action_out_of_scope
 
 - rule: Inappropriate language response
-  # pending_field:null (audit cas 21) : sans cette condition, cette regle
-  # entre en conflit avec "Ignore nlu_fallback/deny/affirm misclassification
-  # while diagnostic dialogue is pending" plus bas, qui doit prendre le
-  # dessus pendant un diagnostic en cours (continuer plutot que couper court
-  # avec le message generique).
-  condition:
-  - slot_was_set:
-    - pending_field: null
+  # action_respectful_language_reminder (pas utter_please_be_respectful
+  # directement) : meme raison, meme correctif que "Out of scope response"
+  # juste au-dessus -- voir sa docstring (diagnostic.py) pour le detail de
+  # l'ambiguite de regles observee en pratique (constatee ici avec "faible",
+  # reponse legitime a l'urgence, classee inappropriate_language a 1.0 de
+  # confiance par le NLU sur ce mot court hors distribution d'entrainement).
   steps:
   - intent: inappropriate_language
-  - action: utter_please_be_respectful
+  - action: action_respectful_language_reminder
 
 - rule: Suggestion response
   # Meme garde-fou que "Bot presentation response" (active_loop: null) : sans
@@ -154,6 +191,17 @@ rules:
   - action: action_store_suggestion
   - action: action_reask_pending_diagnostic_field
   - action: action_listen
+
+- rule: Suggestion response while reclamation form is active
+  # Meme mecanique que "Bot presentation response while reclamation form is
+  # active".
+  condition:
+  - active_loop: reclamation_form
+  steps:
+  - intent: suggestion
+  - action: action_store_suggestion
+  - action: reclamation_form
+  - active_loop: reclamation_form
 
 - rule: Complaint acknowledgement
   # plainte capture l'expression d'un mecontentement general (voir nlu.yml) :
@@ -187,7 +235,25 @@ rules:
   - action: action_reask_pending_diagnostic_field
   - action: action_listen
 
+- rule: Complaint acknowledgement while reclamation form is active
+  # Meme mecanique que "Bot presentation response while reclamation form is
+  # active".
+  condition:
+  - active_loop: reclamation_form
+  steps:
+  - intent: plainte
+  - action: action_acknowledge_complaint
+  - action: reclamation_form
+  - active_loop: reclamation_form
+
 - rule: FAQ semantic search
+  # active_loop:null (audit robustesse, test large 500+) : meme raison que
+  # "Inappropriate language response"/"Out of scope response" -- sans
+  # condition, cette regle l'emporterait a tort sur "FAQ semantic search
+  # while reclamation form is active" (plus bas) si une reponse au
+  # formulaire etait un jour mal classee ask_faq.
+  condition:
+  - active_loop: null
   steps:
   - intent: ask_faq
   - action: action_faq_search
@@ -281,6 +347,9 @@ rules:
   - active_loop: reclamation_form
 
 - rule: Browse FAQ suggestions
+  # active_loop:null : meme raison que "FAQ semantic search" ci-dessus.
+  condition:
+  - active_loop: null
   steps:
   - intent: browse_faq
   - action: action_browse_faq
@@ -296,6 +365,9 @@ rules:
   - active_loop: reclamation_form
 
 - rule: Select FAQ category
+  # active_loop:null : meme raison que "FAQ semantic search" ci-dessus.
+  condition:
+  - active_loop: null
   steps:
   - intent: select_faq_category
   - action: action_select_faq_category
@@ -311,6 +383,9 @@ rules:
   - active_loop: reclamation_form
 
 - rule: Select FAQ question
+  # active_loop:null : meme raison que "FAQ semantic search" ci-dessus.
+  condition:
+  - active_loop: null
   steps:
   - intent: select_faq_question
   - action: action_select_faq_question
@@ -517,35 +592,6 @@ rules:
   - action: reclamation_form
   - active_loop: reclamation_form
 
-- rule: Ignore inappropriate_language misclassification while reclamation form is active
-  # Meme mecanique, meme raison que "Ignore nlu fallback while reclamation
-  # form is active" juste au-dessus (audit robustesse, fluidite de la
-  # conversation) : "Inappropriate language response" plus haut n'est
-  # gardee que par pending_field:null, jamais active_loop -- une reponse
-  # mal classee inappropriate_language en pleine reponse a une question du
-  # formulaire (ex. une description frustree mal etiquetee) coupait le
-  # formulaire avec le message generique "restez poli" au lieu de laisser
-  # reclamation_form la traiter normalement via son mapping from_text.
-  condition:
-  - active_loop: reclamation_form
-  steps:
-  - intent: inappropriate_language
-  - action: reclamation_form
-  - active_loop: reclamation_form
-
-- rule: Ignore out_of_scope misclassification while reclamation form is active
-  # Meme mecanique, meme raison : "Out of scope response" plus haut n'a
-  # AUCUNE garde (ni active_loop, ni pending_field) -- contrairement a
-  # action_out_of_scope, qui elle sait deja distinguer un diagnostic en
-  # attente (voir son commentaire), rien ne protegeait symetriquement le
-  # formulaire de reclamation.
-  condition:
-  - active_loop: reclamation_form
-  steps:
-  - intent: out_of_scope
-  - action: reclamation_form
-  - active_loop: reclamation_form
-
 - rule: Ignore nlu_fallback/deny/affirm misclassification while diagnostic dialogue is pending
   # Meme probleme que ci-dessus, mais pour le flux de diagnostic (qui ne
   # repose pas sur un Form Rasa) : une reponse courte de clarification (ex.
@@ -585,18 +631,21 @@ rules:
   # precis et n'affiche pas le message de fallback quand il ne correspond a
   # rien de reel.
   #
-  # inappropriate_language ajoute ici (audit "robustesse comportementale",
-  # cas 21) : ce meme intent capte deja un registre tres large, de
-  # l'insulte pure ("connard") a une accusation de colere legitime ("vous
-  # me volez mon argent bande de voleurs") -- volontairement PAS un nouvel
-  # intent "frustration" separe, qui aurait chevauche ce vocabulaire deja
-  # couvert et risque exactement la meme derive que modify_reclamation/
-  # confirm_full_cancel avaient causee sur deny. Pendant un diagnostic en
-  # cours, couper court avec le message generique "restez poli" perdrait le
-  # fil (cas 8 : le hors-sujet doit se resoudre brievement puis reprendre le
-  # diagnostic, pas l'interrompre) -- ActionRunDiagnosticStep reconnait cet
-  # intent et adapte son accuse de reception (voir son commentaire) avant de
-  # continuer normalement.
+  # inappropriate_language RETIRE d'ici (audit robustesse, test large 500+) :
+  # cet intent est desormais gere UNIQUEMENT par "Inappropriate language
+  # response" -> action_respectful_language_reminder (rules.yml, plus haut),
+  # qui verifie pending_field en interne et redirige deja vers
+  # action_run_diagnostic_step dans ce meme cas -- comportement identique,
+  # obtenu ici en gardant une SEULE regle qui matche cet intent (une 2e
+  # regle candidate sur le meme intent avait cause l'ambiguite de priorite
+  # RulePolicy/TEDPolicy documentee sur "faible"/inappropriate_language,
+  # voir ActionOutOfScope/ActionRespectfulLanguage dans diagnostic.py).
+  # Historique (audit "robustesse comportementale", cas 21) : cet intent
+  # capte un registre tres large, de l'insulte pure ("connard") a une
+  # accusation de colere legitime ("vous me volez mon argent bande de
+  # voleurs") -- volontairement PAS un intent "frustration" separe, qui
+  # aurait chevauche ce vocabulaire et risque la meme derive que
+  # modify_reclamation/confirm_full_cancel avaient causee sur deny.
   condition:
   - slot_was_set:
     - pending_field
@@ -605,7 +654,6 @@ rules:
     - intent: nlu_fallback
     - intent: deny
     - intent: affirm
-    - intent: inappropriate_language
   - action: action_run_diagnostic_step
   - action: action_listen
 

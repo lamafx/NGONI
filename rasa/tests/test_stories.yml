@@ -35,7 +35,7 @@ stories:
   - user: |
       va te faire foutre
     intent: inappropriate_language
-  - action: utter_please_be_respectful
+  - action: action_respectful_language_reminder
 
 - story: test faq search
   steps:

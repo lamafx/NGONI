@@ -92,9 +92,23 @@ slots:
   incident_date:
     type: text
     influence_conversation: true
+    # Regression decouverte en validant les correctifs NLU de cette session :
+    # from_entity SANS condition capturait "hier"/un jour de semaine mentionne
+    # n'importe ou (ex. dans la DESCRIPTION du probleme : "...depuis hier"),
+    # remplissant incident_date silencieusement AVANT que le formulaire ne
+    # pose la question -- required_slots() la voyait alors deja repondue et
+    # sautait utter_ask_incident_date entierement. Aggrave par l'ajout
+    # d'exemples d'entrainement incident_date plus varies (audit qualite NLU) :
+    # le modele reconnait desormais mieux ce type de mention, y compris hors
+    # contexte. Meme conditions que from_text ci-dessous : les deux mappings
+    # ne s'appliquent plus QUE quand incident_date est reellement le slot
+    # demande, jamais de facon opportuniste sur un autre champ.
     mappings:
       - type: from_entity
         entity: incident_date
+        conditions:
+          - active_loop: reclamation_form
+            requested_slot: incident_date
       - type: from_text
         conditions:
           - active_loop: reclamation_form
@@ -394,6 +408,33 @@ slots:
 
 forms:
   reclamation_form:
+    # Audit robustesse (test large 500+) : sans cette liste, Rasa traite
+    # TOUT intent comme une tentative de remplissage du slot demande tant
+    # que le formulaire est actif -- confirme en pratique via inspection du
+    # tracker : "Es-tu un robot ?" (intent bot_challenge, confiance 1.0)
+    # etait capture par le mapping from_text du slot urgency et REJETE par
+    # validate_urgency, sans jamais laisser la moindre chance aux regles
+    # "... while reclamation form is active" (rules.yml) de s'appliquer,
+    # meme avec `condition: active_loop: reclamation_form` explicite. Cette
+    # liste dit a Rasa : pour CES intents precis, ne tente PAS de remplir le
+    # slot courant -- laisse les regles decider. nlu_fallback/deny/affirm
+    # restent volontairement ABSENTS (voir "Ignore nlu fallback while
+    # reclamation form is active" plus bas, qui a besoin du comportement
+    # inverse : laisser le formulaire capturer le texte brut malgre une
+    # intention mal classee).
+    ignored_intents:
+      - bot_challenge
+      - ask_capabilities
+      - suggestion
+      - plainte
+      - rate_response_useful
+      - rate_response_not_useful
+      - ask_faq
+      - browse_faq
+      - select_faq_category
+      - select_faq_question
+      - inappropriate_language
+      - out_of_scope
     # field_to_edit/cancel_choice ne sont jamais demandes dans cet ordre
     # statique : cette liste est la liste "par defaut", entierement
     # remplacee au runtime par ValidateReclamationForm.required_slots() (voir
@@ -590,6 +631,7 @@ actions:
   - action_handle_negation
   - action_default_fallback
   - action_out_of_scope
+  - action_respectful_language_reminder
   - action_browse_faq
   - action_select_faq_category
   - action_select_faq_question

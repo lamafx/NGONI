@@ -186,7 +186,7 @@ stories:
 - story: inappropriate language then normal reclamation
   steps:
   - intent: inappropriate_language
-  - action: utter_please_be_respectful
+  - action: action_respectful_language_reminder
   - intent: create_reclamation
   - action: action_start_reclamation
   - action: reclamation_form
