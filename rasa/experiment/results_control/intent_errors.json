@@ -1,0 +1,314 @@
+[
+  {
+    "text": "Je souhaite créer un compte.",
+    "intent": "ask_faq",
+    "intent_prediction": {
+      "name": "diagnostic",
+      "confidence": 1.0
+    }
+  },
+  {
+    "text": "Comment accéder à mon compte ?",
+    "intent": "ask_faq",
+    "intent_prediction": {
+      "name": "diagnostic",
+      "confidence": 0.9937477111816406
+    }
+  },
+  {
+    "text": "Puis-je changer mon numéro de téléphone ?",
+    "intent": "ask_faq",
+    "intent_prediction": {
+      "name": "diagnostic",
+      "confidence": 0.9899253845214844
+    }
+  },
+  {
+    "text": "J'aimerais mieux comprendre votre application.",
+    "intent": "ask_faq",
+    "intent_prediction": {
+      "name": "diagnostic",
+      "confidence": 0.9746714234352112
+    }
+  },
+  {
+    "text": "Comment mettre à jour mon compte ?",
+    "intent": "ask_faq",
+    "intent_prediction": {
+      "name": "diagnostic",
+      "confidence": 0.6657112240791321
+    }
+  },
+  {
+    "text": "Je souhaite avoir une précision sur un service.",
+    "intent": "ask_faq",
+    "intent_prediction": {
+      "name": "diagnostic",
+      "confidence": 0.9997498393058777
+    }
+  },
+  {
+    "text": "Pouvez-vous répondre à une question sur l'application ?",
+    "intent": "ask_faq",
+    "intent_prediction": {
+      "name": "diagnostic",
+      "confidence": 0.9990468621253967
+    }
+  },
+  {
+    "text": "koman on peu retirer de largent",
+    "intent": "ask_faq",
+    "intent_prediction": {
+      "name": "diagnostic",
+      "confidence": 0.9983263611793518
+    }
+  },
+  {
+    "text": "pk le retrait prend du tem",
+    "intent": "ask_faq",
+    "intent_prediction": {
+      "name": "diagnostic",
+      "confidence": 0.9999938011169434
+    }
+  },
+  {
+    "text": "Est-ce que je peux avoir plusieurs comptes ?",
+    "intent": "ask_faq",
+    "intent_prediction": {
+      "name": "diagnostic",
+      "confidence": 0.9999079704284668
+    }
+  },
+  {
+    "text": "Comment savoir si mon paiement a bien été pris en compte ?",
+    "intent": "ask_faq",
+    "intent_prediction": {
+      "name": "diagnostic",
+      "confidence": 0.8433500528335571
+    }
+  },
+  {
+    "text": "suspension de compte, pourquoi ça arrive ?",
+    "intent": "ask_faq",
+    "intent_prediction": {
+      "name": "diagnostic",
+      "confidence": 1.0
+    }
+  },
+  {
+    "text": "L'application se ferme toute seule.",
+    "intent": "diagnostic",
+    "intent_prediction": {
+      "name": "ask_faq",
+      "confidence": 0.6682268381118774
+    }
+  },
+  {
+    "text": "Le service ne fonctionne pas normalement.",
+    "intent": "diagnostic",
+    "intent_prediction": {
+      "name": "ask_faq",
+      "confidence": 0.9984923601150513
+    }
+  },
+  {
+    "text": "Je veux savoir où en est ma vérification d'identité.",
+    "intent": "diagnostic",
+    "intent_prediction": {
+      "name": "ask_faq",
+      "confidence": 0.9506132006645203
+    }
+  },
+  {
+    "text": "La demande de consentement parental a expiré.",
+    "intent": "diagnostic",
+    "intent_prediction": {
+      "name": "ask_faq",
+      "confidence": 0.9999980926513672
+    }
+  },
+  {
+    "text": "Vérifie où en est le consentement parental.",
+    "intent": "diagnostic",
+    "intent_prediction": {
+      "name": "ask_faq",
+      "confidence": 1.0
+    }
+  },
+  {
+    "text": "Est-ce que le consentement parental a été validé ?",
+    "intent": "diagnostic",
+    "intent_prediction": {
+      "name": "ask_faq",
+      "confidence": 0.9991284012794495
+    }
+  },
+  {
+    "text": "consentement parental svp",
+    "intent": "diagnostic",
+    "intent_prediction": {
+      "name": "ask_faq",
+      "confidence": 0.9999996423721313
+    }
+  },
+  {
+    "text": "les notifications ont complètement cessé d'arriver",
+    "intent": "diagnostic",
+    "intent_prediction": {
+      "name": "ask_faq",
+      "confidence": 1.0
+    }
+  },
+  {
+    "text": "Le support est-il disponible tous les jours ?",
+    "intent": "ask_faq",
+    "intent_prediction": {
+      "name": "diagnostic",
+      "confidence": 0.917431652545929
+    }
+  },
+  {
+    "text": "Bonjour je ne comprends pas NGONI",
+    "intent": "ask_faq",
+    "intent_prediction": {
+      "name": "diagnostic",
+      "confidence": 0.9955139756202698
+    }
+  },
+  {
+    "text": "y a t’il un tuto ?",
+    "intent": "ask_faq",
+    "intent_prediction": {
+      "name": "diagnostic",
+      "confidence": 0.9999996423721313
+    }
+  },
+  {
+    "text": "difficulté de retrait d'argent",
+    "intent": "diagnostic",
+    "intent_prediction": {
+      "name": "ask_faq",
+      "confidence": 0.9094390869140625
+    }
+  },
+  {
+    "text": "Il y a un dysfonctionnement sur mon compte.",
+    "intent": "diagnostic",
+    "intent_prediction": {
+      "name": "ask_faq",
+      "confidence": 0.9999808073043823
+    }
+  },
+  {
+    "text": "Une opération a disparu.",
+    "intent": "diagnostic",
+    "intent_prediction": {
+      "name": "ask_faq",
+      "confidence": 0.9610840678215027
+    }
+  },
+  {
+    "text": "Cela fait maintenant deux jours que mon retrait est indiqué comme étant toujours en cours de traitement et je commence à m'inquiéter pour mon argent.",
+    "intent": "diagnostic",
+    "intent_prediction": {
+      "name": "ask_faq",
+      "confidence": 0.9999947547912598
+    }
+  },
+  {
+    "text": "le retrait",
+    "intent": "diagnostic",
+    "intent_prediction": {
+      "name": "ask_faq",
+      "confidence": 0.9817503690719604
+    }
+  },
+  {
+    "text": "c'est le dépôt le plus urgent",
+    "intent": "diagnostic",
+    "intent_prediction": {
+      "name": "ask_faq",
+      "confidence": 0.9951969981193542
+    }
+  },
+  {
+    "text": "traitons la connexion en premier",
+    "intent": "diagnostic",
+    "intent_prediction": {
+      "name": "ask_faq",
+      "confidence": 0.9706577658653259
+    }
+  },
+  {
+    "text": "le transfert avant le reste",
+    "intent": "diagnostic",
+    "intent_prediction": {
+      "name": "ask_faq",
+      "confidence": 0.9998775720596313
+    }
+  },
+  {
+    "text": "Le souci a commencé le mois dernier.",
+    "intent": "diagnostic",
+    "intent_prediction": {
+      "name": "ask_faq",
+      "confidence": 0.9807085394859314
+    }
+  },
+  {
+    "text": "Je souhaite diagnostiquer un dysfonctionnement.",
+    "intent": "diagnostic",
+    "intent_prediction": {
+      "name": "ask_faq",
+      "confidence": 0.9999996423721313
+    }
+  },
+  {
+    "text": "Je veux comprendre ce qui ne va pas avant de faire quoi que ce soit.",
+    "intent": "diagnostic",
+    "intent_prediction": {
+      "name": "ask_faq",
+      "confidence": 0.9979044198989868
+    }
+  },
+  {
+    "text": "J'aimerais qu'on essaie de comprendre le problème ensemble.",
+    "intent": "diagnostic",
+    "intent_prediction": {
+      "name": "ask_faq",
+      "confidence": 0.8277604579925537
+    }
+  },
+  {
+    "text": "Comment récupérer mon compte supprimé ?",
+    "intent": "diagnostic",
+    "intent_prediction": {
+      "name": "ask_faq",
+      "confidence": 0.9970278143882751
+    }
+  },
+  {
+    "text": "Combien de temps ai-je pour annuler la suppression ?",
+    "intent": "diagnostic",
+    "intent_prediction": {
+      "name": "ask_faq",
+      "confidence": 0.9591591954231262
+    }
+  },
+  {
+    "text": "Pourquoi le compte de mon enfant reste verrouillé ?",
+    "intent": "diagnostic",
+    "intent_prediction": {
+      "name": "ask_faq",
+      "confidence": 0.9898640513420105
+    }
+  },
+  {
+    "text": "Bonjour, avant d'ouvrir quoi que ce soit, j'aimerais qu'on essaie de diagnostiquer précisément ce qui ne fonctionne pas sur mon compte.",
+    "intent": "diagnostic",
+    "intent_prediction": {
+      "name": "ask_faq",
+      "confidence": 0.9999996423721313
+    }
+  }
+]

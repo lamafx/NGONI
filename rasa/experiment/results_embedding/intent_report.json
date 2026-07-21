@@ -1,0 +1,39 @@
+{
+  "diagnostic": {
+    "precision": 0.9636363636363636,
+    "recall": 0.961139896373057,
+    "f1-score": 0.9623865110246432,
+    "support": 386,
+    "confused_with": {
+      "ask_faq": 15
+    }
+  },
+  "ask_faq": {
+    "precision": 0.9289099526066351,
+    "recall": 0.9333333333333333,
+    "f1-score": 0.9311163895486937,
+    "support": 210,
+    "confused_with": {
+      "diagnostic": 14
+    }
+  },
+  "accuracy": 0.9513422818791947,
+  "macro avg": {
+    "precision": 0.9462731581214994,
+    "recall": 0.9472366148531952,
+    "f1-score": 0.9467514502866685,
+    "support": 596
+  },
+  "weighted avg": {
+    "precision": 0.951400547669513,
+    "recall": 0.9513422818791947,
+    "f1-score": 0.9513685152025805,
+    "support": 596
+  },
+  "micro avg": {
+    "precision": 0.9513422818791947,
+    "recall": 0.9513422818791947,
+    "f1-score": 0.9513422818791947,
+    "support": 596
+  }
+}

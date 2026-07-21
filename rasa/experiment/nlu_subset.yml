@@ -1,0 +1,710 @@
+version: "3.1"
+
+nlu:
+- intent: ask_faq
+  examples: |
+    - Comment créer un compte NGONI ?
+    - Comment ouvrir un compte sur NGONI ?
+    - Comment m'inscrire sur NGONI ?
+    - Je souhaite créer un compte.
+    - Quelle est la procédure d'inscription ?
+    - Comment fonctionne l'inscription ?
+    - Comment accéder à mon compte ?
+    - Comment me connecter ?
+    - J'ai oublié comment me connecter.
+    - Comment réinitialiser mon mot de passe ?
+    - Comment modifier mon mot de passe ?
+    - Puis-je changer mon numéro de téléphone ?
+    - Comment mettre à jour mes informations personnelles ?
+    - Comment compléter mon profil ?
+    - À quoi sert NGONI ?
+    - Qu'est-ce que NGONI ?
+    - Peux-tu me présenter NGONI ?
+    - C'est quoi NGONI ?
+    - Explique-moi le fonctionnement de NGONI.
+    - Comment fonctionne NGONI ?
+    - Comment acheter des pièces ?
+    - Où acheter des pièces ?
+    - Quels sont les moyens d'acheter des pièces ?
+    - Comment obtenir des pièces ?
+    - Comment recharger mon portefeuille de pièces ?
+    - Quels moyens de paiement sont acceptés ?
+    - Comment utiliser mes pièces ?
+    - À quoi servent les pièces ?
+    - Comment consulter mon solde de pièces ?
+    - Comment savoir combien de pièces il me reste ?
+    - Comment effectuer un retrait ?
+    - Comment demander un retrait ?
+    - Quel est le délai d'un retrait ?
+    - Comment suivre mon retrait ?
+    - Comment fonctionne le système de retrait ?
+    - Comment gagner des pièces ?
+    - Existe-t-il plusieurs façons de gagner des pièces ?
+    - Comment fonctionne le système de récompenses ?
+    - Comment consulter mon historique ?
+    - Où voir mes transactions ?
+    - Comment vérifier mes opérations ?
+    - Comment contacter le support ?
+    - Comment obtenir de l'aide ?
+    - Où puis-je trouver les informations sur NGONI ?
+    - Je voudrais en savoir plus sur les services proposés.
+    - Peux-tu répondre à une question concernant NGONI ?
+    - J'aimerais avoir des informations sur NGONI.
+    - Je voudrais comprendre comment fonctionne la plateforme.
+    - Pouvez-vous m'expliquer le fonctionnement de NGONI ?
+    - J'ai quelques questions sur NGONI.
+    - Je souhaite obtenir des renseignements sur vos services.
+    - Je cherche des informations concernant NGONI.
+    - J'aimerais mieux comprendre votre application.
+    - Peux-tu m'aider à comprendre certaines fonctionnalités ?
+    - Je veux en apprendre davantage sur NGONI.
+    - J'aimerais savoir comment utiliser l'application.
+    - Comment utiliser NGONI pour la première fois ?
+    - Que puis-je faire avec NGONI ?
+    - Quelles sont les principales fonctionnalités de NGONI ?
+    - Quels services sont proposés par NGONI ?
+    - Quelles sont les fonctionnalités disponibles ?
+    - Que permet de faire l'application ?
+    - Comment profiter des services NGONI ?
+    - Comment démarrer avec NGONI ?
+    - Existe-t-il un guide d'utilisation ?
+    - Comment apprendre à utiliser la plateforme ?
+    - Comment fonctionne le système de pièces ?
+    - Peux-tu expliquer le système de pièces ?
+    - Je ne comprends pas le fonctionnement des pièces.
+    - Comment les pièces sont-elles utilisées ?
+    - Les pièces servent à quoi exactement ?
+    - À quoi correspondent les pièces ?
+    - Comment connaître le prix des pièces ?
+    - Combien coûtent les pièces ?
+    - Où consulter les tarifs des pièces ?
+    - Comment fonctionne l'achat de pièces ?
+    - Comment récupérer des pièces ?
+    - Peut-on obtenir des pièces gratuitement ?
+    - Comment fonctionne le portefeuille ?
+    - Où consulter mon portefeuille ?
+    - Comment voir mon solde ?
+    - Comment consulter mes informations de compte ?
+    - Où trouver mes informations personnelles ?
+    - Comment modifier mon profil ?
+    - Puis-je changer mes informations personnelles ?
+    - Comment mettre à jour mon compte ?
+
+    - Comment consulter mes récompenses ?
+    - Comment sont calculées les récompenses ?
+    - Comment fonctionne le programme de récompenses ?
+    - Comment vérifier mes récompenses ?
+    - Où consulter l'historique de mes opérations ?
+    - Comment retrouver mes anciennes transactions ?
+    - Où voir mes retraits ?
+    - Comment consulter mes achats ?
+    - Où voir toutes mes opérations ?
+    - Comment accéder à l'historique ?
+    - Comment retrouver une ancienne transaction ?
+    - Quels sont les délais de traitement ?
+    - En combien de temps une opération est-elle traitée ?
+    - Où puis-je lire les conditions d'utilisation ?
+    - Existe-t-il une foire aux questions ?
+    - Où trouver les réponses aux questions fréquentes ?
+    - Où puis-je obtenir plus d'informations ?
+    - Qui puis-je contacter pour avoir des renseignements ?
+    - Comment joindre le support ?
+    - Le support est-il disponible tous les jours ?
+    - Quels sont vos horaires d'assistance ?
+    - Où puis-je consulter les informations officielles ?
+    - Je souhaite avoir une précision sur un service.
+    - J'ai besoin d'une explication concernant une fonctionnalité.
+    - Pouvez-vous répondre à une question sur l'application ?
+    - Bonjour c'est quoi NGONI ?
+    - Salut je veux comprendre comment ça marche
+    - Hello comment utiliser l'application ?
+    - Bonjour j'ai une question sur les pièces
+    - Salut, comment fonctionne un compte sur l'application ?
+    - Bonsoir comment acheter des pièces ?
+    - Hey je veux savoir comment ça marche NGONI
+    - Coucou c'est quoi le système de récompense ?
+    - Bonjour je ne comprends pas NGONI
+    - Salut comment on utilise le portefeuille ?
+    - j’ai une question sur le fonctionnement de l’appli
+    - cmt on fait un retrait ?
+    - comment recharger mon portefeuille ?
+    - tu peux m’expliquer le système de pièces ?
+    - je cherche une info sur les récompenses
+    
+    - comment voir mes pièces ?
+    - j’ai besoin d’aide pour comprendre l’appli
+    - comment s’inscrire vite ?
+    - y a t’il un tuto ?
+
+    
+    - comen sa marche ngoni
+    - koman on peu retirer de largent
+    - c'est koi ngoni exactement
+    - commen fair pr acheter des piece
+    - je c pa comment sinscrire
+    - pk le retrait prend du tem
+    - kes ce que ngoni plus
+    - conment on gagne des piece
+    - eske on peu utiliser ngoni sur android
+    - Bonjour, je découvre l'application et j'aimerais comprendre en détail comment fonctionne le système de pièces avant de faire mon premier achat, s'il vous plaît.
+    - Je voudrais savoir, de manière générale et sans que ce soit lié à un souci particulier, comment se déroule normalement le processus de retrait d'argent sur NGONI.
+    
+    - Avant d'utiliser l'application pour la première fois, je voudrais comprendre comment fonctionnent les pièces, comment on les achète et comment on les utilise pour envoyer des cadeaux.
+    - Je me demandais, puisque je suis nouveau sur la plateforme, quelles étaient les différentes façons de gagner des pièces en dehors de l'achat direct.
+    - Est-ce que vous pourriez m'indiquer, de façon générale, quel est le délai moyen de traitement d'un retrait, juste pour que je sache à quoi m'attendre la prochaine fois ?
+    - Comment fonctionne le contrôle parental ?
+    - C'est quoi le contrôle parental sur l'application ?
+    - Comment activer le contrôle parental pour mon enfant ?
+    - À quoi sert le contrôle parental sur NGONI ?
+    - Comment faire une suggestion d'amélioration ?
+    - Où proposer une idée d'amélioration pour l'application ?
+    - Comment envoyer une suggestion à l'équipe NGONI ?
+    - Existe-t-il un moyen de proposer une amélioration ?
+    - Comment gagner des revenus grâce à mon audience ?
+    - Comment monétiser mon contenu sur NGONI ?
+    - Quelles sont les sources de revenus possibles sur NGONI ?
+    - Comment un créateur peut-il gagner de l'argent sur la plateforme ?
+
+    - Comment supprimer mon compte définitivement ?
+    - C'est quoi les lives privés payants ?
+    - C'est quoi la différence entre le wallet et les pièces ?
+    - Quels documents faut-il pour le KYC ?
+    - Peut-on avoir un compte sans vérification ?
+    - Combien de temps gardez-vous mes données personnelles ?
+    - Est-ce que je peux avoir plusieurs comptes ?
+    - Comment contacter le support directement ?
+    - Puis-je changer mon email ?
+    - Comment je fais pour vérifier mon identité ?
+
+    # Audit qualite NLU (collision lexicale ask_faq/diagnostic, 2026-07-21) :
+    # config.yml n'alimente DIETClassifier qu'avec des featurizers bag-of-words
+    # / char n-gram (CountVectorsFeaturizer word + char_wb), aucun embedding
+    # semantique en amont -- deux exemples partageant beaucoup de mots-contenu
+    # mais assignes a des intentions differentes sont donc un vrai bruit
+    # d'etiquetage pour ce pipeline, pas une simple coincidence stylistique.
+    # Mesure par recouvrement de mots-contenu (Jaccard) entre les 174 exemples
+    # ask_faq et les 387 exemples diagnostic : 2 exemples ask_faq retires/
+    # reformules ci-dessus car structurellement identiques au patron dominant
+    # de diagnostic ("Pourquoi mon [sujet] [etat probleme] ?", 17 occurrences
+    # cote diagnostic, 2 cote ask_faq avant ce correctif). diagnostic reste
+    # volontairement plus fourni (387 exemples, couverture large de problemes
+    # distincts, voir commentaire en fin de fichier) : le corrige ne consiste
+    # donc pas a le reduire, mais a renforcer le cadrage GENERIQUE/PROCEDURAL
+    # cote ask_faq sur la meme zone de vocabulaire (retrait, mot de passe,
+    # connexion, compte, KYC) plutot que de compter sur plus d'exemples courts
+    # -- seul le CADRAGE peut servir de signal discriminant a un modele qui ne
+    # voit que des sacs de mots, pas le sens.
+    - Quelle est la procédure normale pour effectuer un retrait ?
+    - En général, combien de temps faut-il pour qu'un retrait soit traité ?
+    - Comment se passe habituellement une réinitialisation de mot de passe ?
+    - Quelle est la démarche standard pour se connecter à son compte ?
+    - De manière générale, comment accède-t-on à son compte NGONI ?
+    - Quelles sont les étapes classiques pour créer ou ouvrir un compte ?
+    - Comment fonctionne normalement le système de connexion ?
+    - Existe-t-il une procédure standard pour changer de mot de passe ?
+    - Quelle est la marche à suivre habituelle pour le KYC ?
+    - De façon générale, comment se déroule la vérification d'identité ?
+
+    # Nettoyage a plus grande echelle (2026-07-21, suite au 1er correctif qui
+    # a regresse -2.4pt : effet de levier trop faible sur seulement 2 exemples
+    # retires + 10 renforts). Constat par grep direct : depot/transfert/
+    # messagerie/notification/suspension/conformite/consentement parental
+    # sont couverts par des DIZAINES d'exemples diagnostic (dont des exemples
+    # annotes en entites, ex. [depot](operation_type:deposit)) mais ZERO
+    # exemple ask_faq generique n'existe sur ce meme vocabulaire -- toute
+    # question procedurale utilisant ces mots n'a statistiquement aucune
+    # chance face a diagnostic. Les exemples ci-dessous comblent cette
+    # asymetrie plutot que de retoucher les 12 collisions restantes
+    # identifiees par mesure de similarite (Jaccard sur mots-contenu) qui se
+    # sont averees etre, apres relecture, des questions ask_faq deja
+    # correctement etiquetees (juste courtes, donc statistiquement fragiles) :
+    # les retoucher aurait degrade une couverture FAQ deja valide sans
+    # justification semantique, seulement pour "faire baisser un score de
+    # similarite".
+    - Comment effectuer un dépôt sur mon compte ?
+    - Quelle est la procédure pour faire un dépôt ?
+    - Comment faire un transfert vers un autre utilisateur ?
+    - Quelle est la démarche pour transférer de l'argent à un ami ?
+    - Que faire en général si un paiement échoue ?
+    - Quelles sont les causes possibles d'un échec de paiement ?
+    - Comment fonctionne la messagerie sur l'application ?
+    - Quelles sont les règles d'utilisation de la messagerie ?
+    - Comment activer les notifications de l'application ?
+    - Comment paramétrer mes notifications par défaut ?
+    - Pourquoi un compte peut-il être suspendu, en général ?
+    - Quelles sont les raisons possibles d'une suspension de compte ?
+    - Quelles sont les règles de conformité appliquées aux comptes ?
+    - En quoi consiste un contrôle de conformité sur NGONI ?
+    - Comment fonctionne le consentement parental pour un mineur ?
+    - Quelle est la démarche pour donner son consentement parental ?
+    - Combien de temps dure en moyenne le traitement d'un dépôt ?
+    - Quels sont les délais habituels pour un transfert entre utilisateurs ?
+    - Comment savoir si mon paiement a bien été pris en compte ?
+    - Quelle est la démarche générale pour récupérer un compte supprimé ?
+    - dépôt, comment ça marche ?
+    - transfert, quelle est la procédure ?
+    - notifications, comment les activer ?
+    - messagerie, comment ça fonctionne ?
+    - suspension de compte, pourquoi ça arrive ?
+    - consentement parental, comment ça marche ?
+    - conformité, c'est quoi exactement ?
+    - mot de passe oublié, comment faire en général ?
+
+    # Prefixe de politesse "Bonjour, ..." (audit "500 tours", 2026-07-18) :
+    # une question de fond parfaitement claire, une fois precedee d'une
+    # formule de politesse structurée en debut de phrase, se faisait
+    # classer greet/nlu_fallback plutot que la vraie intention. Exemples
+    # ci-dessous pour que le NLU apprenne a ignorer ce prefixe.
+    - Bonjour, quel est le montant minimum de retrait, merci d'avance.
+    - Bonjour, puis-je changer mon email, merci d'avance.
+    - Bonjour, est-ce que mes pièces expirent un jour, merci d'avance.
+    - Bonjour, comment puis-je vérifier mon identité, merci d'avance.
+    - Bonjour, comment fonctionne le parrainage, merci d'avance.
+    - Bonjour, pourriez-vous m'indiquer comment recharger mon compte, merci.
+
+- intent: diagnostic
+  examples: |
+    - mon retrait est bloqué
+    - je n'arrive plus à me connecter
+    - impossible de retirer mon argent
+    # Audit qualite NLU (test large 500+) : symptomes techniques concrets,
+    # confondus avec plainte/ask_faq/deny faute d'exemple proche.
+    - l'appli crash à chaque lancement
+    - je ne reçois plus aucune notification
+    - mon compte est bloqué
+    - pourquoi mon paiement échoue ?
+    - mon retrait reste en attente
+    - je ne peux pas finaliser mon paiement
+    - mon portefeuille ne se met pas à jour
+    - ma connexion est impossible depuis ce matin
+    - l'application plante à l'ouverture
+    - je ne vois pas mes pièces sur mon compte
+    - mon solde semble erroné
+    - le système affiche une erreur de connexion
+    - je ne reçois pas le code de vérification
+    - je ne comprends pas pourquoi mon paiement a échoué
+    - impossible d'accéder à mon espace
+    - mon retrait est toujours en attente
+    - j'ai un souci avec mon compte
+    - mon paiement est refusé sans raison
+    - j'ai un problème de connexion
+    - je ne peux plus me connecter
+    - mon application est lente
+    - le service ne répond pas
+    - ma transaction est bloquée
+    - je ne peux pas valider mon achat
+    - je cherche à comprendre pourquoi ça ne marche pas
+    - il y a un souci sur mon profil
+    - mon compte me refuse l'accès
+    - j'ai l'impression que quelque chose ne va pas
+    - mon retrait ne part jamais
+    - j'essaye de me connecter mais ça bloque
+    - ça fait plusieurs jours que mon retrait est bloqué
+    - je ne sais pas pourquoi mon paiement échoue
+    - j’ai un bug sur l’application
+    - ma transaction reste en cours
+    - mon ticket n'avance pas
+    - difficulté de retrait d'argent
+    - mon espace perso est inaccessible
+    - le service bug depuis ce matin
+    - j’ai un souci de connexion au compte
+    - mon compte refuse ma connexion
+    - je ne peux plus utiliser l’appli
+    - mon paiement a été débité mais je n’ai rien reçu
+    - je ne reçois toujours pas mon argent
+    - c’est bloqué au niveau du retrait
+    - pourquoi mon retrait n’aboutit pas ?
+    - mon portefeuille n’est pas mis à jour
+    - j’ai l’impression que mon compte est gelé
+    - je ne peux pas terminer mon opération
+    - Je rencontre un problème avec mon compte.
+    - J'ai un souci avec mon compte.
+    - Mon compte ne fonctionne pas correctement.
+    - Je n'arrive plus à accéder à mon compte.
+    - Impossible de me connecter.
+    - La connexion à mon compte échoue.
+    - Mon mot de passe ne fonctionne plus.
+    - Je ne reçois pas le code de vérification.
+    - Je ne peux plus utiliser mon compte.
+    - Mon compte semble bloqué.
+    - Il y a un dysfonctionnement sur mon compte.
+    - Quelque chose ne fonctionne pas.
+    - L'application ne répond plus.
+    - L'application plante à chaque ouverture.
+    - L'application se ferme toute seule.
+    - Je rencontre un bug.
+    - Je pense qu'il y a une erreur.
+    - Le service ne fonctionne pas normalement.
+    - Mon achat de pièces n'a pas été pris en compte.
+    - J'ai payé mais je n'ai pas reçu mes pièces.
+    - Mon paiement a échoué.
+    - Mon portefeuille n'a pas été crédité.
+    - Mon solde n'a pas changé après mon achat.
+    - J'ai perdu des pièces.
+    - Des pièces ont disparu de mon compte.
+    - Mon retrait est bloqué.
+    - Je n'ai toujours pas reçu mon retrait.
+    - Mon retrait est en attente depuis longtemps.
+    - Mon retrait a été refusé sans raison.
+    - Mon retrait n'aboutit pas.
+    - Ma demande de retrait ne passe pas.
+    - Je n'arrive pas à effectuer un retrait.
+    - Le retrait reste en cours depuis plusieurs jours.
+    - Mon historique est incorrect.
+    - Une transaction est manquante.
+    - Je constate une erreur dans mes opérations.
+    - Une opération a disparu.
+    - Mes transactions ne s'affichent plus.
+    - Mes récompenses ne sont pas créditées.
+    - Je rencontre un problème avec les récompenses.
+    - Une fonctionnalité ne fonctionne pas.
+    - Le système affiche une erreur.
+    - Depuis ce matin je ne peux plus utiliser mon compte.
+    - Mon compte refuse de s'ouvrir.
+    - Je suis bloqué dès la connexion.
+    - Impossible d'accéder à mon espace personnel.
+    - Je n'arrive pas à terminer la connexion.
+    - La connexion tourne en boucle.
+    - Mon compte est inaccessible.
+    - Je reste bloqué sur la page de connexion.
+    - Je n'arrive plus à utiliser les services.
+    - Mon paiement a bien été effectué mais rien n'a changé.
+    - Mon argent a été débité mais je n'ai rien reçu.
+    - Les pièces achetées ne sont toujours pas visibles.
+    - J'attends toujours les pièces après mon paiement.
+    - Je pense que mon achat n'a pas été validé.
+    - Mon portefeuille n'a pas été mis à jour.
+    - Une partie de mes pièces a disparu.
+    - Mon solde semble incorrect.
+    - Je constate une différence dans mon solde.
+    - Le montant affiché ne correspond pas à ce que je possède.
+    - Je rencontre un souci avec mon portefeuille.
+    - Je ne comprends pas pourquoi mon solde a diminué.
+    - Mon retrait est bloqué depuis plusieurs jours.
+    - Cela fait longtemps que j'attends mon retrait.
+    - Mon retrait ne progresse plus.
+    - Je n'ai toujours rien reçu.
+    - Le statut de mon retrait ne change pas.
+    - Ma demande de retrait semble figée.
+    - J'attends mon argent mais rien ne se passe.
+    - Je pense qu'il y a un problème avec mon retrait.
+    - Pourquoi mon retrait reste bloqué aussi longtemps ?
+    - Mon retrait est toujours marqué en attente.
+    - Mon retrait n'aboutit jamais.
+    - Le système refuse mon retrait.
+    - Je ne peux plus retirer mon argent.
+    - Mon retrait a disparu de l'historique.
+
+    - Je n'ai reçu aucune récompense.
+    - Les bonus promis ne sont pas crédités.
+    - Les récompenses semblent bloquées.
+    - Une erreur apparaît lorsque j'utilise cette fonctionnalité.
+    - L'application affiche un message d'erreur.
+    - Cette fonctionnalité refuse de fonctionner.
+    - Je clique mais il ne se passe rien.
+    - L'application reste bloquée.
+    - Tout est figé sur mon écran.
+    - L'application devient très lente.
+    - Je dois redémarrer l'application à chaque fois.
+    - Je ne peux plus continuer après cette étape.
+    - Une erreur inconnue apparaît.
+    - Je pense qu'il y a un bug sur mon compte.
+    - Mon problème n'est toujours pas résolu.
+    - Cela fait plusieurs jours que le problème persiste.
+    - J'ai déjà essayé plusieurs fois sans succès.
+    - Rien ne fonctionne malgré plusieurs tentatives.
+    - Bonjour mon compte ne marche pas
+    - Salut j'ai un problème avec mon retrait
+    - Hello mon paiement n'a pas été reçu
+    - Bonsoir mon application bug
+    - Salut je n'arrive plus à me connecter
+    - Bonjour mon solde est faux
+    - Hey j'ai perdu mes pièces
+    - Coucou mon retrait est bloqué
+    - Bonjour ça ne fonctionne pas depuis ce matin
+    - Salut j'ai essayé mais ça marche pas
+
+    - Bonsoir comment allez-vous ? J'ai fait un retrait depuis hier mais ça n'a pas été effectué.
+    - Bonjour, comment allez-vous ? Mon compte est bloqué.
+    - Salut, ça va ? J'ai un problème avec mon retrait.
+    - Bonjour comment ça va ? Mon paiement a été refusé sans raison.
+    - Coucou, comment allez-vous ? Je n'arrive plus à me connecter.
+    - Hello, comment vas-tu ? Mon solde semble erroné.
+    - Bonsoir, comment ça va ? Je n'ai pas reçu mes pièces après mon achat.
+    - Bonjour, j'espère que vous allez bien. J'ai un souci avec mon compte.
+    - Salut, comment tu vas ? Mon retrait est toujours en attente.
+    - Bonjour, comment allez-vous aujourd'hui ? Impossible d'accéder à mon espace.
+    - Bonsoir, j'espère que vous allez bien, j'ai un problème avec mon KYC.
+    - Salut, comment ça va aujourd'hui ? Je n'arrive pas à valider mon identité.
+
+    - mon retra est bloqé
+    - je narive pa a me conecter
+    - mon solde et fo depui ce matin
+    - sa march pas du tou
+    - jai un problem de conexion la
+    - mon compt es bloké
+    - jarive pas a retirer mon arjent
+    - le paiement a pa marché
+    - Depuis ce matin j'essaie de retirer mon argent mais ça reste bloqué en attente et je ne comprends vraiment pas pourquoi, est-ce que vous pouvez vérifier ce qui se passe ?
+    - J'ai fait un paiement il y a plus d'une heure, l'argent a bien été débité de mon compte bancaire, mais je n'ai toujours pas reçu mes pièces sur l'application.
+    - Ça fait la troisième fois que j'essaie de me connecter aujourd'hui et à chaque fois l'application me renvoie une erreur juste après avoir entré mon code.
+    - Je ne sais pas si c'est un problème chez moi ou sur l'application, mais depuis hier soir impossible d'ouvrir mon portefeuille et de voir mon solde correctement.
+    - J'ai voulu envoyer un cadeau à un ami tout à l'heure, mes pièces ont bien été débitées de mon compte mais lui affirme n'avoir rien reçu de son côté.
+    - Cela fait maintenant deux jours que mon retrait est indiqué comme étant toujours en cours de traitement et je commence à m'inquiéter pour mon argent.
+
+    - bloqué
+    - bug
+    - ça marche pas
+    - en panne
+    - retrait bloqué
+    - solde faux
+    - connexion impossible
+    - y'a un truc qui cloche avec mon solde
+
+    - Mon [retrait](operation_type:withdrawal) est bloqué depuis hier.
+    - Je n'arrive pas à faire un [retrait](operation_type:withdrawal).
+    - Pourquoi mon argent que je veux [retirer](operation_type:withdrawal) n'arrive pas ?
+    - Mon [dépôt](operation_type:deposit) n'apparaît pas sur mon solde.
+    - J'ai fait un [dépôt](operation_type:deposit) mais rien n'a été crédité.
+    - Impossible de [déposer](operation_type:deposit) de l'argent sur mon compte.
+    - Mon [versement](operation_type:deposit) n'a jamais été crédité.
+    - Mon [transfert](operation_type:transfer) n'est jamais arrivé.
+    - Je n'arrive pas à faire un [transfert](operation_type:transfer) vers un ami.
+    - J'ai essayé de [transférer](operation_type:transfer) de l'argent mais ça a échoué.
+    - Mon [virement](operation_type:transfer) est resté bloqué.
+    - Mon [paiement](operation_type:payment) a été refusé.
+    - Je n'arrive pas à valider mon [paiement](operation_type:payment).
+    - Impossible de [payer](operation_type:payment) avec mon solde de pièces.
+    - J'ai un problème de [connexion](type_problem:login).
+    - Je n'arrive plus à me [connecter](type_problem:login).
+    - Le [login](type_problem:login) ne fonctionne pas depuis ce matin.
+    - J'ai oublié mon [mot de passe](type_problem:password).
+    - Mon [mot de passe](type_problem:password) ne fonctionne plus.
+    - Je n'arrive pas à réinitialiser mon [mot de passe](type_problem:password).
+    - Mon [mdp](type_problem:password) est refusé à chaque tentative.
+    - Je ne reçois plus mes [messages](type_problem:chat).
+    - Le [chat](type_problem:chat) ne fonctionne plus.
+    - La [messagerie](type_problem:chat) est bloquée depuis hier.
+    # Audit qualite NLU : "de" precedant l'entite mal etiquete par le modele
+    # entraine (DIETClassifier_errors.json, confiance 0.57-0.70 sur "problème
+    # de mot de passe"/"problème de connexion") malgre des annotations deja
+    # correctement delimitees ci-dessus -- ces variantes SANS "de" avant
+    # l'entite, et avec d'autres prepositions, diversifient le contexte
+    # d'entrainement pour aider le modele a mieux isoler la frontiere reelle.
+    - Souci avec mon [mot de passe](type_problem:password).
+    - Un souci avec la [connexion](type_problem:login) depuis ce matin.
+    - Impossible de me connecter, ça vient du [login](type_problem:login).
+    - Ma [messagerie](type_problem:chat) plante à chaque ouverture.
+
+    - Mon [retrait](operation_type:withdrawal) est bloqué et je n'arrive plus à me [connecter](type_problem:login).
+    - J'ai un souci de [mot de passe](type_problem:password) et mon [transfert](operation_type:transfer) n'est jamais arrivé.
+    - Impossible de faire un [dépôt](operation_type:deposit), en plus je n'arrive pas à me [connecter](type_problem:login).
+    - Mon [paiement](operation_type:payment) a échoué et en plus j'ai un problème de [mot de passe](type_problem:password).
+
+    - [le retrait](operation_type:withdrawal)
+    - plutôt [le retrait](operation_type:withdrawal) d'abord
+    - c'est [le dépôt](operation_type:deposit) le plus urgent
+    - [mon mot de passe](type_problem:password) d'abord
+    - traitons [la connexion](type_problem:login) en premier
+    - [le transfert](operation_type:transfer) avant le reste
+    - my wallet ne marche pas
+    - my account is bloqué since this morning
+    - I can't login mon mot de passe ne marche pas
+    - je me demande pourquoi mon retrait n'avance pas
+    - je voudrais savoir si vous pouvez vérifier pourquoi ça bloque
+    - mon retrait est bloqué 😡
+    - encore un bug 😤 ça devient long
+    - mon solde est faux depuis ce matin 😞
+
+    - Mon retrait est [en attente](issue_status:pending) depuis trois jours.
+    - J'attends toujours mon retrait, il est resté [en attente](issue_status:pending).
+    - Mon paiement a [échoué](issue_status:failed) sans raison.
+    - Ma transaction a été [refusée](issue_status:failed).
+    - Mon transfert est [bloqué](issue_status:blocked) depuis hier.
+    - La connexion reste [impossible](issue_status:blocked) depuis ce matin.
+    - Mon retrait n'aboutit jamais, il reste [bloqué](issue_status:blocked).
+
+    - Le montant de [500 pièces](amount:500 pièces) n'a pas été crédité.
+    - J'ai perdu [20000 FCFA](amount:20000 FCFA) dans ce retrait.
+    - Il me manque [50 euros](amount:50 euros) sur mon solde.
+    - J'ai payé [300 pièces](amount:300 pièces) mais rien n'est arrivé.
+
+    - Le problème est survenu [sur android](platform:Android).
+    - Ça bloque depuis mon [iphone](platform:iOS).
+    - Depuis mon [ios](platform:iOS) impossible de me connecter.
+    - Le souci vient du [site web](platform:Web).
+    - Sur [android](platform:Android), mon retrait ne passe pas.
+
+    - Mon retrait est [bloqué](issue_status:blocked) depuis [hier](incident_date:hier).
+    - Depuis [hier](incident_date:hier) j'attends mon [retrait](operation_type:withdrawal) de [500 pièces](amount:500 pièces).
+    - Depuis [hier](incident_date:hier) j'attends mon retrait, il reste [en attente](issue_status:pending).
+    - [Depuis ce matin](incident_date:depuis ce matin), impossible de me [connecter](type_problem:login) [sur android](platform:Android).
+    - [La semaine dernière](incident_date:la semaine dernière) j'ai fait un [dépôt](operation_type:deposit) de [1000 pièces](amount:1000 pièces) qui n'est toujours pas crédité.
+    - Mon [transfert](operation_type:transfer) de [200 pièces](amount:200 pièces) est [bloqué](issue_status:blocked) depuis [avant-hier](incident_date:avant-hier).
+    - Mon [paiement](operation_type:payment) a [échoué](issue_status:failed) [ce matin](incident_date:ce matin) [sur iphone](platform:iOS).
+    # Audit qualite NLU : seulement 7 occurrences avant ce fix (recall 0.917
+    # sur 12 exemples de test seulement, DIETClassifier_report.json), aucune
+    # date absolue ni formulation relative variee -- ajoute des formes
+    # supplementaires (date absolue, jour de semaine, duree ecoulee,
+    # week-end) pour couvrir des reponses courtes, isolees, comme celles
+    # tapees directement en reponse a utter_ask_incident_date.
+    - Mon retrait est bloqué depuis [le 15 juillet](incident_date:le 15 juillet).
+    - C'est arrivé [mardi dernier](incident_date:mardi dernier).
+    - Ça a commencé [il y a trois jours](incident_date:il y a trois jours).
+    - Le problème date [du 3 juillet](incident_date:du 3 juillet).
+    - C'est survenu [ce week-end](incident_date:ce week-end).
+    - Mon compte est bloqué depuis [lundi](incident_date:lundi).
+    - Le souci a commencé [le mois dernier](incident_date:le mois dernier).
+    - Ça a débuté [il y a une semaine](incident_date:il y a une semaine).
+
+    - [en attente](issue_status:pending)
+    - c'est [bloqué](issue_status:blocked) qui m'inquiète le plus
+    - plutôt le problème [échoué](issue_status:failed)
+    - [500 pièces](amount:500 pièces)
+    - [sur android](platform:Android)
+
+    - Je veux diagnostiquer un problème.
+    - J'aimerais diagnostiquer mon souci.
+    - Peux-tu diagnostiquer ce qui ne va pas ?
+    - Je veux lancer un diagnostic.
+    - Aide-moi à diagnostiquer mon problème.
+    - Je veux faire un diagnostic de mon compte.
+    - Peux-tu m'aider à diagnostiquer un souci ?
+    - Je souhaite diagnostiquer un dysfonctionnement.
+    - J'ai besoin d'un diagnostic.
+    - Lance un diagnostic s'il te plaît.
+    - Peux-tu m'aider à comprendre ce qui cloche sur mon compte ?
+    - Je veux comprendre ce qui ne va pas avant de faire quoi que ce soit.
+    - J'aimerais qu'on essaie de comprendre le problème ensemble.
+    - Je préfère d'abord comprendre ce qui se passe.
+    - je veu diagnostiké mon probleme
+    - tu peu diagnostik sa stp
+    - jvoudré un diagnostic de mon compte
+
+    - Vérifie mon KYC.
+    - Vérifie mon statut KYC.
+    - Pourquoi mon KYC est refusé ?
+    - Mon KYC a été rejeté, je ne comprends pas pourquoi.
+    - Je n'arrive pas à valider mon identité.
+    - Ma vérification d'identité est bloquée.
+    - Ça fait longtemps que mon KYC est en attente.
+    - Je veux savoir où en est ma vérification d'identité.
+    - Mon document d'identité a été refusé.
+    - Pourquoi ma pièce d'identité est rejetée ?
+    - Je ne comprends pas pourquoi mon identité n'est pas vérifiée.
+    - Mon compte reste non vérifié depuis des jours.
+    - Est-ce que mon KYC est validé ?
+    - Peux-tu vérifier l'état de mon KYC ?
+    - mon kyc marche pas
+    - jarrive pa a valid mon identité
+    - pk mon kyc é refusé
+    - Je n'ai reçu aucune nouvelle sur ma vérification d'identité.
+    - Où en est ma demande de vérification KYC ?
+    - Mon document a été rejeté sans explication.
+    - Peux-tu regarder pourquoi mon KYC ne passe pas ?
+
+    - Pourquoi mon compte est suspendu ?
+    - Mon compte a été bloqué, je ne sais pas pourquoi.
+    - On m'a banni sans explication.
+    - Je n'arrive plus à utiliser mon compte.
+    - Mon compte est restreint depuis hier.
+    - Est-ce que mon compte a été suspendu ?
+    - Je pense que mon compte a été banni.
+    - Pourquoi je ne peux plus me connecter à mon profil ?
+    - Mon accès a été coupé sans raison.
+    - Vérifie si mon compte est suspendu.
+    - Peux-tu vérifier le statut de mon compte ?
+    - mon compte é bloké jsp pk
+    - jss banni pr rien
+    - Je veux comprendre pourquoi mon compte est restreint.
+    - Mon compte semble désactivé.
+    - On dirait que mon compte a été suspendu.
+
+    - Mon compte est bloqué pour conformité.
+    - Ça dit que mon compte est sous contrôle, je ne comprends pas.
+    - Je ne peux plus rien faire, c'est écrit compliance hold.
+    - Pourquoi mon compte est en vérification de conformité ?
+    - Vérifie mon blocage de conformité.
+    - Je ne peux plus retirer, ça parle de compliance.
+    - Mon compte semble sous contrôle de conformité.
+    - Pourquoi ce blocage compliance sur mon compte ?
+    - Ça bloque tout à cause d'un contrôle de conformité.
+    - Peux-tu vérifier pourquoi mon compte est sous contrôle ?
+
+    - J'ai supprimé mon compte par erreur.
+    - Comment récupérer mon compte supprimé ?
+    - Mon compte affiche encore comme supprimé.
+    - Je n'arrive pas à réactiver mon compte.
+    - Est-ce que je peux encore annuler la suppression de mon compte ?
+    - Vérifie l'état de la suppression de mon compte.
+    - J'ai supprimé mon compte, je veux le récupérer.
+    - Combien de temps ai-je pour annuler la suppression ?
+    - Mon compte est-il définitivement supprimé ?
+    - jc supprimé mon compte par erreur comment le récupérer
+
+    - Le compte de mon enfant est toujours bloqué.
+    - Le parent n'a jamais reçu la demande de consentement.
+    - La demande de consentement parental a expiré.
+    - Le consentement de mes parents a été refusé.
+    - Vérifie où en est le consentement parental.
+    - Pourquoi le compte de mon enfant reste verrouillé ?
+    - Je n'ai reçu aucune demande de consentement pour mon compte.
+    - Est-ce que le consentement parental a été validé ?
+    - Le compte de ma fille est bloqué depuis des jours à cause du consentement parental.
+    - Bonjour, avant d'ouvrir quoi que ce soit, j'aimerais qu'on essaie de diagnostiquer précisément ce qui ne fonctionne pas sur mon compte.
+
+    # Ajouts suite a la grande vague de tests conversationnels (2026-07) :
+    # deux trous structurels identifies par analyse du corpus complet --
+    # AUCUN exemple de ce bloc n'utilisait la forme courte "[mot-cle] svp/stp"
+    # ni la formulation "Excusez-moi, ... Pouvez-vous m'aider ?", alors que
+    # create_reclamation/ask_capabilities en ont, eux, une couverture directe
+    # (voir son propre commentaire plus bas) -- un message court ou poli
+    # atterrissait donc chez un voisin plutot qu'ici, faute de precedent
+    # d'entrainement. Un representant par probleme, pas une liste exhaustive.
+    - retrait svp
+    - retrait bloqué svp
+    - kyc svp
+    - recharge svp
+    - ma recharge svp
+    - cadeau svp
+    - mon cadeau svp
+    - compte bloqué svp
+    - compte suspendu svp
+    - conformité svp
+    - blocage conformité svp
+    - suppression compte svp
+    - compte supprimé svp
+    - consentement parental svp
+    - retrait stp
+    - kyc stp
+    - Excusez-moi, mon retrait est bloqué. Pouvez-vous m'aider ?
+    - Excusez-moi, mon KYC est rejeté. Pouvez-vous m'aider ?
+    - Excusez-moi, ma recharge n'est jamais arrivée. Pouvez-vous m'aider ?
+    - Excusez-moi, mon compte semble suspendu. Pouvez-vous m'aider ?
+    - S'il vous plaît, mon cadeau envoyé n'est jamais arrivé. Pouvez-vous m'aider ?
+    - S'il vous plaît, un contrôle de conformité bloque mon compte. Pouvez-vous m'aider ?
+
+    # Audit large 500+ (v7) : deux formulations de probleme reel derivaient
+    # vers deny/out_of_scope faute de proximite avec le vocabulaire deja
+    # couvert (notifications, retrait sans reponse).
+    - aucune notification ne s'affiche depuis plusieurs heures
+    - les notifications ont complètement cessé d'arriver
+    - je ne reçois plus la moindre alerte de l'application
+    - plus aucune notification ne m'arrive depuis hier
+    - ma demande de retrait n'a reçu aucune réponse
+    - mon retrait est en attente depuis des jours sans nouvelles
+    - ma demande de retrait n'avance plus du tout
+    - toujours aucun retour sur ma demande de retrait
+
+# 148 exemples chacune (meme ordre de grandeur que les autres intentions,
+# hors diagnostic qui est un cas particulier a 332 -- voir couverture large
+# de problemes distincts). Vocabulaire deliberement disjoint de
+# create_reclamation, qui utilise deja abondamment "plainte"/"porter
+# plainte"/"deposer une plainte" dans ses propres exemples (verbes d'action :
+# ouvrir/creer/deposer/vouloir un conseiller) : `plainte` ci-dessous capture
+# uniquement l'EXPRESSION d'un mecontentement general, sans verbe de demande
+# d'action, pour ne pas entrer en collision au moment de l'entrainement (voir
+# l'incident deja vecu sur ce projet avec modify_reclamation/confirm_full_cancel
+# vs deny, ou un chevauchement de vocabulaire avait fait deraper la
+# classification de l'intention existante).
+

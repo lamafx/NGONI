@@ -1,0 +1,61 @@
+language: fr
+
+pipeline:
+- name: WhitespaceTokenizer
+
+- name: RegexFeaturizer
+
+- name: LexicalSyntacticFeaturizer
+
+- name: CountVectorsFeaturizer
+
+- name: CountVectorsFeaturizer
+  analyzer: char_wb
+  min_ngram: 2
+  max_ngram: 4
+
+# Experiment (2026-07-21) : embeddings denses CamemBERT en plus du
+# bag-of-words existant, pour aider DIET a separer ask_faq/diagnostic sur du
+# vocabulaire partage. Valide en cross-validation reduite (2 plis, 30 epochs,
+# sous-ensemble ask_faq+diagnostic) : 93.5% -> 95.1% accuracy test, confusions
+# diagnostic->ask_faq reduites de 24 a 15. Essai complet ici pour confirmer
+# sur la vraie mesure adversariale (corpus 435 messages), pas juste la
+# cross-validation intra-distribution.
+- name: LanguageModelFeaturizer
+  model_name: "camembert"
+  model_weights: "camembert-base"
+
+- name: DIETClassifier
+  epochs: 80
+  constrain_similarities: true
+  model_confidence: softmax
+  number_of_transformer_layers: 2
+  transformer_size: 256
+  weight_sparsity: 0.8
+  batch_size: 64
+  learning_rate: 0.001
+
+- name: EntitySynonymMapper
+
+- name: ResponseSelector
+
+- name: components.vocabulary_guard.VocabularyCoverageGuard
+
+- name: FallbackClassifier
+  threshold: 0.6
+  ambiguity_threshold: 0.1
+
+assistant_id: 20260721-embedding-experiment
+policies:
+  - name: MemoizationPolicy
+  - name: RulePolicy
+    core_fallback_threshold: 0.4
+    core_fallback_action_name: action_default_fallback
+    enable_fallback_prediction: true
+  - name: UnexpecTEDIntentPolicy
+    max_history: 5
+    epochs: 100
+  - name: TEDPolicy
+    max_history: 5
+    epochs: 100
+    constrain_similarities: true

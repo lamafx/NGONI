@@ -36,7 +36,6 @@ nlu:
     - Comment effectuer un retrait ?
     - Comment demander un retrait ?
     - Quel est le délai d'un retrait ?
-    - Pourquoi mon retrait est-il en attente ?
     - Comment suivre mon retrait ?
     - Comment fonctionne le système de retrait ?
     - Comment gagner des pièces ?
@@ -120,7 +119,7 @@ nlu:
     - Salut je veux comprendre comment ça marche
     - Hello comment utiliser l'application ?
     - Bonjour j'ai une question sur les pièces
-    - Salut pourquoi mon compte fonctionne comme ça ?
+    - Salut, comment fonctionne un compte sur l'application ?
     - Bonsoir comment acheter des pièces ?
     - Hey je veux savoir comment ça marche NGONI
     - Coucou c'est quoi le système de récompense ?
@@ -176,6 +175,80 @@ nlu:
     - Comment contacter le support directement ?
     - Puis-je changer mon email ?
     - Comment je fais pour vérifier mon identité ?
+
+    # Audit qualite NLU (collision lexicale ask_faq/diagnostic, 2026-07-21) :
+    # config.yml n'alimente DIETClassifier qu'avec des featurizers bag-of-words
+    # / char n-gram (CountVectorsFeaturizer word + char_wb), aucun embedding
+    # semantique en amont -- deux exemples partageant beaucoup de mots-contenu
+    # mais assignes a des intentions differentes sont donc un vrai bruit
+    # d'etiquetage pour ce pipeline, pas une simple coincidence stylistique.
+    # Mesure par recouvrement de mots-contenu (Jaccard) entre les 174 exemples
+    # ask_faq et les 387 exemples diagnostic : 2 exemples ask_faq retires/
+    # reformules ci-dessus car structurellement identiques au patron dominant
+    # de diagnostic ("Pourquoi mon [sujet] [etat probleme] ?", 17 occurrences
+    # cote diagnostic, 2 cote ask_faq avant ce correctif). diagnostic reste
+    # volontairement plus fourni (387 exemples, couverture large de problemes
+    # distincts, voir commentaire en fin de fichier) : le corrige ne consiste
+    # donc pas a le reduire, mais a renforcer le cadrage GENERIQUE/PROCEDURAL
+    # cote ask_faq sur la meme zone de vocabulaire (retrait, mot de passe,
+    # connexion, compte, KYC) plutot que de compter sur plus d'exemples courts
+    # -- seul le CADRAGE peut servir de signal discriminant a un modele qui ne
+    # voit que des sacs de mots, pas le sens.
+    - Quelle est la procédure normale pour effectuer un retrait ?
+    - En général, combien de temps faut-il pour qu'un retrait soit traité ?
+    - Comment se passe habituellement une réinitialisation de mot de passe ?
+    - Quelle est la démarche standard pour se connecter à son compte ?
+    - De manière générale, comment accède-t-on à son compte NGONI ?
+    - Quelles sont les étapes classiques pour créer ou ouvrir un compte ?
+    - Comment fonctionne normalement le système de connexion ?
+    - Existe-t-il une procédure standard pour changer de mot de passe ?
+    - Quelle est la marche à suivre habituelle pour le KYC ?
+    - De façon générale, comment se déroule la vérification d'identité ?
+
+    # Nettoyage a plus grande echelle (2026-07-21, suite au 1er correctif qui
+    # a regresse -2.4pt : effet de levier trop faible sur seulement 2 exemples
+    # retires + 10 renforts). Constat par grep direct : depot/transfert/
+    # messagerie/notification/suspension/conformite/consentement parental
+    # sont couverts par des DIZAINES d'exemples diagnostic (dont des exemples
+    # annotes en entites, ex. [depot](operation_type:deposit)) mais ZERO
+    # exemple ask_faq generique n'existe sur ce meme vocabulaire -- toute
+    # question procedurale utilisant ces mots n'a statistiquement aucune
+    # chance face a diagnostic. Les exemples ci-dessous comblent cette
+    # asymetrie plutot que de retoucher les 12 collisions restantes
+    # identifiees par mesure de similarite (Jaccard sur mots-contenu) qui se
+    # sont averees etre, apres relecture, des questions ask_faq deja
+    # correctement etiquetees (juste courtes, donc statistiquement fragiles) :
+    # les retoucher aurait degrade une couverture FAQ deja valide sans
+    # justification semantique, seulement pour "faire baisser un score de
+    # similarite".
+    - Comment effectuer un dépôt sur mon compte ?
+    - Quelle est la procédure pour faire un dépôt ?
+    - Comment faire un transfert vers un autre utilisateur ?
+    - Quelle est la démarche pour transférer de l'argent à un ami ?
+    - Que faire en général si un paiement échoue ?
+    - Quelles sont les causes possibles d'un échec de paiement ?
+    - Comment fonctionne la messagerie sur l'application ?
+    - Quelles sont les règles d'utilisation de la messagerie ?
+    - Comment activer les notifications de l'application ?
+    - Comment paramétrer mes notifications par défaut ?
+    - Pourquoi un compte peut-il être suspendu, en général ?
+    - Quelles sont les raisons possibles d'une suspension de compte ?
+    - Quelles sont les règles de conformité appliquées aux comptes ?
+    - En quoi consiste un contrôle de conformité sur NGONI ?
+    - Comment fonctionne le consentement parental pour un mineur ?
+    - Quelle est la démarche pour donner son consentement parental ?
+    - Combien de temps dure en moyenne le traitement d'un dépôt ?
+    - Quels sont les délais habituels pour un transfert entre utilisateurs ?
+    - Comment savoir si mon paiement a bien été pris en compte ?
+    - Quelle est la démarche générale pour récupérer un compte supprimé ?
+    - dépôt, comment ça marche ?
+    - transfert, quelle est la procédure ?
+    - notifications, comment les activer ?
+    - messagerie, comment ça fonctionne ?
+    - suspension de compte, pourquoi ça arrive ?
+    - consentement parental, comment ça marche ?
+    - conformité, c'est quoi exactement ?
+    - mot de passe oublié, comment faire en général ?
 
     # Prefixe de politesse "Bonjour, ..." (audit "500 tours", 2026-07-18) :
     # une question de fond parfaitement claire, une fois precedee d'une
@@ -1016,6 +1089,16 @@ nlu:
     - non merci finalement
     - laisse tomber en fait
     - pas maintenant non
+
+    # Audit large 500+ (v7) : "refuse" sans le mot "non" en ancrage --
+    # seul "Non je refuse" existait, le mot seul derivait vers diagnostic.
+    - Je refuse net
+    - Je refuse catégoriquement
+    - Absolument, je refuse ça
+    - Je m'y refuse totalement
+    - Refus total de ma part
+    - Je refuse, point final
+    - Ça, je le refuse complètement
 - intent: bot_challenge
   examples: |
     - Es-tu un bot ?
@@ -1300,6 +1383,16 @@ nlu:
     - Peux-tu réserver un vol pour moi ?
     - Peux-tu m'aider en maths ?
     - Quelle est la capitale du Japon ?
+
+    # Audit large 500+ (v7) : "Quel est ton plat prefere ?" sans accents
+    # perd son indice distinctif et derive vers ask_capabilities. Renforce
+    # le cadre "gouts personnels du bot" avec et sans accents.
+    - Quel est ton film prefere ?
+    - Quel est ton loisir préféré ?
+    - C'est quoi ta couleur preferee ?
+    - T'as un plat préféré toi ?
+    - Quelle est ta série préférée ?
+    - Tu as une chanson prefere ?
 - intent: inappropriate_language
   examples: |
     - fuck
@@ -1465,6 +1558,17 @@ nlu:
     - c'est nul ce bot 🤬
     - sérieux 😡 ça marche jamais
     - putain 😤 encore un bug
+
+    # Audit large 500+ (v7) : "ce service craint vraiment" (devalorisant,
+    # sans mot grossier ni "nul"/"pourri") derive vers deny a 99.8% faute
+    # de proximite lexicale. Renforce la famille "craint" seule.
+    - ce service craint franchement
+    - cette application craint un peu trop
+    - ce bot craint sérieusement
+    - franchement ce truc craint
+    - ça craint vraiment ce service
+    - ce service laisse vraiment à désirer
+    - ce service est franchement médiocre
 - intent: diagnostic
   examples: |
     - mon retrait est bloqué
@@ -1887,6 +1991,18 @@ nlu:
     - S'il vous plaît, mon cadeau envoyé n'est jamais arrivé. Pouvez-vous m'aider ?
     - S'il vous plaît, un contrôle de conformité bloque mon compte. Pouvez-vous m'aider ?
 
+    # Audit large 500+ (v7) : deux formulations de probleme reel derivaient
+    # vers deny/out_of_scope faute de proximite avec le vocabulaire deja
+    # couvert (notifications, retrait sans reponse).
+    - aucune notification ne s'affiche depuis plusieurs heures
+    - les notifications ont complètement cessé d'arriver
+    - je ne reçois plus la moindre alerte de l'application
+    - plus aucune notification ne m'arrive depuis hier
+    - ma demande de retrait n'a reçu aucune réponse
+    - mon retrait est en attente depuis des jours sans nouvelles
+    - ma demande de retrait n'avance plus du tout
+    - toujours aucun retour sur ma demande de retrait
+
 # 148 exemples chacune (meme ordre de grandeur que les autres intentions,
 # hors diagnostic qui est un cas particulier a 332 -- voir couverture large
 # de problemes distincts). Vocabulaire deliberement disjoint de
@@ -2269,6 +2385,22 @@ nlu:
     - Que gères-tu comme sujets ?
     - Dis-moi ton rôle exactement.
 
+    # Audit large 500+ (v7) : le cadre syntaxique "Tu es ... ?" est tres
+    # represente dans bot_challenge ; sans accents, "Tu es specialise en
+    # quoi ?" perd son seul indice distinctif (l'accent de "spécialisé")
+    # et bascule vers bot_challenge a 86%. Renforce la frontiere par des
+    # variantes accentuees ET sans accents du meme cadre, vocabulaire varie.
+    - T'es specialise dans quoi exactement ?
+    - Toi tu es specialise en quoi au juste ?
+    - Dans quoi es-tu spécialisé exactement ?
+    - Tu es axé sur quoi comme sujet ?
+    - Tu es oriente vers quoi comme service ?
+    - Tu es dédié à quoi exactement ?
+    - Tu es dedie a quoi comme mission ?
+    - Que peux tu faire pour moi exactement
+    - Quelles sont tes competences au juste
+    - A quoi tu sers exactement dans cette appli
+
 - intent: rate_response_useful
   examples: |
     - Oui c'était utile
@@ -2315,6 +2447,15 @@ nlu:
     - merci beaucoup, c'est exactement ce que je cherchais
     - top, merci pour l'info
     - ça résout mon souci, merci
+
+    # Audit large 500+ (v7) : "excellent, tres clair merci" derivait vers
+    # goodbye (le "merci" seul est un signal fort de cette intention) --
+    # renforce les formulations "excellent/parfait" + "clair" + "merci".
+    - excellent, super clair merci beaucoup
+    - parfait, très clair comme explication merci
+    - excellent merci, c'était très clair
+    - nickel, très clair merci bien
+    - super clair cette réponse, merci beaucoup
 - intent: rate_response_not_useful
   examples: |
     - Non ce n'est pas utile
@@ -2362,6 +2503,16 @@ nlu:
     - ça ne répond pas vraiment
     - pas du tout ce que je cherchais
 
+    # Audit large 500+ (v7) : 3 formulations sans mot d'ancrage assez fort
+    # derivaient vers deny/plainte. Ajout avec ancrage explicite
+    # (reponse/probleme/info), meme convention que le lot precedent.
+    - cette réponse ne résout absolument rien de mon problème
+    - ça ne résout pas du tout mon souci avec cette réponse
+    - réponse franchement décevante par rapport à ma question
+    - je trouve cette réponse assez décevante honnêtement
+    - ce n'est pas du tout l'info que j'attendais de ta réponse
+    - cette réponse ne correspond pas à ce que j'attendais comme info
+
 # Les 3 intentions suivantes sont normalement declenchees par un clic sur un
 # bouton (payload structure /intent{"entite": "valeur"}, voir faq.py), pas
 # tapees au clavier -- ces exemples existent uniquement pour satisfaire
@@ -2384,6 +2535,14 @@ nlu:
     - j'ai pas d'idée, donne des exemples
     - propose-moi des sujets de questions
     - affiche des exemples de questions
+
+    # Audit large 500+ (v7) : "peux-tu suggerer des questions types"
+    # derivait vers ask_capabilities (le verbe "peux-tu" seul, sans mot
+    # comme "montre/voir/exemples", ressemble a une question de capacite).
+    - tu peux me suggérer des questions types stp
+    - propose-moi des questions types à poser
+    - peux-tu me lister des questions types
+    - suggère-moi quelques questions fréquentes
 
 - intent: select_faq_category
   examples: |

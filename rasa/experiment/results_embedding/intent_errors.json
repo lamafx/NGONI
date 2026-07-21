@@ -1,0 +1,234 @@
+[
+  {
+    "text": "Comment réinitialiser mon mot de passe ?",
+    "intent": "ask_faq",
+    "intent_prediction": {
+      "name": "diagnostic",
+      "confidence": 0.9981734752655029
+    }
+  },
+  {
+    "text": "Comment modifier mon mot de passe ?",
+    "intent": "ask_faq",
+    "intent_prediction": {
+      "name": "diagnostic",
+      "confidence": 0.9999001026153564
+    }
+  },
+  {
+    "text": "Que permet de faire l'application ?",
+    "intent": "ask_faq",
+    "intent_prediction": {
+      "name": "diagnostic",
+      "confidence": 0.9781382083892822
+    }
+  },
+  {
+    "text": "Le support est-il disponible tous les jours ?",
+    "intent": "ask_faq",
+    "intent_prediction": {
+      "name": "diagnostic",
+      "confidence": 1.0
+    }
+  },
+  {
+    "text": "y a t’il un tuto ?",
+    "intent": "ask_faq",
+    "intent_prediction": {
+      "name": "diagnostic",
+      "confidence": 0.9882275462150574
+    }
+  },
+  {
+    "text": "koman on peu retirer de largent",
+    "intent": "ask_faq",
+    "intent_prediction": {
+      "name": "diagnostic",
+      "confidence": 0.9809476137161255
+    }
+  },
+  {
+    "text": "pk le retrait prend du tem",
+    "intent": "ask_faq",
+    "intent_prediction": {
+      "name": "diagnostic",
+      "confidence": 0.9999983310699463
+    }
+  },
+  {
+    "text": "C'est quoi le contrôle parental sur l'application ?",
+    "intent": "ask_faq",
+    "intent_prediction": {
+      "name": "diagnostic",
+      "confidence": 0.9999868869781494
+    }
+  },
+  {
+    "text": "Est-ce que je peux avoir plusieurs comptes ?",
+    "intent": "ask_faq",
+    "intent_prediction": {
+      "name": "diagnostic",
+      "confidence": 1.0
+    }
+  },
+  {
+    "text": "Comment je fais pour vérifier mon identité ?",
+    "intent": "ask_faq",
+    "intent_prediction": {
+      "name": "diagnostic",
+      "confidence": 0.9999597072601318
+    }
+  },
+  {
+    "text": "suspension de compte, pourquoi ça arrive ?",
+    "intent": "ask_faq",
+    "intent_prediction": {
+      "name": "diagnostic",
+      "confidence": 1.0
+    }
+  },
+  {
+    "text": "Je constate une erreur dans mes opérations.",
+    "intent": "diagnostic",
+    "intent_prediction": {
+      "name": "ask_faq",
+      "confidence": 0.9695708751678467
+    }
+  },
+  {
+    "text": "Je souhaite diagnostiquer un dysfonctionnement.",
+    "intent": "diagnostic",
+    "intent_prediction": {
+      "name": "ask_faq",
+      "confidence": 0.9999997615814209
+    }
+  },
+  {
+    "text": "Comment récupérer mon compte supprimé ?",
+    "intent": "diagnostic",
+    "intent_prediction": {
+      "name": "ask_faq",
+      "confidence": 1.0
+    }
+  },
+  {
+    "text": "Mon compte est-il définitivement supprimé ?",
+    "intent": "diagnostic",
+    "intent_prediction": {
+      "name": "ask_faq",
+      "confidence": 0.9566221237182617
+    }
+  },
+  {
+    "text": "La demande de consentement parental a expiré.",
+    "intent": "diagnostic",
+    "intent_prediction": {
+      "name": "ask_faq",
+      "confidence": 0.9991334080696106
+    }
+  },
+  {
+    "text": "consentement parental svp",
+    "intent": "diagnostic",
+    "intent_prediction": {
+      "name": "ask_faq",
+      "confidence": 0.5568255186080933
+    }
+  },
+  {
+    "text": "Je voudrais en savoir plus sur les services proposés.",
+    "intent": "ask_faq",
+    "intent_prediction": {
+      "name": "diagnostic",
+      "confidence": 0.9988396763801575
+    }
+  },
+  {
+    "text": "Comment supprimer mon compte définitivement ?",
+    "intent": "ask_faq",
+    "intent_prediction": {
+      "name": "diagnostic",
+      "confidence": 0.9922605156898499
+    }
+  },
+  {
+    "text": "Comment savoir si mon paiement a bien été pris en compte ?",
+    "intent": "ask_faq",
+    "intent_prediction": {
+      "name": "diagnostic",
+      "confidence": 1.0
+    }
+  },
+  {
+    "text": "je cherche à comprendre pourquoi ça ne marche pas",
+    "intent": "diagnostic",
+    "intent_prediction": {
+      "name": "ask_faq",
+      "confidence": 0.999998927116394
+    }
+  },
+  {
+    "text": "J'ai perdu des pièces.",
+    "intent": "diagnostic",
+    "intent_prediction": {
+      "name": "ask_faq",
+      "confidence": 1.0
+    }
+  },
+  {
+    "text": "Des pièces ont disparu de mon compte.",
+    "intent": "diagnostic",
+    "intent_prediction": {
+      "name": "ask_faq",
+      "confidence": 0.5450987219810486
+    }
+  },
+  {
+    "text": "Hey j'ai perdu mes pièces",
+    "intent": "diagnostic",
+    "intent_prediction": {
+      "name": "ask_faq",
+      "confidence": 0.9999819993972778
+    }
+  },
+  {
+    "text": "c'est le dépôt le plus urgent",
+    "intent": "diagnostic",
+    "intent_prediction": {
+      "name": "ask_faq",
+      "confidence": 0.9999997615814209
+    }
+  },
+  {
+    "text": "Je veux comprendre ce qui ne va pas avant de faire quoi que ce soit.",
+    "intent": "diagnostic",
+    "intent_prediction": {
+      "name": "ask_faq",
+      "confidence": 1.0
+    }
+  },
+  {
+    "text": "Pourquoi ma pièce d'identité est rejetée ?",
+    "intent": "diagnostic",
+    "intent_prediction": {
+      "name": "ask_faq",
+      "confidence": 0.9999150037765503
+    }
+  },
+  {
+    "text": "Pourquoi mon compte est suspendu ?",
+    "intent": "diagnostic",
+    "intent_prediction": {
+      "name": "ask_faq",
+      "confidence": 0.9967173933982849
+    }
+  },
+  {
+    "text": "Je veux comprendre pourquoi mon compte est restreint.",
+    "intent": "diagnostic",
+    "intent_prediction": {
+      "name": "ask_faq",
+      "confidence": 0.990374743938446
+    }
+  }
+]

@@ -364,7 +364,7 @@ def chat_page():
       <div class="info-box" id="parse-info">Envoyez un message pour voir l'intent et le score de confiance.</div>
       <form id="chat-form" class="chat-input">
         <input id="user-id-input" type="text" placeholder="User ID (UUID wallet, optionnel — sinon un ID de test propre à cet onglet)" aria-label="Identifiant utilisateur" style="border:1px solid #d1d5db;border-radius:12px;padding:10px 14px;font-size:0.95rem;" />
-        <textarea id="user-input" placeholder="Écris ton message ici..." aria-label="Message utilisateur"></textarea>
+        <textarea id="user-input" placeholder="Écris ton message ici..." aria-label="Message utilisateur" maxlength="4000"></textarea>
         <button type="submit">Envoyer</button>
       </form>
     </div>
@@ -500,8 +500,18 @@ def chat_page():
           }
         }
       } catch (error) {
+        // Le detail technique (status HTTP, corps JSON brut -- qui peut
+        // inclure le texte utilisateur renvoye tel quel par une erreur de
+        // validation Pydantic, ex. message trop long) reste dans la console
+        // pour le debogage, mais n'est plus affiche dans la bulle : un
+        // utilisateur reel n'a pas a voir un pave JSON illisible en pleine
+        // conversation (constate en pratique sur un message de plus de 4000
+        // caracteres, deja borne cote serveur -- voir ParseRequest/
+        // ChatRequest ci-dessous -- mais jusqu'ici affiche integralement,
+        // texte original inclus, au moindre depassement).
+        console.error('Erreur lors de l\'envoi du message :', error);
         typingEl.remove();
-        addMessage(`Erreur : ${error.message}`, 'bot');
+        addMessage('Désolé, une erreur est survenue pendant l\'envoi de votre message. Veuillez réessayer dans un instant.', 'bot');
         updateParseInfo('erreur', 0, []);
       } finally {
         submitButton.disabled = false;

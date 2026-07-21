@@ -61,10 +61,37 @@ slots:
     # confusion de maintenance ("pourquoi ce mapping ne marche jamais ?").
     mappings:
       - type: from_text
+        not_intent: &reclamation_meta_intents
+          - bot_challenge
+          - ask_capabilities
+          - suggestion
+          - plainte
+          - rate_response_useful
+          - rate_response_not_useful
+          - ask_faq
+          - browse_faq
+          - select_faq_category
+          - select_faq_question
+          - inappropriate_language
+          - out_of_scope
         conditions:
           - active_loop: reclamation_form
             requested_slot: category
 
+  # Texte libre : AUCUNE restriction not_intent ici, volontairement. Une
+  # description de probleme reelle peut contenir n'importe quel vocabulaire,
+  # y compris des mots jamais vus a l'entrainement -- le NLU peut alors la
+  # classer avec une tres haute confiance dans un intent totalement etranger
+  # (ex. "un autre utilisateur me menace, question de securite" -> classe
+  # bot_challenge a 99.99%, aucun mot en commun avec les exemples
+  # d'entrainement de bot_challenge). Si ce slot heritait de la meme
+  # not_intent que category/urgency ci-dessus, ce texte serait rejete et le
+  # formulaire redemanderait la description en boucle (audit robustesse,
+  # test large 500+ : bloc "Safety" echouant systematiquement). category/
+  # urgency/incident_date restent proteges car leurs reponses attendues sont
+  # courtes et proches du vocabulaire d'entrainement des intents meta -- le
+  # risque de faux rejet y est bien plus faible que le benefice de laisser
+  # une vraie interruption ("es-tu un bot ?") suspendre le formulaire.
   description:
     type: text
     influence_conversation: true
@@ -85,6 +112,7 @@ slots:
     # (0 exemple annote (urgency:...) dans nlu.yml).
     mappings:
       - type: from_text
+        not_intent: *reclamation_meta_intents
         conditions:
           - active_loop: reclamation_form
             requested_slot: urgency
@@ -106,10 +134,12 @@ slots:
     mappings:
       - type: from_entity
         entity: incident_date
+        not_intent: *reclamation_meta_intents
         conditions:
           - active_loop: reclamation_form
             requested_slot: incident_date
       - type: from_text
+        not_intent: *reclamation_meta_intents
         conditions:
           - active_loop: reclamation_form
             requested_slot: incident_date
@@ -230,12 +260,13 @@ slots:
     influence_conversation: true
     mappings:
       - type: from_text
+        not_intent: *reclamation_meta_intents
         conditions:
           - active_loop: reclamation_form
             requested_slot: cancel_choice
 
   # Reponse brute a "quel champ voulez-vous modifier ?", interpretee par
-  # mots-cles dans validate_fi²²²²²²²²²²²²²²²²² eld_to_edit (meme logique que best_keyword_match
+  # mots-cles dans validate_field_to_edit (meme logique que best_keyword_match
   # utilise ailleurs dans reclamation.py). from_text + conditions : memes
   # raisons que category/description/urgency/incident_date ci-dessus (capture
   # intent-agnostique pendant que ce slot est demande par le formulaire).
@@ -244,6 +275,7 @@ slots:
     influence_conversation: true
     mappings:
       - type: from_text
+        not_intent: *reclamation_meta_intents
         conditions:
           - active_loop: reclamation_form
             requested_slot: field_to_edit
@@ -408,33 +440,39 @@ slots:
 
 forms:
   reclamation_form:
-    # Audit robustesse (test large 500+) : sans cette liste, Rasa traite
+    # Audit robustesse (test large 500+) : sans restriction, Rasa traite
     # TOUT intent comme une tentative de remplissage du slot demande tant
     # que le formulaire est actif -- confirme en pratique via inspection du
     # tracker : "Es-tu un robot ?" (intent bot_challenge, confiance 1.0)
     # etait capture par le mapping from_text du slot urgency et REJETE par
     # validate_urgency, sans jamais laisser la moindre chance aux regles
     # "... while reclamation form is active" (rules.yml) de s'appliquer,
-    # meme avec `condition: active_loop: reclamation_form` explicite. Cette
-    # liste dit a Rasa : pour CES intents precis, ne tente PAS de remplir le
-    # slot courant -- laisse les regles decider. nlu_fallback/deny/affirm
-    # restent volontairement ABSENTS (voir "Ignore nlu fallback while
-    # reclamation form is active" plus bas, qui a besoin du comportement
-    # inverse : laisser le formulaire capturer le texte brut malgre une
-    # intention mal classee).
-    ignored_intents:
-      - bot_challenge
-      - ask_capabilities
-      - suggestion
-      - plainte
-      - rate_response_useful
-      - rate_response_not_useful
-      - ask_faq
-      - browse_faq
-      - select_faq_category
-      - select_faq_question
-      - inappropriate_language
-      - out_of_scope
+    # meme avec `condition: active_loop: reclamation_form` explicite.
+    #
+    # Initialement corrige via `ignored_intents` au niveau du formulaire --
+    # mais cette option Rasa s'applique a TOUS les slots sans exception,
+    # description y compris. Or description est un champ libre : un vrai
+    # probleme utilisateur peut contenir du vocabulaire absent de
+    # l'entrainement et se faire classer par erreur, a tres haute confiance,
+    # dans un des intents ci-dessous (ex. categorie "Safety" : "un autre
+    # utilisateur me menace, question de securite" classe bot_challenge a
+    # 99.99%, aucun mot en commun avec les exemples d'entrainement de
+    # bot_challenge). Avec `ignored_intents` global, ce texte etait rejete
+    # et le formulaire redemandait la description en boucle (audit
+    # robustesse, test large 500+ : bloc "Safety" echouant systematiquement,
+    # 18 verifications sur 33 echecs restants).
+    #
+    # Remplace par l'ancre YAML &reclamation_meta_intents (definie sur le
+    # mapping de `category` plus haut), appliquee en `not_intent` UNIQUEMENT
+    # aux slots a reponse courte/mot-cle (category, urgency, incident_date,
+    # cancel_choice, field_to_edit) ou le risque de faux rejet est faible et
+    # le benefice de l'interruption reel. `description` n'a explicitement
+    # PAS cette restriction : elle accepte tout texte quel que soit
+    # l'intent classe. nlu_fallback/deny/affirm restent volontairement
+    # ABSENTS de cette liste (voir "Ignore nlu fallback while reclamation
+    # form is active" plus bas, qui a besoin du comportement inverse :
+    # laisser le formulaire capturer le texte brut malgre une intention mal
+    # classee).
     # field_to_edit/cancel_choice ne sont jamais demandes dans cet ordre
     # statique : cette liste est la liste "par defaut", entierement
     # remplacee au runtime par ValidateReclamationForm.required_slots() (voir

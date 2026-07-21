@@ -1,0 +1,1993 @@
+[
+  {
+    "text": "Comment réinitialiser mon mot de passe ?",
+    "entities": [],
+    "predicted_entities": [
+      {
+        "entity": "type_problem",
+        "start": 26,
+        "end": 38,
+        "confidence_entity": 0.6300744414329529,
+        "value": "password",
+        "extractor": "DIETClassifier",
+        "processors": [
+          "EntitySynonymMapper"
+        ]
+      }
+    ]
+  },
+  {
+    "text": "Comment modifier mon mot de passe ?",
+    "entities": [],
+    "predicted_entities": [
+      {
+        "entity": "type_problem",
+        "start": 28,
+        "end": 33,
+        "confidence_entity": 0.6093887090682983,
+        "value": "passe",
+        "extractor": "DIETClassifier"
+      }
+    ]
+  },
+  {
+    "text": "Comment effectuer un dépôt sur mon compte ?",
+    "entities": [],
+    "predicted_entities": [
+      {
+        "entity": "operation_type",
+        "start": 21,
+        "end": 26,
+        "confidence_entity": 0.4445320665836334,
+        "value": "deposit",
+        "extractor": "DIETClassifier",
+        "processors": [
+          "EntitySynonymMapper"
+        ]
+      }
+    ]
+  },
+  {
+    "text": "Quelle est la procédure pour faire un dépôt ?",
+    "entities": [],
+    "predicted_entities": [
+      {
+        "entity": "operation_type",
+        "start": 38,
+        "end": 43,
+        "confidence_entity": 0.47025367617607117,
+        "value": "deposit",
+        "extractor": "DIETClassifier",
+        "processors": [
+          "EntitySynonymMapper"
+        ]
+      }
+    ]
+  },
+  {
+    "text": "Comment fonctionne la messagerie sur l'application ?",
+    "entities": [],
+    "predicted_entities": [
+      {
+        "entity": "type_problem",
+        "start": 22,
+        "end": 32,
+        "confidence_entity": 0.9893304109573364,
+        "value": "chat",
+        "extractor": "DIETClassifier",
+        "processors": [
+          "EntitySynonymMapper"
+        ]
+      }
+    ]
+  },
+  {
+    "text": "Quelles sont les règles d'utilisation de la messagerie ?",
+    "entities": [],
+    "predicted_entities": [
+      {
+        "entity": "type_problem",
+        "start": 44,
+        "end": 54,
+        "confidence_entity": 0.982523500919342,
+        "value": "chat",
+        "extractor": "DIETClassifier",
+        "processors": [
+          "EntitySynonymMapper"
+        ]
+      }
+    ]
+  },
+  {
+    "text": "Combien de temps dure en moyenne le traitement d'un dépôt ?",
+    "entities": [],
+    "predicted_entities": [
+      {
+        "entity": "operation_type",
+        "start": 52,
+        "end": 57,
+        "confidence_entity": 0.46378856897354126,
+        "value": "deposit",
+        "extractor": "DIETClassifier",
+        "processors": [
+          "EntitySynonymMapper"
+        ]
+      }
+    ]
+  },
+  {
+    "text": "messagerie, comment ça fonctionne ?",
+    "entities": [],
+    "predicted_entities": [
+      {
+        "entity": "type_problem",
+        "start": 0,
+        "end": 10,
+        "confidence_entity": 0.942382276058197,
+        "value": "chat",
+        "extractor": "DIETClassifier",
+        "processors": [
+          "EntitySynonymMapper"
+        ]
+      }
+    ]
+  },
+  {
+    "text": "Mon retrait est en attente depuis longtemps.",
+    "entities": [],
+    "predicted_entities": [
+      {
+        "entity": "issue_status",
+        "start": 19,
+        "end": 26,
+        "confidence_entity": 0.6114479303359985,
+        "value": "attente",
+        "extractor": "DIETClassifier"
+      }
+    ]
+  },
+  {
+    "text": "Le retrait reste en cours depuis plusieurs jours.",
+    "entities": [],
+    "predicted_entities": [
+      {
+        "entity": "issue_status",
+        "start": 17,
+        "end": 19,
+        "confidence_entity": 0.5949278473854065,
+        "value": "en",
+        "extractor": "DIETClassifier"
+      }
+    ]
+  },
+  {
+    "text": "L'application affiche un message d'erreur.",
+    "entities": [],
+    "predicted_entities": [
+      {
+        "entity": "type_problem",
+        "start": 25,
+        "end": 32,
+        "confidence_entity": 0.8651358485221863,
+        "value": "message",
+        "extractor": "DIETClassifier"
+      }
+    ]
+  },
+  {
+    "text": "Salut, comment tu vas ? Mon retrait est toujours en attente.",
+    "entities": [],
+    "predicted_entities": [
+      {
+        "entity": "issue_status",
+        "start": 52,
+        "end": 59,
+        "confidence_entity": 0.5124095678329468,
+        "value": "attente",
+        "extractor": "DIETClassifier"
+      }
+    ]
+  },
+  {
+    "text": "connexion impossible",
+    "entities": [],
+    "predicted_entities": [
+      {
+        "entity": "issue_status",
+        "start": 10,
+        "end": 20,
+        "confidence_entity": 0.7271477580070496,
+        "value": "blocked",
+        "extractor": "DIETClassifier",
+        "processors": [
+          "EntitySynonymMapper"
+        ]
+      }
+    ]
+  },
+  {
+    "text": "Mon retrait est bloqué depuis hier.",
+    "entities": [
+      {
+        "start": 4,
+        "end": 11,
+        "value": "withdrawal",
+        "entity": "operation_type"
+      }
+    ],
+    "predicted_entities": [
+      {
+        "entity": "incident_date",
+        "start": 30,
+        "end": 34,
+        "confidence_entity": 0.509604275226593,
+        "value": "hier",
+        "extractor": "DIETClassifier",
+        "processors": [
+          "EntitySynonymMapper"
+        ]
+      }
+    ]
+  },
+  {
+    "text": "Pourquoi mon argent que je veux retirer n'arrive pas ?",
+    "entities": [
+      {
+        "start": 32,
+        "end": 39,
+        "value": "withdrawal",
+        "entity": "operation_type"
+      }
+    ],
+    "predicted_entities": []
+  },
+  {
+    "text": "Impossible de déposer de l'argent sur mon compte.",
+    "entities": [
+      {
+        "start": 14,
+        "end": 21,
+        "value": "deposit",
+        "entity": "operation_type"
+      }
+    ],
+    "predicted_entities": []
+  },
+  {
+    "text": "Mon virement est resté bloqué.",
+    "entities": [
+      {
+        "start": 4,
+        "end": 12,
+        "value": "transfer",
+        "entity": "operation_type"
+      }
+    ],
+    "predicted_entities": []
+  },
+  {
+    "text": "Mon paiement a été refusé.",
+    "entities": [
+      {
+        "start": 4,
+        "end": 12,
+        "value": "payment",
+        "entity": "operation_type"
+      }
+    ],
+    "predicted_entities": []
+  },
+  {
+    "text": "Impossible de payer avec mon solde de pièces.",
+    "entities": [
+      {
+        "start": 14,
+        "end": 19,
+        "value": "payment",
+        "entity": "operation_type"
+      }
+    ],
+    "predicted_entities": []
+  },
+  {
+    "text": "Je n'arrive plus à me connecter.",
+    "entities": [
+      {
+        "start": 22,
+        "end": 31,
+        "value": "login",
+        "entity": "type_problem"
+      }
+    ],
+    "predicted_entities": []
+  },
+  {
+    "text": "Mon mdp est refusé à chaque tentative.",
+    "entities": [
+      {
+        "start": 4,
+        "end": 7,
+        "value": "password",
+        "entity": "type_problem"
+      }
+    ],
+    "predicted_entities": []
+  },
+  {
+    "text": "Mon retrait est bloqué et je n'arrive plus à me connecter.",
+    "entities": [
+      {
+        "start": 4,
+        "end": 11,
+        "value": "withdrawal",
+        "entity": "operation_type"
+      },
+      {
+        "start": 48,
+        "end": 57,
+        "value": "login",
+        "entity": "type_problem"
+      }
+    ],
+    "predicted_entities": [
+      {
+        "entity": "type_problem",
+        "start": 48,
+        "end": 57,
+        "confidence_entity": 0.5369267463684082,
+        "value": "login",
+        "extractor": "DIETClassifier",
+        "processors": [
+          "EntitySynonymMapper"
+        ]
+      }
+    ]
+  },
+  {
+    "text": "Mon paiement a échoué et en plus j'ai un problème de mot de passe.",
+    "entities": [
+      {
+        "start": 4,
+        "end": 12,
+        "value": "payment",
+        "entity": "operation_type"
+      },
+      {
+        "start": 53,
+        "end": 65,
+        "value": "password",
+        "entity": "type_problem"
+      }
+    ],
+    "predicted_entities": [
+      {
+        "entity": "issue_status",
+        "start": 15,
+        "end": 21,
+        "confidence_entity": 0.7970054149627686,
+        "value": "failed",
+        "extractor": "DIETClassifier",
+        "processors": [
+          "EntitySynonymMapper"
+        ]
+      },
+      {
+        "entity": "type_problem",
+        "start": 53,
+        "end": 65,
+        "confidence_entity": 0.8820827007293701,
+        "value": "password",
+        "extractor": "DIETClassifier",
+        "processors": [
+          "EntitySynonymMapper"
+        ]
+      }
+    ]
+  },
+  {
+    "text": "le retrait",
+    "entities": [
+      {
+        "start": 0,
+        "end": 10,
+        "value": "withdrawal",
+        "entity": "operation_type"
+      }
+    ],
+    "predicted_entities": []
+  },
+  {
+    "text": "plutôt le retrait d'abord",
+    "entities": [
+      {
+        "start": 7,
+        "end": 17,
+        "value": "withdrawal",
+        "entity": "operation_type"
+      }
+    ],
+    "predicted_entities": []
+  },
+  {
+    "text": "mon mot de passe d'abord",
+    "entities": [
+      {
+        "start": 0,
+        "end": 16,
+        "value": "password",
+        "entity": "type_problem"
+      }
+    ],
+    "predicted_entities": [
+      {
+        "entity": "type_problem",
+        "start": 11,
+        "end": 16,
+        "confidence_entity": 0.6683929562568665,
+        "value": "passe",
+        "extractor": "DIETClassifier"
+      }
+    ]
+  },
+  {
+    "text": "traitons la connexion en premier",
+    "entities": [
+      {
+        "start": 9,
+        "end": 21,
+        "value": "login",
+        "entity": "type_problem"
+      }
+    ],
+    "predicted_entities": []
+  },
+  {
+    "text": "Ma transaction a été refusée.",
+    "entities": [
+      {
+        "start": 21,
+        "end": 28,
+        "value": "failed",
+        "entity": "issue_status"
+      }
+    ],
+    "predicted_entities": []
+  },
+  {
+    "text": "Mon transfert est bloqué depuis hier.",
+    "entities": [
+      {
+        "start": 18,
+        "end": 24,
+        "value": "blocked",
+        "entity": "issue_status"
+      }
+    ],
+    "predicted_entities": [
+      {
+        "entity": "operation_type",
+        "start": 4,
+        "end": 13,
+        "confidence_entity": 0.6446152925491333,
+        "value": "transfer",
+        "extractor": "DIETClassifier",
+        "processors": [
+          "EntitySynonymMapper"
+        ]
+      },
+      {
+        "entity": "incident_date",
+        "start": 32,
+        "end": 36,
+        "confidence_entity": 0.5085417628288269,
+        "value": "hier",
+        "extractor": "DIETClassifier",
+        "processors": [
+          "EntitySynonymMapper"
+        ]
+      }
+    ]
+  },
+  {
+    "text": "J'ai perdu 20000 FCFA dans ce retrait.",
+    "entities": [
+      {
+        "start": 11,
+        "end": 21,
+        "value": "20000 FCFA",
+        "entity": "amount"
+      }
+    ],
+    "predicted_entities": [
+      {
+        "entity": "amount",
+        "start": 11,
+        "end": 16,
+        "confidence_entity": 0.9810531139373779,
+        "value": "20000",
+        "extractor": "DIETClassifier"
+      }
+    ]
+  },
+  {
+    "text": "Il me manque 50 euros sur mon solde.",
+    "entities": [
+      {
+        "start": 13,
+        "end": 21,
+        "value": "50 euros",
+        "entity": "amount"
+      }
+    ],
+    "predicted_entities": [
+      {
+        "entity": "amount",
+        "start": 13,
+        "end": 15,
+        "confidence_entity": 0.9818918704986572,
+        "value": "50",
+        "extractor": "DIETClassifier"
+      }
+    ]
+  },
+  {
+    "text": "Ça bloque depuis mon iphone.",
+    "entities": [
+      {
+        "start": 21,
+        "end": 27,
+        "value": "iOS",
+        "entity": "platform"
+      }
+    ],
+    "predicted_entities": []
+  },
+  {
+    "text": "Depuis mon ios impossible de me connecter.",
+    "entities": [
+      {
+        "start": 11,
+        "end": 14,
+        "value": "iOS",
+        "entity": "platform"
+      }
+    ],
+    "predicted_entities": []
+  },
+  {
+    "text": "Le souci vient du site web.",
+    "entities": [
+      {
+        "start": 18,
+        "end": 26,
+        "value": "Web",
+        "entity": "platform"
+      }
+    ],
+    "predicted_entities": []
+  },
+  {
+    "text": "Mon retrait est bloqué depuis hier.",
+    "entities": [
+      {
+        "start": 16,
+        "end": 22,
+        "value": "blocked",
+        "entity": "issue_status"
+      },
+      {
+        "start": 30,
+        "end": 34,
+        "value": "hier",
+        "entity": "incident_date"
+      }
+    ],
+    "predicted_entities": [
+      {
+        "entity": "incident_date",
+        "start": 30,
+        "end": 34,
+        "confidence_entity": 0.509604275226593,
+        "value": "hier",
+        "extractor": "DIETClassifier",
+        "processors": [
+          "EntitySynonymMapper"
+        ]
+      }
+    ]
+  },
+  {
+    "text": "Depuis hier j'attends mon retrait de 500 pièces.",
+    "entities": [
+      {
+        "start": 7,
+        "end": 11,
+        "value": "hier",
+        "entity": "incident_date"
+      },
+      {
+        "start": 26,
+        "end": 33,
+        "value": "withdrawal",
+        "entity": "operation_type"
+      },
+      {
+        "start": 37,
+        "end": 47,
+        "value": "500 pièces",
+        "entity": "amount"
+      }
+    ],
+    "predicted_entities": [
+      {
+        "entity": "incident_date",
+        "start": 7,
+        "end": 11,
+        "confidence_entity": 0.853717029094696,
+        "value": "hier",
+        "extractor": "DIETClassifier",
+        "processors": [
+          "EntitySynonymMapper"
+        ]
+      },
+      {
+        "entity": "amount",
+        "start": 37,
+        "end": 47,
+        "confidence_entity": 0.8566471934318542,
+        "value": "500 pièces",
+        "extractor": "DIETClassifier",
+        "processors": [
+          "EntitySynonymMapper"
+        ]
+      }
+    ]
+  },
+  {
+    "text": "Depuis ce matin, impossible de me connecter sur android.",
+    "entities": [
+      {
+        "start": 0,
+        "end": 15,
+        "value": "depuis ce matin",
+        "entity": "incident_date"
+      },
+      {
+        "start": 34,
+        "end": 43,
+        "value": "login",
+        "entity": "type_problem"
+      },
+      {
+        "start": 44,
+        "end": 55,
+        "value": "Android",
+        "entity": "platform"
+      }
+    ],
+    "predicted_entities": [
+      {
+        "entity": "platform",
+        "start": 48,
+        "end": 55,
+        "confidence_entity": 0.8996137976646423,
+        "value": "Android",
+        "extractor": "DIETClassifier",
+        "processors": [
+          "EntitySynonymMapper"
+        ]
+      }
+    ]
+  },
+  {
+    "text": "La semaine dernière j'ai fait un dépôt de 1000 pièces qui n'est toujours pas crédité.",
+    "entities": [
+      {
+        "start": 0,
+        "end": 19,
+        "value": "la semaine dernière",
+        "entity": "incident_date"
+      },
+      {
+        "start": 33,
+        "end": 38,
+        "value": "deposit",
+        "entity": "operation_type"
+      },
+      {
+        "start": 42,
+        "end": 53,
+        "value": "1000 pièces",
+        "entity": "amount"
+      }
+    ],
+    "predicted_entities": [
+      {
+        "entity": "operation_type",
+        "start": 33,
+        "end": 38,
+        "confidence_entity": 0.734171986579895,
+        "value": "deposit",
+        "extractor": "DIETClassifier",
+        "processors": [
+          "EntitySynonymMapper"
+        ]
+      },
+      {
+        "entity": "amount",
+        "start": 42,
+        "end": 53,
+        "confidence_entity": 0.7747629284858704,
+        "value": "1000 pièces",
+        "extractor": "DIETClassifier"
+      }
+    ]
+  },
+  {
+    "text": "Mon transfert de 200 pièces est bloqué depuis avant-hier.",
+    "entities": [
+      {
+        "start": 4,
+        "end": 13,
+        "value": "transfer",
+        "entity": "operation_type"
+      },
+      {
+        "start": 17,
+        "end": 27,
+        "value": "200 pièces",
+        "entity": "amount"
+      },
+      {
+        "start": 32,
+        "end": 38,
+        "value": "blocked",
+        "entity": "issue_status"
+      },
+      {
+        "start": 46,
+        "end": 56,
+        "value": "avant-hier",
+        "entity": "incident_date"
+      }
+    ],
+    "predicted_entities": [
+      {
+        "entity": "operation_type",
+        "start": 4,
+        "end": 13,
+        "confidence_entity": 0.5286844372749329,
+        "value": "transfer",
+        "extractor": "DIETClassifier",
+        "processors": [
+          "EntitySynonymMapper"
+        ]
+      },
+      {
+        "entity": "amount",
+        "start": 17,
+        "end": 27,
+        "confidence_entity": 0.5992059707641602,
+        "value": "200 pièces",
+        "extractor": "DIETClassifier"
+      }
+    ]
+  },
+  {
+    "text": "Mon paiement a échoué ce matin sur iphone.",
+    "entities": [
+      {
+        "start": 4,
+        "end": 12,
+        "value": "payment",
+        "entity": "operation_type"
+      },
+      {
+        "start": 15,
+        "end": 21,
+        "value": "failed",
+        "entity": "issue_status"
+      },
+      {
+        "start": 22,
+        "end": 30,
+        "value": "ce matin",
+        "entity": "incident_date"
+      },
+      {
+        "start": 31,
+        "end": 41,
+        "value": "iOS",
+        "entity": "platform"
+      }
+    ],
+    "predicted_entities": [
+      {
+        "entity": "issue_status",
+        "start": 15,
+        "end": 21,
+        "confidence_entity": 0.7133272290229797,
+        "value": "failed",
+        "extractor": "DIETClassifier",
+        "processors": [
+          "EntitySynonymMapper"
+        ]
+      },
+      {
+        "entity": "platform",
+        "start": 31,
+        "end": 34,
+        "confidence_entity": 0.598098874092102,
+        "value": "sur",
+        "extractor": "DIETClassifier"
+      }
+    ]
+  },
+  {
+    "text": "Mon retrait est bloqué depuis le 15 juillet.",
+    "entities": [
+      {
+        "start": 30,
+        "end": 43,
+        "value": "le 15 juillet",
+        "entity": "incident_date"
+      }
+    ],
+    "predicted_entities": [
+      {
+        "entity": "incident_date",
+        "start": 30,
+        "end": 32,
+        "confidence_entity": 0.6034505367279053,
+        "value": "le",
+        "extractor": "DIETClassifier"
+      },
+      {
+        "entity": "amount",
+        "start": 33,
+        "end": 35,
+        "confidence_entity": 0.966472864151001,
+        "value": "15",
+        "extractor": "DIETClassifier"
+      }
+    ]
+  },
+  {
+    "text": "C'est arrivé mardi dernier.",
+    "entities": [
+      {
+        "start": 13,
+        "end": 26,
+        "value": "mardi dernier",
+        "entity": "incident_date"
+      }
+    ],
+    "predicted_entities": [
+      {
+        "entity": "incident_date",
+        "start": 19,
+        "end": 26,
+        "confidence_entity": 0.8968927264213562,
+        "value": "dernier",
+        "extractor": "DIETClassifier"
+      }
+    ]
+  },
+  {
+    "text": "Ça a commencé il y a trois jours.",
+    "entities": [
+      {
+        "start": 14,
+        "end": 32,
+        "value": "il y a trois jours",
+        "entity": "incident_date"
+      }
+    ],
+    "predicted_entities": []
+  },
+  {
+    "text": "Le problème date du 3 juillet.",
+    "entities": [
+      {
+        "start": 17,
+        "end": 29,
+        "value": "du 3 juillet",
+        "entity": "incident_date"
+      }
+    ],
+    "predicted_entities": [
+      {
+        "entity": "amount",
+        "start": 20,
+        "end": 21,
+        "confidence_entity": 0.9614459276199341,
+        "value": "3",
+        "extractor": "DIETClassifier"
+      }
+    ]
+  },
+  {
+    "text": "C'est survenu ce week-end.",
+    "entities": [
+      {
+        "start": 14,
+        "end": 25,
+        "value": "ce week-end",
+        "entity": "incident_date"
+      }
+    ],
+    "predicted_entities": []
+  },
+  {
+    "text": "Ça a débuté il y a une semaine.",
+    "entities": [
+      {
+        "start": 12,
+        "end": 30,
+        "value": "il y a une semaine",
+        "entity": "incident_date"
+      }
+    ],
+    "predicted_entities": []
+  },
+  {
+    "text": "en attente",
+    "entities": [
+      {
+        "start": 0,
+        "end": 10,
+        "value": "pending",
+        "entity": "issue_status"
+      }
+    ],
+    "predicted_entities": []
+  },
+  {
+    "text": "c'est bloqué qui m'inquiète le plus",
+    "entities": [
+      {
+        "start": 6,
+        "end": 12,
+        "value": "blocked",
+        "entity": "issue_status"
+      }
+    ],
+    "predicted_entities": []
+  },
+  {
+    "text": "plutôt le problème échoué",
+    "entities": [
+      {
+        "start": 19,
+        "end": 25,
+        "value": "failed",
+        "entity": "issue_status"
+      }
+    ],
+    "predicted_entities": []
+  },
+  {
+    "text": "mon retrait est en attente depuis des jours sans nouvelles",
+    "entities": [],
+    "predicted_entities": [
+      {
+        "entity": "issue_status",
+        "start": 19,
+        "end": 26,
+        "confidence_entity": 0.6939533352851868,
+        "value": "attente",
+        "extractor": "DIETClassifier"
+      }
+    ]
+  },
+  {
+    "text": "eske on peu utiliser ngoni sur android",
+    "entities": [],
+    "predicted_entities": [
+      {
+        "entity": "platform",
+        "start": 31,
+        "end": 38,
+        "confidence_entity": 0.5705105066299438,
+        "value": "Android",
+        "extractor": "DIETClassifier",
+        "processors": [
+          "EntitySynonymMapper"
+        ]
+      }
+    ]
+  },
+  {
+    "text": "mon retrait est bloqué",
+    "entities": [],
+    "predicted_entities": [
+      {
+        "entity": "operation_type",
+        "start": 4,
+        "end": 11,
+        "confidence_entity": 0.6789975166320801,
+        "value": "withdrawal",
+        "extractor": "DIETClassifier",
+        "processors": [
+          "EntitySynonymMapper"
+        ]
+      }
+    ]
+  },
+  {
+    "text": "je n'arrive plus à me connecter",
+    "entities": [],
+    "predicted_entities": [
+      {
+        "entity": "type_problem",
+        "start": 22,
+        "end": 31,
+        "confidence_entity": 0.8196777105331421,
+        "value": "login",
+        "extractor": "DIETClassifier",
+        "processors": [
+          "EntitySynonymMapper"
+        ]
+      }
+    ]
+  },
+  {
+    "text": "impossible de retirer mon argent",
+    "entities": [],
+    "predicted_entities": [
+      {
+        "entity": "operation_type",
+        "start": 14,
+        "end": 21,
+        "confidence_entity": 0.9822835922241211,
+        "value": "withdrawal",
+        "extractor": "DIETClassifier",
+        "processors": [
+          "EntitySynonymMapper"
+        ]
+      }
+    ]
+  },
+  {
+    "text": "ma connexion est impossible depuis ce matin",
+    "entities": [],
+    "predicted_entities": [
+      {
+        "entity": "incident_date",
+        "start": 35,
+        "end": 43,
+        "confidence_entity": 0.676386833190918,
+        "value": "ce matin",
+        "extractor": "DIETClassifier",
+        "processors": [
+          "EntitySynonymMapper"
+        ]
+      }
+    ]
+  },
+  {
+    "text": "j'essaye de me connecter mais ça bloque",
+    "entities": [],
+    "predicted_entities": [
+      {
+        "entity": "type_problem",
+        "start": 15,
+        "end": 24,
+        "confidence_entity": 0.8361068367958069,
+        "value": "login",
+        "extractor": "DIETClassifier",
+        "processors": [
+          "EntitySynonymMapper"
+        ]
+      }
+    ]
+  },
+  {
+    "text": "Impossible de me connecter.",
+    "entities": [],
+    "predicted_entities": [
+      {
+        "entity": "type_problem",
+        "start": 17,
+        "end": 26,
+        "confidence_entity": 0.6410593390464783,
+        "value": "login",
+        "extractor": "DIETClassifier",
+        "processors": [
+          "EntitySynonymMapper"
+        ]
+      }
+    ]
+  },
+  {
+    "text": "Mon mot de passe ne fonctionne plus.",
+    "entities": [],
+    "predicted_entities": [
+      {
+        "entity": "type_problem",
+        "start": 4,
+        "end": 16,
+        "confidence_entity": 0.6815288066864014,
+        "value": "password",
+        "extractor": "DIETClassifier",
+        "processors": [
+          "EntitySynonymMapper"
+        ]
+      }
+    ]
+  },
+  {
+    "text": "Mon paiement a échoué.",
+    "entities": [],
+    "predicted_entities": [
+      {
+        "entity": "operation_type",
+        "start": 4,
+        "end": 12,
+        "confidence_entity": 0.9835867285728455,
+        "value": "payment",
+        "extractor": "DIETClassifier",
+        "processors": [
+          "EntitySynonymMapper"
+        ]
+      },
+      {
+        "entity": "issue_status",
+        "start": 15,
+        "end": 21,
+        "confidence_entity": 0.9205532670021057,
+        "value": "failed",
+        "extractor": "DIETClassifier",
+        "processors": [
+          "EntitySynonymMapper"
+        ]
+      }
+    ]
+  },
+  {
+    "text": "Mon retrait est bloqué.",
+    "entities": [],
+    "predicted_entities": [
+      {
+        "entity": "operation_type",
+        "start": 4,
+        "end": 11,
+        "confidence_entity": 0.9272530674934387,
+        "value": "withdrawal",
+        "extractor": "DIETClassifier",
+        "processors": [
+          "EntitySynonymMapper"
+        ]
+      }
+    ]
+  },
+  {
+    "text": "Je suis bloqué dès la connexion.",
+    "entities": [],
+    "predicted_entities": [
+      {
+        "entity": "issue_status",
+        "start": 8,
+        "end": 14,
+        "confidence_entity": 0.5636376142501831,
+        "value": "blocked",
+        "extractor": "DIETClassifier",
+        "processors": [
+          "EntitySynonymMapper"
+        ]
+      },
+      {
+        "entity": "type_problem",
+        "start": 19,
+        "end": 21,
+        "confidence_entity": 0.7575401663780212,
+        "value": "la",
+        "extractor": "DIETClassifier"
+      }
+    ]
+  },
+  {
+    "text": "Je reste bloqué sur la page de connexion.",
+    "entities": [],
+    "predicted_entities": [
+      {
+        "entity": "issue_status",
+        "start": 9,
+        "end": 15,
+        "confidence_entity": 0.6918737292289734,
+        "value": "blocked",
+        "extractor": "DIETClassifier",
+        "processors": [
+          "EntitySynonymMapper"
+        ]
+      },
+      {
+        "entity": "type_problem",
+        "start": 20,
+        "end": 22,
+        "confidence_entity": 0.6875790953636169,
+        "value": "la",
+        "extractor": "DIETClassifier"
+      }
+    ]
+  },
+  {
+    "text": "J'attends toujours les pièces après mon paiement.",
+    "entities": [],
+    "predicted_entities": [
+      {
+        "entity": "amount",
+        "start": 23,
+        "end": 29,
+        "confidence_entity": 0.7008647918701172,
+        "value": "pièces",
+        "extractor": "DIETClassifier"
+      },
+      {
+        "entity": "operation_type",
+        "start": 40,
+        "end": 48,
+        "confidence_entity": 0.5144678950309753,
+        "value": "payment",
+        "extractor": "DIETClassifier",
+        "processors": [
+          "EntitySynonymMapper"
+        ]
+      }
+    ]
+  },
+  {
+    "text": "Mon retrait est bloqué depuis plusieurs jours.",
+    "entities": [],
+    "predicted_entities": [
+      {
+        "entity": "operation_type",
+        "start": 4,
+        "end": 11,
+        "confidence_entity": 0.8322726488113403,
+        "value": "withdrawal",
+        "extractor": "DIETClassifier",
+        "processors": [
+          "EntitySynonymMapper"
+        ]
+      }
+    ]
+  },
+  {
+    "text": "Mon retrait n'aboutit jamais.",
+    "entities": [],
+    "predicted_entities": [
+      {
+        "entity": "operation_type",
+        "start": 4,
+        "end": 11,
+        "confidence_entity": 0.3775149881839752,
+        "value": "withdrawal",
+        "extractor": "DIETClassifier",
+        "processors": [
+          "EntitySynonymMapper"
+        ]
+      }
+    ]
+  },
+  {
+    "text": "Je ne peux plus retirer mon argent.",
+    "entities": [],
+    "predicted_entities": [
+      {
+        "entity": "operation_type",
+        "start": 16,
+        "end": 23,
+        "confidence_entity": 0.7402662038803101,
+        "value": "withdrawal",
+        "extractor": "DIETClassifier",
+        "processors": [
+          "EntitySynonymMapper"
+        ]
+      }
+    ]
+  },
+  {
+    "text": "Bonjour ça ne fonctionne pas depuis ce matin",
+    "entities": [],
+    "predicted_entities": [
+      {
+        "entity": "incident_date",
+        "start": 36,
+        "end": 38,
+        "confidence_entity": 0.38475796580314636,
+        "value": "ce",
+        "extractor": "DIETClassifier"
+      }
+    ]
+  },
+  {
+    "text": "Bonsoir comment allez-vous ? J'ai fait un retrait depuis hier mais ça n'a pas été effectué.",
+    "entities": [],
+    "predicted_entities": [
+      {
+        "entity": "incident_date",
+        "start": 57,
+        "end": 61,
+        "confidence_entity": 0.6572726368904114,
+        "value": "hier",
+        "extractor": "DIETClassifier",
+        "processors": [
+          "EntitySynonymMapper"
+        ]
+      }
+    ]
+  },
+  {
+    "text": "jarive pas a retirer mon arjent",
+    "entities": [],
+    "predicted_entities": [
+      {
+        "entity": "operation_type",
+        "start": 13,
+        "end": 20,
+        "confidence_entity": 0.6902008652687073,
+        "value": "withdrawal",
+        "extractor": "DIETClassifier",
+        "processors": [
+          "EntitySynonymMapper"
+        ]
+      }
+    ]
+  },
+  {
+    "text": "Depuis ce matin j'essaie de retirer mon argent mais ça reste bloqué en attente et je ne comprends vraiment pas pourquoi, est-ce que vous pouvez vérifier ce qui se passe ?",
+    "entities": [],
+    "predicted_entities": [
+      {
+        "entity": "incident_date",
+        "start": 7,
+        "end": 15,
+        "confidence_entity": 0.7886337637901306,
+        "value": "ce matin",
+        "extractor": "DIETClassifier",
+        "processors": [
+          "EntitySynonymMapper"
+        ]
+      },
+      {
+        "entity": "operation_type",
+        "start": 28,
+        "end": 35,
+        "confidence_entity": 0.9942154884338379,
+        "value": "withdrawal",
+        "extractor": "DIETClassifier",
+        "processors": [
+          "EntitySynonymMapper"
+        ]
+      },
+      {
+        "entity": "issue_status",
+        "start": 61,
+        "end": 67,
+        "confidence_entity": 0.6549643874168396,
+        "value": "blocked",
+        "extractor": "DIETClassifier",
+        "processors": [
+          "EntitySynonymMapper"
+        ]
+      }
+    ]
+  },
+  {
+    "text": "J'ai fait un paiement il y a plus d'une heure, l'argent a bien été débité de mon compte bancaire, mais je n'ai toujours pas reçu mes pièces sur l'application.",
+    "entities": [],
+    "predicted_entities": [
+      {
+        "entity": "operation_type",
+        "start": 13,
+        "end": 21,
+        "confidence_entity": 0.9018977284431458,
+        "value": "payment",
+        "extractor": "DIETClassifier",
+        "processors": [
+          "EntitySynonymMapper"
+        ]
+      },
+      {
+        "entity": "incident_date",
+        "start": 22,
+        "end": 28,
+        "confidence_entity": 0.9042609930038452,
+        "value": "il y a",
+        "extractor": "DIETClassifier"
+      },
+      {
+        "entity": "incident_date",
+        "start": 36,
+        "end": 39,
+        "confidence_entity": 0.9529961943626404,
+        "value": "une",
+        "extractor": "DIETClassifier"
+      }
+    ]
+  },
+  {
+    "text": "Ça fait la troisième fois que j'essaie de me connecter aujourd'hui et à chaque fois l'application me renvoie une erreur juste après avoir entré mon code.",
+    "entities": [],
+    "predicted_entities": [
+      {
+        "entity": "incident_date",
+        "start": 8,
+        "end": 20,
+        "confidence_entity": 0.66,
+        "value": "la troisième",
+        "extractor": "DIETClassifier"
+      },
+      {
+        "entity": "type_problem",
+        "start": 45,
+        "end": 54,
+        "confidence_entity": 0.8095930814743042,
+        "value": "login",
+        "extractor": "DIETClassifier",
+        "processors": [
+          "EntitySynonymMapper"
+        ]
+      }
+    ]
+  },
+  {
+    "text": "Je n'arrive pas à faire un retrait.",
+    "entities": [
+      {
+        "start": 27,
+        "end": 34,
+        "value": "withdrawal",
+        "entity": "operation_type"
+      }
+    ],
+    "predicted_entities": []
+  },
+  {
+    "text": "J'ai essayé de transférer de l'argent mais ça a échoué.",
+    "entities": [
+      {
+        "start": 15,
+        "end": 25,
+        "value": "transfer",
+        "entity": "operation_type"
+      }
+    ],
+    "predicted_entities": [
+      {
+        "entity": "operation_type",
+        "start": 15,
+        "end": 25,
+        "confidence_entity": 0.9599324464797974,
+        "value": "transfer",
+        "extractor": "DIETClassifier",
+        "processors": [
+          "EntitySynonymMapper"
+        ]
+      },
+      {
+        "entity": "issue_status",
+        "start": 48,
+        "end": 54,
+        "confidence_entity": 0.8517911434173584,
+        "value": "failed",
+        "extractor": "DIETClassifier",
+        "processors": [
+          "EntitySynonymMapper"
+        ]
+      }
+    ]
+  },
+  {
+    "text": "Je n'arrive pas à valider mon paiement.",
+    "entities": [
+      {
+        "start": 30,
+        "end": 38,
+        "value": "payment",
+        "entity": "operation_type"
+      }
+    ],
+    "predicted_entities": []
+  },
+  {
+    "text": "J'ai un problème de connexion.",
+    "entities": [
+      {
+        "start": 20,
+        "end": 29,
+        "value": "login",
+        "entity": "type_problem"
+      }
+    ],
+    "predicted_entities": []
+  },
+  {
+    "text": "Le login ne fonctionne pas depuis ce matin.",
+    "entities": [
+      {
+        "start": 3,
+        "end": 8,
+        "value": "login",
+        "entity": "type_problem"
+      }
+    ],
+    "predicted_entities": [
+      {
+        "entity": "type_problem",
+        "start": 3,
+        "end": 8,
+        "confidence_entity": 0.9738902449607849,
+        "value": "login",
+        "extractor": "DIETClassifier",
+        "processors": [
+          "EntitySynonymMapper"
+        ]
+      },
+      {
+        "entity": "incident_date",
+        "start": 34,
+        "end": 36,
+        "confidence_entity": 0.41942718625068665,
+        "value": "ce",
+        "extractor": "DIETClassifier"
+      }
+    ]
+  },
+  {
+    "text": "Je ne reçois plus mes messages.",
+    "entities": [
+      {
+        "start": 22,
+        "end": 30,
+        "value": "chat",
+        "entity": "type_problem"
+      }
+    ],
+    "predicted_entities": []
+  },
+  {
+    "text": "Le chat ne fonctionne plus.",
+    "entities": [
+      {
+        "start": 3,
+        "end": 7,
+        "value": "chat",
+        "entity": "type_problem"
+      }
+    ],
+    "predicted_entities": []
+  },
+  {
+    "text": "La messagerie est bloquée depuis hier.",
+    "entities": [
+      {
+        "start": 3,
+        "end": 13,
+        "value": "chat",
+        "entity": "type_problem"
+      }
+    ],
+    "predicted_entities": [
+      {
+        "entity": "type_problem",
+        "start": 3,
+        "end": 13,
+        "confidence_entity": 0.9833516478538513,
+        "value": "chat",
+        "extractor": "DIETClassifier",
+        "processors": [
+          "EntitySynonymMapper"
+        ]
+      },
+      {
+        "entity": "incident_date",
+        "start": 33,
+        "end": 37,
+        "confidence_entity": 0.7256284952163696,
+        "value": "hier",
+        "extractor": "DIETClassifier",
+        "processors": [
+          "EntitySynonymMapper"
+        ]
+      }
+    ]
+  },
+  {
+    "text": "Un souci avec la connexion depuis ce matin.",
+    "entities": [
+      {
+        "start": 17,
+        "end": 26,
+        "value": "login",
+        "entity": "type_problem"
+      }
+    ],
+    "predicted_entities": [
+      {
+        "entity": "type_problem",
+        "start": 14,
+        "end": 26,
+        "confidence_entity": 0.5242941379547119,
+        "value": "login",
+        "extractor": "DIETClassifier",
+        "processors": [
+          "EntitySynonymMapper"
+        ]
+      },
+      {
+        "entity": "incident_date",
+        "start": 34,
+        "end": 42,
+        "confidence_entity": 0.6584303379058838,
+        "value": "ce matin",
+        "extractor": "DIETClassifier",
+        "processors": [
+          "EntitySynonymMapper"
+        ]
+      }
+    ]
+  },
+  {
+    "text": "J'ai un souci de mot de passe et mon transfert n'est jamais arrivé.",
+    "entities": [
+      {
+        "start": 17,
+        "end": 29,
+        "value": "password",
+        "entity": "type_problem"
+      },
+      {
+        "start": 37,
+        "end": 46,
+        "value": "transfer",
+        "entity": "operation_type"
+      }
+    ],
+    "predicted_entities": [
+      {
+        "entity": "type_problem",
+        "start": 14,
+        "end": 16,
+        "confidence_entity": 0.81561279296875,
+        "value": "de",
+        "extractor": "DIETClassifier"
+      },
+      {
+        "entity": "type_problem",
+        "start": 17,
+        "end": 29,
+        "confidence_entity": 0.7764164805412292,
+        "value": "password",
+        "extractor": "DIETClassifier",
+        "processors": [
+          "EntitySynonymMapper"
+        ]
+      },
+      {
+        "entity": "operation_type",
+        "start": 37,
+        "end": 46,
+        "confidence_entity": 0.9727073907852173,
+        "value": "transfer",
+        "extractor": "DIETClassifier",
+        "processors": [
+          "EntitySynonymMapper"
+        ]
+      }
+    ]
+  },
+  {
+    "text": "c'est le dépôt le plus urgent",
+    "entities": [
+      {
+        "start": 6,
+        "end": 14,
+        "value": "deposit",
+        "entity": "operation_type"
+      }
+    ],
+    "predicted_entities": []
+  },
+  {
+    "text": "I can't login mon mot de passe ne marche pas",
+    "entities": [],
+    "predicted_entities": [
+      {
+        "entity": "type_problem",
+        "start": 8,
+        "end": 13,
+        "confidence_entity": 0.9245308041572571,
+        "value": "login",
+        "extractor": "DIETClassifier",
+        "processors": [
+          "EntitySynonymMapper"
+        ]
+      },
+      {
+        "entity": "type_problem",
+        "start": 18,
+        "end": 30,
+        "confidence_entity": 0.6808485984802246,
+        "value": "password",
+        "extractor": "DIETClassifier",
+        "processors": [
+          "EntitySynonymMapper"
+        ]
+      }
+    ]
+  },
+  {
+    "text": "mon retrait est bloqué 😡",
+    "entities": [],
+    "predicted_entities": [
+      {
+        "entity": "operation_type",
+        "start": 4,
+        "end": 11,
+        "confidence_entity": 0.6789975166320801,
+        "value": "withdrawal",
+        "extractor": "DIETClassifier",
+        "processors": [
+          "EntitySynonymMapper"
+        ]
+      }
+    ]
+  },
+  {
+    "text": "Mon retrait est en attente depuis trois jours.",
+    "entities": [
+      {
+        "start": 16,
+        "end": 26,
+        "value": "pending",
+        "entity": "issue_status"
+      }
+    ],
+    "predicted_entities": [
+      {
+        "entity": "operation_type",
+        "start": 4,
+        "end": 11,
+        "confidence_entity": 0.6595284342765808,
+        "value": "withdrawal",
+        "extractor": "DIETClassifier",
+        "processors": [
+          "EntitySynonymMapper"
+        ]
+      },
+      {
+        "entity": "incident_date",
+        "start": 34,
+        "end": 45,
+        "confidence_entity": 0.8890025615692139,
+        "value": "trois jours",
+        "extractor": "DIETClassifier"
+      }
+    ]
+  },
+  {
+    "text": "J'attends toujours mon retrait, il est resté en attente.",
+    "entities": [
+      {
+        "start": 45,
+        "end": 55,
+        "value": "pending",
+        "entity": "issue_status"
+      }
+    ],
+    "predicted_entities": []
+  },
+  {
+    "text": "Mon paiement a échoué sans raison.",
+    "entities": [
+      {
+        "start": 15,
+        "end": 21,
+        "value": "failed",
+        "entity": "issue_status"
+      }
+    ],
+    "predicted_entities": [
+      {
+        "entity": "operation_type",
+        "start": 4,
+        "end": 12,
+        "confidence_entity": 0.6188909411430359,
+        "value": "payment",
+        "extractor": "DIETClassifier",
+        "processors": [
+          "EntitySynonymMapper"
+        ]
+      }
+    ]
+  },
+  {
+    "text": "La connexion reste impossible depuis ce matin.",
+    "entities": [
+      {
+        "start": 19,
+        "end": 29,
+        "value": "blocked",
+        "entity": "issue_status"
+      }
+    ],
+    "predicted_entities": [
+      {
+        "entity": "incident_date",
+        "start": 37,
+        "end": 45,
+        "confidence_entity": 0.6779308319091797,
+        "value": "ce matin",
+        "extractor": "DIETClassifier",
+        "processors": [
+          "EntitySynonymMapper"
+        ]
+      }
+    ]
+  },
+  {
+    "text": "Mon retrait n'aboutit jamais, il reste bloqué.",
+    "entities": [
+      {
+        "start": 39,
+        "end": 45,
+        "value": "blocked",
+        "entity": "issue_status"
+      }
+    ],
+    "predicted_entities": [
+      {
+        "entity": "operation_type",
+        "start": 4,
+        "end": 11,
+        "confidence_entity": 0.9188017249107361,
+        "value": "withdrawal",
+        "extractor": "DIETClassifier",
+        "processors": [
+          "EntitySynonymMapper"
+        ]
+      },
+      {
+        "entity": "issue_status",
+        "start": 39,
+        "end": 45,
+        "confidence_entity": 0.5170787572860718,
+        "value": "blocked",
+        "extractor": "DIETClassifier",
+        "processors": [
+          "EntitySynonymMapper"
+        ]
+      }
+    ]
+  },
+  {
+    "text": "Le montant de 500 pièces n'a pas été crédité.",
+    "entities": [
+      {
+        "start": 14,
+        "end": 24,
+        "value": "500 pièces",
+        "entity": "amount"
+      }
+    ],
+    "predicted_entities": [
+      {
+        "entity": "incident_date",
+        "start": 0,
+        "end": 2,
+        "confidence_entity": 0.47593018412590027,
+        "value": "Le",
+        "extractor": "DIETClassifier"
+      },
+      {
+        "entity": "amount",
+        "start": 14,
+        "end": 24,
+        "confidence_entity": 0.969022810459137,
+        "value": "500 pièces",
+        "extractor": "DIETClassifier",
+        "processors": [
+          "EntitySynonymMapper"
+        ]
+      }
+    ]
+  },
+  {
+    "text": "Depuis hier j'attends mon retrait, il reste en attente.",
+    "entities": [
+      {
+        "start": 7,
+        "end": 11,
+        "value": "hier",
+        "entity": "incident_date"
+      },
+      {
+        "start": 44,
+        "end": 54,
+        "value": "pending",
+        "entity": "issue_status"
+      }
+    ],
+    "predicted_entities": [
+      {
+        "entity": "incident_date",
+        "start": 7,
+        "end": 11,
+        "confidence_entity": 0.965154230594635,
+        "value": "hier",
+        "extractor": "DIETClassifier",
+        "processors": [
+          "EntitySynonymMapper"
+        ]
+      },
+      {
+        "entity": "issue_status",
+        "start": 47,
+        "end": 54,
+        "confidence_entity": 0.6294196248054504,
+        "value": "attente",
+        "extractor": "DIETClassifier"
+      }
+    ]
+  },
+  {
+    "text": "Mon compte est bloqué depuis lundi.",
+    "entities": [
+      {
+        "start": 29,
+        "end": 34,
+        "value": "lundi",
+        "entity": "incident_date"
+      }
+    ],
+    "predicted_entities": [
+      {
+        "entity": "issue_status",
+        "start": 15,
+        "end": 21,
+        "confidence_entity": 0.5734032392501831,
+        "value": "blocked",
+        "extractor": "DIETClassifier",
+        "processors": [
+          "EntitySynonymMapper"
+        ]
+      }
+    ]
+  },
+  {
+    "text": "Pourquoi je ne peux plus me connecter à mon profil ?",
+    "entities": [],
+    "predicted_entities": [
+      {
+        "entity": "type_problem",
+        "start": 28,
+        "end": 37,
+        "confidence_entity": 0.51693195104599,
+        "value": "login",
+        "extractor": "DIETClassifier",
+        "processors": [
+          "EntitySynonymMapper"
+        ]
+      }
+    ]
+  },
+  {
+    "text": "plus aucune notification ne m'arrive depuis hier",
+    "entities": [],
+    "predicted_entities": [
+      {
+        "entity": "incident_date",
+        "start": 44,
+        "end": 48,
+        "confidence_entity": 0.5277243852615356,
+        "value": "hier",
+        "extractor": "DIETClassifier",
+        "processors": [
+          "EntitySynonymMapper"
+        ]
+      }
+    ]
+  }
+]
