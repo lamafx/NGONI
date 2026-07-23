@@ -79,3 +79,6 @@ rasa/models/
 # Config machine-locale (Rasa/Keras, generee automatiquement, pas du projet)
 rasa/.config/
 rasa/.keras/
+
+# Frontend (module independant, voir frontend/README le cas echeant)
+frontend/

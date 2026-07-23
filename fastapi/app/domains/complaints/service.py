@@ -60,6 +60,7 @@ class ComplaintService:
         category: Optional[str] = None,
         urgency: Optional[str] = None,
         created_by: Optional[str] = None,
+        user_id: Optional[str] = None,
         limit: int = 50,
         offset: int = 0,
     ) -> List[ComplaintResponse]:
@@ -67,7 +68,7 @@ class ComplaintService:
             return []
         complaints = self.repository.list_tickets(
             status=status, category=category, urgency=urgency, created_by=created_by,
-            limit=limit, offset=offset,
+            user_id=user_id, limit=limit, offset=offset,
         )
         return [_to_response(c) for c in complaints]
 

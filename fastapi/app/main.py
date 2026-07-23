@@ -10,7 +10,8 @@ from typing import Optional
 
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.concurrency import run_in_threadpool
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
@@ -35,6 +36,7 @@ from .domains.diagnostic.router import router as diagnostic_router, get_registry
 from .domains.audit.router import router as audit_router
 from .domains.audit.service import record_faq_lookup
 from .shared.admin_auth import warn_if_admin_secret_missing
+from .shared.rate_limit import InMemoryRateLimitMiddleware
 from .shared.embeddings.router import router as embeddings_router
 from .shared.embeddings import get_embedding_model
 from .domains.faq.service import FaqService
@@ -45,6 +47,7 @@ from .database import get_db
 logger = logging.getLogger(__name__)
 
 app = FastAPI(title="NGONI FastAPI", version="1.0.0")
+app.add_middleware(InMemoryRateLimitMiddleware)
 
 RASA_WEBHOOK_URL = getenv("RASA_WEBHOOK_URL", "http://127.0.0.1:5005/webhooks/rest/webhook")
 RASA_PARSE_URL = getenv("RASA_PARSE_URL", "http://127.0.0.1:5005/model/parse")
@@ -185,21 +188,13 @@ app.add_api_route(
 )
 
 
-@app.get("/", response_class=HTMLResponse)
+@app.get("/")
 def read_root():
-    return """<!DOCTYPE html>
-<html lang="fr">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Testeur de modèle Rasa</title>
-</head>
-<body>
-  <h1>FastAPI NGONI Service</h1>
-  <p>Interface chat dédiée disponible sur <a href="/chat">/chat</a>.</p>
-  <p>Ou utilise les endpoints API : <code>/api/parse</code> et <code>/api/chat</code>. Les FAQ sont gérées via Rasa puis redirigées vers FastAPI.</p>
-</body>
-</html>"""
+    # Remplace l'ancienne page placeholder ("Testeur de modele Rasa") --
+    # redirige vers le nouveau frontend (frontend/index.html, monte plus bas
+    # via StaticFiles). Route enregistree avant le montage : reste prioritaire
+    # sur "/" exact, comme requis par Starlette (routes explicites d'abord).
+    return RedirectResponse(url="/index.html")
 
 
 @app.get("/chat", response_class=HTMLResponse)
@@ -653,3 +648,15 @@ async def send_to_bot(request: ChatRequest, db=Depends(get_db)):
 
     logger.info("[trace_id=%s] send_to_bot succeeded using %s", trace_id, RASA_WEBHOOK_URL)
     return {"messages": rasa_response.json()}
+
+
+# Monte APRES toutes les routes explicites ci-dessus : Starlette verifie les
+# routes dans leur ordre d'enregistrement, donc /api/*, /admin/*, /audit/*,
+# /feedback/*, /chat, /docs restent prioritaires sur ce montage generique.
+# Aucun fichier de frontend/ ne porte l'un de ces chemins, donc pas de
+# collision reelle. html=True sert index.html sur "/".
+_FRONTEND_DIR = Path(__file__).resolve().parents[2] / "frontend"
+if _FRONTEND_DIR.is_dir():
+    app.mount("/", StaticFiles(directory=str(_FRONTEND_DIR), html=True), name="frontend")
+else:
+    logger.warning("[FastAPI] Dossier frontend/ introuvable (%s) -- montage statique ignore.", _FRONTEND_DIR)

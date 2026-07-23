@@ -122,6 +122,12 @@
           "items": { "$ref": "#/$defs/fieldSpec" },
           "default": []
         },
+        "fallback_fields": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/fieldSpec" },
+          "default": [],
+          "description": "Groupe de repli utilisable A LA PLACE de required_fields quand l'utilisateur ne peut pas fournir un des champs requis (ex: pas de reference de transaction, mais date + montant). Optionnel : vide par defaut, aucun repli."
+        },
         "resolution_causes": {
           "type": "array",
           "items": { "$ref": "#/$defs/resolutionCause" },

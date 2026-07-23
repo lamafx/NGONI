@@ -176,79 +176,17 @@ nlu:
     - Puis-je changer mon email ?
     - Comment je fais pour vérifier mon identité ?
 
-    # Audit qualite NLU (collision lexicale ask_faq/diagnostic, 2026-07-21) :
-    # config.yml n'alimente DIETClassifier qu'avec des featurizers bag-of-words
-    # / char n-gram (CountVectorsFeaturizer word + char_wb), aucun embedding
-    # semantique en amont -- deux exemples partageant beaucoup de mots-contenu
-    # mais assignes a des intentions differentes sont donc un vrai bruit
-    # d'etiquetage pour ce pipeline, pas une simple coincidence stylistique.
-    # Mesure par recouvrement de mots-contenu (Jaccard) entre les 174 exemples
-    # ask_faq et les 387 exemples diagnostic : 2 exemples ask_faq retires/
-    # reformules ci-dessus car structurellement identiques au patron dominant
-    # de diagnostic ("Pourquoi mon [sujet] [etat probleme] ?", 17 occurrences
-    # cote diagnostic, 2 cote ask_faq avant ce correctif). diagnostic reste
-    # volontairement plus fourni (387 exemples, couverture large de problemes
-    # distincts, voir commentaire en fin de fichier) : le corrige ne consiste
-    # donc pas a le reduire, mais a renforcer le cadrage GENERIQUE/PROCEDURAL
-    # cote ask_faq sur la meme zone de vocabulaire (retrait, mot de passe,
-    # connexion, compte, KYC) plutot que de compter sur plus d'exemples courts
-    # -- seul le CADRAGE peut servir de signal discriminant a un modele qui ne
-    # voit que des sacs de mots, pas le sens.
-    - Quelle est la procédure normale pour effectuer un retrait ?
-    - En général, combien de temps faut-il pour qu'un retrait soit traité ?
-    - Comment se passe habituellement une réinitialisation de mot de passe ?
-    - Quelle est la démarche standard pour se connecter à son compte ?
-    - De manière générale, comment accède-t-on à son compte NGONI ?
-    - Quelles sont les étapes classiques pour créer ou ouvrir un compte ?
-    - Comment fonctionne normalement le système de connexion ?
-    - Existe-t-il une procédure standard pour changer de mot de passe ?
-    - Quelle est la marche à suivre habituelle pour le KYC ?
-    - De façon générale, comment se déroule la vérification d'identité ?
-
-    # Nettoyage a plus grande echelle (2026-07-21, suite au 1er correctif qui
-    # a regresse -2.4pt : effet de levier trop faible sur seulement 2 exemples
-    # retires + 10 renforts). Constat par grep direct : depot/transfert/
-    # messagerie/notification/suspension/conformite/consentement parental
-    # sont couverts par des DIZAINES d'exemples diagnostic (dont des exemples
-    # annotes en entites, ex. [depot](operation_type:deposit)) mais ZERO
-    # exemple ask_faq generique n'existe sur ce meme vocabulaire -- toute
-    # question procedurale utilisant ces mots n'a statistiquement aucune
-    # chance face a diagnostic. Les exemples ci-dessous comblent cette
-    # asymetrie plutot que de retoucher les 12 collisions restantes
-    # identifiees par mesure de similarite (Jaccard sur mots-contenu) qui se
-    # sont averees etre, apres relecture, des questions ask_faq deja
-    # correctement etiquetees (juste courtes, donc statistiquement fragiles) :
-    # les retoucher aurait degrade une couverture FAQ deja valide sans
-    # justification semantique, seulement pour "faire baisser un score de
-    # similarite".
-    - Comment effectuer un dépôt sur mon compte ?
-    - Quelle est la procédure pour faire un dépôt ?
-    - Comment faire un transfert vers un autre utilisateur ?
-    - Quelle est la démarche pour transférer de l'argent à un ami ?
-    - Que faire en général si un paiement échoue ?
-    - Quelles sont les causes possibles d'un échec de paiement ?
-    - Comment fonctionne la messagerie sur l'application ?
-    - Quelles sont les règles d'utilisation de la messagerie ?
-    - Comment activer les notifications de l'application ?
-    - Comment paramétrer mes notifications par défaut ?
-    - Pourquoi un compte peut-il être suspendu, en général ?
-    - Quelles sont les raisons possibles d'une suspension de compte ?
-    - Quelles sont les règles de conformité appliquées aux comptes ?
-    - En quoi consiste un contrôle de conformité sur NGONI ?
-    - Comment fonctionne le consentement parental pour un mineur ?
-    - Quelle est la démarche pour donner son consentement parental ?
-    - Combien de temps dure en moyenne le traitement d'un dépôt ?
-    - Quels sont les délais habituels pour un transfert entre utilisateurs ?
-    - Comment savoir si mon paiement a bien été pris en compte ?
-    - Quelle est la démarche générale pour récupérer un compte supprimé ?
-    - dépôt, comment ça marche ?
-    - transfert, quelle est la procédure ?
-    - notifications, comment les activer ?
-    - messagerie, comment ça fonctionne ?
-    - suspension de compte, pourquoi ça arrive ?
-    - consentement parental, comment ça marche ?
-    - conformité, c'est quoi exactement ?
-    - mot de passe oublié, comment faire en général ?
+    # Nettoyage 2026-07-22 : les blocs v1 (10 exemples) et v2 (28 exemples)
+    # ajoutes le 2026-07-21 pour combler l'asymetrie de vocabulaire avec
+    # diagnostic (depot/transfert/messagerie/notifications/suspension/
+    # conformite/consentement parental) ont ete retires. Les deux avaient
+    # regresse l'accuracy sur le corpus adversarial (-2.4pt puis -2.2pt,
+    # avec une regression collaterale de -20pt sur out_of_scope pour v2 --
+    # le vocabulaire generique ajoute, "en general"/"quelle est la
+    # procedure", diluait le VocabularyCoverageGuard). Le modele reellement
+    # deploye (retrained-audit-fixes-v6.tar.gz) avait deja ete reentraine
+    # SANS ces exemples ; ce fichier ne correspondait donc plus au modele en
+    # prod avant ce nettoyage.
 
     # Prefixe de politesse "Bonjour, ..." (audit "500 tours", 2026-07-18) :
     # une question de fond parfaitement claire, une fois precedee d'une
@@ -2545,13 +2483,90 @@ nlu:
     - suggère-moi quelques questions fréquentes
 
 - intent: select_faq_category
+  # Rapport 18-rapport-competences.md, proposition P1 : ce flux est
+  # principalement pilote par des boutons (payload
+  # /select_faq_category{"faq_category": "..."}, voir
+  # fetch_faq_category_buttons dans faq.py) mais accepte aussi du texte libre
+  # -- contrairement a select_faq_question ci-dessous. Couverture etendue aux
+  # 12 valeurs reelles de core.FaqCategory (04-services.md/06-api-reference.md,
+  # FAQ_CATEGORY_LABELS dans faq.py) : seules WALLET/ACCOUNT/KYC/NGONI_PLUS
+  # avaient un exemple avant cet ajout, les 8 autres n'avaient donc aucune
+  # chance d'etre reconnues si un utilisateur les tapait au lieu de cliquer.
   examples: |
     - Je veux voir les questions sur [le portefeuille](faq_category:WALLET)
     - Montre-moi les questions à propos du [compte](faq_category:ACCOUNT)
     - Des questions sur [le KYC](faq_category:KYC)
     - Des questions sur [NGONI Plus](faq_category:NGONI_PLUS)
+    - Des questions sur [les pièces](faq_category:COINS)
+    - Comment ça marche les [pièces](faq_category:COINS) ?
+    - Je veux voir les questions sur les [vidéos privées payantes](faq_category:VPP)
+    - Montre-moi les questions sur les [lives privés payants](faq_category:LPP)
+    - Des questions sur [les retraits](faq_category:WITHDRAWAL)
+    - Je veux voir les questions sur le [retrait d'argent](faq_category:WITHDRAWAL)
+    - Des questions sur le [contrôle parental](faq_category:PARENTAL_CONTROL)
+    - Montre-moi les questions sur les [cadeaux](faq_category:GIFTS)
+    - Des questions sur l'[assistance](faq_category:ASSISTANCE)
+    - Je veux contacter l'[assistance](faq_category:ASSISTANCE)
+    - Je veux des questions [générales](faq_category:GENERAL)
+    - Montre-moi des questions [générales](faq_category:GENERAL) sur NGONI
 
 - intent: select_faq_question
+  # Rapport 18-rapport-competences.md, proposition P1 : intentionnellement
+  # sans equivalent texte libre, contrairement a select_faq_category ci-dessus
+  # -- un `faq_slug` (ex. "comment-recevoir-des-revenus-sur-ngoni-abc12345")
+  # est un identifiant technique genere cote FastAPI (/faq/suggestions), pas
+  # un mot que redigerait un utilisateur reel. Ce flux est et reste
+  # exclusivement pilote par le payload du bouton envoye par
+  # ActionSelectFaqCategory (voir faq.py) ; les deux exemples ci-dessous ne
+  # servent qu'a entrainer l'extraction de l'entite sur ce format de payload,
+  # pas a reconnaitre une formulation naturelle -- ajouter plus d'exemples
+  # n'aurait aucun effet utile ici, a la difference de select_faq_category.
   examples: |
     - [comment-recevoir-des-revenus-sur-ngoni-abc12345](faq_slug)
     - [quest-ce-que-ngoni-plus-def67890](faq_slug)
+
+- intent: ask_complaint_status
+  examples: |
+    - Où en est ma réclamation ?
+    - Quel est le statut de ma dernière réclamation ?
+    - Affiche toutes mes réclamations
+    - Quelles sont mes réclamations en cours ?
+    - La réclamation concernant mon retrait a-t-elle avancé ?
+    - Où en est mon ticket ?
+    - Quel est le statut de mon ticket ?
+    - Je veux voir mes réclamations
+    - Montre-moi mes réclamations
+    - Liste de mes réclamations
+    - Ma réclamation a-t-elle été traitée ?
+    - Est-ce que ma réclamation a avancé ?
+    - Qu'en est-il de ma dernière réclamation ?
+    - Peux-tu me dire où en est ma réclamation ?
+    - J'aimerais connaître le statut de ma réclamation
+    - Ma réclamation sur mon retrait a-t-elle été résolue ?
+    - Où en est le ticket que j'ai créé ?
+    - Toutes mes réclamations en cours s'il te plaît
+    - Est-ce que mon ticket a été traité ?
+    - Donne-moi le statut de mes réclamations
+    # Rapport 18-rapport-competences.md (P1) + audit adversarial du 23/07 :
+    # 0% de rappel mesure en conditions live (results/adversarial,
+    # intent_errors.json) -- absorbe systematiquement par create_reclamation
+    # a tres haute confiance (jusqu'a 99,9%). Les 20 exemples ci-dessus
+    # partagent tous la meme structure explicite ("statut de ma
+    # reclamation/mon ticket"). Exemples ci-dessous : vocabulaire "dossier"
+    # (jamais utilise ci-dessus), tournures au passe ("j'ai deja...", "ça
+    # fait X jours que...") qui marquent une reclamation DEJA ouverte plutot
+    # qu'une demande d'en ouvrir une, et registre familier/SMS.
+    - Ça fait un moment que j'attends une réponse sur mon dossier, ça avance ?
+    - Vous pouvez me dire où ça en est pour le ticket que j'ai ouvert la dernière fois ?
+    - Toujours rien de neuf concernant la réclamation que j'ai faite il y a quelques jours.
+    - J'ai déjà signalé ce problème, vous en êtes où de votre côté ?
+    - Ça fait trois jours que j'ai ouvert un dossier, toujours pas de réponse.
+    - Je voulais juste savoir si quelqu'un avait regardé mon dossier depuis.
+    - Mon dossier avance ou pas du tout ?
+    - Personne ne m'a recontacté depuis ma réclamation, c'est normal ?
+    - J'ai déjà fait une réclamation la semaine dernière, où ça en est ?
+    - Vous avez des nouvelles de mon dossier depuis le temps ?
+    - c ou mon dossier g deja fai 1 reclam
+    - jatend tjr 1 reponse pr mon tiket douvr
+    - sa fai 1 semaine ke jatend pr mon dossié
+    - kelkun a regardé mon dossié ou pa ankor

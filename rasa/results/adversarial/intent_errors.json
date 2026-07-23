@@ -1,0 +1,178 @@
+[
+  {
+    "text": "Comment récupérer l'accès à mon compte si j'ai oublié mon mot de passe ?",
+    "intent": "ask_faq",
+    "intent_prediction": {
+      "name": "diagnostic",
+      "confidence": 0.9972851276397705
+    }
+  },
+  {
+    "text": "Comment on fait pour se reconnecter si on a perdu l'accès ?",
+    "intent": "ask_faq",
+    "intent_prediction": {
+      "name": "diagnostic",
+      "confidence": 0.43915027379989624
+    }
+  },
+  {
+    "text": "jve cré 1 compte comen on fé",
+    "intent": "ask_faq",
+    "intent_prediction": {
+      "name": "out_of_scope",
+      "confidence": 0.9997429251670837
+    }
+  },
+  {
+    "text": "jarive pa a me co koman on fé",
+    "intent": "ask_faq",
+    "intent_prediction": {
+      "name": "out_of_scope",
+      "confidence": 0.45762741565704346
+    }
+  },
+  {
+    "text": "Tarifs ?",
+    "intent": "ask_faq",
+    "intent_prediction": {
+      "name": "affirm",
+      "confidence": 0.5423617362976074
+    }
+  },
+  {
+    "text": "Moyens de paiement ?",
+    "intent": "ask_faq",
+    "intent_prediction": {
+      "name": "suggestion",
+      "confidence": 0.6024106740951538
+    }
+  },
+  {
+    "text": "Parrainage ?",
+    "intent": "ask_faq",
+    "intent_prediction": {
+      "name": "suggestion",
+      "confidence": 0.9321895837783813
+    }
+  },
+  {
+    "text": "D'habitude comment ça se passe pour recharger son compte, parce que là ma recharge de ce matin a disparu.",
+    "intent": "diagnostic",
+    "intent_prediction": {
+      "name": "suggestion",
+      "confidence": 0.37446942925453186
+    }
+  },
+  {
+    "text": "Je cherchais des infos sur le fonctionnement des comptes, mais en fait le mien est suspendu depuis hier soir.",
+    "intent": "diagnostic",
+    "intent_prediction": {
+      "name": "ask_faq",
+      "confidence": 0.8580509424209595
+    }
+  },
+  {
+    "text": "Tu peux commander une pizza margherita pour ce soir ?",
+    "intent": "out_of_scope",
+    "intent_prediction": {
+      "name": "ask_capabilities",
+      "confidence": 0.4520779252052307
+    }
+  },
+  {
+    "text": "Aujourd'hui",
+    "intent": "greet",
+    "intent_prediction": {
+      "name": "out_of_scope",
+      "confidence": 0.7786966562271118
+    }
+  },
+  {
+    "text": "creé moi 1 tiket pliz c urjan",
+    "intent": "create_reclamation",
+    "intent_prediction": {
+      "name": "out_of_scope",
+      "confidence": 0.999873161315918
+    }
+  },
+  {
+    "text": "Je commence à en avoir marre de tous ces soucis techniques.",
+    "intent": "plainte",
+    "intent_prediction": {
+      "name": "inappropriate_language",
+      "confidence": 0.9981256127357483
+    }
+  },
+  {
+    "text": "Sincèrement ça devient pénible d'utiliser NGONI ces derniers temps.",
+    "intent": "plainte",
+    "intent_prediction": {
+      "name": "ask_faq",
+      "confidence": 0.9850833415985107
+    }
+  },
+  {
+    "text": "jen ai marre sa march jamè bien votre application",
+    "intent": "plainte",
+    "intent_prediction": {
+      "name": "inappropriate_language",
+      "confidence": 0.6959341168403625
+    }
+  },
+  {
+    "text": "sa srai bien d'avoir une version en anglais aussi",
+    "intent": "suggestion",
+    "intent_prediction": {
+      "name": "out_of_scope",
+      "confidence": 0.5118826627731323
+    }
+  },
+  {
+    "text": "Ça fait longtemps que j'attends une réponse sur mon dossier, où ça en est ?",
+    "intent": "ask_complaint_status",
+    "intent_prediction": {
+      "name": "create_reclamation",
+      "confidence": 0.9536475539207458
+    }
+  },
+  {
+    "text": "Vous pouvez me dire ce qui se passe avec le ticket que j'ai ouvert ?",
+    "intent": "ask_complaint_status",
+    "intent_prediction": {
+      "name": "create_reclamation",
+      "confidence": 0.993643045425415
+    }
+  },
+  {
+    "text": "Toujours aucune nouvelle concernant ma réclamation de la semaine dernière.",
+    "intent": "ask_complaint_status",
+    "intent_prediction": {
+      "name": "plainte",
+      "confidence": 0.8359673619270325
+    }
+  },
+  {
+    "text": "mon dossié davan sa en é ou",
+    "intent": "ask_complaint_status",
+    "intent_prediction": {
+      "name": "create_reclamation",
+      "confidence": 0.9993948936462402
+    }
+  },
+  {
+    "text": "alor sa en é ou avec mon tiket",
+    "intent": "ask_complaint_status",
+    "intent_prediction": {
+      "name": "out_of_scope",
+      "confidence": 0.7491389513015747
+    }
+  },
+  {
+    "text": "Laissez tomber le diagnostic automatique, je veux directement parler à quelqu'un.",
+    "intent": "create_reclamation",
+    "intent_prediction": {
+      "name": "bot_challenge",
+      "confidence": 0.7531252503395081
+    }
+  }
+]

@@ -41,6 +41,7 @@ class ComplaintRepository:
         category: Optional[str] = None,
         urgency: Optional[str] = None,
         created_by: Optional[str] = None,
+        user_id: Optional[str] = None,
         limit: int = 50,
         offset: int = 0,
     ) -> List[Complaint]:
@@ -53,6 +54,8 @@ class ComplaintRepository:
             query = query.filter(Complaint.urgency == urgency)
         if created_by is not None:
             query = query.filter(Complaint.created_by == created_by)
+        if user_id is not None:
+            query = query.filter(Complaint.user_id == user_id)
         return (
             query.order_by(Complaint.created_at.desc())
             .limit(limit)

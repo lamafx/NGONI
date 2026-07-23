@@ -93,6 +93,7 @@ async def list_capabilities(registry: CapabilityRegistry = Depends(get_registry)
                 keywords=routable.problem.keywords,
                 required_fields=routable.problem.required_fields,
                 optional_fields=routable.problem.optional_fields,
+                fallback_fields=routable.problem.fallback_fields,
                 embedding=routable.embedding,
                 example_embeddings=routable.example_embeddings,
             )

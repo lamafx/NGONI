@@ -1,4 +1,5 @@
 import json
+import re
 import uuid
 from os import getenv
 from typing import Any, Dict, List, Optional, Text, Tuple
@@ -9,7 +10,41 @@ from rasa_sdk.executor import CollectingDispatcher
 
 FAQ_SERVICE_URL = getenv("FAQ_SERVICE_URL", "http://fastapi:8000/faq/search")
 FAQ_SUGGESTIONS_SERVICE_URL = getenv("FAQ_SUGGESTIONS_SERVICE_URL", "http://fastapi:8000/faq/suggestions")
+# Base URL, sans slug (le slug est ajoute a l'appel, voir ActionSelectFaqQuestion) --
+# utilisee uniquement quand une suggestion "vouliez-vous dire..." (audit FAQ
+# #8) n'est pas deja dans le cache faq_suggestions_cache.
+FAQ_BY_SLUG_SERVICE_URL = getenv("FAQ_BY_SLUG_SERVICE_URL", "http://fastapi:8000/faq/by-slug")
 FAQ_SUGGESTIONS_COUNT = 10
+
+# Detection de "message composite" (audit FAQ #5, 16.6) : signaux de
+# severite/urgence concrete qui, presents dans le MEME message qu'une
+# question FAQ generale, suggerent un incident specifique non couvert par
+# une reponse generique -- meme liste que URGENCY_HIGH_KEYWORDS
+# (reclamation.py), volontairement dupliquee (fichier d'action distinct,
+# meme esprit que CATEGORY_KEYWORDS/ERROR_TYPE_KEYWORDS localement definis
+# par module dans ce projet) plutot qu'un import croise entre domaines
+# d'action independants.
+COMPOSITE_INCIDENT_KEYWORDS: List[Text] = [
+    "urgent", "urgence", "bloqué", "bloque", "piraté", "pirate", "hacké",
+    "hacke", "volé", "vole", "arnaque", "suspendu", "suspension", "perdu",
+]
+
+
+def _has_composite_incident_signal(text: Text) -> bool:
+    """Repere un incident concret (pas seulement une question generale) dans
+    le meme message qu'une question FAQ -- ex. "Comment fonctionne le
+    retrait ? Ça fait 5 jours que j'attends le mien". Utilisee par
+    _present_faq_answer pour proposer explicitement l'ouverture d'une
+    reclamation en plus de la reponse FAQ, plutot que de trancher en
+    silence entre les deux (16.5 #5)."""
+    normalized = text.lower()
+    if any(re.search(rf"\b{re.escape(kw)}\b", normalized) for kw in COMPOSITE_INCIDENT_KEYWORDS):
+        return True
+    elapsed = re.search(r"\bdepuis\s+(\d+)\s*(jour|jours|semaine|semaines|mois)\b", normalized)
+    if elapsed:
+        amount, unit = int(elapsed.group(1)), elapsed.group(2)
+        return unit.startswith("semaine") or unit.startswith("mois") or amount >= 3
+    return False
 
 # Libelles francais des valeurs de core.FaqCategory (voir
 # app/domains/faq/models.py) : utilises comme titres de boutons de categorie
@@ -96,7 +131,40 @@ def _present_faq_answer(
         answer = payload.get("answer") or payload.get("response") or payload.get("result")
 
         if answer:
-            return _present_answer(dispatcher, tracker, user_question, answer)
+            events = _present_answer(dispatcher, tracker, user_question, answer)
+            # Message composite (audit FAQ #5, 16.5/16.6) : la reponse FAQ
+            # generique vient d'etre servie, mais le message contient aussi
+            # un signal d'incident concret (urgence, blocage, delai anormal)
+            # -- propose explicitement l'ouverture d'une reclamation plutot
+            # que de laisser croire que la reponse generale suffit.
+            if _has_composite_incident_signal(user_question):
+                dispatcher.utter_message(
+                    text="Si votre cas précis n'est pas résolu par cette réponse générale, "
+                    "voulez-vous que j'ouvre une réclamation ?",
+                    buttons=[
+                        {"title": "Ouvrir une réclamation", "payload": "/create_reclamation"},
+                        {"title": "Non merci", "payload": "/deny"},
+                    ],
+                )
+            return events
+
+        # Audit FAQ #8 (16.6) : avant de conclure a un echec, /faq/search
+        # renvoie desormais jusqu'a 3 suggestions ("vouliez-vous dire...")
+        # quand un candidat franchit SECONDARY_THRESHOLD sans atteindre
+        # DEFAULT_THRESHOLD -- proposees en boutons plutot que le
+        # utter_faq_not_found sec si au moins une existe.
+        suggestions = payload.get("suggestions") or []
+        if suggestions:
+            dispatcher.utter_message(
+                text="Je n'ai pas trouvé de réponse exacte, vouliez-vous dire :",
+                buttons=[
+                    {
+                        "title": suggestion["question"],
+                        "payload": f'/select_faq_question{{"faq_slug": "{suggestion["slug"]}"}}',
+                    }
+                    for suggestion in suggestions
+                ],
+            )
         else:
             # Audit ton/clarite : utter_faq_not_found/utter_faq_error
             # (domain.yml) etaient definies mais jamais utilisees -- ce texte
@@ -266,15 +334,32 @@ class ActionSelectFaqCategory(Action):
         return []
 
 
+def _fetch_faq_by_slug(slug: Text) -> Optional[Tuple[Text, Text]]:
+    # Repli reseau (audit FAQ #8) : une suggestion "vouliez-vous dire..."
+    # (voir _present_faq_answer) vient de /faq/search, jamais mise en cache
+    # dans faq_suggestions_cache (qui ne connait que les categories parcourues
+    # via /faq/suggestions) -- contrairement au chemin normal
+    # ActionSelectFaqCategory -> ActionSelectFaqQuestion, ce clic-la doit donc
+    # recuperer la reponse aupres du backend.
+    try:
+        response = requests.get(f"{FAQ_BY_SLUG_SERVICE_URL}/{slug}", timeout=5)
+        response.raise_for_status()
+        payload = response.json()
+    except (requests.RequestException, ValueError):
+        return None
+    question_text = payload.get("question")
+    answer_text = payload.get("answer")
+    if not question_text or not answer_text:
+        return None
+    return question_text, answer_text
+
+
 class ActionSelectFaqQuestion(Action):
-    # Declenchee par un bouton de question envoye par
-    # ActionSelectFaqCategory (payload /select_faq_question{"faq_slug": "..."})
-    # : la reponse est deja presente dans le cache faq_suggestions_cache
-    # (pose par fetch_faq_category_buttons, /faq/suggestions renvoie
-    # desormais aussi la reponse de chaque question) -- aucun appel a
-    # /faq/search ni requete
-    # supplementaire vers la base, contrairement a ActionFaqSearch (question
-    # libre tapee au clavier, qui doit passer par la recherche semantique).
+    # Declenchee par un bouton de question envoye par ActionSelectFaqCategory
+    # (parcours par categorie, reponse deja en cache faq_suggestions_cache,
+    # voir fetch_faq_category_buttons) OU par une suggestion "vouliez-vous
+    # dire..." de _present_faq_answer (audit FAQ #8, jamais en cache -- voir
+    # _fetch_faq_by_slug ci-dessus, repli reseau dans ce second cas).
 
     def name(self) -> Text:
         return "action_select_faq_question"
@@ -304,6 +389,11 @@ class ActionSelectFaqQuestion(Action):
                         break
                 if question_text:
                     break
+
+        if (not question_text or not answer_text) and faq_slug:
+            fetched = _fetch_faq_by_slug(faq_slug)
+            if fetched:
+                question_text, answer_text = fetched
 
         if not question_text or not answer_text:
             dispatcher.utter_message(text="Cette question n'est plus disponible, vous pouvez la reformuler.")

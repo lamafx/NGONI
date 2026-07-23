@@ -159,6 +159,14 @@ class ProblemDefinition(BaseModel):
     endpoint: DiagnosticEndpoint
     required_fields: list[FieldSpec] = Field(default_factory=list)
     optional_fields: list[FieldSpec] = Field(default_factory=list)
+    # Groupe de repli utilisable A LA PLACE de required_fields quand
+    # l'utilisateur indique explicitement ne pas pouvoir fournir un des
+    # champs requis (voir intent cannot_provide_field, rasa/actions/
+    # diagnostic.py) -- ex. pas de reference de transaction mais date +
+    # montant du retrait. Optionnel : une liste vide (defaut) signifie
+    # qu'aucun repli n'existe pour ce probleme, required_fields reste alors
+    # strictement obligatoire comme avant l'ajout de ce champ.
+    fallback_fields: list[FieldSpec] = Field(default_factory=list)
     resolution_causes: list[ResolutionCause] = Field(default_factory=list)
     escalation_causes: list[str] = Field(default_factory=list)
 
@@ -190,6 +198,7 @@ class CapabilityProblemSummary(BaseModel):
     keywords: list[str] = Field(default_factory=list)
     required_fields: list[FieldSpec] = Field(default_factory=list)
     optional_fields: list[FieldSpec] = Field(default_factory=list)
+    fallback_fields: list[FieldSpec] = Field(default_factory=list)
     # Vecteur d'embedding precalcule (voir app.shared.embeddings), a partir de
     # la description (ou du label a defaut) -- calcule une seule fois par
     # rafraichissement du registre (CapabilityRegistry.refresh), pas a chaque

@@ -1,0 +1,214 @@
+version: "3.1"
+# Corpus de non-regression NLU adversarial permanent -- 18-rapport-competences.md
+# (proposition P0) et 16-audit-faq-nlu-2026-07.md (16.6, P0 : "remplacer/
+# completer le jeu de test NLU par un corpus independant"). Redige dans une
+# session separee de celle qui a ecrit rasa/data/nlu.yml, en evitant
+# deliberement de reprendre le vocabulaire/la syntaxe des exemples
+# d'entrainement -- contrairement a tests/test_nlu.yml, dont 16.1 a mesure
+# qu'il partage un style trop proche de nlu.yml pour etre representatif
+# (99,85% sur test_nlu.yml vs 65,4% sur le corpus adversarial de l'audit).
+#
+# Ne remplace PAS tests/test_nlu.yml (qui reste utile comme test de
+# non-regression "cas simples") : s'y ajoute comme deuxieme jeu, execute
+# separement (rasa test nlu --nlu tests/test_nlu_adversarial.yml
+# --out results/adversarial), pour ne jamais melanger les deux mesures.
+#
+# Ce fichier ne pretend pas reproduire les 435 messages de l'audit original
+# (non committes, "disponibles sur demande" selon 16.md) : c'est un corpus
+# plus petit (~150 messages) mais construit avec la meme methode
+# (categories A-I de 16.1), avec un accent particulier sur les deux
+# faiblesses classees les plus importantes par le rapport de competences :
+# la collision ask_faq/diagnostic (rang 1 vs rang 2) et la robustesse du
+# pilier reclamation (rang 3), jamais mesuree par l'audit du 16 juillet
+# (perimetre limite a ask_faq/diagnostic).
+#
+# Convention : chaque bloc "- intent: X" reste autonome (jamais de
+# commentaire au milieu d'un bloc "examples: |", qui casse le parsing YAML
+# du bloc litteral) -- une meme intention peut apparaitre dans plusieurs
+# blocs, Rasa les fusionne a la lecture.
+
+nlu:
+
+# --- Categorie A/B : reformulations naturelles + fautes de frappe, sur le
+# terrain le plus a risque -- vocabulaire "compte/mot de passe/retrait/
+# connexion/verifier" dans une VRAIE question generale (pas un incident
+# concret), le motif d'echec #1 de 16.5 ("ask_faq absorbe par diagnostic").
+- intent: ask_faq
+  examples: |
+    - Comment récupérer l'accès à mon compte si j'ai oublié mon mot de passe ?
+    - Quelle est la démarche pour changer de mot de passe ?
+    - Comment vérifier que mon identité a bien été validée ?
+    - Quel est le délai normal pour qu'un retrait soit traité ?
+    - Comment se connecter à NGONI depuis un nouveau téléphone ?
+    - Est-ce que je peux avoir deux comptes NGONI différents ?
+    - Comment fonctionne la vérification du compte en général ?
+    - Quelles infos faut-il donner pour vérifier son identité ?
+    - C'est quoi la procédure normale pour un retrait d'argent ?
+    - Comment on fait pour se reconnecter si on a perdu l'accès ?
+    - koman on peu changé le mdp de son compte
+    - c koi la procedur pr verifié son compte
+    - kel é le délai moyen pour un retré d'argent normalement
+    - cmt on recupère un compte si on a zapé le mdp
+    - Bonjour, savez-vous en général au bout de combien de temps un retrait est validé côté NGONI ?
+    - Je me demandais, de manière générale, comment se passe la vérification d'identité sur la plateforme.
+    - Que se passe-t-il concrètement pendant la procédure de vérification du compte ?
+    - Est-il possible de se connecter à son compte NGONI sans mot de passe, par exemple avec une empreinte ?
+    - Comment fait-on d'habitude pour signaler un changement de numéro de téléphone lié au compte ?
+    - Quelles sont les règles générales concernant les délais de retrait ?
+
+# --- Categorie C : registre familier/SMS -- recall quasi nul mesure par 16.1
+# (40,4% retrieval) sur ce registre, teste ici cote classification d'intent.
+- intent: ask_faq
+  examples: |
+    - jve cré 1 compte comen on fé
+    - c koi le tarif des piece stp
+    - jarive pa a me co koman on fé
+    - eske on peu changé son numero de tel sur le compt
+    - kes ki fo pr le kyc
+
+# --- Categorie D : questions courtes/elliptiques -- pire score du corpus
+# original (25% d'accuracy, 16.4).
+- intent: ask_faq
+  examples: |
+    - Tarifs ?
+    - Inscription ?
+    - Délai retrait ?
+    - Moyens de paiement ?
+    - Parrainage ?
+
+# --- Categorie E : messages longs melangeant question generale ET incident
+# concret -- 16.5 #5 note qu'aucune strategie n'existe pour ce cas, le
+# systeme tranche une seule intention et perd l'info secondaire. Etiquetes
+# ici cote intention DOMINANTE (l'incident concret l'emporte), pour mesurer
+# si le systeme fait bien ce choix, pas l'inverse.
+- intent: diagnostic
+  examples: |
+    - Je me demandais comment fonctionne le système de retrait en général, mais surtout là mon retrait d'hier n'est toujours pas arrivé.
+    - Je voulais comprendre la procédure de vérification d'identité, sauf que la mienne est bloquée depuis une semaine et ça devient urgent.
+    - D'habitude comment ça se passe pour recharger son compte, parce que là ma recharge de ce matin a disparu.
+    - Je cherchais des infos sur le fonctionnement des comptes, mais en fait le mien est suspendu depuis hier soir.
+
+# --- Categorie diagnostic : reformulations/fautes de frappe eloignees du
+# vocabulaire d'entrainement (voir wallet_stub/user_stub manifest.py pour
+# les example_phrases officielles, deliberement non reprises ici).
+- intent: diagnostic
+  examples: |
+    - sa fait 3 jours ke jatend mon argen apre un retré
+    - mon dossié didentité é refusé jconpran pa pourkoi
+    - jve envoyé un cado mé la person la reçu jamé
+    - mon compt é gelé sans explication depui ce matin
+    - ma demande de suppression de compte traine depuis un mois
+    - le consentement de mes parents n'a jamais été traité
+    - Ça fait depuis lundi que ma recharge Wave n'apparaît nulle part sur mon solde.
+    - Mon virement est parti de ma banque mais rien n'est arrivé sur NGONI.
+
+# --- Categorie F : hors-domaine, teste a cote de create_reclamation/ask_faq
+# a tort selon 16.4 ("Comment fait-on pour apprendre le piano rapidement ?"
+# -> ask_faq 1.000).
+- intent: out_of_scope
+  examples: |
+    - Comment on fait du pain maison sans levure ?
+    - C'est quoi la capitale de l'Australie ?
+    - Peux-tu me raconter une histoire pour dormir ?
+    - Comment réparer un robinet qui fuit ?
+    - Quel est le meilleur moment pour planter des tomates ?
+    - Peux-tu réserver un billet de train pour moi ?
+    - Explique-moi la théorie de la relativité simplement.
+    - Tu peux commander une pizza margherita pour ce soir ?
+
+# --- Categorie G : proches semantiquement mais reponses differentes.
+- intent: ask_faq
+  examples: |
+    - Comment gagner des pièces en regardant du contenu sur l'application ?
+    - Est-ce qu'on peut recevoir des pièces sans en acheter ?
+
+- intent: diagnostic
+  examples: |
+    - Comment débloquer mon compte, il est bloqué depuis ce matin ?
+    - Mon compte est bloqué, comment le débloquer concrètement pour MOI ?
+
+# --- Categorie I : frontiere avec d'autres intentions (bot_challenge/
+# greet confondus avec une vraie intention metier).
+- intent: bot_challenge
+  examples: |
+    - Franchement, j'ai l'impression de parler à un robot, c'est le cas ?
+    - Avant de continuer, dis-moi honnêtement si t'es une IA ou une vraie personne.
+
+- intent: greet
+  examples: |
+    - Aujourd'hui
+    - Allo ?
+    - Y'a quelqu'un ?
+
+# =========================================================================
+# Pilier Reclamation (rang 3 du rapport de competences) -- jamais couvert
+# par l'audit adversarial du 16 juillet (perimetre limite a ask_faq/
+# diagnostic). Meme methode (reformulations, fautes de frappe, registre
+# familier, messages composites, frontiere avec diagnostic/plainte).
+# =========================================================================
+
+# --- create_reclamation : reformulations naturelles.
+- intent: create_reclamation
+  examples: |
+    - Je veux qu'un dossier soit ouvert pour ce que je vis en ce moment.
+    - Pouvez-vous faire remonter mon cas à quelqu'un de responsable ?
+    - J'aimerais qu'on m'attribue un numéro de suivi pour ce problème.
+    - Ça suffit, je veux que ça passe par une vraie procédure de réclamation.
+    - Merci de consigner officiellement ce que je viens de décrire.
+    - Je souhaite qu'un agent reprenne mon dossier depuis le début.
+    - Il faut absolument qu'un humain regarde mon cas maintenant.
+
+# --- create_reclamation : fautes de frappe / registre degrade.
+- intent: create_reclamation
+  examples: |
+    - jve k on ouvr 1 vrai dossié pr mon problem
+    - fo k un ajan tret mon ca svp
+    - jexije un suivi humain pr sa histoir
+    - creé moi 1 tiket pliz c urjan
+
+# --- create_reclamation : messages composites (plainte + demande explicite
+# de reclamation dans le meme message -- risque de derive vers "plainte"
+# seule, sans ouverture de dossier).
+- intent: create_reclamation
+  examples: |
+    - Je suis vraiment déçu du service, et en plus je veux qu'un dossier soit ouvert pour de bon.
+    - Ce n'est pas normal ce qui m'arrive, ouvrez-moi une réclamation s'il vous plaît.
+    - Ça devient n'importe quoi cette histoire, je veux un ticket officiel maintenant.
+
+# --- plainte (mecontentement general, SANS demande explicite de suivi --
+# frontiere la plus fine avec create_reclamation ci-dessus).
+- intent: plainte
+  examples: |
+    - Franchement je suis déçu par la qualité du service en ce moment.
+    - C'est n'importe quoi, rien ne fonctionne comme il faut sur cette appli.
+    - Je commence à en avoir marre de tous ces soucis techniques.
+    - Sincèrement ça devient pénible d'utiliser NGONI ces derniers temps.
+    - jen ai marre sa march jamè bien votre application
+
+# --- suggestion (proposition d'amelioration, frontiere avec ask_faq quand
+# formulee comme une question "pourquoi n'existe-t-il pas...").
+- intent: suggestion
+  examples: |
+    - Ce serait bien d'avoir un mode sombre sur l'application.
+    - Vous devriez ajouter un moyen de contacter directement un humain.
+    - Pourquoi ne pas proposer un récapitulatif mensuel des transactions ?
+    - Il faudrait un bouton pour annuler un retrait par erreur.
+    - sa srai bien d'avoir une version en anglais aussi
+
+# --- ask_complaint_status : reformulations + registre familier (seulement
+# 20 exemples d'entrainement, le plus faible volume du pilier reclamation
+# selon le rapport de competences -- P1).
+- intent: ask_complaint_status
+  examples: |
+    - Ça fait longtemps que j'attends une réponse sur mon dossier, où ça en est ?
+    - Vous pouvez me dire ce qui se passe avec le ticket que j'ai ouvert ?
+    - Toujours aucune nouvelle concernant ma réclamation de la semaine dernière.
+    - mon dossié davan sa en é ou
+    - alor sa en é ou avec mon tiket
+
+# --- create_reclamation vs diagnostic : l'utilisateur demande explicitement
+# un humain PLUTOT QUE le diagnostic automatique.
+- intent: create_reclamation
+  examples: |
+    - Laissez tomber le diagnostic automatique, je veux directement parler à quelqu'un.
+    - Ne me redemandez pas de détails, ouvrez juste un dossier tout de suite.

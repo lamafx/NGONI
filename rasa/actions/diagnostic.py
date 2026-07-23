@@ -223,7 +223,11 @@ def _score_capabilities_keywords(text: Text, problems: List[Dict[Text, Any]]) ->
         matched = sum(1.0 for kw in keywords if _keyword_matches(kw, text))
         if matched < MIN_CAPABILITY_CONFIDENCE:
             continue
-        fields = problem.get("required_fields", []) + problem.get("optional_fields", [])
+        fields = (
+            problem.get("required_fields", [])
+            + problem.get("optional_fields", [])
+            + problem.get("fallback_fields", [])
+        )
         scored.append(
             {
                 "service_id": problem["service"],
@@ -238,6 +242,7 @@ def _score_capabilities_keywords(text: Text, problems: List[Dict[Text, Any]]) ->
                 "match_ratio": matched / len(keywords),
                 "required_fields": [f["name"] for f in problem.get("required_fields", [])],
                 "optional_fields": [f["name"] for f in problem.get("optional_fields", [])],
+                "fallback_fields": [f["name"] for f in problem.get("fallback_fields", [])],
                 "field_specs": {f["name"]: f for f in fields},
             }
         )
@@ -446,7 +451,11 @@ def _score_capabilities_embeddings(
         similarity = _best_similarity(message_embedding, problem)
         if similarity < MIN_EMBEDDING_SIMILARITY:
             continue
-        fields = problem.get("required_fields", []) + problem.get("optional_fields", [])
+        fields = (
+            problem.get("required_fields", [])
+            + problem.get("optional_fields", [])
+            + problem.get("fallback_fields", [])
+        )
         scored.append(
             {
                 "service_id": problem["service"],
@@ -460,6 +469,7 @@ def _score_capabilities_embeddings(
                 "match_ratio": similarity,
                 "required_fields": [f["name"] for f in problem.get("required_fields", [])],
                 "optional_fields": [f["name"] for f in problem.get("optional_fields", [])],
+                "fallback_fields": [f["name"] for f in problem.get("fallback_fields", [])],
                 "field_specs": {f["name"]: f for f in fields},
             }
         )
@@ -565,7 +575,11 @@ def _rescue_unique_keyword_match(
     similarity = _best_similarity(message_embedding, problem)
     if similarity < KEYWORD_RESCUE_MIN_EMBEDDING_SIMILARITY:
         return None
-    fields = problem.get("required_fields", []) + problem.get("optional_fields", [])
+    fields = (
+        problem.get("required_fields", [])
+        + problem.get("optional_fields", [])
+        + problem.get("fallback_fields", [])
+    )
     return {
         "service_id": problem["service"],
         "problem_id": problem["id"],
@@ -574,6 +588,7 @@ def _rescue_unique_keyword_match(
         "match_ratio": similarity,
         "required_fields": [f["name"] for f in problem.get("required_fields", [])],
         "optional_fields": [f["name"] for f in problem.get("optional_fields", [])],
+        "fallback_fields": [f["name"] for f in problem.get("fallback_fields", [])],
         "field_specs": {f["name"]: f for f in fields},
     }
 
@@ -1050,7 +1065,11 @@ def _capture_opportunistic_field_patterns(
     if not message_text:
         return
     field_specs = state.get("field_specs") or {}
-    known_fields = set(state.get("required_fields", [])) | set(state.get("optional_fields", []))
+    known_fields = (
+        set(state.get("required_fields", []))
+        | set(state.get("optional_fields", []))
+        | set(state.get("fallback_fields", []))
+    )
     for field in known_fields:
         if field in confirmed:
             continue
@@ -1064,6 +1083,35 @@ def _capture_opportunistic_field_patterns(
         # est bloque depuis hier" capturait "retrait" comme transaction_reference).
         if match and _looks_like_identifier(match):
             confirmed[field] = match
+
+
+def _capture_opportunistic_nlu_entities(
+    state: Dict[Text, Any], confirmed: Dict[Text, Any], entities: List[Dict[Text, Any]]
+) -> None:
+    # Meme principe que _capture_opportunistic_field_patterns juste au-dessus,
+    # mais pour les entites NLU (operation_type, issue_status, amount,
+    # incident_date, platform -- voir nlu.yml) plutot qu'un pattern de
+    # manifeste. Avant cet ajout, _extract_field_answer etait le SEUL endroit
+    # qui lisait ces entites, et il ne tourne que si `waiting_for` est deja
+    # pose (voir ActionRunDiagnosticStep) -- jamais au tout premier message,
+    # qui est pourtant celui ou l'utilisateur donne le plus spontanement ce
+    # genre d'info ("mon retrait est bloque depuis hier"). Appele au moment
+    # ou un probleme est (re)verrouille, sur les entites du message qui vient
+    # d'etre classe (voir state["message_entities"], ActionRunDiagnosticStep)
+    # -- symetrique de l'appel a _capture_opportunistic_field_patterns juste
+    # au-dessus.
+    known_fields = (
+        set(state.get("required_fields", []))
+        | set(state.get("optional_fields", []))
+        | set(state.get("fallback_fields", []))
+    )
+    for entity in entities:
+        field_name = entity.get("entity")
+        if field_name not in known_fields or field_name in confirmed:
+            continue
+        value = entity.get("value")
+        if value is not None:
+            confirmed[field_name] = value
 
 
 def _next_missing_field(required_fields: List[Text], confirmed: Dict[Text, Any]) -> Text:
@@ -1101,7 +1149,26 @@ def _entities_for_engine(confirmed: Dict[Text, Any]) -> Dict[Text, Any]:
     }
 
 
-def _call_diagnostic_engine(tracker: Tracker, state: Dict[Text, Any]) -> Dict[Text, Any] | None:
+# Nombre de pannes techniques CONSECUTIVES (voir _respond_engine_outcome)
+# tolerees avant de proposer un ticket -- 1re panne = simple message
+# d'attente/reessai, 2e panne d'affilee = on cesse d'inviter a reessayer et
+# on transmet a l'equipe technique (meme principe que le rapport : "l'escalade
+# ne doit intervenir que si plusieurs tentatives echouent").
+ENGINE_UNAVAILABLE_ESCALATION_THRESHOLD = 2
+
+ENGINE_UNAVAILABLE_MESSAGES: Dict[Text, Text] = {
+    "timeout": (
+        "Je rencontre actuellement une difficulté pour accéder à votre dossier. "
+        "Le service semble temporairement indisponible. Merci de réessayer dans quelques instants."
+    ),
+    "http_error": (
+        "Une erreur interne est survenue lors de la récupération de vos informations. "
+        "Je vous invite à réessayer dans quelques minutes."
+    ),
+}
+
+
+def _call_diagnostic_engine(tracker: Tracker, state: Dict[Text, Any]) -> Dict[Text, Any]:
     payload = {
         "session_id": tracker.sender_id,
         "service": state.get("service_id"),
@@ -1118,16 +1185,33 @@ def _call_diagnostic_engine(tracker: Tracker, state: Dict[Text, Any]) -> Dict[Te
         )
         result = response.json()
         return result
+    except (requests.Timeout, requests.ConnectionError) as exc:
+        # Distinct de l'erreur HTTP ci-dessous (audit robustesse UX, cas
+        # "panne technique confondue avec escalade metier") : ni timeout ni
+        # panne reseau ne sont une decision du moteur de diagnostic --
+        # _respond_engine_outcome ne doit PAS proposer un ticket dans le
+        # meme message que pour un vrai outcome ESCALATE, sinon une panne
+        # transitoire se presente a l'utilisateur exactement comme si son
+        # dossier avait ete reellement examine puis escalade.
+        logger.warning(
+            "Timeout/panne reseau vers le moteur de diagnostic (%s) session=%s service=%s problem=%s : %s",
+            DIAGNOSTIC_SERVICE_URL, tracker.sender_id, payload.get("service"), payload.get("problem"), exc,
+        )
+        return {"outcome": "_ENGINE_UNAVAILABLE", "kind": "timeout"}
     except requests.RequestException as exc:
         # Jamais les entities du payload ici (peuvent contenir des donnees
         # sensibles -- montant, reference de transaction... -- voir
         # app.shared.logging_utils.redact_entities cote FastAPI, meme
         # principe) : seuls service/problem/session, jamais des valeurs.
+        # Regroupe les 5xx (deja retries par request_with_retry) et tout
+        # autre echec HTTP inattendu -- meme traitement cote
+        # _respond_engine_outcome que le timeout ci-dessus (panne technique,
+        # pas une decision metier).
         logger.warning(
             "Echec d'appel au moteur de diagnostic (%s) session=%s service=%s problem=%s : %s",
             DIAGNOSTIC_SERVICE_URL, tracker.sender_id, payload.get("service"), payload.get("problem"), exc,
         )
-        return None
+        return {"outcome": "_ENGINE_UNAVAILABLE", "kind": "http_error"}
 
 
 # Question posee quand un required_field du probleme resolu manque encore.
@@ -1138,7 +1222,10 @@ def _call_diagnostic_engine(tracker: Tracker, state: Dict[Text, Any]) -> Dict[Te
 FIELD_QUESTIONS: Dict[Text, Text] = {
     "issue_status": "Où en est ce problème : en attente, échoué ou bloqué ?",
     "amount": "Quel est le montant concerné ?",
-    "date": "À quelle date (ou depuis quand) le problème s’est-il produit ?",
+    # Nom aligne sur l'entite NLU "incident_date" (nlu.yml), pas "date" :
+    # _capture_opportunistic_nlu_entities/_extract_field_answer matchent par
+    # egalite exacte entre nom de champ de manifeste et nom d'entite NLU.
+    "incident_date": "À quelle date (ou depuis quand) le problème s’est-il produit ?",
     "device": "Sur quelle plateforme rencontrez-vous ce problème ? (Android, iOS, Web)",
     "payment_method": "Quel moyen de paiement avez-vous utilisé ?",
     "description": "Pouvez-vous décrire le problème plus précisément ?",
@@ -1163,7 +1250,7 @@ FIELD_QUESTIONS: Dict[Text, Text] = {
 FIELD_LABELS: Dict[Text, Text] = {
     "issue_status": "statut",
     "amount": "montant",
-    "date": "date",
+    "incident_date": "date",
     "device": "plateforme",
     "payment_method": "moyen de paiement",
     "description": "description",
@@ -1359,6 +1446,38 @@ def _extract_field_answer(ctx: _DiagnosticContext) -> None:
     # telle quelle comme donnee metier, et un rejet 4xx du microservice sur ce
     # champ mal type se confondait avec une vraie panne reseau.
     raw_text = (ctx.tracker.latest_message.get("text") or "").lower()
+
+    if _looks_like_cannot_provide_field(raw_text):
+        # Rapport utilisateur, "champs alternatifs" : distinct du refus/de
+        # l'incertitude ci-dessous ("je ne l'ai pas" = l'utilisateur ne
+        # POSSEDE pas cette information precise, pas qu'il refuse de repondre
+        # ou qu'il soit incertain d'une valeur qu'il pourrait donner).
+        fallback_fields = ctx.state.get("fallback_fields") or []
+        if fallback_fields and not ctx.state.get("_using_fallback_fields"):
+            # Bascule required_fields -> fallback_fields : _continue_locked_template,
+            # appele juste apres cette extraction dans le meme tour (voir
+            # ActionRunDiagnosticStep.run()), recalculera waiting_for sur ce
+            # nouvel ensemble via _next_step.
+            ctx.state["required_fields"] = fallback_fields
+            ctx.state["_using_fallback_fields"] = True
+            ctx.state.pop("invalid_field_attempt", None)
+            ctx.dispatcher.utter_message(
+                text="Pas de souci, je vais vous demander d'autres informations à la place."
+            )
+            return
+        if ctx.state.get("_using_fallback_fields"):
+            # Deja en repli (le groupe de secours lui-meme ne peut pas non
+            # plus etre fourni) : plus aucune voie de collecte possible, on
+            # arrete le diagnostic ici plutot que de redemander indefiniment.
+            # _continue_locked_template ne doit PAS ecraser ce waiting_for
+            # (voir le garde correspondant, meme fichier).
+            ctx.state["no_capability_matched"] = True
+            ctx.state["no_capability_matched_reason"] = "fields_unavailable"
+            ctx.state["waiting_for"] = ""
+            return
+        # Pas de repli declare pour ce probleme : retombe sur le
+        # comportement existant (incertitude/refus, ou capture litterale).
+
     if _looks_like_refusal(raw_text):
         ctx.confirmed[waiting_for] = f"{UNRESOLVED_FIELD_PLACEHOLDER_PREFIX} (l'utilisateur a préféré ne pas répondre)"
         ctx.state.pop("invalid_field_attempt", None)
@@ -1514,6 +1633,13 @@ def _continue_locked_template(
     # distraire si le message courant ne matche plus aucun mot-cle
     # (l'utilisateur repond a la question posee, il ne relance pas une
     # nouvelle classification).
+    if state.get("no_capability_matched"):
+        # Deja decide par l'extraction de ce meme tour (voir
+        # _extract_field_answer, cas "plus aucun champ de repli
+        # disponible") : ne pas recalculer waiting_for ici, ce qui
+        # redeviendrait un vrai nom de champ et masquerait cette decision
+        # d'escalade prise juste avant dans le meme tour.
+        return
     confirmed = state.get("confirmed", {})
     _capture_opportunistic_field_patterns(state, confirmed, state.get("message") or "")
     state["waiting_for"] = _next_step(
@@ -1586,6 +1712,7 @@ def _lock_new_template(
     state["template_name"] = best["label"]
     state["required_fields"] = best["required_fields"]
     state["optional_fields"] = best["optional_fields"]
+    state["fallback_fields"] = best.get("fallback_fields", [])
     state["field_specs"] = best["field_specs"]
     # Meme raisonnement que le reset de _multi_problem_detected (voir
     # ActionRunDiagnosticStep) : sans ce reset explicite, un
@@ -1611,6 +1738,7 @@ def _lock_new_template(
     # inutilement juste apres l'avoir verrouille sur ce probleme.
     confirmed = state.get("confirmed", {})
     _capture_opportunistic_field_patterns(state, confirmed, state.get("message") or "")
+    _capture_opportunistic_nlu_entities(state, confirmed, state.get("message_entities") or [])
     state["waiting_for"] = _next_step(
         state["required_fields"], confirmed, state.get("diagnostic_confirmed", False)
     )
@@ -1748,6 +1876,17 @@ def _respond_no_capability_matched(
             "même après vous avoir demandé de préciser. Je vous propose de créer un ticket afin qu'un membre "
             "de notre équipe technique examine votre cas directement. Voulez-vous que je le crée ?"
         )
+    elif reason == "fields_unavailable":
+        # L'utilisateur a indique ne pas pouvoir fournir ni le champ requis
+        # ni son repli (cannot_provide_field detecte deux fois de suite --
+        # voir _handle_cannot_provide_field). Contrairement aux branches
+        # ci-dessus, pas d'echec de classification ici : le probleme EST
+        # identifie, seules les informations necessaires pour le verifier
+        # manquent reellement.
+        message = (
+            "Je ne peux pas continuer le diagnostic sans ces informations. "
+            "Je transmets votre demande à notre équipe technique. Voulez-vous que je crée un ticket de réclamation ?"
+        )
     else:
         # "description_failed" ou raison absente (filet de securite) : repli
         # generique classique.
@@ -1798,7 +1937,36 @@ def _respond_engine_outcome(
         dispatcher.utter_message(text=f"J’ai encore besoin de : {missing}.")
         return state_events
 
-    if outcome == "ESCALATE":
+    if outcome == "_ENGINE_UNAVAILABLE":
+        # Panne technique (timeout/erreur reseau/5xx, deja retentee par
+        # request_with_retry) : a distinguer d'une vraie decision ESCALATE
+        # du moteur (audit robustesse UX). Ne propose PAS de ticket des la
+        # 1ere panne -- seulement si la MEME panne se reproduit au tour
+        # suivant (compteur conserve dans diagnostic_state, jamais reset
+        # tant que le moteur ne repond pas avec succes).
+        attempts = state.get("_engine_unavailable_count", 0) + 1
+        state["_engine_unavailable_count"] = attempts
+        if attempts < ENGINE_UNAVAILABLE_ESCALATION_THRESHOLD:
+            kind = result.get("kind")
+            dispatcher.utter_message(
+                text=ENGINE_UNAVAILABLE_MESSAGES.get(kind, ENGINE_UNAVAILABLE_MESSAGES["http_error"])
+            )
+            # diagnostic_state reconstruit ICI (pas `state_events`, deja
+            # serialise par l'appelant AVANT cet appel, donc sans le
+            # compteur qu'on vient d'incrementer) : conserve le necessaire
+            # pour qu'un prochain message de l'utilisateur rejoue ce meme
+            # chemin sans rien redemander.
+            return [
+                {"event": "slot", "name": "pending_field", "value": None},
+                {"event": "slot", "name": "diagnostic_state", "value": json.dumps(state, ensure_ascii=False)},
+            ]
+        message = (
+            "Je rencontre toujours une difficulté technique pour accéder à votre dossier. "
+            "Je transmets votre demande à notre équipe technique."
+        )
+        category = state.get("service_id", "Diagnostic")
+        urgency = "medium"
+    elif outcome == "ESCALATE":
         message = result.get("message", "Je transmets votre demande à notre équipe.")
         escalation = result.get("escalation_payload", {})
         category = escalation.get("category", state.get("service_id", "Diagnostic"))
@@ -2131,6 +2299,21 @@ _UNCERTAINTY_PHRASES = (
     "difficile à dire", "difficile a dire",
 )
 
+# Distinct de _REFUSAL_PHRASES (refus de repondre) et _UNCERTAINTY_PHRASES
+# (incertitude sur une valeur) : ici l'utilisateur affirme ne pas POSSEDER
+# l'information demandee (rapport utilisateur, "champs alternatifs") --
+# seul ce cas declenche une bascule vers fallback_fields quand ce dernier
+# existe (voir _extract_field_answer).
+_CANNOT_PROVIDE_FIELD_PHRASES = (
+    "je ne l'ai pas", "je ne l ai pas", "je n'ai pas ça", "je n'ai pas ca",
+    "je n'ai pas ce numéro", "je n'ai pas ce numero",
+    "je n'ai pas cette référence", "je n'ai pas cette reference",
+    "je n'ai pas cette information", "je n'ai pas cette info",
+    "je ne connais pas la référence", "je ne connais pas la reference",
+    "je ne l'ai plus", "je ne l ai plus",
+    "je n'ai pas de référence", "je n'ai pas de reference",
+)
+
 
 def _looks_like_refusal(text: Text) -> bool:
     return any(phrase in text for phrase in _REFUSAL_PHRASES)
@@ -2138,6 +2321,10 @@ def _looks_like_refusal(text: Text) -> bool:
 
 def _looks_like_uncertain(text: Text) -> bool:
     return any(phrase in text for phrase in _UNCERTAINTY_PHRASES)
+
+
+def _looks_like_cannot_provide_field(text: Text) -> bool:
+    return any(phrase in text for phrase in _CANNOT_PROVIDE_FIELD_PHRASES)
 
 
 class ActionReaskPendingDiagnosticField(Action):
@@ -2413,6 +2600,11 @@ class ActionRunDiagnosticStep(Action):
 
         state["confirmed"] = confirmed
         state["message"] = raw_text
+        # Lu par _capture_opportunistic_nlu_entities au moment du verrouillage
+        # (ci-dessous et dans _lock_new_template) : le nom de champ EXACT vu
+        # par le NLU (entity.get("entity")) ne survit pas au-dela de ce tour
+        # via `text`/`raw_text` seuls, il faut les entites elles-memes.
+        state["message_entities"] = tracker.latest_message.get("entities", [])
 
         # --- 3) Mise a jour de l'etat (ex action_update_diagnostic_state) ---
         state["status"] = "in_progress"
@@ -2424,6 +2616,7 @@ class ActionRunDiagnosticStep(Action):
             state["template_name"] = chosen["label"]
             state["required_fields"] = chosen["required_fields"]
             state["optional_fields"] = chosen["optional_fields"]
+            state["fallback_fields"] = chosen.get("fallback_fields", [])
             state["field_specs"] = chosen["field_specs"]
             state.pop("pending_choices", None)
             # Meme reset que dans _lock_new_template ci-dessus, pour le meme
@@ -2431,6 +2624,12 @@ class ActionRunDiagnosticStep(Action):
             # explicite apres plusieurs candidats a egalite).
             state["no_capability_matched"] = False
             state["narrowing_attempted"] = False
+            # Meme capture opportuniste que _lock_new_template : ce chemin
+            # verrouille aussi un probleme (apres narrowing de service), sur
+            # le meme message dont les entites peuvent deja repondre a un
+            # champ requis.
+            _capture_opportunistic_field_patterns(state, confirmed, state.get("message") or "")
+            _capture_opportunistic_nlu_entities(state, confirmed, state.get("message_entities") or [])
 
         # Recalcule a chaque tour (pas seulement mis a True) : sans ce reset
         # explicite, une detection multi-probleme d'un tour precedent

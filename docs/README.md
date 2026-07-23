@@ -32,10 +32,22 @@ faire évoluer ou dépanner ce périmètre.
 | 13 | [Limitations actuelles](13-limitations.md) | Ce qui n'est délibérément pas fait à ce stade, et pourquoi |
 | 14 | [Perspectives d'évolution](14-evolutions.md) | Pistes pour la suite du projet |
 | 15 | [Modèle de données](15-modele-donnees.md) | Schémas PostgreSQL réels, pgvector, tables, conventions |
+| 17 | [DevOps — flow Rasa](17-devops.md) | Build/train/test/deploy/rollback des conteneurs `rasa`/`actions`, CI/CD proposée, hors périmètre LLM |
+| 18 | [Rapport des compétences](18-rapport-competences.md) | Classement des compétences de l'assistant, du plus important au plus mineur, et propositions priorisées |
+| 19 | [Audit adversarial complémentaire](19-audit-adversarial-2026-07-23.md) | Mesure en direct (corpus adversarial indépendant) après application des propositions du chapitre 18 |
+| 20 | [Réentraînement v7 et abandon de CamemBERT](20-rapport-retrain-v7.md) | Décisions P0 tranchées : abandon CamemBERT, automatisation de l'urgence, réentraînement v7 mesuré puis rollback |
+| 21 | [Rapport de bouclage feedback](21-rapport-feedback.md) | Script d'exploitation de audit.agent_actions/feedback.response_ratings, sur données réelles |
+| 22 | [Rapport final de session](22-rapport-final-session.md) | État final de chaque point de taches.txt, décisions actées, incident et correction, recommandations |
 
 ## Statut de rédaction
 
 - [x] Chapitres 1 à 15 rédigés
+- [x] Chapitre 17 rédigé (DevOps — flow Rasa)
+- [x] Chapitre 18 rédigé (Rapport des compétences)
+- [x] Chapitre 19 rédigé (Audit adversarial complémentaire)
+- [x] Chapitre 20 rédigé (Réentraînement v7 et abandon de CamemBERT)
+- [x] Chapitre 21 rédigé (Rapport de bouclage feedback)
+- [x] Chapitre 22 rédigé (Rapport final de session)
 
 ## Conventions utilisées dans ce document
 

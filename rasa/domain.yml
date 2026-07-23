@@ -19,6 +19,7 @@ intents:
   - browse_faq
   - select_faq_category
   - select_faq_question
+  - ask_complaint_status
 
 entities:
   # Audit qualite NLU : category/service/device/error_type/keyword retires
@@ -28,7 +29,15 @@ entities:
   # _best_semantic_match dans reclamation.py, jamais via une entite Rasa).
   # Les declarer sans jamais les entrainer n'est pas neutre : ca laisse
   # croire qu'une extraction existe la ou il n'y en a aucune.
-  - urgency
+  #
+  # urgency retiree de cette liste (18-rapport-competences.md, proposition
+  # P2) pour la meme raison, verifie ici avec le meme comptage que les 5
+  # ci-dessus : 0 exemple annote (urgency:...) dans nlu.yml, et aucun mapping
+  # de slot ne reference "entity: urgency" (le slot urgency plus bas est
+  # desormais rempli par inference automatique cote backend, jamais par
+  # extraction NLU -- voir son propre commentaire) -- entite fantome,
+  # rejoint donc le lot deja retire plutot que de rester la seule exception
+  # non expliquee.
   - incident_date
   - platform
   - operation_type
@@ -85,10 +94,10 @@ slots:
   # (ex. "un autre utilisateur me menace, question de securite" -> classe
   # bot_challenge a 99.99%, aucun mot en commun avec les exemples
   # d'entrainement de bot_challenge). Si ce slot heritait de la meme
-  # not_intent que category/urgency ci-dessus, ce texte serait rejete et le
+  # not_intent que category ci-dessus, ce texte serait rejete et le
   # formulaire redemanderait la description en boucle (audit robustesse,
   # test large 500+ : bloc "Safety" echouant systematiquement). category/
-  # urgency/incident_date restent proteges car leurs reponses attendues sont
+  # incident_date restent proteges car leurs reponses attendues sont
   # courtes et proches du vocabulaire d'entrainement des intents meta -- le
   # risque de faux rejet y est bien plus faible que le benefice de laisser
   # une vraie interruption ("es-tu un bot ?") suspendre le formulaire.
@@ -108,14 +117,14 @@ slots:
       - medium
       - high
     influence_conversation: true
-    # Meme raison que category ci-dessus : mapping from_entity mort retire
-    # (0 exemple annote (urgency:...) dans nlu.yml).
+    # N'est plus demande a l'utilisateur (retour utilisateur, 2026-07 :
+    # ce jugement doit etre deduit du probleme decrit, pas delegue) --
+    # rempli uniquement par validate_description (reclamation.py, voir
+    # _infer_urgency_from_description) via un evenement slot explicite,
+    # jamais par mapping conversationnel. Retire de reclamation_form.required_slots
+    # ci-dessous en consequence.
     mappings:
-      - type: from_text
-        not_intent: *reclamation_meta_intents
-        conditions:
-          - active_loop: reclamation_form
-            requested_slot: urgency
+      - type: custom
 
   incident_date:
     type: text
@@ -268,8 +277,10 @@ slots:
   # Reponse brute a "quel champ voulez-vous modifier ?", interpretee par
   # mots-cles dans validate_field_to_edit (meme logique que best_keyword_match
   # utilise ailleurs dans reclamation.py). from_text + conditions : memes
-  # raisons que category/description/urgency/incident_date ci-dessus (capture
+  # raisons que category/description/incident_date ci-dessus (capture
   # intent-agnostique pendant que ce slot est demande par le formulaire).
+  # urgency n'est plus editable ici (n'est plus demande du tout, voir son
+  # propre commentaire) -- retire de FIELD_TO_EDIT_KEYWORDS en consequence.
   field_to_edit:
     type: text
     influence_conversation: true
@@ -361,82 +372,23 @@ slots:
       - type: from_entity
         entity: platform
 
-  # Slots dormants pour le flux diagnostic : depuis le passage a la
-  # decouverte dynamique des capacites (GET /diagnostic/capabilities), les
-  # valeurs de champs vivent dans diagnostic_state.confirmed (actions.py),
-  # pas dans des slots individuels. Ceux-ci restent declares uniquement pour
-  # ne pas casser le formulaire de reclamation qui les reutilise par ailleurs.
-  payment_method:
-    type: text
-    influence_conversation: false
-    mappings:
-      - type: custom
-
-  transaction_id:
-    type: text
-    influence_conversation: false
-    mappings:
-      - type: custom
-
-  time:
-    type: text
-    influence_conversation: false
-    mappings:
-      - type: custom
-
-  content_type:
-    type: text
-    influence_conversation: false
-    mappings:
-      - type: custom
-
-  video_id:
-    type: text
-    influence_conversation: false
-    mappings:
-      - type: custom
-
-  last_message:
-    type: text
-    influence_conversation: false
-    mappings:
-      - type: custom
-
-  severity:
-    type: text
-    influence_conversation: false
-    mappings:
-      - type: custom
-
-  document_type:
-    type: text
-    influence_conversation: false
-    mappings:
-      - type: custom
-
-  country:
-    type: text
-    influence_conversation: false
-    mappings:
-      - type: custom
-
-  subscription_type:
-    type: text
-    influence_conversation: false
-    mappings:
-      - type: custom
-
-  channel:
-    type: text
-    influence_conversation: false
-    mappings:
-      - type: custom
-
-  contact_channel:
-    type: text
-    influence_conversation: false
-    mappings:
-      - type: custom
+  # 18-rapport-competences.md, proposition P2 : les 11 slots
+  # (payment_method, transaction_id, time, content_type, video_id,
+  # last_message, severity, document_type, country, subscription_type,
+  # channel, contact_channel) declares ici jusqu'a cette revision ont ete
+  # supprimes apres verification qu'aucun n'etait plus reellement utilise :
+  # zero SlotSet/evenement "slot" les ciblant dans rasa/actions/*.py, zero
+  # reference dans nlu.yml/stories.yml/rules.yml, et reclamation.py (le
+  # formulaire cite comme raison de leur maintien) ne les mentionne nulle
+  # part. Les valeurs de champs du flux diagnostic vivent reellement dans
+  # diagnostic_state.confirmed (JSON, actions/diagnostic.py) ; le
+  # dictionnaire de libelles francais par nom de champ (FIELD_QUESTIONS et
+  # son pendant court, diagnostic.py) reste independant de ces slots -- il
+  # phrase dynamiquement N'IMPORTE QUEL nom de champ declare par un futur
+  # manifeste de service, sans avoir besoin d'un slot Rasa du meme nom.
+  # Supprimer ces slots est donc sans effet sur le pipeline diagnostic ; ca
+  # retire seulement des champs morts qui laissaient croire, comme les
+  # entites mortes documentees plus haut, qu'un usage reel existait encore.
 
 forms:
   reclamation_form:
@@ -444,8 +396,8 @@ forms:
     # TOUT intent comme une tentative de remplissage du slot demande tant
     # que le formulaire est actif -- confirme en pratique via inspection du
     # tracker : "Es-tu un robot ?" (intent bot_challenge, confiance 1.0)
-    # etait capture par le mapping from_text du slot urgency et REJETE par
-    # validate_urgency, sans jamais laisser la moindre chance aux regles
+    # etait capture par le mapping from_text du slot category et REJETE par
+    # validate_category, sans jamais laisser la moindre chance aux regles
     # "... while reclamation form is active" (rules.yml) de s'appliquer,
     # meme avec `condition: active_loop: reclamation_form` explicite.
     #
@@ -464,7 +416,7 @@ forms:
     #
     # Remplace par l'ancre YAML &reclamation_meta_intents (definie sur le
     # mapping de `category` plus haut), appliquee en `not_intent` UNIQUEMENT
-    # aux slots a reponse courte/mot-cle (category, urgency, incident_date,
+    # aux slots a reponse courte/mot-cle (category, incident_date,
     # cancel_choice, field_to_edit) ou le risque de faux rejet est faible et
     # le benefice de l'interruption reel. `description` n'a explicitement
     # PAS cette restriction : elle accepte tout texte quel que soit
@@ -494,7 +446,6 @@ forms:
     required_slots:
       - description
       - category
-      - urgency
       - incident_date
       - cancel_choice
       - field_to_edit
@@ -566,10 +517,6 @@ responses:
     - text: "Pouvez-vous me décrire ce qui se passe, avec le plus de détails possible ?"
     - text: "Expliquez-moi ce qui ne va pas, en quelques phrases si possible."
 
-  utter_ask_urgency:
-    - text: "Quel est le niveau d'urgence ? (faible, moyenne, élevée)"
-    - text: "À quel point est-ce urgent pour vous ? (faible, moyenne, élevée)"
-
   utter_ask_incident_date:
     - text: "À quelle date le problème s'est-il produit ?"
     - text: "Quand ce problème est-il survenu ?"
@@ -589,10 +536,6 @@ responses:
   utter_description_too_short:
     - text: "Votre description est un peu courte pour que je comprenne bien, pouvez-vous préciser davantage ?"
     - text: "Pouvez-vous détailler un peu plus ? Quelques mots supplémentaires m'aideraient à bien cerner le problème."
-
-  utter_wrong_urgency:
-    - text: "Le niveau d'urgence doit être : faible, moyenne ou élevée."
-    - text: "Merci de préciser l'urgence avec l'un de ces mots : faible, moyenne ou élevée."
 
   utter_wrong_incident_date:
     - text: "Je n'ai pas compris la date. Pouvez-vous préciser quand le problème est survenu ?"
@@ -618,11 +561,11 @@ responses:
     - text: "Je n’ai pas compris. Répondez par : modifier, ou annuler."
 
   utter_ask_field_to_edit:
-    - text: "Quel élément souhaitez-vous modifier ? (catégorie / description / urgence / date)"
-    - text: "Qu'aimeriez-vous corriger ? (catégorie / description / urgence / date)"
+    - text: "Quel élément souhaitez-vous modifier ? (catégorie / description / date)"
+    - text: "Qu'aimeriez-vous corriger ? (catégorie / description / date)"
 
   utter_wrong_field_to_edit:
-    - text: "Je n’ai pas compris. Répondez par : catégorie, description, urgence ou date."
+    - text: "Je n’ai pas compris. Répondez par : catégorie, description ou date."
 
   utter_thanks_for_suggestion:
     - text: "Merci pour votre suggestion ! Je la transmets à notre équipe pour étude."
@@ -673,4 +616,5 @@ actions:
   - action_browse_faq
   - action_select_faq_category
   - action_select_faq_question
+  - action_consult_complaints
  

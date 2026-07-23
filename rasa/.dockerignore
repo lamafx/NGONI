@@ -1,5 +1,6 @@
 .rasa/
 models/
+.cache/
 __pycache__/
 **/__pycache__/
 *.pyc

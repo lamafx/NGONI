@@ -43,12 +43,26 @@ services:
     depends_on:
       - postgres
 
+  # NOTE (docs/16-audit-faq-nlu-2026-07.md 16.3, docs/10-deploiement.md 10.2) :
+  # ce service, `postgres` et `pgadmin` ne sont PAS utilises tels quels dans
+  # le fonctionnement reel de ce projet -- FastAPI et Postgres tournent
+  # nativement sur l'hote (voir docs/10-deploiement.md pour la sequence de
+  # demarrage documentee), seuls `rasa`/`actions` sont dockerises en
+  # pratique. Fait maintenant fonctionnel si utilise quand meme (les deux
+  # URLs Rasa manquaient, seul DATABASE_URL etait deja correct) : lancer
+  # `docker compose up fastapi postgres` en plus des processus natifs
+  # creerait des conteneurs concurrents sur les memes ports (8000/5432),
+  # avec un etat/catalogue FAQ different (voir fastapi/seeds/faq_items.sql
+  # pour repeupler) -- a eviter, pas une garantie de parite avec l'environnement
+  # de developpement reel.
   fastapi:
     build: ./fastapi
     ports:
       - "8000:8000"
     environment:
       - DATABASE_URL=${DATABASE_URL}
+      - RASA_PARSE_URL=http://rasa:5005/model/parse
+      - RASA_WEBHOOK_URL=http://rasa:5005/webhooks/rest/webhook
     depends_on:
       - postgres
       - rasa

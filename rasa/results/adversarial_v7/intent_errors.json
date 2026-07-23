@@ -1,0 +1,210 @@
+[
+  {
+    "text": "Comment récupérer l'accès à mon compte si j'ai oublié mon mot de passe ?",
+    "intent": "ask_faq",
+    "intent_prediction": {
+      "name": "diagnostic",
+      "confidence": 1.0
+    }
+  },
+  {
+    "text": "Quelle est la démarche pour changer de mot de passe ?",
+    "intent": "ask_faq",
+    "intent_prediction": {
+      "name": "diagnostic",
+      "confidence": 1.0
+    }
+  },
+  {
+    "text": "Comment fonctionne la vérification du compte en général ?",
+    "intent": "ask_faq",
+    "intent_prediction": {
+      "name": "diagnostic",
+      "confidence": 0.9999234676361084
+    }
+  },
+  {
+    "text": "C'est quoi la procédure normale pour un retrait d'argent ?",
+    "intent": "ask_faq",
+    "intent_prediction": {
+      "name": "diagnostic",
+      "confidence": 1.0
+    }
+  },
+  {
+    "text": "Comment on fait pour se reconnecter si on a perdu l'accès ?",
+    "intent": "ask_faq",
+    "intent_prediction": {
+      "name": "diagnostic",
+      "confidence": 1.0
+    }
+  },
+  {
+    "text": "koman on peu changé le mdp de son compte",
+    "intent": "ask_faq",
+    "intent_prediction": {
+      "name": "diagnostic",
+      "confidence": 0.9999425411224365
+    }
+  },
+  {
+    "text": "Que se passe-t-il concrètement pendant la procédure de vérification du compte ?",
+    "intent": "ask_faq",
+    "intent_prediction": {
+      "name": "diagnostic",
+      "confidence": 1.0
+    }
+  },
+  {
+    "text": "Est-il possible de se connecter à son compte NGONI sans mot de passe, par exemple avec une empreinte ?",
+    "intent": "ask_faq",
+    "intent_prediction": {
+      "name": "diagnostic",
+      "confidence": 1.0
+    }
+  },
+  {
+    "text": "Quelles sont les règles générales concernant les délais de retrait ?",
+    "intent": "ask_faq",
+    "intent_prediction": {
+      "name": "select_faq_category",
+      "confidence": 0.8437075614929199
+    }
+  },
+  {
+    "text": "jve cré 1 compte comen on fé",
+    "intent": "ask_faq",
+    "intent_prediction": {
+      "name": "out_of_scope",
+      "confidence": 1.0
+    }
+  },
+  {
+    "text": "jarive pa a me co koman on fé",
+    "intent": "ask_faq",
+    "intent_prediction": {
+      "name": "diagnostic",
+      "confidence": 1.0
+    }
+  },
+  {
+    "text": "Moyens de paiement ?",
+    "intent": "ask_faq",
+    "intent_prediction": {
+      "name": "suggestion",
+      "confidence": 0.998988687992096
+    }
+  },
+  {
+    "text": "Parrainage ?",
+    "intent": "ask_faq",
+    "intent_prediction": {
+      "name": "inappropriate_language",
+      "confidence": 1.0
+    }
+  },
+  {
+    "text": "Je cherchais des infos sur le fonctionnement des comptes, mais en fait le mien est suspendu depuis hier soir.",
+    "intent": "diagnostic",
+    "intent_prediction": {
+      "name": "ask_faq",
+      "confidence": 0.9925228953361511
+    }
+  },
+  {
+    "text": "Peux-tu réserver un billet de train pour moi ?",
+    "intent": "out_of_scope",
+    "intent_prediction": {
+      "name": "ask_faq",
+      "confidence": 0.9673537015914917
+    }
+  },
+  {
+    "text": "Tu peux commander une pizza margherita pour ce soir ?",
+    "intent": "out_of_scope",
+    "intent_prediction": {
+      "name": "ask_faq",
+      "confidence": 0.9086334109306335
+    }
+  },
+  {
+    "text": "Franchement, j'ai l'impression de parler à un robot, c'est le cas ?",
+    "intent": "bot_challenge",
+    "intent_prediction": {
+      "name": "diagnostic",
+      "confidence": 1.0
+    }
+  },
+  {
+    "text": "fo k un ajan tret mon ca svp",
+    "intent": "create_reclamation",
+    "intent_prediction": {
+      "name": "diagnostic",
+      "confidence": 1.0
+    }
+  },
+  {
+    "text": "creé moi 1 tiket pliz c urjan",
+    "intent": "create_reclamation",
+    "intent_prediction": {
+      "name": "out_of_scope",
+      "confidence": 1.0
+    }
+  },
+  {
+    "text": "C'est n'importe quoi, rien ne fonctionne comme il faut sur cette appli.",
+    "intent": "plainte",
+    "intent_prediction": {
+      "name": "ask_faq",
+      "confidence": 0.8257274627685547
+    }
+  },
+  {
+    "text": "Je commence à en avoir marre de tous ces soucis techniques.",
+    "intent": "plainte",
+    "intent_prediction": {
+      "name": "inappropriate_language",
+      "confidence": 1.0
+    }
+  },
+  {
+    "text": "Sincèrement ça devient pénible d'utiliser NGONI ces derniers temps.",
+    "intent": "plainte",
+    "intent_prediction": {
+      "name": "ask_faq",
+      "confidence": 0.9998538494110107
+    }
+  },
+  {
+    "text": "jen ai marre sa march jamè bien votre application",
+    "intent": "plainte",
+    "intent_prediction": {
+      "name": "diagnostic",
+      "confidence": 1.0
+    }
+  },
+  {
+    "text": "Vous devriez ajouter un moyen de contacter directement un humain.",
+    "intent": "suggestion",
+    "intent_prediction": {
+      "name": "ask_faq",
+      "confidence": 0.7006533145904541
+    }
+  },
+  {
+    "text": "sa srai bien d'avoir une version en anglais aussi",
+    "intent": "suggestion",
+    "intent_prediction": {
+      "name": "goodbye",
+      "confidence": 1.0
+    }
+  },
+  {
+    "text": "Laissez tomber le diagnostic automatique, je veux directement parler à quelqu'un.",
+    "intent": "create_reclamation",
+    "intent_prediction": {
+      "name": "deny",
+      "confidence": 0.42105647921562195
+    }
+  }
+]

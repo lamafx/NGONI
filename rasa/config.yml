@@ -49,6 +49,18 @@ pipeline:
 # quand aucun mot du message n'est reconnu, sans changer model_confidence.
 - name: components.vocabulary_guard.VocabularyCoverageGuard
 
+# Audit FAQ, 16.5 #6 / 16.6 (P2 #12) : un message court/elliptique (1-2
+# mots, ex. "Retrait ?", "KYC") portant sur un sujet FAQ legitime est
+# mesure comme absorbe par `diagnostic` a confiance ~1.0 (16.4) -- pire
+# score du corpus adversarial (25% d'accuracy sur cette categorie). Reroute
+# specifiquement CE cas precis vers ask_faq (dont la recherche hybride,
+# app/domains/faq/service.py, gere correctement ces messages courts une
+# fois l'intention correctement reconnue -- verifie manuellement).
+# Place APRES VocabularyCoverageGuard : un message deja neutralise comme
+# hors-vocabulaire (confidence forcee a 0) n'est jamais rerouter vers une
+# recherche FAQ inutile.
+- name: components.short_message_router.ShortMessageFaqRouter
+
 - name: FallbackClassifier
   threshold: 0.6
   ambiguity_threshold: 0.1

@@ -39,6 +39,54 @@ rules:
   - intent: goodbye
   - action: utter_goodbye
 
+- rule: Consult complaint status
+  # Meme garde que "Greeting response"/"Goodbye response" juste au-dessus :
+  # ne declenche que hors formulaire de reclamation et hors diagnostic en
+  # attente. Les deux variantes ci-dessous (rapport 18-rapport-competences.md,
+  # proposition P1 : couvrir ask_complaint_status par les memes gardes que
+  # les autres intentions "meta") alignent ce comportement sur celui deja en
+  # place pour bot_challenge/ask_capabilities/suggestion/plainte -- avant leur
+  # ajout, une reponse mal classee ask_complaint_status pendant l'un de ces
+  # deux flux ne correspondait a AUCUNE regle et tombait dans le fallback
+  # generique (meme classe de bug documentee sur "Suggestion response"/"Bot
+  # presentation response").
+  condition:
+  - active_loop: null
+  - slot_was_set:
+    - claim_requested: false
+    - pending_field: null
+  steps:
+  - intent: ask_complaint_status
+  - action: action_consult_complaints
+
+- rule: Consult complaint status while diagnostic is pending
+  # Meme mecanique que "Bot presentation response while diagnostic is
+  # pending"/"Suggestion response while diagnostic is pending" : repond a la
+  # question de statut PUIS rappelle la question de diagnostic en attente au
+  # lieu de la laisser silencieusement abandonnee.
+  condition:
+  - active_loop: null
+  - slot_was_set:
+    - pending_field
+  steps:
+  - intent: ask_complaint_status
+  - action: action_consult_complaints
+  - action: action_reask_pending_diagnostic_field
+  - action: action_listen
+
+- rule: Consult complaint status while reclamation form is active
+  # Meme mecanique que "Bot presentation response while reclamation form is
+  # active"/"Suggestion response while reclamation form is active" : repond
+  # PUIS reactive reclamation_form dans le meme tour, qui pose automatiquement
+  # sa prochaine question requise.
+  condition:
+  - active_loop: reclamation_form
+  steps:
+  - intent: ask_complaint_status
+  - action: action_consult_complaints
+  - action: reclamation_form
+  - active_loop: reclamation_form
+
 - rule: Bot presentation response
   # Sans cette condition, cette regle s'applique aussi pendant reclamation_form
   # et contredit la story "bot challenge interrupts reclamation then resumes"
@@ -78,9 +126,9 @@ rules:
   # Audit robustesse (test large 500+, decouvert par regression) : sans
   # cette regle, "Bot presentation response" ci-dessus ne s'applique pas
   # pendant reclamation_form (active_loop: null exige) mais RIEN ne prenait
-  # le relais non plus -- le mapping from_text du slot demande (ex. urgency)
+  # le relais non plus -- le mapping from_text du slot demande (ex. category)
   # capturait alors le texte de bot_challenge comme une tentative de reponse,
-  # rejetee par la validation ("Le niveau d'urgence doit être..."). Meme
+  # rejetee par la validation ("Je n'ai pas bien compris..."). Meme
   # mecanique que "FAQ semantic search while reclamation form is active" :
   # repond PUIS reactive le formulaire dans le meme tour.
   condition:

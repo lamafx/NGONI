@@ -25,6 +25,7 @@ from .common import (
 from .diagnostic import _call_diagnostic_engine, _cosine_similarity, _embed_message, _embed_messages
 
 TICKET_SERVICE_URL = getenv("TICKET_SERVICE_URL", "http://fastapi:8000/tickets/create")
+TICKET_LIST_SERVICE_URL = getenv("TICKET_LIST_SERVICE_URL", "http://fastapi:8000/complaints/mine")
 
 # Etoffe (retour utilisateur, 2026-07) au-dela des formes nominales
 # d'origine ("connexion", "vérification"...) pour couvrir aussi les formes
@@ -145,7 +146,6 @@ def _best_semantic_match(field: Text, text: Text, keyword_map: Dict[Text, List[T
 FIELD_TO_EDIT_KEYWORDS: Dict[Text, List[Text]] = {
     "category": ["categorie", "catégorie", "service", "type"],
     "description": ["description", "detail", "détail", "probleme", "problème"],
-    "urgency": ["urgence", "urgency", "priorite", "priorité"],
     "incident_date": ["date", "quand", "jour"],
 }
 
@@ -474,6 +474,56 @@ def _infer_category_from_description(normalized_text: Text) -> Optional[Text]:
     qu'en noms de service bruts.
     """
     return best_keyword_match(normalized_text, CATEGORY_KEYWORDS, None)
+
+
+# Signaux lexicaux d'urgence (retour utilisateur, 2026-07 : demander
+# explicitement "quel est le niveau d'urgence ?" n'a pas de sens pour un
+# utilisateur -- ce jugement doit se deduire de ce qu'il decrit, pas lui etre
+# delegue). Meme esprit que CATEGORY_KEYWORDS/_infer_category_from_description
+# ci-dessus, mais _infer_urgency_from_description ne retourne jamais None : au
+# pire "medium", deja le repli neutre utilise partout ailleurs (voir
+# ActionGenerateReclamationSummary, ActionCreateTicket) quand le slot est vide.
+URGENCY_HIGH_KEYWORDS: List[Text] = [
+    "urgent", "urgence", "immédiat", "immediat", "immédiatement", "immediatement",
+    "bloqué", "bloque", "piraté", "pirate", "hacké", "hacke", "compromis",
+    "volé", "vole", "arnaque", "arnaqué", "escroqu", "grave",
+    "critique", "suspendu", "suspension",
+]
+URGENCY_LOW_KEYWORDS: List[Text] = [
+    "pas urgent", "pas grave", "pas pressé", "pas presse", "quand vous pourrez",
+    "quand vous pouvez", "a l'occasion", "à l'occasion", "juste une question",
+    "juste pour savoir", "petite question",
+]
+# "depuis 5 jours"/"depuis 2 semaines" : un probleme qui traine depuis un
+# moment est traite comme urgent (delai deja anormal), pas seulement les mots
+# d'urgence explicites ci-dessus.
+_ELAPSED_TIME_PATTERN = re.compile(r"\bdepuis\s+(\d+)\s*(jour|jours|semaine|semaines|mois)\b")
+
+
+def _contains_keyword(text: Text, keywords: List[Text]) -> bool:
+    # Frontieres de mot explicites (\b...\b), meme precaution que
+    # best_keyword_match ci-dessus : un simple `kw in text` ferait par
+    # exemple matcher "vole" dans "je voLE Rai" ou "grave" dans un mot plus
+    # long, comme le cas "chat" dans "achat" deja documente sur ce fichier.
+    return any(re.search(rf"\b{re.escape(kw)}\b", text) for kw in keywords)
+
+
+def _infer_urgency_from_description(normalized_text: Text) -> Text:
+    """Deduit automatiquement le niveau d'urgence (low/medium/high) depuis la
+    description libre du probleme -- jamais demande a l'utilisateur (voir
+    validate_description ci-dessous, appele systematiquement des que la
+    description est validee, remplace l'ancienne question utter_ask_urgency).
+    """
+    if _contains_keyword(normalized_text, URGENCY_HIGH_KEYWORDS):
+        return "high"
+    elapsed = _ELAPSED_TIME_PATTERN.search(normalized_text)
+    if elapsed:
+        amount, unit = int(elapsed.group(1)), elapsed.group(2)
+        if unit.startswith("semaine") or unit.startswith("mois") or amount >= 3:
+            return "high"
+    if _contains_keyword(normalized_text, URGENCY_LOW_KEYWORDS):
+        return "low"
+    return "medium"
 
 
 class ActionStartReclamation(Action):
@@ -809,38 +859,14 @@ class ValidateReclamationForm(FormValidationAction):
             if inferred:
                 result["category"] = inferred
 
+        # Urgence deduite automatiquement ici, jamais demandee a l'utilisateur
+        # (retour utilisateur, 2026-07 -- voir _infer_urgency_from_description
+        # ci-dessus). Toujours ecrasee avec la derniere description en date :
+        # contrairement a category, il n'existe aucune autre source legitime
+        # (bouton, entite du message declencheur) pour ce slot.
+        result["urgency"] = _infer_urgency_from_description(normalized)
+
         return result
-
-    def validate_urgency(
-        self,
-        slot_value: Text,
-        dispatcher: CollectingDispatcher,
-        tracker: Tracker,
-        domain: Dict[Text, Any],
-    ) -> Dict[Text, Any]:
-        # Audit ton/clarite : utter_wrong_urgency et utter_ask_urgency
-        # demandent desormais "faible/moyenne/élevée" (domain.yml) plutot que
-        # les mots anglais bruts "low/medium/high", incoherents pour un
-        # utilisateur francophone. La valeur INTERNE reste low/medium/high
-        # (deja utilisee partout ailleurs -- ticket, contrat diagnostic, voir
-        # complaints/schemas.py::Urgency) : seule cette table d'entree
-        # s'elargit, pour continuer d'accepter les mots anglais bruts aussi
-        # (compatibilite avec un appelant direct de l'API, ou un utilisateur
-        # qui les tape quand meme).
-        allowed = {
-            "low": "low", "faible": "low",
-            "medium": "medium", "moyenne": "medium", "moyen": "medium",
-            "high": "high", "élevée": "high", "élevee": "high", "elevee": "high", "élevé": "high", "eleve": "high",
-        }
-        # Meme garde que validate_category (voir son commentaire) : slot_value
-        # peut etre None lors d'une re-validation.
-        if isinstance(slot_value, str):
-            normalized = slot_value.strip().lower()
-            if normalized in allowed:
-                return {"urgency": allowed[normalized]}
-
-        dispatcher.utter_message(response="utter_wrong_urgency")
-        return {"urgency": None}
 
     def validate_incident_date(
         self,
@@ -1191,3 +1217,108 @@ class ActionAskCancelClarification(Action):
             {"event": "slot", "name": "claim_requested", "value": False},
             {"event": "slot", "name": "awaiting_cancel_choice", "value": True},
         ]
+
+
+# "toutes"/"liste"/... : l'utilisateur demande explicitement l'ensemble de ses
+# reclamations plutot que la derniere seule (comportement par defaut de
+# ActionConsultComplaints ci-dessous).
+ALL_COMPLAINTS_KEYWORDS = ["toutes", "liste", "affiche", "montre"]
+
+# "en cours" = pas encore cloturee/resolue -- pas un statut backend unique
+# (ALLOWED_STATUSES = OPEN/IN_PROGRESS/RESOLVED/CLOSED, complaints/schemas.py) :
+# filtre cote client sur cet ensemble plutot que de forcer une egalite sur un
+# seul statut backend.
+IN_PROGRESS_STATUSES = {"OPEN", "IN_PROGRESS"}
+IN_PROGRESS_KEYWORDS = [
+    "en cours", "pas encore résolu", "pas encore resolu",
+    "toujours pas résolu", "toujours pas resolu", "pas terminé", "pas termine",
+]
+
+
+def _looks_like_all_complaints_request(text: Text) -> bool:
+    return any(keyword in text for keyword in ALL_COMPLAINTS_KEYWORDS)
+
+
+def _looks_like_in_progress_request(text: Text) -> bool:
+    return any(keyword in text for keyword in IN_PROGRESS_KEYWORDS)
+
+
+def _format_complaint_line(complaint: Dict[Text, Any]) -> Text:
+    status_label = TICKET_STATUS_LABELS.get(complaint.get("status"), complaint.get("status"))
+    return f"{complaint.get('ticket_id')} ({complaint.get('category')}) : {status_label}"
+
+
+def _format_complaint_list(complaints: List[Dict[Text, Any]]) -> Text:
+    return "\n".join(f"- {_format_complaint_line(c)}" for c in complaints)
+
+
+class ActionConsultComplaints(Action):
+    # Consultation des reclamations deja creees (rapport utilisateur, point
+    # "consultation des reclamations") : aucun intent/action n'existait pour
+    # repondre a "ou en est ma reclamation ?" avant cet ajout. Le seul
+    # endpoint backend disponible jusqu'ici (GET /complaints/{ticket_id})
+    # exige de CONNAITRE le ticket_id, que l'utilisateur ne fournit jamais
+    # dans ces formulations -- voir le nouvel endpoint GET /complaints/mine
+    # (complaints/router.py), filtre par le header X-User-ID plutot que par
+    # un ticket_id explicite.
+    def name(self) -> Text:
+        return "action_consult_complaints"
+
+    def run(
+        self,
+        dispatcher: CollectingDispatcher,
+        tracker: Tracker,
+        domain: Dict[Text, Any],
+    ) -> List[Dict[Text, Any]]:
+        text = (tracker.latest_message.get("text") or "").lower()
+
+        try:
+            response = request_with_retry(
+                "GET", TICKET_LIST_SERVICE_URL, headers={"X-User-ID": tracker.sender_id}, timeout=10
+            )
+            complaints = response.json()
+        except (requests.RequestException, ValueError) as error:
+            logger.warning("Echec de consultation des reclamations session=%s : %s", tracker.sender_id, error)
+            dispatcher.utter_message(
+                text="Je n'arrive pas à récupérer vos réclamations pour le moment. Merci de réessayer dans quelques instants."
+            )
+            return []
+
+        if not complaints:
+            dispatcher.utter_message(text="Je ne trouve aucune réclamation associée à votre compte.")
+            return []
+
+        if _looks_like_all_complaints_request(text):
+            dispatcher.utter_message(text="Voici vos réclamations :\n" + _format_complaint_list(complaints))
+            return []
+
+        if _looks_like_in_progress_request(text):
+            in_progress = [c for c in complaints if c.get("status") in IN_PROGRESS_STATUSES]
+            if not in_progress:
+                dispatcher.utter_message(text="Vous n'avez aucune réclamation en cours actuellement.")
+            else:
+                dispatcher.utter_message(text="Voici vos réclamations en cours :\n" + _format_complaint_list(in_progress))
+            return []
+
+        # Recherche par sujet (ex. "la reclamation concernant mon retrait") :
+        # meme mots-cles que le formulaire de reclamation (CATEGORY_KEYWORDS),
+        # mais pour RESTREINDRE une liste deja recuperee plutot que pour
+        # choisir une categorie a valider. Sans correspondance, `complaints`
+        # reste inchange et le plus recent (ci-dessous) fait office de reponse
+        # par defaut -- comportement attendu pour "où en est ma réclamation ?"
+        # sans autre precision.
+        matched_category = best_keyword_match(text, CATEGORY_KEYWORDS, "")
+        if matched_category:
+            topic_matches = [c for c in complaints if c.get("category") == matched_category]
+            if topic_matches:
+                complaints = topic_matches
+
+        latest = complaints[0]
+        status_label = TICKET_STATUS_LABELS.get(latest.get("status"), latest.get("status"))
+        dispatcher.utter_message(
+            text=(
+                f"Votre réclamation {latest.get('ticket_id')} ({latest.get('category')}) "
+                f"est actuellement {status_label}."
+            )
+        )
+        return []

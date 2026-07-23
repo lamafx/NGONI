@@ -145,9 +145,17 @@ class DiagnosticPipeline:
 
         # 2. Validation generique de completude : un ensemble de cles attendu
         #    contre un ensemble de cles fourni, jamais une regle metier.
+        #    fallback_fields (rapport utilisateur, "champs alternatifs") :
+        #    un groupe de repli COMPLET satisfait aussi la validation, meme
+        #    generique quel que soit le service -- le Dialogue Manager
+        #    n'envoie jamais un melange partiel des deux groupes (il ne
+        #    bascule sur fallback_fields qu'une fois celui-ci entierement
+        #    collecte, voir rasa/actions/diagnostic.py).
         required = {field.name for field in target.problem.required_fields}
+        fallback = {field.name for field in target.problem.fallback_fields}
         provided = set(request.entities.keys())
-        missing = sorted(required - provided)
+        satisfied_by_fallback = bool(fallback) and not (fallback - provided)
+        missing = sorted(required - provided) if not satisfied_by_fallback else []
         if missing:
             logger.info(
                 "[DIAG][ENGINE] session=%s stage=validate result=NEED_MORE_INFO missing_fields=%s",
@@ -161,7 +169,7 @@ class DiagnosticPipeline:
             )
             return outcome
 
-        allowed = required | {field.name for field in target.problem.optional_fields}
+        allowed = required | {field.name for field in target.problem.optional_fields} | fallback
         filtered_entities = {k: v for k, v in request.entities.items() if k in allowed}
 
         invocation = DiagnosticInvocationRequest(
