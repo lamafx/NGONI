@@ -1,0 +1,206 @@
+# ============================================================
+# .gitlab-ci.yml — ngoni-ia-service (Rasa + FastAPI)
+# ============================================================
+# Contexte (docs/17-devops.md 17.5, docs/taches.txt P2 #17) : aucune CI/CD
+# n'existait pour ce service, contrairement aux autres microservices du
+# depot (chacun a deja son .gitlab-ci.yml). Style/conventions repris de
+# ngoni-user-service/.gitlab-ci.yml (stages, cache, registre GitLab unifie)
+# pour rester coherent avec le reste de l'organisation.
+#
+# Pas de stage `deploy` : aucun mecanisme de deploiement reel n'est
+# documente ni demande pour ce service a ce jour (docs/10-deploiement.md ne
+# couvre que le developpement local) -- a ajouter explicitement quand la
+# question se posera, plutot que d'inventer une cible de deploiement ici.
+#
+# Verifie localement uniquement (syntaxe YAML, commandes rejouees a la main
+# dans cette session) : pas de runner GitLab disponible dans cet
+# environnement pour une validation d'execution reelle.
+# ============================================================
+
+stages:
+  - test
+  - security
+  - build
+
+variables:
+  SERVICE_NAME: ngoni-ia-service
+  REGISTRY: registry.gitlab.com/ngoni_ci/microservices
+  DOCKER_BUILDKIT: "1"
+
+.pip-cache: &pip-cache
+  cache:
+    key:
+      files:
+        - fastapi/requirements.txt
+    paths:
+      - .pip-cache/
+    policy: pull-push
+
+.transient-retry: &transient-retry
+  retry:
+    max: 2
+    when:
+      - runner_system_failure
+      - stuck_or_timeout_failure
+
+# ─── TEST : FastAPI / pytest (contre un vrai Postgres+pgvector) ──────────
+# Contrat conformance (test_diagnostic_contracts.py), FAQ (test_faq_*.py,
+# nouveaux cette session), tickets, diagnostic... Necessite pgvector (voir
+# fastapi/init_db.sql, CREATE EXTENSION vector) -- image dediee, pas le
+# postgres:*-alpine simple utilise par les services soeurs qui n'en ont pas
+# besoin.
+test:pytest:
+  stage: test
+  <<: [*pip-cache, *transient-retry]
+  image: python:3.11-slim
+  services:
+    - name: pgvector/pgvector:pg15
+      alias: pgsql
+      variables:
+        POSTGRES_USER: chatbot_user
+        POSTGRES_PASSWORD: ci-test-secret
+        POSTGRES_DB: chatbotdb
+  variables:
+    DATABASE_URL: "postgresql+psycopg://chatbot_user:ci-test-secret@pgsql:5432/chatbotdb"
+    PGPASSWORD: ci-test-secret
+  before_script:
+    - apt-get update -qq && apt-get install -y -qq postgresql-client
+    - pip install --cache-dir .pip-cache -r fastapi/requirements.txt
+    - psql -h pgsql -U chatbot_user -d chatbotdb -f fastapi/init_db.sql
+    - for f in fastapi/migrations/*.sql; do psql -h pgsql -U chatbot_user -d chatbotdb -f "$f"; done
+    # Catalogue FAQ reel (26 lignes, voir fastapi/seeds/faq_items.sql) :
+    # necessaire pour tests/test_faq_repository.py (auto-retrouvaille contre
+    # de vraies donnees, pas un mock).
+    - psql -h pgsql -U chatbot_user -d chatbotdb -f fastapi/seeds/faq_items.sql
+  script:
+    - cd fastapi && pytest tests/ -v
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "develop" || $CI_PIPELINE_SOURCE == "merge_request_event"'
+
+# ─── TEST : contrats JSON Schema (diagnostic) ─────────────────────────────
+# Deja couvert par test_diagnostic_contracts.py (execute par test:pytest
+# ci-dessus) -- job separe demande par docs/taches.txt P2 #17 ("validation
+# JSON Schema des contrats") pour un signal isole et lisible dans
+# l'interface GitLab, sans dupliquer la logique de test elle-meme.
+test:contracts:
+  stage: test
+  <<: [*pip-cache, *transient-retry]
+  image: python:3.11-slim
+  before_script:
+    - pip install --cache-dir .pip-cache -r fastapi/requirements.txt
+  script:
+    - cd fastapi && pytest tests/test_diagnostic_contracts.py tests/test_diagnostic_contract_conformance.py -v
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "develop" || $CI_PIPELINE_SOURCE == "merge_request_event"'
+
+# ─── TEST : Rasa, validation de donnees (rapide, a chaque push) ──────────
+# rasa data validate seulement ici -- rapide (~secondes), catch les
+# incoherences structurelles (domain/nlu/rules/stories). Le corpus complet
+# (rasa test nlu) exige un modele entraine, absent du depot (rasa/models/
+# est gitignore, voir .gitignore) -- entrainer a chaque push couterait
+# ~1h-1h30 (mesure reelle, voir docs/20-rapport-retrain-v7.md), impraticable
+# pour un retour rapide. Voir test:rasa:regression (manuel) ci-dessous.
+test:rasa:validate:
+  stage: test
+  image: rasa/rasa:3.6.20
+  script:
+    - cd rasa && rasa data validate
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "develop" || $CI_PIPELINE_SOURCE == "merge_request_event"'
+
+# ─── TEST : Rasa, entrainement + non-regression adversariale (manuel) ────
+# Rejoue exactement le protocole de docs/20-rapport-retrain-v7.md : entraine
+# puis mesure sur tests/test_nlu_adversarial.yml (corpus independant, 90
+# exemples, voir docs/19-audit-adversarial-2026-07-23.md). Declenchement
+# manuel (pas automatique a chaque push) : cout ~1h-1h30, et toute
+# modification nlu.yml doit etre comparee AVANT/APRES par un humain (voir
+# 20.4 -- ce pipeline ne bloque pas automatiquement sur une regression,
+# il expose seulement le rapport pour decision).
+test:rasa:regression:
+  stage: test
+  image: rasa/rasa:3.6.20
+  script:
+    - cd rasa
+    - rasa train --fixed-model-name ci-candidate
+    - rasa test nlu --nlu tests/test_nlu_adversarial.yml --out results/ci-candidate
+  artifacts:
+    paths:
+      - rasa/results/ci-candidate/
+    expire_in: 30 days
+  when: manual
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "develop" || $CI_PIPELINE_SOURCE == "merge_request_event"'
+
+# ─── SECURITY ──────────────────────────────────────────────────────────
+security:gitleaks:
+  stage: security
+  image:
+    name: zricethezav/gitleaks:latest
+    entrypoint: [""]
+  script:
+    - gitleaks detect --source . --verbose
+  allow_failure: false
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "develop"'
+
+security:trivy:
+  stage: security
+  image:
+    name: ghcr.io/aquasecurity/trivy:latest
+    entrypoint: [""]
+  script:
+    - trivy filesystem --exit-code 1 --severity HIGH,CRITICAL --no-progress --skip-files "docker-compose.yml" .
+  allow_failure: false
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "develop"'
+
+# ─── BUILD & PUSH (3 images : rasa, actions, fastapi) ─────────────────────
+.build-image: &build-image
+  stage: build
+  <<: *transient-retry
+  image: docker:24
+  services: [docker:24-dind]
+  variables:
+    DOCKER_TLS_CERTDIR: "/certs"
+  before_script:
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
+  rules:
+    - if: $CI_COMMIT_BRANCH
+      when: manual
+    - if: $CI_COMMIT_TAG
+
+build:rasa:
+  <<: *build-image
+  script:
+    - |
+      docker buildx create --use --name builder || true
+      docker buildx build --platform linux/amd64 \
+        --cache-from type=registry,ref=$REGISTRY/$SERVICE_NAME-rasa:latest \
+        --cache-to type=inline \
+        --tag $REGISTRY/$SERVICE_NAME-rasa:$CI_COMMIT_SHORT_SHA \
+        --tag $REGISTRY/$SERVICE_NAME-rasa:latest \
+        --push ./rasa
+
+build:actions:
+  <<: *build-image
+  script:
+    - |
+      docker buildx create --use --name builder || true
+      docker buildx build --platform linux/amd64 \
+        --cache-from type=registry,ref=$REGISTRY/$SERVICE_NAME-actions:latest \
+        --cache-to type=inline \
+        --tag $REGISTRY/$SERVICE_NAME-actions:$CI_COMMIT_SHORT_SHA \
+        --tag $REGISTRY/$SERVICE_NAME-actions:latest \
+        --push ./rasa/actions
+
+build:fastapi:
+  <<: *build-image
+  script:
+    - |
+      docker buildx create --use --name builder || true
+      docker buildx build --platform linux/amd64 \
+        --cache-from type=registry,ref=$REGISTRY/$SERVICE_NAME-fastapi:latest \
+        --cache-to type=inline \
+        --tag $REGISTRY/$SERVICE_NAME-fastapi:$CI_COMMIT_SHORT_SHA \
+        --tag $REGISTRY/$SERVICE_NAME-fastapi:latest \
+        --push ./fastapi

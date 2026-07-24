@@ -1,1 +1,89 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+*.pdb
+*.cache
+*.log
+*.sqlite3
+*.db
+*.sqlite
+.Python
+env/
+venv/
+.venv/
+__pypackages__/
+pyvenv.cfg
+
+# Virtual environment
+.venv/
+
+# Testing
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.coverage
+coverage.xml
+
+# Packaging
+build/
+dist/
+sdist/
+*.egg-info/
+.eggs/
+.installed.cfg
+*.egg
+
+# PyCharm / IntelliJ
+.idea/
+
+# VS Code
+.vscode/
+
+# MacOS
 .DS_Store
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Logs
+logs/
+*.log
+
+# Misc
+*.swp
+*~
+
+# FastAPI / project folders
+fastapi/__pycache__/
+fastapi/*.py[cod]
+
+# Docker
+docker-compose.override.yml
+
+# Local generated files
+migrations/versions/__pycache__/
+
+# Local stubs
+wallet_stub/
+user_stub/
+
+rasa/.rasa/
+rasa/models/
+
+# Config machine-locale (Rasa/Keras, generee automatiquement, pas du projet)
+rasa/.config/
+rasa/.keras/
+
+# Frontend (module independant, voir frontend/README le cas echeant)
+frontend/
+
+# Artefacts de developpement / experimentation (non necessaires en prod)
+scratchpad/
+rasa/results/
+rasa/experiment/

@@ -1,0 +1,211 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1500 1320" font-family="-apple-system, 'Segoe UI', Arial, sans-serif">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" class="arrowhead"/>
+    </marker>
+    <marker id="arrowFaq" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#3763c9"/>
+    </marker>
+    <marker id="arrowDiag" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#157b74"/>
+    </marker>
+    <marker id="arrowRecl" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#b3591b"/>
+    </marker>
+  </defs>
+
+  <style>
+    :root {
+      --bg: #f6f7f6; --panel: #ffffff; --border: #d7ddda; --text: #16211f; --dim: #5c6b65; --faint: #8a978f;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root { --bg: #10161a; --panel: #182226; --border: #2c383d; --text: #eaf1ef; --dim: #a9b8b3; --faint: #7c8c86; }
+    }
+    .bgrect { fill: var(--bg); }
+    .box { fill: var(--panel); stroke: var(--border); stroke-width: 1.4; }
+    .box-terminal { fill: var(--panel); stroke-dasharray: 5 4; stroke-width: 1.6; }
+    .box-header { fill: var(--panel); stroke: #157b74; stroke-width: 1.8; }
+    .title { fill: var(--text); font-weight: 700; }
+    .sub { fill: var(--dim); font-weight: 400; }
+    .faint { fill: var(--faint); font-weight: 600; letter-spacing: .04em; }
+    .mono { font-family: 'Cascadia Code','SF Mono',Consolas,ui-monospace,monospace; }
+    .arrowhead { fill: var(--faint); }
+    .connector { stroke: var(--faint); stroke-width: 1.6; fill: none; }
+    .lane-faq { stroke: #3763c9; }
+    .lane-diag { stroke: #157b74; }
+    .lane-recl { stroke: #b3591b; }
+    .fill-faq { fill: rgba(55,99,201,0.08); }
+    .fill-diag { fill: rgba(21,123,116,0.08); }
+    .fill-recl { fill: rgba(179,89,27,0.08); }
+    .label-faq { fill: #3763c9; font-weight: 700; }
+    .label-diag { fill: #157b74; font-weight: 700; }
+    .label-recl { fill: #b3591b; font-weight: 700; }
+    .edgelabel { fill: var(--dim); font-weight: 600; }
+  </style>
+
+  <rect class="bgrect" x="0" y="0" width="1500" height="1320"/>
+
+  <!-- Title -->
+  <text x="40" y="34" class="title" font-size="19">Workflows après classification NLU — FAQ · Diagnostic · Réclamation</text>
+
+  <!-- Legend -->
+  <g font-size="12" class="sub">
+    <rect x="1130" y="12" width="10" height="10" rx="2" fill="#3763c9"/>
+    <text x="1146" y="21">FAQ</text>
+    <rect x="1210" y="12" width="10" height="10" rx="2" fill="#157b74"/>
+    <text x="1226" y="21">Diagnostic</text>
+    <rect x="1320" y="12" width="10" height="10" rx="2" fill="#b3591b"/>
+    <text x="1336" y="21">Réclamation</text>
+  </g>
+
+  <!-- Header nodes -->
+  <rect x="580" y="48" width="340" height="48" rx="9" class="box"/>
+  <text x="750" y="77" text-anchor="middle" class="title" font-size="14">Message utilisateur</text>
+
+  <line x1="750" y1="96" x2="750" y2="128" class="connector" marker-end="url(#arrow)"/>
+
+  <rect x="560" y="128" width="380" height="48" rx="9" class="box-header"/>
+  <text x="750" y="157" text-anchor="middle" class="title" font-size="14">Classification NLU (intent)</text>
+
+  <!-- Fan-out lines to 3 lanes -->
+  <path d="M750,176 C750,210 250,210 250,246" class="connector" marker-end="url(#arrowFaq)"/>
+  <path d="M750,176 C750,210 730,210 730,246" class="connector" marker-end="url(#arrowDiag)"/>
+  <path d="M750,176 C750,210 1210,210 1210,246" class="connector" marker-end="url(#arrowRecl)"/>
+
+  <!-- ============ FAQ LANE (x=40..460, center 250) ============ -->
+  <text x="250" y="232" text-anchor="middle" class="faint" font-size="11">FAQ</text>
+
+  <rect x="60" y="246" width="380" height="50" rx="8" class="box"/>
+  <text x="250" y="266" text-anchor="middle" class="title mono" font-size="13">intent : ask_faq</text>
+  <text x="250" y="283" text-anchor="middle" class="sub" font-size="11">règle « FAQ semantic search »</text>
+
+  <line x1="250" y1="296" x2="250" y2="326" class="connector" marker-end="url(#arrowFaq)"/>
+
+  <rect x="60" y="326" width="380" height="50" rx="8" class="box"/>
+  <text x="250" y="356" text-anchor="middle" class="title mono" font-size="13">action_faq_search</text>
+
+  <line x1="250" y1="376" x2="250" y2="406" class="connector" marker-end="url(#arrowFaq)"/>
+
+  <rect x="52" y="406" width="396" height="80" rx="10" class="box lane-faq fill-faq" stroke-width="2"/>
+  <text x="250" y="434" text-anchor="middle" class="label-faq" font-size="14">Recherche sémantique (embeddings)</text>
+  <text x="250" y="454" text-anchor="middle" class="sub mono" font-size="12">POST /faq/search</text>
+  <text x="250" y="472" text-anchor="middle" class="sub" font-size="11">le message brut EST la requête — rien à extraire</text>
+
+  <line x1="250" y1="486" x2="250" y2="516" class="connector" marker-end="url(#arrowFaq)"/>
+
+  <rect x="52" y="516" width="396" height="96" rx="10" class="box-terminal lane-faq"/>
+  <text x="250" y="540" text-anchor="middle" class="title" font-size="12.5">Réponse terminale</text>
+  <text x="250" y="560" text-anchor="middle" class="sub" font-size="11">réponse trouvée → affichée avec la question reconnue</text>
+  <text x="250" y="577" text-anchor="middle" class="sub" font-size="11">aucune réponse → message d'excuse</text>
+  <text x="250" y="594" text-anchor="middle" class="sub" font-size="11">service indisponible → message d'erreur</text>
+
+  <text x="250" y="636" text-anchor="middle" class="faint" font-size="10.5">conversation libre ensuite — aucun slot modifié</text>
+
+  <!-- ============ DIAGNOSTIC LANE (x=500..960, center 730) ============ -->
+  <text x="730" y="232" text-anchor="middle" class="faint" font-size="11">DIAGNOSTIC</text>
+
+  <rect x="520" y="246" width="420" height="50" rx="8" class="box"/>
+  <text x="730" y="266" text-anchor="middle" class="title mono" font-size="13">intent : diagnostic</text>
+  <text x="730" y="283" text-anchor="middle" class="sub" font-size="10.5">(ou nlu_fallback/deny/affirm si un champ est déjà en attente)</text>
+
+  <line x1="730" y1="296" x2="730" y2="326" class="connector" marker-end="url(#arrowDiag)"/>
+
+  <rect x="520" y="326" width="420" height="50" rx="8" class="box"/>
+  <text x="730" y="356" text-anchor="middle" class="title mono" font-size="13">action_run_diagnostic_step</text>
+
+  <line x1="730" y1="376" x2="730" y2="406" class="connector" marker-end="url(#arrowDiag)"/>
+
+  <rect x="520" y="406" width="420" height="60" rx="8" class="box lane-diag fill-diag"/>
+  <text x="730" y="430" text-anchor="middle" class="label-diag" font-size="13">1 · Classification hybride</text>
+  <text x="730" y="448" text-anchor="middle" class="sub" font-size="11">embeddings, départagés par mots-clés si trop proches</text>
+
+  <line x1="730" y1="466" x2="730" y2="496" class="connector" marker-end="url(#arrowDiag)"/>
+
+  <rect x="520" y="496" width="420" height="76" rx="8" class="box"/>
+  <text x="730" y="518" text-anchor="middle" class="title" font-size="12.5">2 · Verrouillage ou clarification</text>
+  <text x="730" y="537" text-anchor="middle" class="sub" font-size="10.5">net → verrouillé · ambigu → priority_choice</text>
+  <text x="730" y="553" text-anchor="middle" class="sub" font-size="10.5">rien → service_narrowing → description libre</text>
+
+  <line x1="730" y1="572" x2="730" y2="602" class="connector" marker-end="url(#arrowDiag)"/>
+
+  <rect x="520" y="602" width="420" height="50" rx="8" class="box"/>
+  <text x="730" y="632" text-anchor="middle" class="title" font-size="12.5">3 · Collecte des champs requis</text>
+
+  <line x1="730" y1="652" x2="730" y2="682" class="connector" marker-end="url(#arrowDiag)"/>
+
+  <rect x="520" y="682" width="420" height="60" rx="8" class="box" stroke="#a97218" stroke-width="1.8"/>
+  <text x="730" y="706" text-anchor="middle" font-size="13" font-weight="700" fill="#a97218">Changement de sujet détecté ?</text>
+  <text x="730" y="724" text-anchor="middle" class="sub" font-size="11">suspend, demande de confirmation</text>
+
+  <line x1="730" y1="742" x2="730" y2="772" class="connector" marker-end="url(#arrowDiag)"/>
+
+  <rect x="520" y="772" width="420" height="50" rx="8" class="box"/>
+  <text x="730" y="802" text-anchor="middle" class="title" font-size="12.5">4 · Récapitulatif + confirmation (oui/non)</text>
+
+  <line x1="730" y1="822" x2="730" y2="852" class="connector" marker-end="url(#arrowDiag)"/>
+
+  <rect x="520" y="852" width="420" height="60" rx="8" class="box lane-diag fill-diag"/>
+  <text x="730" y="876" text-anchor="middle" class="label-diag" font-size="13">5 · POST /diagnostic/resolve</text>
+  <text x="730" y="894" text-anchor="middle" class="sub" font-size="11">disjoncteur + timeout + audit persistant</text>
+
+  <line x1="730" y1="912" x2="730" y2="942" class="connector" marker-end="url(#arrowDiag)"/>
+
+  <rect x="520" y="942" width="420" height="60" rx="10" class="box-terminal lane-diag"/>
+  <text x="730" y="967" text-anchor="middle" class="title" font-size="12.5">RESOLVED · NEED_MORE_INFO · ESCALATE</text>
+  <text x="730" y="985" text-anchor="middle" class="sub" font-size="10.5">résolu = réponse finale · info manquante = retour à l'étape 3</text>
+
+  <!-- loop back NEED_MORE_INFO -->
+  <path d="M940,972 C992,972 992,627 940,627" class="connector" fill="none" stroke-dasharray="3 3" marker-end="url(#arrowDiag)"/>
+  <text x="990" y="800" text-anchor="middle" class="edgelabel mono" font-size="10" transform="rotate(90 990 800)">NEED_MORE_INFO</text>
+
+  <!-- escalate -> ticket -->
+  <line x1="820" y1="1002" x2="870" y2="1150" class="connector" marker-end="url(#arrowDiag)"/>
+  <text x="878" y="1075" class="edgelabel" font-size="11">ESCALATE + oui</text>
+
+  <!-- ============ RÉCLAMATION LANE (x=1000..1420, center 1210) ============ -->
+  <text x="1210" y="232" text-anchor="middle" class="faint" font-size="11">RÉCLAMATION</text>
+
+  <rect x="1020" y="246" width="380" height="50" rx="8" class="box"/>
+  <text x="1210" y="266" text-anchor="middle" class="title mono" font-size="13">intent : create_reclamation</text>
+
+  <line x1="1210" y1="296" x2="1210" y2="326" class="connector" marker-end="url(#arrowRecl)"/>
+
+  <rect x="1020" y="326" width="380" height="50" rx="8" class="box"/>
+  <text x="1210" y="349" text-anchor="middle" class="title mono" font-size="12.5">action_start_reclamation</text>
+  <text x="1210" y="366" text-anchor="middle" class="sub" font-size="10">vérifie l'intention courante (anti-relance)</text>
+
+  <line x1="1210" y1="376" x2="1210" y2="406" class="connector" marker-end="url(#arrowRecl)"/>
+
+  <rect x="1012" y="406" width="396" height="76" rx="8" class="box lane-recl fill-recl"/>
+  <text x="1210" y="430" text-anchor="middle" class="label-recl mono" font-size="13">reclamation_form</text>
+  <text x="1210" y="449" text-anchor="middle" class="sub" font-size="10.5">category · description · urgency</text>
+  <text x="1210" y="465" text-anchor="middle" class="sub" font-size="10.5">incident_date — chacun validé</text>
+
+  <line x1="1210" y1="482" x2="1210" y2="512" class="connector" marker-end="url(#arrowRecl)"/>
+
+  <rect x="1020" y="512" width="380" height="50" rx="8" class="box"/>
+  <text x="1210" y="542" text-anchor="middle" class="title" font-size="12.5">Extraction + résumé automatique</text>
+
+  <line x1="1210" y1="562" x2="1210" y2="592" class="connector" marker-end="url(#arrowRecl)"/>
+
+  <rect x="1020" y="592" width="380" height="50" rx="8" class="box"/>
+  <text x="1210" y="622" text-anchor="middle" class="title" font-size="12.5">Confirmation (oui/non)</text>
+
+  <line x1="1210" y1="642" x2="1210" y2="672" class="connector" marker-end="url(#arrowRecl)"/>
+
+  <rect x="1012" y="672" width="396" height="60" rx="10" class="box-terminal lane-recl"/>
+  <text x="1210" y="698" text-anchor="middle" class="title" font-size="12.5">oui → ticket · non → annulé</text>
+  <text x="1210" y="716" text-anchor="middle" class="sub" font-size="10.5">utter_reclamation_cancelled si refus</text>
+
+  <line x1="1160" y1="732" x2="1060" y2="1150" class="connector" marker-end="url(#arrowRecl)"/>
+  <text x="1055" y="950" class="edgelabel" font-size="11">oui</text>
+
+  <!-- ============ SHARED TICKET NODE ============ -->
+  <rect x="700" y="1150" width="380" height="94" rx="10" class="box" stroke="#157b74" stroke-width="2"/>
+  <text x="890" y="1178" text-anchor="middle" class="title mono" font-size="14">action_create_ticket</text>
+  <text x="890" y="1198" text-anchor="middle" class="sub mono" font-size="11">POST /tickets/create → complaints.complaints</text>
+  <text x="890" y="1216" text-anchor="middle" class="sub" font-size="10.5">ticket_source distingue l'origine :</text>
+  <text x="890" y="1233" text-anchor="middle" class="sub mono" font-size="10">user_diagnostic_escalation · user_reclamation_form</text>
+
+  <text x="750" y="1290" text-anchor="middle" class="faint" font-size="11">FAQ ne rejoint jamais ce chemin — c'est le seul des trois workflows qui ne peut pas produire de ticket.</text>
+</svg>

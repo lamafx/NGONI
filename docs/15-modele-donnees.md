@@ -49,6 +49,7 @@ erDiagram
         text category
         text status
         text created_by
+        text updated_by
         jsonb context
     }
     feedback_entries {
@@ -151,7 +152,6 @@ CREATE TABLE complaints.complaints (
     description TEXT NOT NULL,
     summary TEXT,
     urgency TEXT NOT NULL DEFAULT 'medium',
-    status TEXT NOT NULL DEFAULT 'OPEN',
     order_number TEXT,
     incident_date TEXT,
     department TEXT,
@@ -163,8 +163,18 @@ CREATE TABLE complaints.complaints (
             'user_reclamation_form', 'user_diagnostic_escalation',
             'ai_auto_escalation', 'ai_feedback_ticket'
         )),
+    -- Cycle de vie (voir migrations/0008_complaints_status_lifecycle.sql) :
+    -- OPEN -> IN_PROGRESS -> RESOLVED / CLOSED, pas de machine a etats
+    -- stricte (OPEN -> CLOSED directement reste autorise).
+    status TEXT NOT NULL DEFAULT 'OPEN'
+        CONSTRAINT chk_complaints_status
+        CHECK (status IN ('OPEN', 'IN_PROGRESS', 'RESOLVED', 'CLOSED')),
+    -- Admin ayant modifie le ticket en dernier (X-User-ID, voir
+    -- app/shared/admin_auth.py::get_admin_id) -- distinct de
+    -- audit.agent_actions (§15.6), reserve aux decisions autonomes de l'IA.
+    updated_by TEXT,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT now()   -- onupdate automatique (voir models.py)
 );
 ```
 
@@ -174,7 +184,11 @@ utilisateur, escalade automatique du Diagnostic Engine, ou ticket créé à
 partir d'un feedback (`suggestion`/`plainte`). `context` porte le contexte
 libre transmis par l'appelant (ex. `service`/`problem`/`entities` d'une
 escalade diagnostique) — jamais relu ni interprété côté SQL, uniquement pour
-consultation humaine.
+consultation humaine. `status`/`updated_by` alimentent la première route
+admin du projet (`PATCH /admin/complaints/{ticket_id}`, voir
+[6.3](06-api-reference.md#gestion-admin-des-tickets--admincomplaints)) —
+`updated_by` reste `NULL` tant qu'aucun admin n'a jamais modifié le ticket
+depuis sa création.
 
 ## 15.4 Schéma `feedback` — suggestions, plaintes, notations
 

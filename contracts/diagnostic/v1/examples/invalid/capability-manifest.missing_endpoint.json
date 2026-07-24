@@ -1,0 +1,15 @@
+{
+  "service": "wallet",
+  "manifest_version": "1.0.0",
+  "base_url": "http://wallet-service.internal/api/v1",
+  "protocol": "REST",
+  "problems": [
+    {
+      "id": "withdrawal_pending",
+      "label": "Retrait bloque ou en attente",
+      "required_fields": [
+        { "name": "transaction_reference", "type": "string" }
+      ]
+    }
+  ]
+}

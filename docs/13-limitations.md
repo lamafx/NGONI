@@ -26,9 +26,16 @@ fermée par défaut si `ADMIN_INTERNAL_SECRET` n'est pas configuré) et
 même patron que `assertInternalAuth`/`getAdminId` de `ngoni-core-service`.
 Introduit **avant** la première route admin plutôt qu'ajouté après coup, un
 avertissement au démarrage du moteur (`main.py::startup`) signale si le
-secret n'est pas configuré. Aucune route admin n'existe encore à ce jour —
-ce socle n'élimine donc pas la limitation ci-dessus, il évite seulement
-qu'une future route admin soit écrite sans protection dès le départ.
+secret n'est pas configuré.
+
+**Première route admin** : `/admin/complaints` (gestion des tickets —
+lister, consulter, changer le statut), voir
+[6.3](06-api-reference.md#gestion-admin-des-tickets--admincomplaints) et
+[15.3](15-modele-donnees.md#153-schéma-complaints--tickets). Protégée par
+`require_admin_auth` dès son introduction. Le reste du périmètre (FAQ,
+diagnostic, feedback, Rasa) reste sans authentification — cette limitation
+n'est donc levée que pour la gestion des tickets, pas pour l'ensemble de
+l'assistant.
 **Pas** une recommandation pour la production.
 
 ## 13.2 Absence de chiffrement des échanges

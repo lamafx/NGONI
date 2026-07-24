@@ -1,0 +1,9 @@
+{
+  "session_id": "b3a1f9e0-6e2a-4b3a-9c3a-1f2e3d4c5b6a",
+  "trace_id": "9f8e7d6c-5b4a-3c2d-1e0f-a1b2c3d4e5f6",
+  "user_id": "usr_123",
+  "problem_id": "withdrawal_pending",
+  "entities": {
+    "transaction_reference": "WITHDRAW-abc123"
+  }
+}

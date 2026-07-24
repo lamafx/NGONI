@@ -1,0 +1,4 @@
+{
+  "outcome": "NEED_MORE_INFO",
+  "missing_fields": ["transaction_reference"]
+}

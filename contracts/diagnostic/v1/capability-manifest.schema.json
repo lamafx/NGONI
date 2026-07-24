@@ -1,0 +1,179 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.ngoni.internal/diagnostic/v1/capability-manifest.schema.json",
+  "title": "CapabilityManifest",
+  "description": "Auto-description qu'un microservice doit exposer sur GET /diagnostic/manifest pour etre decouvert par le Capability Registry du Diagnostic Engine. C'est le seul mecanisme par lequel le Engine apprend l'existence d'un service ou d'un probleme diagnosticable.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["service", "manifest_version", "base_url", "protocol", "problems"],
+  "properties": {
+    "service": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "description": "Nom logique et unique du microservice (ex: 'wallet'). Sert de premiere partie de la cle de routage (service, problem_id) dans le Registry."
+    },
+    "manifest_version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "description": "Version semantique (SemVer) du manifeste lui-meme, independante de la version de l'API metier du service. Voir contracts/diagnostic/README.md pour la politique de compatibilite."
+    },
+    "base_url": {
+      "type": "string",
+      "format": "uri",
+      "description": "URL interne de base du service, a laquelle sont concatenes les 'path' de chaque probleme."
+    },
+    "protocol": {
+      "type": "string",
+      "enum": ["REST", "GRPC"],
+      "description": "Protocole utilise pour invoquer les endpoints de diagnostic de ce service. Determine quel Adapter le Diagnostic Engine doit selectionner."
+    },
+    "problems": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/problemDefinition" }
+    }
+  },
+  "$defs": {
+    "fieldSpec": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "type"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["string", "number", "boolean", "datetime"]
+        },
+        "description": {
+          "type": "string",
+          "description": "Texte d'aide reutilisable par le Dialogue Manager pour formuler la question posee a l'utilisateur."
+        }
+      }
+    },
+    "resolutionCause": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "action"],
+      "properties": {
+        "code": {
+          "type": "string",
+          "pattern": "^[A-Z][A-Z0-9_]*$",
+          "description": "Code metier interne au service, documentaire uniquement (jamais evalue par le Diagnostic Engine)."
+        },
+        "action": {
+          "type": "string",
+          "description": "Etiquette de l'action de resolution associee, a but documentaire/analytics."
+        }
+      }
+    },
+    "problemDefinition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "label", "endpoint", "required_fields"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "description": "Identifiant unique du probleme au sein de ce service (ex: 'withdrawal_pending'). Seconde partie de la cle de routage (service, problem_id)."
+        },
+        "label": {
+          "type": "string",
+          "description": "Libelle humain, utilisable dans les interfaces d'administration/monitoring."
+        },
+        "description": {
+          "type": "string",
+          "description": "Description en langage naturel du probleme (une ou deux phrases), utilisee par le Dialogue Manager pour le matching semantique par embeddings via GET /diagnostic/capabilities. Optionnelle : a defaut, le label sert de texte a vectoriser."
+        },
+        "example_phrases": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": [],
+          "description": "Formulations alternatives, plus proches de la maniere dont un utilisateur reel decrit le probleme, qu'une description formelle unique. Chacune est vectorisee separement ; le Dialogue Manager retient le meilleur score parmi description + example_phrases. Optionnel, purement additif."
+        },
+        "keywords": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": [],
+          "description": "Mots-cles indicatifs pour l'entrainement NLU, purement informatifs pour le Diagnostic Engine."
+        },
+        "endpoint": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["method", "path"],
+          "properties": {
+            "method": { "type": "string", "enum": ["POST"] },
+            "path": {
+              "type": "string",
+              "pattern": "^/diagnostic/.+",
+              "description": "Chemin relatif a base_url, conforme a la convention documentee dans contracts/diagnostic/README.md."
+            }
+          }
+        },
+        "required_fields": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/fieldSpec" },
+          "description": "Champs sans lesquels le Diagnostic Engine refuse d'invoquer l'endpoint (NEED_MORE_INFO renvoye au client)."
+        },
+        "optional_fields": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/fieldSpec" },
+          "default": []
+        },
+        "fallback_fields": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/fieldSpec" },
+          "default": [],
+          "description": "Groupe de repli utilisable A LA PLACE de required_fields quand l'utilisateur ne peut pas fournir un des champs requis (ex: pas de reference de transaction, mais date + montant). Optionnel : vide par defaut, aucun repli."
+        },
+        "resolution_causes": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/resolutionCause" },
+          "default": [],
+          "description": "Documentation des causes de resolution connues. Metadonnee, jamais executee par le Diagnostic Engine."
+        },
+        "escalation_causes": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": [],
+          "description": "Documentation des codes d'escalade connus. Metadonnee, jamais evaluee par le Diagnostic Engine."
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "service": "wallet",
+      "manifest_version": "1.0.0",
+      "base_url": "http://wallet-service.internal/api/v1",
+      "protocol": "REST",
+      "problems": [
+        {
+          "id": "withdrawal_pending",
+          "label": "Retrait bloque ou en attente",
+          "keywords": ["retrait", "withdrawal", "bloque", "argent pas recu"],
+          "endpoint": { "method": "POST", "path": "/diagnostic/withdrawal" },
+          "required_fields": [
+            { "name": "transaction_reference", "type": "string", "description": "Reference du retrait, ex: WITHDRAW-xxxx" }
+          ],
+          "optional_fields": [
+            { "name": "amount", "type": "number" },
+            { "name": "currency", "type": "string" },
+            { "name": "operator", "type": "string" }
+          ],
+          "resolution_causes": [
+            { "code": "KYC_REQUIRED", "action": "redirect_kyc" },
+            { "code": "LIMIT_EXCEEDED", "action": "inform_limit" },
+            { "code": "PENDING_WITHIN_SLA", "action": "reassure_wait" }
+          ],
+          "escalation_causes": [
+            "PENDING_BEYOND_SLA_NO_PROVIDER_RESPONSE",
+            "PAYOUT_FAILED_NO_REFUND_TRACE"
+          ]
+        }
+      ]
+    }
+  ]
+}

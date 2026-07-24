@@ -1,0 +1,121 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.ngoni.internal/diagnostic/v1/service-invocation-response.schema.json",
+  "title": "DiagnosticInvocationResponse",
+  "description": "Enveloppe de reponse standard que TOUT microservice diagnosticable doit renvoyer depuis sa route POST /diagnostic/{problem_id}. Une reponse valide correspond a exactement une des 3 formes definies dans oneOf, discriminees par le champ 'outcome'. Le Diagnostic Engine ne sait interpreter que ces 3 formes et aucune autre.",
+  "type": "object",
+  "oneOf": [
+    { "$ref": "#/$defs/resolved" },
+    { "$ref": "#/$defs/escalate" },
+    { "$ref": "#/$defs/needMoreInfo" }
+  ],
+  "$defs": {
+    "resolved": {
+      "title": "Resolved",
+      "description": "Le microservice a resolu le probleme lui-meme ; aucune escalade n'est necessaire.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["outcome", "message", "resolution_code"],
+      "properties": {
+        "outcome": { "const": "RESOLVED" },
+        "message": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Message final, deja redige et pret a etre affiche a l'utilisateur par le chatbot."
+        },
+        "resolution_code": {
+          "type": "string",
+          "pattern": "^[A-Z][A-Z0-9_]*$",
+          "description": "Code machine identifiant la cause resolue (ex: TOPUP_SETTLED_ON_DEMAND), utilise pour les metriques/analytics, jamais interprete par le Diagnostic Engine."
+        },
+        "data": {
+          "type": "object",
+          "description": "Donnees additionnelles optionnelles utiles au front (ex: nouveau solde).",
+          "additionalProperties": true
+        }
+      }
+    },
+    "escalate": {
+      "title": "Escalate",
+      "description": "Le microservice ne peut pas resoudre le probleme et fournit un payload de ticket pret a l'emploi.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["outcome", "message", "escalation_reason", "escalation_payload"],
+      "properties": {
+        "outcome": { "const": "ESCALATE" },
+        "message": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Message d'attente/transition affiche a l'utilisateur avant la creation du ticket."
+        },
+        "escalation_reason": {
+          "type": "string",
+          "pattern": "^[A-Z][A-Z0-9_]*$",
+          "description": "Code machine identifiant la cause d'escalade (ex: PENDING_BEYOND_SLA_NO_PROVIDER_RESPONSE)."
+        },
+        "escalation_payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["category", "urgency", "context"],
+          "properties": {
+            "category": {
+              "type": "string",
+              "description": "Categorie de reclamation compatible avec l'API de creation de ticket existante."
+            },
+            "urgency": {
+              "type": "string",
+              "enum": ["low", "medium", "high"]
+            },
+            "context": {
+              "type": "object",
+              "description": "Bloc libre contenant toutes les informations techniques utiles a l'equipe support (references de transaction, etats, delais...). Le Diagnostic Engine le transmet tel quel, sans jamais en connaitre la structure interne.",
+              "additionalProperties": true
+            }
+          }
+        }
+      }
+    },
+    "needMoreInfo": {
+      "title": "NeedMoreInfo",
+      "description": "Filet de securite : le microservice constate qu'il lui manque une information malgre la validation des champs obligatoires effectuee par le Diagnostic Engine (ex: incoherence detectee en cours de traitement).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["outcome", "missing_fields"],
+      "properties": {
+        "outcome": { "const": "NEED_MORE_INFO" },
+        "missing_fields": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "outcome": "RESOLVED",
+      "message": "Votre recharge de 5000 FCFA vient d'etre creditee a l'instant.",
+      "resolution_code": "TOPUP_SETTLED_ON_DEMAND",
+      "data": { "new_balance": 15000, "currency": "XOF" }
+    },
+    {
+      "outcome": "ESCALATE",
+      "message": "Je transmets cela a notre equipe technique.",
+      "escalation_reason": "PENDING_BEYOND_SLA_NO_PROVIDER_RESPONSE",
+      "escalation_payload": {
+        "category": "Wallet",
+        "urgency": "high",
+        "context": {
+          "transaction_reference": "WITHDRAW-abc123",
+          "status": "PENDING",
+          "age_minutes": 187,
+          "provider_transaction_id": null
+        }
+      }
+    },
+    {
+      "outcome": "NEED_MORE_INFO",
+      "missing_fields": ["transaction_reference"]
+    }
+  ]
+}

@@ -183,6 +183,39 @@ Si aucune correspondance ne dépasse le seuil de similarité configuré
 
 - **Réponse `200`** : `TicketCreateResponse` — `{ "ticket_id": "CMP-20260717-3F9A2B1C", "status": "open", "message": "..." }`
 
+### Gestion admin des tickets — `/admin/complaints`
+
+> **Protégé.** Tout le routeur exige le header `X-Internal-Secret` (valeur
+> `ADMIN_INTERNAL_SECRET`, voir [9. Configuration](09-configuration.md)) —
+> première route de ce périmètre à ne **pas** suivre la politique
+> "aucune authentification" décrite en tête de ce chapitre (voir
+> [13.1](13-limitations.md#131-absence-dauthentification-et-dautorisation)).
+> `401` si le secret est absent/incorrect ou non configuré côté serveur.
+
+| Méthode | Route | Description |
+|---|---|---|
+| `GET` | `/admin/complaints/?status=&category=&urgency=&created_by=&limit=&offset=` | Liste paginée (`limit` 1-200, défaut 50), filtres optionnels, triée par date de création décroissante. |
+| `GET` | `/admin/complaints/{ticket_id}` | Détail d'un ticket, `404` si introuvable. |
+| `PATCH` | `/admin/complaints/{ticket_id}` | Change le statut. Corps `{ "status": string }`. |
+
+- **Cycle de statuts** : `OPEN` (défaut à la création) → `IN_PROGRESS` →
+  `RESOLVED` / `CLOSED` — pas de machine à états stricte (`OPEN` → `CLOSED`
+  directement reste autorisé). `400` si `status` n'appartient pas à cet
+  ensemble.
+- **En-tête `X-User-ID`** (optionnel) : identité de l'admin appelant,
+  persistée dans `updated_by` à chaque `PATCH` — traçabilité humaine,
+  distincte de `audit.agent_actions` (réservé aux décisions autonomes de
+  l'IA, voir [6.7](#67-fastapi--traçabilité-des-actions-autonomes-audit)).
+
+```json
+// PATCH /admin/complaints/CMP-20260717-820E0A92
+// Header: X-Internal-Secret: <secret>, X-User-ID: admin-1
+{ "status": "IN_PROGRESS" }
+
+// Réponse 200
+{ "ticket_id": "CMP-20260717-820E0A92", "status": "IN_PROGRESS", "updated_by": "admin-1", "...": "..." }
+```
+
 ## 6.4 FastAPI — Feedback (`/feedback`)
 
 | Méthode | Route | Description |

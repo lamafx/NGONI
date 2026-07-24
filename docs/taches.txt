@@ -1,0 +1,28 @@
+À faire, par priorité
+P0 — le plus important
+
+Décider du sort de l'expérimentation CamemBERT (résultats déjà connus, à remesurer sur test_nlu_adversarial.yml avant décision finale) : adopter (fixer les dépendances dans rasa/Dockerfile, réduire le déséquilibre 387 diagnostic vs 210 ask_faq, envisager distilbert) ou abandonner formellement.
+Réentraîner et redéployer le modèle Rasa avec les changements déjà prêts (rules.yml/nlu.yml/domain.yml), puis revalider avec le corpus adversarial — un changement de données peut régresser d'autres intentions sans lien apparent (déjà vécu le 16 juillet, -2,4 pt puis -2,2 pt).
+Remplacer/compléter tests/test_nlu.yml (trop proche du style d'entraînement, 99,85 % illusoire) par un corpus indépendant permanent en CI.
+P1
+4. Recréer/reseeder core.faq_items — bloque la 2ᵉ compétence la plus importante et tout le reste de cette liste FAQ.
+5. Une fois la table FAQ rétablie : script de bouclage feedback hebdomadaire (audit.agent_actions + feedback.response_ratings, tous deux à 0 ligne aujourd'hui).
+6. Recalibrer DEFAULT_THRESHOLD FAQ (0,85) sur un corpus plus large que les 15+10 d'origine.
+7. Recherche hybride lexicale + sémantique (colonne keywords, en base mais jamais lue).
+8. Étendre find_closest à un Top-3 avec un second seuil ("vouliez-vous dire...").
+9. Dédupliquer le catalogue FAQ (5 doublons connus) + garde-fou anti-doublon à l'écriture.
+10. Détection de message composite (FAQ générale + incident concret dans le même message).
+11. Remesurer ask_complaint_status après réentraînement (0 % de rappel constaté, correctif de données déjà écrit mais pas encore actif).
+
+P2
+12. Gestion dédiée des messages courts/elliptiques (< 3 mots).
+13. Index ivfflat/hnsw sur les embeddings FAQ (prématuré à 31 lignes, à planifier).
+14. Non-régression automatisée FAQ (test_faq_*.py inexistant).
+15. Corriger ou documenter le service fastapi mort dans docker-compose.yml.
+16. Sécurisation avant production (authentification, HTTPS, rate limiting, gestion des secrets).
+17. CI/CD (validation JSON Schema des contrats, rasa test/pytest automatisés).
+18. Tableau de bord agent humain pour les tickets.
+19. Support multilingue.
+
+Travail arrêté comme demandé — tout est en l'état, rien de plus ne sera modifié.
+

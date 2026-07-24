@@ -1,0 +1,69 @@
+language: fr
+
+# Experience 2026-07-22 : remplace le CountVectorsFeaturizer word-level (bag-of-
+# mots) par un LanguageModelFeaturizer (CamemBERT), au lieu de l'ajouter en
+# complement comme dans l'essai precedent (rasa/models/experiments/
+# faq-diagnostic-embedding-v1.tar.gz, +1.2pt seulement sur le corpus
+# adversarial). Hypothese : le bag-of-mots word-level est la source directe
+# de la collision ask_faq/diagnostic (deux phrases qui partagent le mot
+# "retrait" sont proches pour ce featurizer, quelle que soit leur structure
+# grammaticale). Le char_wb est conserve seul pour la tolerance aux fautes de
+# frappe (role different, pas concerne par cette collision).
+# Ne remplace PAS config.yml : fichier de config alternatif pour comparaison
+# controlee, entraine et teste separement.
+
+pipeline:
+- name: WhitespaceTokenizer
+
+- name: RegexFeaturizer
+
+- name: LexicalSyntacticFeaturizer
+
+- name: LanguageModelFeaturizer
+  model_name: camembert
+  model_weights: camembert-base
+
+# char_wb capture des fragments de mots (sous-chaines) plutot que des mots
+# entiers : c'est ce qui permet de reconnaitre "retra" comme proche de
+# "retrait", ou "mon compt es bloké" comme proche de "mon compte est bloqué",
+# meme si le mot exact n'a jamais ete vu tel quel a l'entrainement.
+# min_ngram=2 (au lieu de 3) capture aussi les tres courtes fautes (2 lettres).
+- name: CountVectorsFeaturizer
+  analyzer: char_wb
+  min_ngram: 2
+  max_ngram: 4
+
+- name: DIETClassifier
+  epochs: 80
+  constrain_similarities: true
+  model_confidence: softmax
+  number_of_transformer_layers: 2
+  transformer_size: 256
+  weight_sparsity: 0.8
+  batch_size: 64
+  learning_rate: 0.001
+
+- name: EntitySynonymMapper
+
+- name: ResponseSelector
+
+- name: components.vocabulary_guard.VocabularyCoverageGuard
+
+- name: FallbackClassifier
+  threshold: 0.6
+  ambiguity_threshold: 0.1
+
+assistant_id: 20260630-224717-muted-inertia
+policies:
+  - name: MemoizationPolicy
+  - name: RulePolicy
+    core_fallback_threshold: 0.4
+    core_fallback_action_name: action_default_fallback
+    enable_fallback_prediction: true
+  - name: UnexpecTEDIntentPolicy
+    max_history: 5
+    epochs: 100
+  - name: TEDPolicy
+    max_history: 5
+    epochs: 100
+    constrain_similarities: true

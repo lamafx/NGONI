@@ -1,0 +1,70 @@
+{
+  "service": "wallet",
+  "manifest_version": "1.0.0",
+  "base_url": "http://wallet-service.internal/api/v1",
+  "protocol": "REST",
+  "problems": [
+    {
+      "id": "withdrawal_pending",
+      "label": "Retrait bloque ou en attente",
+      "keywords": ["retrait", "withdrawal", "bloque", "argent pas recu"],
+      "endpoint": { "method": "POST", "path": "/diagnostic/withdrawal" },
+      "required_fields": [
+        { "name": "transaction_reference", "type": "string", "description": "Reference du retrait, ex: WITHDRAW-xxxx" }
+      ],
+      "optional_fields": [
+        { "name": "amount", "type": "number" },
+        { "name": "currency", "type": "string" },
+        { "name": "operator", "type": "string" }
+      ],
+      "resolution_causes": [
+        { "code": "KYC_REQUIRED", "action": "redirect_kyc" },
+        { "code": "LIMIT_EXCEEDED", "action": "inform_limit" },
+        { "code": "PENDING_WITHIN_SLA", "action": "reassure_wait" }
+      ],
+      "escalation_causes": [
+        "PENDING_BEYOND_SLA_NO_PROVIDER_RESPONSE",
+        "PAYOUT_FAILED_NO_REFUND_TRACE"
+      ]
+    },
+    {
+      "id": "topup_not_credited",
+      "label": "Recharge non creditee",
+      "keywords": ["recharge", "topup", "solde", "credite"],
+      "endpoint": { "method": "POST", "path": "/diagnostic/topup" },
+      "required_fields": [
+        { "name": "amount", "type": "number" }
+      ],
+      "optional_fields": [
+        { "name": "operator", "type": "string" },
+        { "name": "occurred_at", "type": "datetime" }
+      ],
+      "resolution_causes": [
+        { "code": "PROCESSING_WITHIN_SLA", "action": "reassure_wait" },
+        { "code": "PROVIDER_REJECTED", "action": "inform_rejection" }
+      ],
+      "escalation_causes": [
+        "PROVIDER_CONFIRMS_SUCCESS_BUT_NOT_CREDITED"
+      ]
+    },
+    {
+      "id": "gift_not_received",
+      "label": "Cadeau envoye mais non recu",
+      "keywords": ["cadeau", "gift", "non recu"],
+      "endpoint": { "method": "POST", "path": "/diagnostic/gift" },
+      "required_fields": [
+        { "name": "gift_reference", "type": "string" }
+      ],
+      "optional_fields": [
+        { "name": "recipient_handle", "type": "string" }
+      ],
+      "resolution_causes": [
+        { "code": "PAIR_CONFIRMED", "action": "reassure_delivered" },
+        { "code": "INSUFFICIENT_COINS", "action": "inform_balance" }
+      ],
+      "escalation_causes": [
+        "SENT_WITHOUT_RECEIVED_PAIR"
+      ]
+    }
+  ]
+}

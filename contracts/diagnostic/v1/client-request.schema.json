@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.ngoni.internal/diagnostic/v1/client-request.schema.json",
+  "title": "DiagnosticResolveRequest",
+  "description": "Requete envoyee par le Dialogue Manager (Rasa) au Diagnostic Engine sur POST /diagnostic/resolve. Represente un probleme deja classifie et dont les entites obligatoires ont ete collectees.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["session_id", "service", "problem", "entities"],
+  "properties": {
+    "session_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Identifiant unique de la session de diagnostic en cours, genere et conserve cote Dialogue Manager pour toute la conversation."
+    },
+    "service": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "description": "Nom logique du microservice cible, identique au champ 'service' de son Capability Manifest (ex: 'wallet')."
+    },
+    "problem": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "description": "Identifiant du probleme diagnostique, identique a un 'id' de probleme declare dans le Capability Manifest du service (ex: 'withdrawal_pending')."
+    },
+    "entities": {
+      "type": "object",
+      "description": "Informations collectees aupres de l'utilisateur. Les cles doivent correspondre aux 'required_fields'/'optional_fields' declares par le service pour ce probleme. Le Diagnostic Engine ne valide que la presence des champs obligatoires, jamais leur sens metier.",
+      "additionalProperties": true
+    }
+  },
+  "examples": [
+    {
+      "session_id": "b3a1f9e0-6e2a-4b3a-9c3a-1f2e3d4c5b6a",
+      "service": "wallet",
+      "problem": "withdrawal_pending",
+      "entities": {
+        "transaction_reference": "WITHDRAW-abc123"
+      }
+    }
+  ]
+}

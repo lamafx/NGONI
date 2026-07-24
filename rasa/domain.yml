@@ -1,0 +1,620 @@
+version: "3.1"
+
+intents:
+  - ask_faq
+  - greet
+  - goodbye
+  - bot_challenge
+  - create_reclamation
+  - diagnostic
+  - affirm
+  - deny
+  - out_of_scope
+  - inappropriate_language
+  - suggestion
+  - plainte
+  - ask_capabilities
+  - rate_response_useful
+  - rate_response_not_useful
+  - browse_faq
+  - select_faq_category
+  - select_faq_question
+  - ask_complaint_status
+
+entities:
+  # Audit qualite NLU : category/service/device/error_type/keyword retires
+  # (0 exemple annote pour aucun des 5 dans tout nlu.yml -- jamais extraits
+  # par le NLU en pratique ; device/error_type sont bien des CONCEPTS reels,
+  # mais calcules par similarite semantique sur texte brut, voir
+  # _best_semantic_match dans reclamation.py, jamais via une entite Rasa).
+  # Les declarer sans jamais les entrainer n'est pas neutre : ca laisse
+  # croire qu'une extraction existe la ou il n'y en a aucune.
+  #
+  # urgency retiree de cette liste (18-rapport-competences.md, proposition
+  # P2) pour la meme raison, verifie ici avec le meme comptage que les 5
+  # ci-dessus : 0 exemple annote (urgency:...) dans nlu.yml, et aucun mapping
+  # de slot ne reference "entity: urgency" (le slot urgency plus bas est
+  # desormais rempli par inference automatique cote backend, jamais par
+  # extraction NLU -- voir son propre commentaire) -- entite fantome,
+  # rejoint donc le lot deja retire plutot que de rester la seule exception
+  # non expliquee.
+  - incident_date
+  - platform
+  - operation_type
+  - type_problem
+  - issue_status
+  - amount
+  - faq_category
+  - faq_slug
+  # Reference courte generee par _present_answer (faq.py), encodee dans le
+  # payload des boutons "Utile"/"Pas utile" -- voir pending_ratings plus bas
+  # (audit robustesse, fluidite de la conversation).
+  - rating_ref
+
+slots:
+  category:
+    type: categorical
+    values:
+      - KYC
+      - Wallet
+      - Video
+      - Auth
+      - Chat
+      - Safety
+    influence_conversation: true
+    # Audit qualite NLU : le mapping from_entity (entity: category) est retire
+    # -- 0 exemple annote (category:...) dans tout nlu.yml, ce slot n'a donc
+    # jamais ete rempli par cette voie en pratique (la vraie logique passe
+    # entierement par best_keyword_match sur texte brut, voir reclamation.py).
+    # Mort de fait, retire plutot que documente comme limite : evite la
+    # confusion de maintenance ("pourquoi ce mapping ne marche jamais ?").
+    mappings:
+      - type: from_text
+        not_intent: &reclamation_meta_intents
+          - bot_challenge
+          - ask_capabilities
+          - suggestion
+          - plainte
+          - rate_response_useful
+          - rate_response_not_useful
+          - ask_faq
+          - browse_faq
+          - select_faq_category
+          - select_faq_question
+          - inappropriate_language
+          - out_of_scope
+        conditions:
+          - active_loop: reclamation_form
+            requested_slot: category
+
+  # Texte libre : AUCUNE restriction not_intent ici, volontairement. Une
+  # description de probleme reelle peut contenir n'importe quel vocabulaire,
+  # y compris des mots jamais vus a l'entrainement -- le NLU peut alors la
+  # classer avec une tres haute confiance dans un intent totalement etranger
+  # (ex. "un autre utilisateur me menace, question de securite" -> classe
+  # bot_challenge a 99.99%, aucun mot en commun avec les exemples
+  # d'entrainement de bot_challenge). Si ce slot heritait de la meme
+  # not_intent que category ci-dessus, ce texte serait rejete et le
+  # formulaire redemanderait la description en boucle (audit robustesse,
+  # test large 500+ : bloc "Safety" echouant systematiquement). category/
+  # incident_date restent proteges car leurs reponses attendues sont
+  # courtes et proches du vocabulaire d'entrainement des intents meta -- le
+  # risque de faux rejet y est bien plus faible que le benefice de laisser
+  # une vraie interruption ("es-tu un bot ?") suspendre le formulaire.
+  description:
+    type: text
+    influence_conversation: true
+    mappings:
+      - type: from_text
+        conditions:
+          - active_loop: reclamation_form
+            requested_slot: description
+
+  urgency:
+    type: categorical
+    values:
+      - low
+      - medium
+      - high
+    influence_conversation: true
+    # N'est plus demande a l'utilisateur (retour utilisateur, 2026-07 :
+    # ce jugement doit etre deduit du probleme decrit, pas delegue) --
+    # rempli uniquement par validate_description (reclamation.py, voir
+    # _infer_urgency_from_description) via un evenement slot explicite,
+    # jamais par mapping conversationnel. Retire de reclamation_form.required_slots
+    # ci-dessous en consequence.
+    mappings:
+      - type: custom
+
+  incident_date:
+    type: text
+    influence_conversation: true
+    # Regression decouverte en validant les correctifs NLU de cette session :
+    # from_entity SANS condition capturait "hier"/un jour de semaine mentionne
+    # n'importe ou (ex. dans la DESCRIPTION du probleme : "...depuis hier"),
+    # remplissant incident_date silencieusement AVANT que le formulaire ne
+    # pose la question -- required_slots() la voyait alors deja repondue et
+    # sautait utter_ask_incident_date entierement. Aggrave par l'ajout
+    # d'exemples d'entrainement incident_date plus varies (audit qualite NLU) :
+    # le modele reconnait desormais mieux ce type de mention, y compris hors
+    # contexte. Meme conditions que from_text ci-dessous : les deux mappings
+    # ne s'appliquent plus QUE quand incident_date est reellement le slot
+    # demande, jamais de facon opportuniste sur un autre champ.
+    mappings:
+      - type: from_entity
+        entity: incident_date
+        not_intent: *reclamation_meta_intents
+        conditions:
+          - active_loop: reclamation_form
+            requested_slot: incident_date
+      - type: from_text
+        not_intent: *reclamation_meta_intents
+        conditions:
+          - active_loop: reclamation_form
+            requested_slot: incident_date
+
+  extracted_entities:
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: custom
+
+  summary:
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: custom
+
+  # Memorisent la derniere reponse presentee a l'utilisateur (ActionFaqSearch,
+  # feedback.py) le temps qu'il clique un bouton "utile"/"pas utile" --
+  # remis a None par ActionRecordResponseRating une fois la notation
+  # enregistree, pour ne jamais notater deux fois la meme reponse par erreur
+  # sur un tour de conversation ulterieur sans rapport.
+  # Remplace les 3 anciens slots pending_rating_type/question/answer (audit
+  # robustesse : un slot mutable UNIQUE ecrasait la notation en attente d'une
+  # reponse FAQ des qu'une SECONDE question FAQ etait posee avant que la
+  # premiere ne soit notee -- le clic sur un vieux bouton notait alors la
+  # MAUVAISE reponse, silencieusement). Dict JSON {rating_ref: {type,
+  # question, answer}} : plusieurs notations en attente peuvent desormais
+  # coexister, chacune identifiee par le rating_ref encode dans le payload de
+  # son propre bouton (voir _present_answer, faq.py, et
+  # ActionRecordResponseRating, feedback.py).
+  pending_ratings:
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: custom
+
+  # Cache le dernier tirage aleatoire de /faq/suggestions (voir
+  # ActionBrowseFaq, faq.py) le temps que l'utilisateur clique une categorie
+  # puis une question -- evite un 2e appel reseau qui donnerait un tirage
+  # different de celui affiche dans les boutons.
+  faq_suggestions_cache:
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: custom
+
+  diagnostic_state:
+    type: text
+    influence_conversation: true
+    initial_value: "{}"
+    mappings:
+      - type: custom
+
+  service_candidates:
+    type: text
+    influence_conversation: true
+    mappings:
+      - type: custom
+
+  pending_field:
+    type: text
+    influence_conversation: true
+    mappings:
+      - type: custom
+
+  claim_requested:
+    type: bool
+    influence_conversation: true
+    initial_value: false
+    mappings:
+      - type: custom
+
+  # true entre le "non" a la confirmation et la reponse de l'utilisateur a
+  # "modifier ou annuler ?" -- bascule required_slots() de reclamation_form
+  # (voir ValidateReclamationForm) pour ne demander QUE cancel_choice.
+  # Deliberement PAS gere par intent (modify_reclamation/confirm_full_cancel
+  # ont ete tentes puis abandonnes : leur vocabulaire, une fois entraine,
+  # chevauchait fortement celui deja couvert par deny -- "annule", "corrige",
+  # "je veux modifier ce que j'ai dit" y figurent deja comme exemples -- ce
+  # qui faisait deriver la classification du simple "non" lui-meme vers ces
+  # nouveaux intents, cassant la question de clarification. cancel_choice
+  # (voir plus bas) capture le texte brut via from_text, intent-agnostique,
+  # comme field_to_edit.
+  awaiting_cancel_choice:
+    type: bool
+    influence_conversation: true
+    initial_value: false
+    mappings:
+      - type: custom
+
+  # true entre la resolution du choix "annuler" (validate_cancel_choice) et
+  # l'execution reelle de action_cancel_reclamation : reclamation_form se
+  # termine naturellement (category/description/urgency/incident_date restent
+  # tous remplis, rien a redemander), et la regle "Cancel reclamation after
+  # clarification via form" (rules.yml) detecte cette combinaison precise
+  # (active_loop redevenu null + ce slot) pour declencher l'annulation reelle.
+  cancel_confirmed:
+    type: bool
+    influence_conversation: true
+    initial_value: false
+    mappings:
+      - type: custom
+
+  # true pendant la sous-etape "quel champ voulez-vous modifier ?" :
+  # bascule required_slots() de reclamation_form (voir ValidateReclamationForm)
+  # pour ne demander QUE field_to_edit, au lieu des 4 champs habituels.
+  editing_field:
+    type: bool
+    influence_conversation: true
+    initial_value: false
+    mappings:
+      - type: custom
+
+  # Reponse brute a "modifier ou annuler ?", interpretee par mots-cles dans
+  # validate_cancel_choice (meme logique que field_to_edit/best_keyword_match).
+  cancel_choice:
+    type: text
+    influence_conversation: true
+    mappings:
+      - type: from_text
+        not_intent: *reclamation_meta_intents
+        conditions:
+          - active_loop: reclamation_form
+            requested_slot: cancel_choice
+
+  # Reponse brute a "quel champ voulez-vous modifier ?", interpretee par
+  # mots-cles dans validate_field_to_edit (meme logique que best_keyword_match
+  # utilise ailleurs dans reclamation.py). from_text + conditions : memes
+  # raisons que category/description/incident_date ci-dessus (capture
+  # intent-agnostique pendant que ce slot est demande par le formulaire).
+  # urgency n'est plus editable ici (n'est plus demande du tout, voir son
+  # propre commentaire) -- retire de FIELD_TO_EDIT_KEYWORDS en consequence.
+  field_to_edit:
+    type: text
+    influence_conversation: true
+    mappings:
+      - type: from_text
+        not_intent: *reclamation_meta_intents
+        conditions:
+          - active_loop: reclamation_form
+            requested_slot: field_to_edit
+
+  # Tracabilite (voir app/domains/complaints/schemas.py, DEFAULT_CREATED_BY) :
+  # distingue un ticket ne d'une reclamation classique (formulaire) d'un
+  # ticket ne d'une escalade de diagnostic confirmee par l'utilisateur.
+  # Absent/vide = reclamation classique (comportement par defaut, inchange).
+  ticket_source:
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: custom
+
+  # Audit "robustesse comportementale", cas 40 : porte le strict necessaire
+  # (service/probleme/champs confirmes) pour qu'ActionCreateTicket puisse
+  # reinterroger le moteur de diagnostic une derniere fois juste avant de
+  # creer un ticket issu d'une escalade, au cas ou le probleme se serait
+  # resolu entre-temps. influence_conversation:false : contenu JSON opaque,
+  # jamais utilise comme feature de dialogue (meme choix que
+  # extracted_entities).
+  escalation_recheck_context:
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: custom
+
+  escalation_reason:
+    type: text
+    influence_conversation: true
+    mappings:
+      - type: custom
+
+  operation_type:
+    type: categorical
+    values:
+      - withdrawal
+      - deposit
+      - transfer
+      - payment
+    influence_conversation: true
+    mappings:
+      - type: from_entity
+        entity: operation_type
+
+  type_problem:
+    type: categorical
+    values:
+      - login
+      - password
+      - chat
+    influence_conversation: true
+    mappings:
+      - type: from_entity
+        entity: type_problem
+
+  issue_status:
+    type: categorical
+    values:
+      - pending
+      - failed
+      - blocked
+    influence_conversation: true
+    mappings:
+      - type: from_entity
+        entity: issue_status
+
+  amount:
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: from_entity
+        entity: amount
+
+  platform:
+    type: categorical
+    values:
+      - Android
+      - iOS
+      - Web
+    influence_conversation: false
+    mappings:
+      - type: from_entity
+        entity: platform
+
+  # 18-rapport-competences.md, proposition P2 : les 11 slots
+  # (payment_method, transaction_id, time, content_type, video_id,
+  # last_message, severity, document_type, country, subscription_type,
+  # channel, contact_channel) declares ici jusqu'a cette revision ont ete
+  # supprimes apres verification qu'aucun n'etait plus reellement utilise :
+  # zero SlotSet/evenement "slot" les ciblant dans rasa/actions/*.py, zero
+  # reference dans nlu.yml/stories.yml/rules.yml, et reclamation.py (le
+  # formulaire cite comme raison de leur maintien) ne les mentionne nulle
+  # part. Les valeurs de champs du flux diagnostic vivent reellement dans
+  # diagnostic_state.confirmed (JSON, actions/diagnostic.py) ; le
+  # dictionnaire de libelles francais par nom de champ (FIELD_QUESTIONS et
+  # son pendant court, diagnostic.py) reste independant de ces slots -- il
+  # phrase dynamiquement N'IMPORTE QUEL nom de champ declare par un futur
+  # manifeste de service, sans avoir besoin d'un slot Rasa du meme nom.
+  # Supprimer ces slots est donc sans effet sur le pipeline diagnostic ; ca
+  # retire seulement des champs morts qui laissaient croire, comme les
+  # entites mortes documentees plus haut, qu'un usage reel existait encore.
+
+forms:
+  reclamation_form:
+    # Audit robustesse (test large 500+) : sans restriction, Rasa traite
+    # TOUT intent comme une tentative de remplissage du slot demande tant
+    # que le formulaire est actif -- confirme en pratique via inspection du
+    # tracker : "Es-tu un robot ?" (intent bot_challenge, confiance 1.0)
+    # etait capture par le mapping from_text du slot category et REJETE par
+    # validate_category, sans jamais laisser la moindre chance aux regles
+    # "... while reclamation form is active" (rules.yml) de s'appliquer,
+    # meme avec `condition: active_loop: reclamation_form` explicite.
+    #
+    # Initialement corrige via `ignored_intents` au niveau du formulaire --
+    # mais cette option Rasa s'applique a TOUS les slots sans exception,
+    # description y compris. Or description est un champ libre : un vrai
+    # probleme utilisateur peut contenir du vocabulaire absent de
+    # l'entrainement et se faire classer par erreur, a tres haute confiance,
+    # dans un des intents ci-dessous (ex. categorie "Safety" : "un autre
+    # utilisateur me menace, question de securite" classe bot_challenge a
+    # 99.99%, aucun mot en commun avec les exemples d'entrainement de
+    # bot_challenge). Avec `ignored_intents` global, ce texte etait rejete
+    # et le formulaire redemandait la description en boucle (audit
+    # robustesse, test large 500+ : bloc "Safety" echouant systematiquement,
+    # 18 verifications sur 33 echecs restants).
+    #
+    # Remplace par l'ancre YAML &reclamation_meta_intents (definie sur le
+    # mapping de `category` plus haut), appliquee en `not_intent` UNIQUEMENT
+    # aux slots a reponse courte/mot-cle (category, incident_date,
+    # cancel_choice, field_to_edit) ou le risque de faux rejet est faible et
+    # le benefice de l'interruption reel. `description` n'a explicitement
+    # PAS cette restriction : elle accepte tout texte quel que soit
+    # l'intent classe. nlu_fallback/deny/affirm restent volontairement
+    # ABSENTS de cette liste (voir "Ignore nlu fallback while reclamation
+    # form is active" plus bas, qui a besoin du comportement inverse :
+    # laisser le formulaire capturer le texte brut malgre une intention mal
+    # classee).
+    # field_to_edit/cancel_choice ne sont jamais demandes dans cet ordre
+    # statique : cette liste est la liste "par defaut", entierement
+    # remplacee au runtime par ValidateReclamationForm.required_slots() (voir
+    # reclamation.py), qui renvoie soit cette liste (filtree des deux),
+    # soit uniquement ["cancel_choice"] ou ["field_to_edit"] pendant les
+    # sous-etapes correspondantes. Rasa exige neanmoins que tout slot dont
+    # le mapping a une condition "active_loop: reclamation_form" figure ici,
+    # sous peine d'avertissement de validation.
+    #
+    # description AVANT category (retour utilisateur, 2026-07 : "quel est le
+    # service concerne ça n'aide pas... pour un public qui ne maitrise pas la
+    # plateforme") : Rasa demande les slots manquants dans l'ordre de cette
+    # liste, donc description est desormais toujours demandee en premier.
+    # validate_description (reclamation.py) tente d'en deduire la categorie
+    # automatiquement ; si ça reussit, category est deja rempli quand son
+    # tour arrive et n'est jamais redemande. Sinon, utter_ask_category prend
+    # le relais -- reformule en langage naturel plutot qu'en noms de service
+    # bruts (KYC/Wallet/Video/Auth/Chat/Safety), voir plus bas.
+    required_slots:
+      - description
+      - category
+      - incident_date
+      - cancel_choice
+      - field_to_edit
+
+responses:
+  # A partir d'ici, la plupart des reponses portent plusieurs variantes :
+  # Rasa en tire une au hasard a chaque utterance (comportement natif, pas de
+  # code custom necessaire pour ce cas simple -- contrairement a
+  # greeting.py/reclamation.py ou le texte depend de donnees dynamiques,
+  # voir pick() dans actions/common.py). Trouve par test conversationnel
+  # (505 tours, 2026-07-18) : ces messages revenaient identiques mot pour mot
+  # a chaque conversation (ex. utter_ask_category : 54/54 occurrences
+  # strictement identiques), contrastant fortement avec l'accueil, deja
+  # variable. Seul l'habillage change d'une variante a l'autre, jamais le
+  # contenu factuel (memes valeurs autorisees listees, meme question posee).
+  utter_greet:
+    - text: "Bonjour 👋 Je suis l'assistant NGONI. Comment puis-je vous aider ?"
+
+  utter_goodbye:
+    - text: "Merci et à bientôt sur NGONI !"
+    - text: "Avec plaisir. À bientôt sur NGONI !"
+    - text: "Merci de votre visite, à bientôt !"
+
+  utter_iamabot:
+    - text: "Je suis l'assistant virtuel NGONI, conçu pour répondre à vos questions sur la plateforme."
+    - text: "Je suis un assistant virtuel, pas un humain : je suis là pour répondre à vos questions sur NGONI."
+
+  utter_out_of_scope:
+    - text: "Désolé, je ne peux pas répondre à cette demande. Je peux vous aider à consulter la FAQ ou ouvrir une réclamation."
+    - text: "Ce sujet dépasse ce que je sais traiter. Je peux en revanche vous aider avec la FAQ ou une réclamation."
+
+  utter_default:
+    - text: "Désolé, je n'ai pas bien compris votre demande. Pouvez-vous reformuler ? Je peux vous aider avec votre compte, votre portefeuille NGONI ou une réclamation."
+    - text: "Je n'ai pas bien saisi votre demande. Pouvez-vous la reformuler ? Je peux vous aider avec votre compte, votre portefeuille NGONI ou une réclamation."
+
+  utter_please_be_respectful:
+    - text: "Je comprends votre frustration, mais je ne peux pas donner suite à un message contenant des propos inappropriés. Décrivez-moi votre problème et je ferai de mon mieux pour vous aider."
+
+  utter_faq_answer:
+    - text: "{faq_answer}"
+
+  utter_faq_not_found:
+    - text: "Désolé, je n'ai pas trouvé de réponse pertinente pour votre question."
+    - text: "Je n'ai pas de réponse précise à vous apporter sur ce point, désolé."
+
+  utter_faq_error:
+    - text: "Désolé, ce service est momentanément indisponible."
+
+  utter_reclamation_start:
+    - text: "Je peux vous aider à ouvrir une réclamation. Décrivez votre problème et je vais le structurer."
+    - text: "D'accord, ouvrons une réclamation ensemble. Décrivez-moi votre problème."
+
+  # Reformule en langage naturel (retour utilisateur, 2026-07 : "quel est le
+  # service concerne ça n'aide pas... pour un public qui ne maitrise pas la
+  # plateforme") : ces libelles ("identité", "portefeuille", "connexion"...)
+  # sont exactement les synonymes deja acceptes par validate_category
+  # (ALLOWED_CATEGORIES, reclamation.py), donc taper la reponse en suivant
+  # cette question fonctionne directement -- aucun changement cote
+  # validation necessaire. N'est plus posee que si validate_description n'a
+  # pas reussi a deduire la categorie toute seule (voir son commentaire) ou
+  # lors d'une modification explicite ("modifier" -> "categorie").
+  utter_ask_category:
+    - text: "Pour bien orienter votre réclamation, ça concerne plutôt quoi : votre identité (vérification), votre portefeuille (argent, retraits), une vidéo, la connexion à votre compte, la messagerie, ou la sécurité ?"
+    - text: "Dites-moi si ça touche plutôt à : votre identité, votre portefeuille, une vidéo, votre connexion, la messagerie, ou la sécurité de votre compte."
+    - text: "C'est plutôt lié à quoi : identité, portefeuille, vidéo, connexion, messagerie, ou sécurité ?"
+
+  utter_ask_description:
+    - text: "Décrivez votre problème en détail."
+    - text: "Pouvez-vous me décrire ce qui se passe, avec le plus de détails possible ?"
+    - text: "Expliquez-moi ce qui ne va pas, en quelques phrases si possible."
+
+  utter_ask_incident_date:
+    - text: "À quelle date le problème s'est-il produit ?"
+    - text: "Quand ce problème est-il survenu ?"
+    - text: "Pouvez-vous me dire à quel moment c'est arrivé ?"
+
+  utter_wrong_category:
+    - text: "Je n'ai pas bien compris. Est-ce plutôt lié à : votre identité, votre portefeuille, une vidéo, votre connexion, la messagerie, ou la sécurité ?"
+    - text: "Pouvez-vous préciser ? Par exemple : identité, portefeuille, vidéo, connexion, messagerie, ou sécurité."
+
+  utter_wrong_description:
+    - text: "La description ne peut pas être vide. Pouvez-vous décrire votre problème plus précisément ?"
+
+  # Distinct de utter_wrong_description (audit "500 tours", 2026-07-18) :
+  # une description non vide mais trop courte/vague ("mon solde est faux")
+  # recevait auparavant le meme message que "vide", ce qui ne veut rien dire
+  # pour l'utilisateur -- voir validate_description, reclamation.py.
+  utter_description_too_short:
+    - text: "Votre description est un peu courte pour que je comprenne bien, pouvez-vous préciser davantage ?"
+    - text: "Pouvez-vous détailler un peu plus ? Quelques mots supplémentaires m'aideraient à bien cerner le problème."
+
+  utter_wrong_incident_date:
+    - text: "Je n'ai pas compris la date. Pouvez-vous préciser quand le problème est survenu ?"
+    - text: "Cette date ne m'est pas claire, pouvez-vous la reformuler ?"
+
+  utter_reclamation_summary:
+    - text: "Résumé généré : {summary}"
+
+  utter_ask_confirmation:
+    - text: "Je peux préparer votre réclamation avec les informations collectées. Confirmez-vous l’envoi ?"
+    - text: "Voici ce que j'ai retenu pour votre réclamation. Je confirme l'envoi ?"
+    - text: "Je suis prêt à enregistrer votre réclamation avec ces informations. On y va ?"
+
+  utter_reclamation_cancelled:
+    - text: "Très bien, la réclamation n’a pas été créée. Je peux continuer à vous aider."
+    - text: "D'accord, cette réclamation n'a pas été créée. N'hésitez pas si vous avez besoin d'autre chose."
+
+  utter_ask_cancel_choice:
+    - text: "Voulez-vous modifier les informations de votre réclamation, ou l’annuler complètement ?"
+    - text: "Préférez-vous corriger certaines informations, ou annuler complètement la réclamation ?"
+
+  utter_wrong_cancel_choice:
+    - text: "Je n’ai pas compris. Répondez par : modifier, ou annuler."
+
+  utter_ask_field_to_edit:
+    - text: "Quel élément souhaitez-vous modifier ? (catégorie / description / date)"
+    - text: "Qu'aimeriez-vous corriger ? (catégorie / description / date)"
+
+  utter_wrong_field_to_edit:
+    - text: "Je n’ai pas compris. Répondez par : catégorie, description ou date."
+
+  utter_thanks_for_suggestion:
+    - text: "Merci pour votre suggestion ! Je la transmets à notre équipe pour étude."
+    - text: "Merci, c'est une bonne idée : je la fais remonter à notre équipe."
+
+  utter_suggestion_storage_failed:
+    - text: "Je n'ai pas pu enregistrer votre suggestion pour le moment, le service est indisponible. Vous pouvez réessayer un peu plus tard."
+
+  utter_acknowledge_complaint:
+    - text: "Je suis désolé que vous ne soyez pas satisfait. Si vous voulez que j'examine concrètement votre cas, dites-le-moi et j'ouvre une réclamation."
+
+  # Audit robustesse : symetrique a utter_suggestion_storage_failed --
+  # jusqu'ici, une panne de FEEDBACK_SERVICE_URL affichait le meme message
+  # que ci-dessus (utter_acknowledge_complaint), laissant croire que la
+  # plainte etait bien enregistree alors que rien n'avait ete persiste.
+  utter_complaint_storage_failed:
+    - text: "Je n'ai pas pu enregistrer votre remarque pour le moment, le service est indisponible. Vous pouvez réessayer un peu plus tard."
+
+  utter_thanks_for_rating:
+    - text: "Merci pour votre retour !"
+    - text: "Merci, c'est noté !"
+
+  utter_rating_storage_failed:
+    - text: "Merci pour votre retour ! (je n'ai cependant pas pu l'enregistrer pour le moment, le service est indisponible)"
+
+actions:
+  - action_greet_with_time
+  - action_faq_search
+  - action_start_reclamation
+  - action_extract_reclamation_entities
+  - action_store_suggestion
+  - action_acknowledge_complaint
+  - action_describe_capabilities
+  - action_record_response_rating
+  - action_generate_reclamation_summary
+  - validate_reclamation_form
+  - action_create_ticket
+  - action_cancel_reclamation
+  - action_ask_cancel_clarification
+  - action_request_reclamation_confirmation
+  - action_run_diagnostic_step
+  - action_reask_pending_diagnostic_field
+  - action_decide_escalation
+  - action_handle_negation
+  - action_default_fallback
+  - action_out_of_scope
+  - action_respectful_language_reminder
+  - action_browse_faq
+  - action_select_faq_category
+  - action_select_faq_question
+  - action_consult_complaints
+ 
