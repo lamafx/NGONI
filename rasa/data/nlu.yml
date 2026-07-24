@@ -1508,228 +1508,121 @@ nlu:
     - ce service laisse vraiment à désirer
     - ce service est franchement médiocre
 - intent: diagnostic
+  # Reequilibrage volontaire (2026-07-23, decision utilisateur explicite,
+  # voir docs/23-rapport-equilibrage-diagnostic-faq.md) : 386 -> 172
+  # exemples, pour egaler exactement le volume d'ask_faq (172). Objectif :
+  # tester si le desequilibre de volume lui-meme (documente comme facteur
+  # aggravant en 16.8/20.4, jamais isole seul jusqu'ici) explique une partie
+  # de la collision ask_faq/diagnostic, sans ajouter de vocabulaire nouveau
+  # (contrairement aux tentatives v1/v2/v7 precedentes, qui ont chacune
+  # regresse -- voir 16.8/20.4). 214 exemples retires par tirage aleatoire
+  # (seed=42, reproductible) plutot qu'un sous-ensemble choisi a la main, pour
+  # ne pas biaiser vers un sous-theme diagnostic particulier. Les exemples
+  # retires restent recuperables via l'historique Git (git show <commit
+  # precedent>:rasa/data/nlu.yml) si ce test ne donne pas le resultat espere.
   examples: |
     - mon retrait est bloqué
-    - je n'arrive plus à me connecter
-    - impossible de retirer mon argent
     # Audit qualite NLU (test large 500+) : symptomes techniques concrets,
     # confondus avec plainte/ask_faq/deny faute d'exemple proche.
     - l'appli crash à chaque lancement
     - je ne reçois plus aucune notification
     - mon compte est bloqué
-    - pourquoi mon paiement échoue ?
-    - mon retrait reste en attente
-    - je ne peux pas finaliser mon paiement
-    - mon portefeuille ne se met pas à jour
-    - ma connexion est impossible depuis ce matin
-    - l'application plante à l'ouverture
     - je ne vois pas mes pièces sur mon compte
     - mon solde semble erroné
-    - le système affiche une erreur de connexion
     - je ne reçois pas le code de vérification
     - je ne comprends pas pourquoi mon paiement a échoué
-    - impossible d'accéder à mon espace
-    - mon retrait est toujours en attente
-    - j'ai un souci avec mon compte
-    - mon paiement est refusé sans raison
-    - j'ai un problème de connexion
     - je ne peux plus me connecter
     - mon application est lente
     - le service ne répond pas
-    - ma transaction est bloquée
-    - je ne peux pas valider mon achat
     - je cherche à comprendre pourquoi ça ne marche pas
     - il y a un souci sur mon profil
-    - mon compte me refuse l'accès
-    - j'ai l'impression que quelque chose ne va pas
-    - mon retrait ne part jamais
     - j'essaye de me connecter mais ça bloque
     - ça fait plusieurs jours que mon retrait est bloqué
-    - je ne sais pas pourquoi mon paiement échoue
     - j’ai un bug sur l’application
     - ma transaction reste en cours
-    - mon ticket n'avance pas
-    - difficulté de retrait d'argent
     - mon espace perso est inaccessible
     - le service bug depuis ce matin
     - j’ai un souci de connexion au compte
-    - mon compte refuse ma connexion
-    - je ne peux plus utiliser l’appli
     - mon paiement a été débité mais je n’ai rien reçu
     - je ne reçois toujours pas mon argent
     - c’est bloqué au niveau du retrait
     - pourquoi mon retrait n’aboutit pas ?
-    - mon portefeuille n’est pas mis à jour
     - j’ai l’impression que mon compte est gelé
     - je ne peux pas terminer mon opération
     - Je rencontre un problème avec mon compte.
     - J'ai un souci avec mon compte.
-    - Mon compte ne fonctionne pas correctement.
-    - Je n'arrive plus à accéder à mon compte.
-    - Impossible de me connecter.
     - La connexion à mon compte échoue.
     - Mon mot de passe ne fonctionne plus.
     - Je ne reçois pas le code de vérification.
-    - Je ne peux plus utiliser mon compte.
-    - Mon compte semble bloqué.
-    - Il y a un dysfonctionnement sur mon compte.
-    - Quelque chose ne fonctionne pas.
     - L'application ne répond plus.
-    - L'application plante à chaque ouverture.
-    - L'application se ferme toute seule.
-    - Je rencontre un bug.
     - Je pense qu'il y a une erreur.
-    - Le service ne fonctionne pas normalement.
-    - Mon achat de pièces n'a pas été pris en compte.
     - J'ai payé mais je n'ai pas reçu mes pièces.
     - Mon paiement a échoué.
-    - Mon portefeuille n'a pas été crédité.
     - Mon solde n'a pas changé après mon achat.
-    - J'ai perdu des pièces.
     - Des pièces ont disparu de mon compte.
     - Mon retrait est bloqué.
-    - Je n'ai toujours pas reçu mon retrait.
     - Mon retrait est en attente depuis longtemps.
     - Mon retrait a été refusé sans raison.
-    - Mon retrait n'aboutit pas.
     - Ma demande de retrait ne passe pas.
     - Je n'arrive pas à effectuer un retrait.
     - Le retrait reste en cours depuis plusieurs jours.
-    - Mon historique est incorrect.
-    - Une transaction est manquante.
-    - Je constate une erreur dans mes opérations.
     - Une opération a disparu.
-    - Mes transactions ne s'affichent plus.
-    - Mes récompenses ne sont pas créditées.
-    - Je rencontre un problème avec les récompenses.
-    - Une fonctionnalité ne fonctionne pas.
     - Le système affiche une erreur.
-    - Depuis ce matin je ne peux plus utiliser mon compte.
-    - Mon compte refuse de s'ouvrir.
     - Je suis bloqué dès la connexion.
-    - Impossible d'accéder à mon espace personnel.
-    - Je n'arrive pas à terminer la connexion.
     - La connexion tourne en boucle.
-    - Mon compte est inaccessible.
-    - Je reste bloqué sur la page de connexion.
     - Je n'arrive plus à utiliser les services.
-    - Mon paiement a bien été effectué mais rien n'a changé.
-    - Mon argent a été débité mais je n'ai rien reçu.
-    - Les pièces achetées ne sont toujours pas visibles.
-    - J'attends toujours les pièces après mon paiement.
-    - Je pense que mon achat n'a pas été validé.
     - Mon portefeuille n'a pas été mis à jour.
     - Une partie de mes pièces a disparu.
-    - Mon solde semble incorrect.
     - Je constate une différence dans mon solde.
     - Le montant affiché ne correspond pas à ce que je possède.
     - Je rencontre un souci avec mon portefeuille.
-    - Je ne comprends pas pourquoi mon solde a diminué.
     - Mon retrait est bloqué depuis plusieurs jours.
-    - Cela fait longtemps que j'attends mon retrait.
     - Mon retrait ne progresse plus.
     - Je n'ai toujours rien reçu.
-    - Le statut de mon retrait ne change pas.
     - Ma demande de retrait semble figée.
-    - J'attends mon argent mais rien ne se passe.
-    - Je pense qu'il y a un problème avec mon retrait.
-    - Pourquoi mon retrait reste bloqué aussi longtemps ?
-    - Mon retrait est toujours marqué en attente.
-    - Mon retrait n'aboutit jamais.
     - Le système refuse mon retrait.
     - Je ne peux plus retirer mon argent.
-    - Mon retrait a disparu de l'historique.
 
     - Je n'ai reçu aucune récompense.
     - Les bonus promis ne sont pas crédités.
-    - Les récompenses semblent bloquées.
-    - Une erreur apparaît lorsque j'utilise cette fonctionnalité.
-    - L'application affiche un message d'erreur.
-    - Cette fonctionnalité refuse de fonctionner.
     - Je clique mais il ne se passe rien.
     - L'application reste bloquée.
     - Tout est figé sur mon écran.
     - L'application devient très lente.
     - Je dois redémarrer l'application à chaque fois.
-    - Je ne peux plus continuer après cette étape.
     - Une erreur inconnue apparaît.
-    - Je pense qu'il y a un bug sur mon compte.
     - Mon problème n'est toujours pas résolu.
-    - Cela fait plusieurs jours que le problème persiste.
-    - J'ai déjà essayé plusieurs fois sans succès.
-    - Rien ne fonctionne malgré plusieurs tentatives.
-    - Bonjour mon compte ne marche pas
-    - Salut j'ai un problème avec mon retrait
     - Hello mon paiement n'a pas été reçu
-    - Bonsoir mon application bug
     - Salut je n'arrive plus à me connecter
-    - Bonjour mon solde est faux
-    - Hey j'ai perdu mes pièces
     - Coucou mon retrait est bloqué
-    - Bonjour ça ne fonctionne pas depuis ce matin
     - Salut j'ai essayé mais ça marche pas
 
-    - Bonsoir comment allez-vous ? J'ai fait un retrait depuis hier mais ça n'a pas été effectué.
-    - Bonjour, comment allez-vous ? Mon compte est bloqué.
-    - Salut, ça va ? J'ai un problème avec mon retrait.
-    - Bonjour comment ça va ? Mon paiement a été refusé sans raison.
     - Coucou, comment allez-vous ? Je n'arrive plus à me connecter.
     - Hello, comment vas-tu ? Mon solde semble erroné.
-    - Bonsoir, comment ça va ? Je n'ai pas reçu mes pièces après mon achat.
     - Bonjour, j'espère que vous allez bien. J'ai un souci avec mon compte.
-    - Salut, comment tu vas ? Mon retrait est toujours en attente.
-    - Bonjour, comment allez-vous aujourd'hui ? Impossible d'accéder à mon espace.
     - Bonsoir, j'espère que vous allez bien, j'ai un problème avec mon KYC.
-    - Salut, comment ça va aujourd'hui ? Je n'arrive pas à valider mon identité.
 
-    - mon retra est bloqé
-    - je narive pa a me conecter
-    - mon solde et fo depui ce matin
-    - sa march pas du tou
     - jai un problem de conexion la
-    - mon compt es bloké
     - jarive pas a retirer mon arjent
-    - le paiement a pa marché
     - Depuis ce matin j'essaie de retirer mon argent mais ça reste bloqué en attente et je ne comprends vraiment pas pourquoi, est-ce que vous pouvez vérifier ce qui se passe ?
-    - J'ai fait un paiement il y a plus d'une heure, l'argent a bien été débité de mon compte bancaire, mais je n'ai toujours pas reçu mes pièces sur l'application.
-    - Ça fait la troisième fois que j'essaie de me connecter aujourd'hui et à chaque fois l'application me renvoie une erreur juste après avoir entré mon code.
-    - Je ne sais pas si c'est un problème chez moi ou sur l'application, mais depuis hier soir impossible d'ouvrir mon portefeuille et de voir mon solde correctement.
-    - J'ai voulu envoyer un cadeau à un ami tout à l'heure, mes pièces ont bien été débitées de mon compte mais lui affirme n'avoir rien reçu de son côté.
     - Cela fait maintenant deux jours que mon retrait est indiqué comme étant toujours en cours de traitement et je commence à m'inquiéter pour mon argent.
 
-    - bloqué
     - bug
     - ça marche pas
     - en panne
     - retrait bloqué
-    - solde faux
-    - connexion impossible
     - y'a un truc qui cloche avec mon solde
 
-    - Mon [retrait](operation_type:withdrawal) est bloqué depuis hier.
-    - Je n'arrive pas à faire un [retrait](operation_type:withdrawal).
-    - Pourquoi mon argent que je veux [retirer](operation_type:withdrawal) n'arrive pas ?
     - Mon [dépôt](operation_type:deposit) n'apparaît pas sur mon solde.
     - J'ai fait un [dépôt](operation_type:deposit) mais rien n'a été crédité.
     - Impossible de [déposer](operation_type:deposit) de l'argent sur mon compte.
-    - Mon [versement](operation_type:deposit) n'a jamais été crédité.
     - Mon [transfert](operation_type:transfer) n'est jamais arrivé.
-    - Je n'arrive pas à faire un [transfert](operation_type:transfer) vers un ami.
     - J'ai essayé de [transférer](operation_type:transfer) de l'argent mais ça a échoué.
-    - Mon [virement](operation_type:transfer) est resté bloqué.
-    - Mon [paiement](operation_type:payment) a été refusé.
     - Je n'arrive pas à valider mon [paiement](operation_type:payment).
-    - Impossible de [payer](operation_type:payment) avec mon solde de pièces.
     - J'ai un problème de [connexion](type_problem:login).
     - Je n'arrive plus à me [connecter](type_problem:login).
     - Le [login](type_problem:login) ne fonctionne pas depuis ce matin.
-    - J'ai oublié mon [mot de passe](type_problem:password).
-    - Mon [mot de passe](type_problem:password) ne fonctionne plus.
-    - Je n'arrive pas à réinitialiser mon [mot de passe](type_problem:password).
-    - Mon [mdp](type_problem:password) est refusé à chaque tentative.
-    - Je ne reçois plus mes [messages](type_problem:chat).
     - Le [chat](type_problem:chat) ne fonctionne plus.
-    - La [messagerie](type_problem:chat) est bloquée depuis hier.
     # Audit qualite NLU : "de" precedant l'entite mal etiquete par le modele
     # entraine (DIETClassifier_errors.json, confiance 0.57-0.70 sur "problème
     # de mot de passe"/"problème de connexion") malgre des annotations deja
@@ -1739,53 +1632,29 @@ nlu:
     - Souci avec mon [mot de passe](type_problem:password).
     - Un souci avec la [connexion](type_problem:login) depuis ce matin.
     - Impossible de me connecter, ça vient du [login](type_problem:login).
-    - Ma [messagerie](type_problem:chat) plante à chaque ouverture.
 
-    - Mon [retrait](operation_type:withdrawal) est bloqué et je n'arrive plus à me [connecter](type_problem:login).
     - J'ai un souci de [mot de passe](type_problem:password) et mon [transfert](operation_type:transfer) n'est jamais arrivé.
-    - Impossible de faire un [dépôt](operation_type:deposit), en plus je n'arrive pas à me [connecter](type_problem:login).
-    - Mon [paiement](operation_type:payment) a échoué et en plus j'ai un problème de [mot de passe](type_problem:password).
 
     - [le retrait](operation_type:withdrawal)
-    - plutôt [le retrait](operation_type:withdrawal) d'abord
     - c'est [le dépôt](operation_type:deposit) le plus urgent
-    - [mon mot de passe](type_problem:password) d'abord
-    - traitons [la connexion](type_problem:login) en premier
-    - [le transfert](operation_type:transfer) avant le reste
-    - my wallet ne marche pas
     - my account is bloqué since this morning
-    - I can't login mon mot de passe ne marche pas
-    - je me demande pourquoi mon retrait n'avance pas
     - je voudrais savoir si vous pouvez vérifier pourquoi ça bloque
     - mon retrait est bloqué 😡
     - encore un bug 😤 ça devient long
     - mon solde est faux depuis ce matin 😞
 
     - Mon retrait est [en attente](issue_status:pending) depuis trois jours.
-    - J'attends toujours mon retrait, il est resté [en attente](issue_status:pending).
-    - Mon paiement a [échoué](issue_status:failed) sans raison.
     - Ma transaction a été [refusée](issue_status:failed).
-    - Mon transfert est [bloqué](issue_status:blocked) depuis hier.
     - La connexion reste [impossible](issue_status:blocked) depuis ce matin.
-    - Mon retrait n'aboutit jamais, il reste [bloqué](issue_status:blocked).
 
     - Le montant de [500 pièces](amount:500 pièces) n'a pas été crédité.
     - J'ai perdu [20000 FCFA](amount:20000 FCFA) dans ce retrait.
-    - Il me manque [50 euros](amount:50 euros) sur mon solde.
-    - J'ai payé [300 pièces](amount:300 pièces) mais rien n'est arrivé.
 
-    - Le problème est survenu [sur android](platform:Android).
     - Ça bloque depuis mon [iphone](platform:iOS).
-    - Depuis mon [ios](platform:iOS) impossible de me connecter.
     - Le souci vient du [site web](platform:Web).
-    - Sur [android](platform:Android), mon retrait ne passe pas.
 
     - Mon retrait est [bloqué](issue_status:blocked) depuis [hier](incident_date:hier).
-    - Depuis [hier](incident_date:hier) j'attends mon [retrait](operation_type:withdrawal) de [500 pièces](amount:500 pièces).
-    - Depuis [hier](incident_date:hier) j'attends mon retrait, il reste [en attente](issue_status:pending).
     - [Depuis ce matin](incident_date:depuis ce matin), impossible de me [connecter](type_problem:login) [sur android](platform:Android).
-    - [La semaine dernière](incident_date:la semaine dernière) j'ai fait un [dépôt](operation_type:deposit) de [1000 pièces](amount:1000 pièces) qui n'est toujours pas crédité.
-    - Mon [transfert](operation_type:transfer) de [200 pièces](amount:200 pièces) est [bloqué](issue_status:blocked) depuis [avant-hier](incident_date:avant-hier).
     - Mon [paiement](operation_type:payment) a [échoué](issue_status:failed) [ce matin](incident_date:ce matin) [sur iphone](platform:iOS).
     # Audit qualite NLU : seulement 7 occurrences avant ce fix (recall 0.917
     # sur 12 exemples de test seulement, DIETClassifier_report.json), aucune
@@ -1793,110 +1662,53 @@ nlu:
     # supplementaires (date absolue, jour de semaine, duree ecoulee,
     # week-end) pour couvrir des reponses courtes, isolees, comme celles
     # tapees directement en reponse a utter_ask_incident_date.
-    - Mon retrait est bloqué depuis [le 15 juillet](incident_date:le 15 juillet).
     - C'est arrivé [mardi dernier](incident_date:mardi dernier).
-    - Ça a commencé [il y a trois jours](incident_date:il y a trois jours).
     - Le problème date [du 3 juillet](incident_date:du 3 juillet).
-    - C'est survenu [ce week-end](incident_date:ce week-end).
-    - Mon compte est bloqué depuis [lundi](incident_date:lundi).
-    - Le souci a commencé [le mois dernier](incident_date:le mois dernier).
-    - Ça a débuté [il y a une semaine](incident_date:il y a une semaine).
 
     - [en attente](issue_status:pending)
-    - c'est [bloqué](issue_status:blocked) qui m'inquiète le plus
-    - plutôt le problème [échoué](issue_status:failed)
-    - [500 pièces](amount:500 pièces)
-    - [sur android](platform:Android)
 
     - Je veux diagnostiquer un problème.
     - J'aimerais diagnostiquer mon souci.
     - Peux-tu diagnostiquer ce qui ne va pas ?
     - Je veux lancer un diagnostic.
-    - Aide-moi à diagnostiquer mon problème.
-    - Je veux faire un diagnostic de mon compte.
-    - Peux-tu m'aider à diagnostiquer un souci ?
     - Je souhaite diagnostiquer un dysfonctionnement.
-    - J'ai besoin d'un diagnostic.
-    - Lance un diagnostic s'il te plaît.
     - Peux-tu m'aider à comprendre ce qui cloche sur mon compte ?
-    - Je veux comprendre ce qui ne va pas avant de faire quoi que ce soit.
-    - J'aimerais qu'on essaie de comprendre le problème ensemble.
     - Je préfère d'abord comprendre ce qui se passe.
-    - je veu diagnostiké mon probleme
     - tu peu diagnostik sa stp
-    - jvoudré un diagnostic de mon compte
 
     - Vérifie mon KYC.
-    - Vérifie mon statut KYC.
-    - Pourquoi mon KYC est refusé ?
-    - Mon KYC a été rejeté, je ne comprends pas pourquoi.
     - Je n'arrive pas à valider mon identité.
-    - Ma vérification d'identité est bloquée.
     - Ça fait longtemps que mon KYC est en attente.
     - Je veux savoir où en est ma vérification d'identité.
-    - Mon document d'identité a été refusé.
     - Pourquoi ma pièce d'identité est rejetée ?
-    - Je ne comprends pas pourquoi mon identité n'est pas vérifiée.
     - Mon compte reste non vérifié depuis des jours.
     - Est-ce que mon KYC est validé ?
     - Peux-tu vérifier l'état de mon KYC ?
-    - mon kyc marche pas
     - jarrive pa a valid mon identité
-    - pk mon kyc é refusé
-    - Je n'ai reçu aucune nouvelle sur ma vérification d'identité.
-    - Où en est ma demande de vérification KYC ?
     - Mon document a été rejeté sans explication.
     - Peux-tu regarder pourquoi mon KYC ne passe pas ?
 
-    - Pourquoi mon compte est suspendu ?
-    - Mon compte a été bloqué, je ne sais pas pourquoi.
     - On m'a banni sans explication.
-    - Je n'arrive plus à utiliser mon compte.
-    - Mon compte est restreint depuis hier.
-    - Est-ce que mon compte a été suspendu ?
     - Je pense que mon compte a été banni.
-    - Pourquoi je ne peux plus me connecter à mon profil ?
-    - Mon accès a été coupé sans raison.
     - Vérifie si mon compte est suspendu.
-    - Peux-tu vérifier le statut de mon compte ?
     - mon compte é bloké jsp pk
-    - jss banni pr rien
-    - Je veux comprendre pourquoi mon compte est restreint.
-    - Mon compte semble désactivé.
-    - On dirait que mon compte a été suspendu.
 
     - Mon compte est bloqué pour conformité.
     - Ça dit que mon compte est sous contrôle, je ne comprends pas.
     - Je ne peux plus rien faire, c'est écrit compliance hold.
-    - Pourquoi mon compte est en vérification de conformité ?
     - Vérifie mon blocage de conformité.
     - Je ne peux plus retirer, ça parle de compliance.
     - Mon compte semble sous contrôle de conformité.
-    - Pourquoi ce blocage compliance sur mon compte ?
-    - Ça bloque tout à cause d'un contrôle de conformité.
-    - Peux-tu vérifier pourquoi mon compte est sous contrôle ?
 
-    - J'ai supprimé mon compte par erreur.
     - Comment récupérer mon compte supprimé ?
-    - Mon compte affiche encore comme supprimé.
-    - Je n'arrive pas à réactiver mon compte.
-    - Est-ce que je peux encore annuler la suppression de mon compte ?
-    - Vérifie l'état de la suppression de mon compte.
     - J'ai supprimé mon compte, je veux le récupérer.
-    - Combien de temps ai-je pour annuler la suppression ?
-    - Mon compte est-il définitivement supprimé ?
-    - jc supprimé mon compte par erreur comment le récupérer
 
     - Le compte de mon enfant est toujours bloqué.
-    - Le parent n'a jamais reçu la demande de consentement.
     - La demande de consentement parental a expiré.
     - Le consentement de mes parents a été refusé.
     - Vérifie où en est le consentement parental.
     - Pourquoi le compte de mon enfant reste verrouillé ?
-    - Je n'ai reçu aucune demande de consentement pour mon compte.
     - Est-ce que le consentement parental a été validé ?
-    - Le compte de ma fille est bloqué depuis des jours à cause du consentement parental.
-    - Bonjour, avant d'ouvrir quoi que ce soit, j'aimerais qu'on essaie de diagnostiquer précisément ce qui ne fonctionne pas sur mon compte.
 
     # Ajouts suite a la grande vague de tests conversationnels (2026-07) :
     # deux trous structurels identifies par analyse du corpus complet --
@@ -1907,25 +1719,14 @@ nlu:
     # atterrissait donc chez un voisin plutot qu'ici, faute de precedent
     # d'entrainement. Un representant par probleme, pas une liste exhaustive.
     - retrait svp
-    - retrait bloqué svp
-    - kyc svp
     - recharge svp
-    - ma recharge svp
-    - cadeau svp
-    - mon cadeau svp
-    - compte bloqué svp
     - compte suspendu svp
-    - conformité svp
     - blocage conformité svp
     - suppression compte svp
     - compte supprimé svp
-    - consentement parental svp
     - retrait stp
     - kyc stp
-    - Excusez-moi, mon retrait est bloqué. Pouvez-vous m'aider ?
-    - Excusez-moi, mon KYC est rejeté. Pouvez-vous m'aider ?
     - Excusez-moi, ma recharge n'est jamais arrivée. Pouvez-vous m'aider ?
-    - Excusez-moi, mon compte semble suspendu. Pouvez-vous m'aider ?
     - S'il vous plaît, mon cadeau envoyé n'est jamais arrivé. Pouvez-vous m'aider ?
     - S'il vous plaît, un contrôle de conformité bloque mon compte. Pouvez-vous m'aider ?
 
@@ -1935,9 +1736,6 @@ nlu:
     - aucune notification ne s'affiche depuis plusieurs heures
     - les notifications ont complètement cessé d'arriver
     - je ne reçois plus la moindre alerte de l'application
-    - plus aucune notification ne m'arrive depuis hier
-    - ma demande de retrait n'a reçu aucune réponse
-    - mon retrait est en attente depuis des jours sans nouvelles
     - ma demande de retrait n'avance plus du tout
     - toujours aucun retour sur ma demande de retrait
 
