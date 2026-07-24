@@ -22,7 +22,7 @@ from app.models import Base
 
 class DiagnosticSession(Base):
     __tablename__ = "diagnostic_sessions"
-    __table_args__ = {"schema": "diagnostic"}
+    __table_args__ = {"schema": "ia"}
 
     # session_id (pas un UUID genere ici) : c'est le meme identifiant que
     # Rasa utilise cote conversation (tracker.sender_id / session_id du
@@ -48,7 +48,7 @@ class DiagnosticSession(Base):
 
 class DiagnosticAuditLog(Base):
     __tablename__ = "diagnostic_audit_log"
-    __table_args__ = {"schema": "diagnostic"}
+    __table_args__ = {"schema": "ia"}
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     trace_id = Column(String, nullable=False)

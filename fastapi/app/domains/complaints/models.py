@@ -9,7 +9,7 @@ from app.models import Base
 
 class Complaint(Base):
     __tablename__ = "complaints"
-    __table_args__ = {"schema": "complaints"}
+    __table_args__ = {"schema": "ia"}
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     ticket_id = Column(String, nullable=False, unique=True)

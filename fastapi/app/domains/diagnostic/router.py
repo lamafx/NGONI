@@ -40,7 +40,7 @@ def search_diagnostic(payload: DiagnosticQuery, db: Session = Depends(get_db)):
     # AsyncSession/await, ce qui levait un TypeError a chaque appel (Session
     # n'est pas awaitable). Aligne sur le meme pattern synchrone que le reste
     # de ce fichier (escalate_diagnostic, get_pipeline...).
-    query = text('SELECT symptom, diagnosis, next_steps FROM diagnostic_records WHERE symptom ILIKE :symptom LIMIT 1')
+    query = text('SELECT symptom, diagnosis, next_steps FROM ia.diagnostic_records WHERE symptom ILIKE :symptom LIMIT 1')
     result = db.execute(query, {'symptom': f'%{payload.symptom}%'})
     row = result.first()
     if row is None:

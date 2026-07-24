@@ -21,7 +21,7 @@ from app.models import Base
 
 class AgentAction(Base):
     __tablename__ = "agent_actions"
-    __table_args__ = {"schema": "audit"}
+    __table_args__ = {"schema": "ia"}
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     # Absent pour les actions sans notion de trace_id (ex. reponse FAQ) --

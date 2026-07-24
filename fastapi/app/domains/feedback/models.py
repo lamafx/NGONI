@@ -19,7 +19,7 @@ class RatingInteractionType(str, enum.Enum):
 
 class FeedbackEntry(Base):
     __tablename__ = "entries"
-    __table_args__ = {"schema": "feedback"}
+    __table_args__ = {"schema": "ia"}
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     # Texte libre (pas un SAEnum Postgres) : meme raisonnement que
@@ -48,7 +48,7 @@ class ResponseRating(Base):
     # apres coup QUELLES reponses sont jugees utiles ou non, pas seulement un
     # score global.
     __tablename__ = "response_ratings"
-    __table_args__ = {"schema": "feedback"}
+    __table_args__ = {"schema": "ia"}
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     # Texte libre (meme raisonnement que FeedbackEntry.type) : 'faq'

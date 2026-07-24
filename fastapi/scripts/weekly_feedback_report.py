@@ -1,5 +1,5 @@
 """Boucle de feedback hebdomadaire (docs/16-audit-faq-nlu-2026-07.md 16.7,
-docs/taches.txt P1 #5) : audit.agent_actions et feedback.response_ratings
+docs/taches.txt P1 #5) : ia.agent_actions et ia.response_ratings
 journalisent deja chaque recherche FAQ (voir record_faq_lookup,
 app/domains/audit/service.py) et chaque notation utile/pas utile (voir
 ActionRecordResponseRating, rasa/actions/feedback.py) -- mais cette donnee
@@ -8,7 +8,7 @@ n'etait exploitee nulle part avant ce script. Deux sections :
 1. Questions posees sans reponse FAQ trouvee (action_type='faq_answer_not_found'),
    triees par frequence -- des candidats naturels a de futurs exemples
    d'entrainement ask_faq ou de nouvelles entrees de catalogue.
-2. Reponses notees "pas utile" (feedback.response_ratings, is_useful=false),
+2. Reponses notees "pas utile" (ia.response_ratings, is_useful=false),
    avec le score de similarite de la recherche qui les a servies quand il
    est retrouvable -- pas de cle etrangere entre les deux tables (convention
    du projet, voir docs/15-modele-donnees.md), jointure heuristique sur le
@@ -44,7 +44,7 @@ def _not_found_questions(session, since: datetime, limit: int = 20):
         text(
             """
             SELECT lower(trim(input_data->>'question')) AS question, count(*) AS occurrences
-            FROM audit.agent_actions
+            FROM ia.agent_actions
             WHERE domain = 'faq'
               AND action_type = 'faq_answer_not_found'
               AND created_at >= :since
@@ -64,7 +64,7 @@ def _not_useful_ratings_with_score(session, since: datetime, limit: int = 20):
         text(
             """
             SELECT question, answer, created_at
-            FROM feedback.response_ratings
+            FROM ia.response_ratings
             WHERE interaction_type = 'faq'
               AND is_useful = false
               AND created_at >= :since
@@ -86,7 +86,7 @@ def _not_useful_ratings_with_score(session, since: datetime, limit: int = 20):
             text(
                 """
                 SELECT output_data->>'score' AS score
-                FROM audit.agent_actions
+                FROM ia.agent_actions
                 WHERE domain = 'faq'
                   AND action_type = 'faq_answer_served'
                   AND lower(trim(input_data->>'question')) = lower(trim(:question))

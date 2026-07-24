@@ -33,13 +33,13 @@ class FaqStatus(str, enum.Enum):
 
 class FaqItem(Base):
     __tablename__ = "faq_items"
-    __table_args__ = {"schema": "core"}
+    __table_args__ = {"schema": "ia"}
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     question = Column(Text, nullable=False)
     answer = Column(Text, nullable=False)
     category = Column(
-        SAEnum(FaqCategory, name="FaqCategory", schema="core", create_type=False),
+        SAEnum(FaqCategory, name="FaqCategory", schema="ia", create_type=False),
         nullable=False,
     )
     keywords = Column(ARRAY(Text), nullable=False, default=list)
@@ -50,7 +50,7 @@ class FaqItem(Base):
     updated_at = Column(DateTime, nullable=False, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
     slug = Column(String(160), nullable=False, unique=True)
     status = Column(
-        SAEnum(FaqStatus, name="FaqStatus", schema="core", create_type=False),
+        SAEnum(FaqStatus, name="FaqStatus", schema="ia", create_type=False),
         nullable=False,
         default=FaqStatus.PUBLISHED,
     )

@@ -1,5 +1,5 @@
 """Recalcule embedding = embed_passage(question) pour toutes les lignes de
-core.faq_items avec le modele d'embedding COURANT (app.shared.embeddings).
+ia.faq_items avec le modele d'embedding COURANT (app.shared.embeddings).
 
 A executer une seule fois apres un changement de modele d'embedding (voir
 migrations/0001_e5_base_upgrade.sql, etape 2) -- deux vecteurs ne sont
@@ -33,7 +33,7 @@ def main() -> None:
         items = repository.list_all()
         total = len(items)
         if total == 0:
-            print("Aucune ligne dans core.faq_items, rien a faire.")
+            print("Aucune ligne dans ia.faq_items, rien a faire.")
             return
         for index, item in enumerate(items, start=1):
             embedding = embed_passage(item.question)
