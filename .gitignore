@@ -82,3 +82,8 @@ rasa/.keras/
 
 # Frontend (module independant, voir frontend/README le cas echeant)
 frontend/
+
+# Artefacts de developpement / experimentation (non necessaires en prod)
+scratchpad/
+rasa/results/
+rasa/experiment/
