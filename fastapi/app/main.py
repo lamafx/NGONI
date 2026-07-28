@@ -27,22 +27,40 @@ logging.basicConfig(
 
 load_dotenv(Path(__file__).resolve().parents[1] / '.env')
 
-from .domains.faq.router import router as faq_router
-from .domains.complaints.router import router as complaints_router, create_ticket as complaints_create_ticket
-from .domains.complaints.admin_router import router as complaints_admin_router
-from .domains.feedback.router import router as feedback_router
-from .domains.diagnostic.registry import REGISTRY_POLL_INTERVAL_SECONDS
-from .domains.diagnostic.router import router as diagnostic_router, get_registry
-from .domains.audit.router import router as audit_router
-from .domains.audit.service import record_faq_lookup
-from .shared.admin_auth import warn_if_admin_secret_missing
-from .shared.rate_limit import InMemoryRateLimitMiddleware
-from .shared.embeddings.router import router as embeddings_router
-from .shared.embeddings import get_embedding_model
-from .domains.faq.service import FaqService
-from .domains.faq.repository import FaqRepository
-from .domains.complaints.schemas import TicketCreateResponse
-from .database import get_db
+try:
+    from .domains.faq.router import router as faq_router
+    from .domains.complaints.router import router as complaints_router, create_ticket as complaints_create_ticket
+    from .domains.complaints.admin_router import router as complaints_admin_router
+    from .domains.feedback.router import router as feedback_router
+    from .domains.diagnostic.registry import REGISTRY_POLL_INTERVAL_SECONDS
+    from .domains.diagnostic.router import router as diagnostic_router, get_registry
+    from .domains.audit.router import router as audit_router
+    from .domains.audit.service import record_faq_lookup
+    from .shared.admin_auth import warn_if_admin_secret_missing
+    from .shared.rate_limit import InMemoryRateLimitMiddleware
+    from .shared.embeddings.router import router as embeddings_router
+    from .shared.embeddings import get_embedding_model
+    from .domains.faq.service import FaqService
+    from .domains.faq.repository import FaqRepository
+    from .domains.complaints.schemas import TicketCreateResponse
+    from .database import get_db
+except ImportError:  # pragma: no cover - support running as `uvicorn main:app`
+    from domains.faq.router import router as faq_router
+    from domains.complaints.router import router as complaints_router, create_ticket as complaints_create_ticket
+    from domains.complaints.admin_router import router as complaints_admin_router
+    from domains.feedback.router import router as feedback_router
+    from domains.diagnostic.registry import REGISTRY_POLL_INTERVAL_SECONDS
+    from domains.diagnostic.router import router as diagnostic_router, get_registry
+    from domains.audit.router import router as audit_router
+    from domains.audit.service import record_faq_lookup
+    from shared.admin_auth import warn_if_admin_secret_missing
+    from shared.rate_limit import InMemoryRateLimitMiddleware
+    from shared.embeddings.router import router as embeddings_router
+    from shared.embeddings import get_embedding_model
+    from domains.faq.service import FaqService
+    from domains.faq.repository import FaqRepository
+    from domains.complaints.schemas import TicketCreateResponse
+    from database import get_db
 
 logger = logging.getLogger(__name__)
 

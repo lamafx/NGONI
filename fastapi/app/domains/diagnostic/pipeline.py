@@ -23,7 +23,10 @@ import time
 import uuid
 from typing import Union
 
-from app.shared.logging_utils import redact_entities
+try:
+    from app.shared.logging_utils import redact_entities
+except ImportError:  # pragma: no cover - support running as `main`
+    from shared.logging_utils import redact_entities
 
 from .adapter import DiagnosticInvocationError, HttpDiagnosticAdapter
 from .audit_repository import DiagnosticAuditRepository

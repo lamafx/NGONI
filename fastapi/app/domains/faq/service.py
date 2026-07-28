@@ -5,7 +5,10 @@ from typing import Dict, List, NamedTuple, Optional, Sequence, Tuple
 
 from langdetect import LangDetectException, detect
 
-from app.shared.embeddings import embed_passage, embed_query
+try:
+    from app.shared.embeddings import embed_passage, embed_query
+except ImportError:  # pragma: no cover - support running as `main`
+    from shared.embeddings import embed_passage, embed_query
 
 from .models import FaqCategory, FaqItem
 from .repository import FaqRepository

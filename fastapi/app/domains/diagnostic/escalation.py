@@ -3,8 +3,12 @@ existant (voir docs/diagnostic-roadmap.md, Phase 3). Reutilise ComplaintService
 tel quel -- la roadmap notait des le depart que "/tickets/create existe deja
 cote FastAPI, reutilisable tel quel pour l'escalade"."""
 
-from app.domains.complaints.schemas import TicketCreateRequest, TicketCreateResponse
-from app.domains.complaints.service import ComplaintService
+try:
+    from app.domains.complaints.schemas import TicketCreateRequest, TicketCreateResponse
+    from app.domains.complaints.service import ComplaintService
+except ImportError:  # pragma: no cover - support running as `main`
+    from domains.complaints.schemas import TicketCreateRequest, TicketCreateResponse
+    from domains.complaints.service import ComplaintService
 
 from .contracts import EscalateOutcome
 

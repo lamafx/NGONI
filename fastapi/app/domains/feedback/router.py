@@ -3,7 +3,10 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from app.database import get_db
+try:
+    from app.database import get_db
+except ImportError:  # pragma: no cover - support running as `main`
+    from database import get_db
 from .schemas import (
     FeedbackCreateRequest,
     FeedbackResponse,

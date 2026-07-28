@@ -1,0 +1,7 @@
+rasa[spacy]==3.6.19
+spacy==3.4.4
+scikit-learn==1.1.3
+numpy==1.23.5
+joblib
+PyYAML
+requests

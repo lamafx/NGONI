@@ -9,8 +9,12 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
-from app.database import get_db
-from app.shared.admin_auth import get_admin_id, require_admin_auth
+try:
+    from app.database import get_db
+    from app.shared.admin_auth import get_admin_id, require_admin_auth
+except ImportError:  # pragma: no cover - support running as `main`
+    from database import get_db
+    from shared.admin_auth import get_admin_id, require_admin_auth
 
 from .schemas import AdminComplaintStatusUpdateRequest, ComplaintResponse
 from .service import ComplaintService

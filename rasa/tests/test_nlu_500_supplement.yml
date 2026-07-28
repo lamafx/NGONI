@@ -1,0 +1,148 @@
+version: '3.1'
+nlu:
+- intent: ask_faq
+  examples: "|\n    - Comment on active un compte NGONI la premiere fois ?\n    -\
+    \ Faut-il un document particulier pour s'inscrire ?\n    - L'appli marche sans\
+    \ reseau ou pas du tout ?\n    - Comment on repare son mot de passe oublie ?\n\
+    \    - Y a-t-il une limite au nombre de pieces qu'on peut avoir ?\n    - Comment\
+    \ ca se passe si je change de telephone ?\n    - Est-ce que le service est gratuit\
+    \ ou payant ?\n    - Comment je fais pour voir mes anciens achats ?\n    - Quelles\
+    \ sont les etapes pour retirer de l'argent ?\n    - On peut payer avec quoi exactement\
+    \ sur NGONI ?\n    - Comment on ajoute un moyen de paiement ?\n    - Ca sert a\
+    \ quoi le NGONI Plus concretement ?\n    - Comment on devient createur sur la\
+    \ plateforme ?\n    - Quelles infos il faut donner pour la verification d'identite\
+    \ ?\n    - Est ce qu'il y a des frais caches quelque part ?\n    - kess ki fo\
+    \ pr sinscrire sur lappli\n    - eske on doi payé pr utilisé ngoni\n    - Je voudrais\
+    \ savoir, dans les grandes lignes, comment se passe la creation d'un compte sur\
+    \ cette plateforme.\n    - Pourriez-vous m'expliquer simplement a quoi correspondent\
+    \ les pieces dans l'application ?\n    - Sans etre dans une situation particuliere,\
+    \ j'aimerais comprendre le fonctionnement general des retraits.\n    - Une question\
+    \ toute simple : comment se procurer des pieces sur NGONI ?"
+- intent: diagnostic
+  examples: "|\n    - mon compte affiche un solde a zero alors que j'avais de l'argent\
+    \ dessus\n    - la verification de mon identite tourne en boucle sans jamais aboutir\n\
+    \    - impossible d'ouvrir la messagerie, ca plante direct\n    - j'ai recu un\
+    \ message d'erreur bizarre en voulant payer\n    - mon numero de telephone n'est\
+    \ plus reconnu par l'application\n    - la video que j'ai postee a disparu toute\
+    \ seule\n    - mon virement é resté en attente depui 3 jour\n    - Depuis la derniere\
+    \ mise a jour, je n'arrive plus du tout a me connecter a mon compte, meme avec\
+    \ le bon mot de passe.\n    - Ca fait deux fois que j'essaie de retirer mes gains\
+    \ et a chaque fois ca echoue sans aucune explication.\n    - mon solde a baissé\
+    \ tou seul sans ke je fass rien\n    - g fé un depot mé rien narive sur mon compte\n\
+    \    - le bouton pour envoyer un cadeau ne repond plus du tout\n    - j'ai ete\
+    \ facture deux fois pour le meme achat de pieces\n    - impossible de valider\
+    \ mon numero avec le code recu par SMS\n    - l'ecran reste bloque sur le logo\
+    \ au demarrage de l'app"
+- intent: create_reclamation
+  examples: "|\n    - je voudrais qu'un humain regarde mon dossier stp c'est urgent\n\
+    \    - pouvez vous escalader mon probleme a quelqu'un de competent\n    - ca fait\
+    \ trois fois que j'ecris sans reponse, je veux un ticket officiel\n    - merci\
+    \ de transmettre ca directement a un responsable\n    - je veux formellement me\
+    \ plaindre du traitement de mon compte\n    - ouvrez moi un dossier je n'en peux\
+    \ plus de ce probleme\n    - je souhaite qu'une personne reelle prenne en charge\
+    \ ma demande\n    - Je vous demande d'ouvrir formellement une reclamation concernant\
+    \ ce probleme qui dure depuis trop longtemps maintenant.\n    - Pouvez-vous enregistrer\
+    \ officiellement ma demande afin qu'un conseiller me recontacte rapidement ?\n\
+    \    - creez moi un dossier stp j'en peux plus\n    - il me faut absolument un\
+    \ numero de suivi pour ce probleme"
+- intent: greet
+  examples: "|\n    - Salut toute l'equipe\n    - Bien le bonjour a vous\n    - Hola\
+    \ que tal\n    - re coucou\n    - bonsoir tt le monde ici\n    - Bonjour, je vous\
+    \ ecris pour la premiere fois.\n    - Coucou, une petite question si vous avez\
+    \ un instant.\n    - hey la team ngoni\n    - bjr a tous"
+- intent: goodbye
+  examples: "|\n    - allez j'y vais, merci pour tout\n    - c'est noté, merci et\
+    \ bonne continuation\n    - parfait, je vous laisse, au revoir\n    - mrc pr votr\
+    \ éd bi1to\n    - jvous kit la, mrc\n    - Merci infiniment pour votre patience,\
+    \ je vous souhaite une excellente journee.\n    - Ca repond a tout, merci beaucoup\
+    \ et a une prochaine fois.\n    - bon voila g tou c ki me fo mrc"
+- intent: bot_challenge
+  examples: "|\n    - dis moi franchement, c du code ou un vrai humain\n    - t branché\
+    \ a une IA ou t programé a la main\n    - Honnetement, es-tu capable de comprendre\
+    \ vraiment ce que je te dis ou tu suis juste un script ?\n    - ya un etre humain\
+    \ qui lit mes messages en ce moment ou pas du tout\n    - t1 robo ou pa"
+- intent: out_of_scope
+  examples: "|\n    - donne moi un conseil pour bien dormir\n    - il fait quel temps\
+    \ chez toi\n    - koman sapel le president actuel"
+- intent: inappropriate_language
+  examples: "|\n    - dégage de la avec tes reponses a la con\n    - c'est une honte\
+    \ votre service, bande d'incapables\n    - sale bot inutile\n    - vous vous foutez\
+    \ vraiment de la gueule du monde la\n    - Franchement c'est lamentable, votre\
+    \ application ne sert absolument a rien du tout."
+- intent: suggestion
+  examples: "|\n    - ce serait cool d'avoir des stats plus detaillees sur mes gains\n\
+    \    - proposition : un mode nuit pour pas se cramer les yeux le soir\n    - Il\
+    \ serait interessant d'ajouter un systeme de badges pour recompenser les utilisateurs\
+    \ fideles.\n    - vs devriez ajouté une fonction pr exporté mé donné\n    - ce\
+    \ serait top d'avoir des alertes personnalisables selon le montant\n    - je pense\
+    \ qu'un tuto rapide au demarrage aiderait bcp les nouveaux"
+- intent: plainte
+  examples: "|\n    - c'est franchement decevant comme experience depuis le debut\n\
+    \    - je suis lasse de devoir toujours repeter la meme chose\n    - vraiment\
+    \ pas satisfait de la reactivite du service\n    - Cela devient vraiment penible\
+    \ de ne jamais avoir de reponse claire a mes questions.\n    - je m'attendais\
+    \ a bien mieux honnetement\n    - ras le bol de ces bugs a repetition franchement"
+- intent: ask_capabilities
+  examples: "|\n    - concretement tu m'aides sur quoi la dedans\n    - tu gere quel\
+    \ type de demande en fait\n    - Pourrais-tu me detailler precisement l'etendue\
+    \ de ce que tu es capable de faire pour moi ?"
+- intent: rate_response_useful
+  examples: "|\n    - ah oui voila exactement ce qu'il me fallait merci\n    - nickel\
+    \ ca repond bien a ma question\n    - super clair, merci pour cette explication\n\
+    \    - Cette reponse est exactement ce que je cherchais, un grand merci a vous.\n\
+    \    - impec, tout est clair maintenant"
+- intent: rate_response_not_useful
+  examples: "|\n    - non ca ne repond pas du tout a ce que je demandais\n    - bof,\
+    \ pas vraiment ce que j'attendais comme reponse\n    - ca n'a aucun rapport avec\
+    \ ma question en fait\n    - Cette reponse ne correspond absolument pas a ce que\
+    \ je cherchais a savoir.\n    - pas clair du tout cette explication"
+- intent: browse_faq
+  examples: "|\n    - t'as des exemples de questions que je pourrais poser\n    -\
+    \ montre moi un peu ce qu'on peut demander\n    - propose moi des idees de questions\
+    \ frequentes\n    - Pourrais-tu m'indiquer quelques exemples de questions couramment\
+    \ posees ?"
+- intent: select_faq_category
+  examples: "|\n    - Des questions sur le controle parental stp\n    - Montre moi\
+    \ ce qui concerne les pieces\n    - Je m'interesse aux questions sur mon compte"
+- intent: ask_complaint_status
+  examples: "|\n    - est ce que quelqu'un a enfin regarde mon dossier depuis\n  \
+    \  - toujours aucune reponse concernant le ticket que j'avais ouvert la semaine\
+    \ derniere\n    - vous en etes ou avec le probleme que j'avais signale\n    -\
+    \ Cela fait maintenant plusieurs jours que j'attends des nouvelles de ma reclamation,\
+    \ avez-vous une mise a jour ?\n    - sa avanc ou pa mon dossié\n    - kelkun a\
+    \ traité mon tiket ou tjr pa\n    - quelqu'un peut me dire si mon cas a ete traite\
+    \ entre temps\n    - ma demande envoyee la semaine derniere a-t-elle ete examinee"
+- intent: affirm
+  examples: "|\n    - ouais grave c'est ca\n    - carrement banco\n    - impec on\
+    \ fait comme ca alors\n    - Tout a fait, c'est exactement la situation que je\
+    \ rencontre en ce moment.\n    - dak c bon vazy\n    - ouep ca me va nickel"
+- intent: deny
+  examples: "|\n    - non serieux c'est pas ca du tout\n    - nan laisse tomber finalement\n\
+    \    - absolument pas d'accord avec ce resume\n    - Non, ce n'est vraiment pas\
+    \ la bonne information, il y a une erreur quelque part.\n    - nn c pa sa"
+- intent: ask_capabilities
+  examples: "|\n    - t'es cense m'aider sur quels sujets au juste\n    - resume moi\
+    \ en 2 mots ce que tu sais faire\n    - c koi les trucs ou tu peux vraiment m'etre\
+    \ utile\n    - Dis-moi clairement quels types de demandes tu es en mesure de traiter."
+- intent: inappropriate_language
+  examples: "|\n    - vos reponses sont vraiment minables franchement\n    - j'en\
+    \ ai vraiment marre de ce service pourri\n    - quelle bande d'incompetents serieusement\n\
+    \    - c1 servic 2 merd franchman"
+- intent: plainte
+  examples: "|\n    - honnetement je suis vraiment decu par cette experience\n   \
+    \ - Je dois dire que je suis assez mecontent de la maniere dont mon dossier a\
+    \ ete traite."
+- intent: rate_response_useful
+  examples: "|\n    - ah nickel merci c'est exactement ca\n    - parfait comme reponse\
+    \ merci beaucoup\n    - Voila exactement l'information dont j'avais besoin, merci\
+    \ infiniment.\n    - top sa maide grave"
+- intent: rate_response_not_useful
+  examples: "|\n    - pas vraiment ce que j'esperais comme reponse\n    - aucun rapport\
+    \ avec ce que je demandais en fait"
+- intent: browse_faq
+  examples: "|\n    - donne moi quelques exemples de questions que je pourrais te\
+    \ poser\n    - propose moi des sujets sur lesquels je pourrais m'informer\n  \
+    \  - Pourrais-tu me suggerer quelques questions types pour commencer ?\n    -\
+    \ montre voir des exemples stp"
+- intent: select_faq_category
+  examples: "|\n    - Des questions sur la securite du compte stp"

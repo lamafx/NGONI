@@ -3,8 +3,12 @@ from typing import List, Optional
 
 from sqlalchemy.orm import Session
 
-from app.domains.complaints.schemas import TicketCreateRequest
-from app.domains.complaints.service import ComplaintService
+try:
+    from app.domains.complaints.schemas import TicketCreateRequest
+    from app.domains.complaints.service import ComplaintService
+except ImportError:  # pragma: no cover - support running as `main`
+    from domains.complaints.schemas import TicketCreateRequest
+    from domains.complaints.service import ComplaintService
 
 from .models import FeedbackEntry, FeedbackType, RatingInteractionType, ResponseRating
 from .repository import FeedbackRepository, ResponseRatingRepository

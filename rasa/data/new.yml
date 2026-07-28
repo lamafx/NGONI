@@ -1,0 +1,314 @@
+version: "3.1"
+nlu:
+  - intent: ask_faq
+    examples: |
+      - Pourquoi utiliser cette application ?
+      - Quelles sont les options disponibles ?
+      - Comment ça marche les retraits ?
+      - Comment récupérer l'accès à mon compte si j'ai oublié mon mot de passe ?
+      - Quelle est la démarche pour changer de mot de passe ?
+      - Comment vérifier mon identité ?
+      - Comment fonctionne le système de récompense ?
+      - Comment on gagne des pièces sur l'application ?
+      - Quelles sont les moyens de paiement disponibles ?
+      - Je voudrais comprendre les services disponibles.
+      - Je veux comprendre le fonctionnement général.
+      - Comment créer un compte NGONI ?
+      - Comment ouvrir un compte sur NGONI ?
+      - Comment m'inscrire sur NGONI ?
+      - Je souhaite créer un compte.
+      - Quelle est la procédure d'inscription ?
+      - Comment fonctionne l'inscription ?
+      - Comment accéder à mon compte ?
+      - Comment me connecter ?
+      - J'ai oublié comment me connecter.
+      - Comment réinitialiser mon mot de passe ?
+      - Comment modifier mon mot de passe ?
+      - Puis-je changer mon numéro de téléphone ?
+      - Comment mettre à jour mes informations personnelles ?
+      - Comment compléter mon profil ?
+      - À quoi sert NGONI ?
+      - Qu'est-ce que NGONI ?
+      - Peux-tu me présenter NGONI ?
+      - Explique-moi le fonctionnement de NGONI.
+      - Comment fonctionne NGONI ?
+      - Comment acheter des pièces ?
+      - Où acheter des pièces ?
+      - Quels sont les moyens d'acheter des pièces ?
+      - Comment obtenir des pièces ?
+      - Comment recharger mon portefeuille de pièces ?
+      - Quels moyens de paiement sont acceptés ?
+      - Comment utiliser mes pièces ?
+      - À quoi servent les pièces ?
+      - Comment consulter mon solde de pièces ?
+      - Comment savoir combien de pièces il me reste ?
+      - Comment effectuer un retrait ?
+      - Comment demander un retrait ?
+      - Quel est le délai d'un retrait ?
+      - Comment suivre mon retrait ?
+      - Comment fonctionne le système de retrait ?
+      - Comment gagner des pièces ?
+      - Existe-t-il plusieurs façons de gagner des pièces ?
+      - Comment fonctionne le système de récompenses ?
+      - Comment consulter mon historique ?
+      - Où voir mes transactions ?
+      - Comment vérifier mes opérations ?
+      - Comment contacter le support ?
+      - Comment obtenir de l'aide ?
+      - Où puis-je trouver les informations sur NGONI ?
+      - Je voudrais en savoir plus sur les services proposés.
+      - Peux-tu répondre à une question concernant NGONI ?
+      - J'aimerais avoir des informations sur NGONI.
+      - Je voudrais comprendre comment fonctionne la plateforme.
+      - Pouvez-vous m'expliquer le fonctionnement de NGONI ?
+      - J'ai quelques questions sur NGONI.
+      - Je souhaite obtenir des renseignements sur vos services.
+      - Je cherche des informations concernant NGONI.
+      - J'aimerais mieux comprendre votre application.
+      - Peux-tu m'aider à comprendre certaines fonctionnalités ?
+      - Je veux en apprendre davantage sur NGONI.
+      - J'aimerais savoir comment utiliser l'application.
+      - Comment utiliser NGONI pour la première fois ?
+      - Que puis-je faire avec NGONI ?
+      - Quelles sont les principales fonctionnalités de NGONI ?
+      - Quels services sont proposés par NGONI ?
+      - Que permet de faire l'application ?
+      - Comment profiter des services NGONI ?
+      - Comment démarrer avec NGONI ?
+      - Existe-t-il un guide d'utilisation ?
+      - Comment apprendre à utiliser la plateforme ?
+      - Comment fonctionne le système de pièces ?
+      - Peux-tu expliquer le système de pièces ?
+      - Je ne comprends pas le fonctionnement des pièces.
+      - Comment les pièces sont-elles utilisées ?
+      - À quoi correspondent les pièces ?
+      - Comment connaître le prix des pièces ?
+      - Combien coûtent les pièces ?
+      - Où consulter les tarifs des pièces ?
+      - Comment fonctionne l'achat de pièces ?
+      - Comment récupérer des pièces ?
+      - Peut-on obtenir des pièces gratuitement ?
+      - Comment fonctionne le portefeuille ?
+      - Où consulter mon portefeuille ?
+      - Comment voir mon solde ?
+      - Comment consulter mes informations de compte ?
+      - Où trouver mes informations personnelles ?
+      - Comment modifier mon profil ?
+      - Puis-je changer mes informations personnelles ?
+      - Comment mettre à jour mon compte ?
+      - Comment consulter mes récompenses ?
+      - Comment sont calculées les récompenses ?
+      - Comment fonctionne le programme de récompenses ?
+      - Comment vérifier mes récompenses ?
+      - Où consulter l'historique de mes opérations ?
+      - Comment retrouver mes anciennes transactions ?
+      - Où voir mes retraits ?
+      - Comment consulter mes achats ?
+      - Où voir toutes mes opérations ?
+      - Comment accéder à l'historique ?
+      - Comment retrouver une ancienne transaction ?
+      - Quels sont les délais de traitement ?
+      - En combien de temps une opération est-elle traitée ?
+      - Où puis-je lire les conditions d'utilisation ?
+      - Existe-t-il une foire aux questions ?
+      - Où trouver les réponses aux questions fréquentes ?
+      - Où puis-je obtenir plus d'informations ?
+      - Qui puis-je contacter pour avoir des renseignements ?
+      - Comment joindre le support ?
+      - Le support est-il disponible tous les jours ?
+      - Quels sont vos horaires d'assistance ?
+      - Où puis-je consulter les informations officielles ?
+      - Je souhaite avoir une précision sur un service.
+      - J'ai besoin d'une explication concernant une fonctionnalité.
+      - Pouvez-vous répondre à une question sur l'application ?
+      - Bonjour c'est quoi NGONI ?
+      - Salut je veux comprendre comment ça marche
+      - Hello comment utiliser l'application ?
+      - Bonjour j'ai une question sur les pièces
+      - Salut, comment fonctionne un compte sur l'application ?
+      - Bonsoir comment acheter des pièces ?
+      - Hey je veux savoir comment ça marche NGONI
+      - Coucou c'est quoi le système de récompense ?
+      - Bonjour je ne comprends pas NGONI
+      - Salut comment on utilise le portefeuille ?
+      - j'ai une question sur le fonctionnement de l'appli
+      - cmt on fait un retrait ?
+      - comment recharger mon portefeuille ?
+      - je cherche une info sur les récompenses
+      - comment voir mes pièces ?
+      - j'ai besoin d'aide pour comprendre l'appli
+      - comment s'inscrire vite ?
+      - y a t'il un tuto ?
+      - comen sa marche ngoni
+      - koman on peu retirer de largent
+      - c'est koi ngoni exactement
+      - commen fair pr acheter des piece
+      - je c pa comment sinscrire
+      - pk le retrait prend du tem
+      - kes ce que ngoni plus
+      - conment on gagne des piece
+      - eske on peu utiliser ngoni sur android
+      - Bonjour, je découvre l'application et j'aimerais comprendre en détail comment fonctionne le système de pièces avant de faire mon premier achat, s'il vous plaît.
+      - Je voudrais savoir, de manière générale et sans que ce soit lié à un souci particulier, comment se déroule normalement le processus de retrait d'argent sur NGONI.
+      - Avant d'utiliser l'application pour la première fois, je voudrais comprendre comment fonctionnent les pièces, comment on les achète et comment on les utilise pour envoyer des cadeaux.
+      - Je me demandais, puisque je suis nouveau sur la plateforme, quelles étaient les différentes façons de gagner des pièces en dehors de l'achat direct.
+      - Est-ce que vous pourriez m'indiquer, de façon générale, quel est le délai moyen de traitement d'un retrait, juste pour que je sache à quoi m'attendre la prochaine fois ?
+      - Comment fonctionne le contrôle parental ?
+      - C'est quoi le contrôle parental sur l'application ?
+      - Comment activer le contrôle parental pour mon enfant ?
+      - À quoi sert le contrôle parental sur NGONI ?
+      - Comment faire une suggestion d'amélioration ?
+      - Où proposer une idée d'amélioration pour l'application ?
+      - Comment envoyer une suggestion à l'équipe NGONI ?
+      - Existe-t-il un moyen de proposer une amélioration ?
+      - Comment gagner des revenus grâce à mon audience ?
+      - Comment monétiser mon contenu sur NGONI ?
+      - Quelles sont les sources de revenus possibles sur NGONI ?
+      - Comment un créateur peut-il gagner de l'argent sur la plateforme ?
+      - Comment supprimer mon compte définitivement ?
+      - C'est quoi les lives privés payants ?
+      - C'est quoi la différence entre le wallet et les pièces ?
+      - Quels documents faut-il pour le KYC ?
+      - Peut-on avoir un compte sans vérification ?
+      - Combien de temps gardez-vous mes données personnelles ?
+      - Est-ce que je peux avoir plusieurs comptes ?
+      - Comment contacter le support directement ?
+      - Puis-je changer mon email ?
+      - Comment je fais pour vérifier mon identité ?
+      - Bonjour, quel est le montant minimum de retrait, merci d'avance.
+      - Bonjour, puis-je changer mon email, merci d'avance.
+      - Bonjour, est-ce que mes pièces expirent un jour, merci d'avance.
+      - Bonjour, comment puis-je vérifier mon identité, merci d'avance.
+      - Bonjour, comment fonctionne le parrainage, merci d'avance.
+      - Bonjour, pourriez-vous m'indiquer comment recharger mon compte, merci.
+      - Je ne comprends pas comment ça marche
+      - cmt on recupère un compte si on a zapé le mdp
+      - jarive pa a me co koman on fé
+      - kes ki fo pr le kyc
+      - Parrainage ?
+      - Comment on parametre les notifications ?
+      - koman on fé pr changé de numero
+      - c ou ke je vois mon solde exactement
+      - c koi la procedur pr verifié son compte
+
+  - intent: greet
+    examples: |
+      - Bonjour
+      - Bonsoir
+      - Salut
+      - Salutations
+      - Bien le bonjour
+      - Hey
+      - Coucou
+      - Hello
+      - Salut ça va ?
+      - Bonjour à vous
+      - Bonsoir l'équipe
+      - Salut NGONI
+      - Hello comment ça va ?
+      - Yo
+      - Salam
+      - Bonsoir tout le monde
+      - Bonjour, j'ai une question
+      - Salut j'ai besoin d'aide
+      - Coucou, petite question
+      - Hello, je voulais demander quelque chose
+      - Bonjour est-ce que vous êtes là ?
+      - Salut pouvez-vous m'aider ?
+      - Hey j'ai un souci
+      - Bonjour support
+      - Salut assistance
+      - Hello team NGONI
+      - slt
+      - salut
+      - bonjour
+      - bonsoir
+      - hey
+      - yo
+      - coucou
+      - hello
+      - bjr
+      - slt ça va
+      - bonjour svp
+      - hello j'ai une question
+      - salut j'ai un problème
+      - hey besoin d'aide
+      - slt support
+      - bonjour assistance
+      - coucou ngoni
+      - salut l'équipe
+      - hello ngoni
+      - bonsoir je veux une info
+      - bonjour, vous êtes là ?
+      - hello, j'ai besoin d'infos
+      - slt, je cherche de l'aide
+      - bonjour support, je voudrais une info
+      - hey, ça va ?
+      - coucou, j'ai une petite question
+      - bjr, vous pouvez m'aider stp
+      - bonsoir, est-ce que quelqu'un peut me répondre ?
+      - salut, j'ai un souci rapide
+      - salu
+      - bjrr
+      - yo la team
+      - coucou vous etes la
+      - Bonjour, j'espère que vous allez bien aujourd'hui.
+      - Bien le bonjour à toute l'équipe NGONI.
+      - Bonjour, désolé de vous déranger, j'ai une petite question.
+      - Salut, excusez-moi de vous solliciter.
+      - Bonne journée à vous, j'ai besoin d'un renseignement.
+      - Hello l'assistant NGONI, comment vas-tu ?
+      - Bonjour bonjour !
+      - Coucou, c'est encore moi.
+      - Salut, ravi de vous retrouver.
+      - Bonjour, je reviens vers vous pour une question.
+      - Cher assistant NGONI, bonjour.
+      - Bonjour, pouvez-vous m'accorder un instant ?
+      - Salut toi, ça roule ?
+      - Yo, tout va bien ?
+      - Wesh, présent ?
+      - Bonjour, êtes-vous disponible pour m'aider ?
+      - Salut, je peux te poser une question ?
+      - Bonjour madame, bonjour monsieur.
+      - Bonjour l'assistant.
+      - Salut l'assistant NGONI.
+      - Bien le bonjour.
+      - Bonjour à l'équipe support.
+      - Coucou l'équipe.
+      - Salut, il y a quelqu'un ?
+      - Bonjour, y a-t-il un agent disponible ?
+      - Bjr tt le monde
+      - slt tlm
+      - cc
+      - cc tlm
+      - bjr, ça va bien ?
+      - slt toi
+      - yo l'assistant
+      - bonjour ngoni, ça va ?
+      - salut, petite question rapide stp
+      - hello, dispo pour m'aider ?
+      - bjr, j'ai un truc a demander
+      - coucou, j'ai besoin d'un renseignement
+      - bonjour !!
+      - salut !!
+      - hello !
+      - bjr :)
+      - salut :)
+      - Bonjour à vous, j'espère ne pas vous déranger en ce début de journée.
+      - Je vous souhaite le bonjour, j'aurais besoin d'un petit renseignement si possible.
+      - Bonsoir, je sais qu'il est tard mais j'aurais besoin d'aide rapidement.
+      - Bonjour, je me permets de vous contacter pour une question concernant mon compte.
+      - Salut, je viens d'ouvrir l'application et j'ai une question avant de commencer.
+      - bonjour l'assistant virtuel de ngoni
+      - salut c'est bibi encore
+      - re bonjour
+      - re salut
+      - rebonjour
+      - bonjour, encore moi
+      - salut c'est encore moi
+      - Allô, il y a quelqu'un ?
+      - Bonjour, je découvre l'application NGONI.
+      - Bonsoir, première fois que j'utilise ce chat.
+      - Bonjour, je suis nouveau ici.
+      - Salut, je débarque.
+      - Bonjour cher assistant, comment allez-vous ?

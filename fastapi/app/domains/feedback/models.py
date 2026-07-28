@@ -5,7 +5,10 @@ from datetime import datetime, timezone
 from sqlalchemy import Boolean, Column, DateTime, String
 from sqlalchemy.dialects.postgresql import UUID
 
-from app.models import Base
+try:
+    from app.models import Base
+except ImportError:  # pragma: no cover - support running as `main`
+    from models import Base
 
 
 class FeedbackType(str, enum.Enum):

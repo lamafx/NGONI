@@ -26,7 +26,10 @@ from pathlib import Path
 import httpx
 import yaml
 
-from app.shared.embeddings import embed_passage_batch
+try:
+    from app.shared.embeddings import embed_passage_batch
+except ImportError:  # pragma: no cover - support running as `main`
+    from shared.embeddings import embed_passage_batch
 
 from .contracts import CapabilityManifest, ProblemDefinition
 

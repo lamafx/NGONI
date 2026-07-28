@@ -3,8 +3,12 @@ from typing import List
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
-from app.database import get_db
-from app.domains.audit.service import record_faq_lookup
+try:
+    from app.database import get_db
+    from app.domains.audit.service import record_faq_lookup
+except ImportError:  # pragma: no cover - support running as `main`
+    from database import get_db
+    from domains.audit.service import record_faq_lookup
 from .repository import FaqRepository
 from .schemas import (
     FaqCategoryGroup,

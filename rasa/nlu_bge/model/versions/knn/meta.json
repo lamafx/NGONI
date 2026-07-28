@@ -1,0 +1,45 @@
+{
+  "embedding_model": "BAAI/bge-m3",
+  "classifier": "knn",
+  "n_examples": 2011,
+  "n_intents": 19,
+  "intent_counts": {
+    "ask_faq": 188,
+    "diagnostic": 183,
+    "deny": 180,
+    "greet": 171,
+    "inappropriate_language": 168,
+    "affirm": 162,
+    "goodbye": 150,
+    "out_of_scope": 147,
+    "bot_challenge": 142,
+    "create_reclamation": 112,
+    "plainte": 67,
+    "suggestion": 63,
+    "ask_capabilities": 54,
+    "ask_complaint_status": 50,
+    "rate_response_not_useful": 45,
+    "rate_response_useful": 44,
+    "select_faq_category": 41,
+    "browse_faq": 32,
+    "select_faq_question": 12
+  },
+  "embed_dim": 1024,
+  "trained_at": "2026-07-28T19:16:05",
+  "selected_k": 7,
+  "candidate_neighbors": [
+    1,
+    3,
+    5,
+    7,
+    9
+  ],
+  "cv_scores": [
+    0.8014888337468983,
+    0.7935323383084577,
+    0.8084577114427861,
+    0.8109452736318408,
+    0.7786069651741293
+  ],
+  "best_cv_score": 0.7986062244608225
+}

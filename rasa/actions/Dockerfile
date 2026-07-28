@@ -1,12 +1,19 @@
-FROM rasa/rasa-sdk:3.6.2
+FROM python:3.10-slim
 
-USER root
 WORKDIR /app
 
-COPY requirements.txt .
+ENV PIP_NO_CACHE_DIR=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
 
-RUN pip install --no-cache-dir -r requirements.txt
+COPY requirements.txt ./
+
+# Install dependencies into the final image so console scripts are on PATH
+RUN pip install --upgrade pip \
+    && pip install --no-cache-dir -r requirements.txt \
+    && rm -rf /var/lib/apt/lists/* /root/.cache/pip
 
 COPY . /app
 
-CMD ["start", "--actions", "actions"]
+# Use module invocation which is less sensitive to console script layout
+CMD ["python", "-m", "rasa_sdk", "start", "--actions", "actions"]

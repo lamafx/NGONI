@@ -3,10 +3,25 @@ import re
 import threading
 import time
 from os import getenv
-from typing import Optional, Text
+from typing import Dict, List, Optional, Text
 
 import requests
 from rasa_sdk import Tracker
+
+# Suggestions d'actions (experience conversationnelle, 2026-07) : memes 3
+# raccourcis partout ou une reponse ferme naturellement un sujet (accueil,
+# ticket cree, diagnostic resolu, incomprehension...) -- centralises ici
+# plutot que redefinis par module, pour que les 3 payloads (deja des intents
+# existants et entraines, voir domain.yml) restent la seule source de verite.
+# /diagnostic seul (sans description) est gere explicitement par
+# ActionRunDiagnosticStep (diagnostic.py, voir son garde-fou) : sans texte de
+# probleme reel, il redemande simplement une description au lieu de tenter
+# une classification vouee a l'echec.
+QUICK_ACTION_BUTTONS: List[Dict[Text, Text]] = [
+    {"title": "🩺 Lancer un diagnostic", "payload": "/diagnostic"},
+    {"title": "📝 Créer une réclamation", "payload": "/create_reclamation"},
+    {"title": "📚 Voir la FAQ", "payload": "/browse_faq"},
+]
 
 
 class SimpleCircuitBreaker:
@@ -233,6 +248,20 @@ def _search_faq(question: Text) -> Optional[Text]:
     if payload.get("flow", {}).get("status") != "matched":
         return None
     return payload.get("answer") or payload.get("response") or payload.get("result")
+
+
+def _conversation_is_free(tracker: Tracker) -> bool:
+    """True si aucun flux structure (formulaire de reclamation, champ de
+    diagnostic en attente) n'est actif -- a verifier avant d'attacher
+    QUICK_ACTION_BUTTONS a une reponse. Plusieurs intents (ask_capabilities,
+    suggestion, plainte, rate_response_useful/not_useful) ont deja leur
+    propre variante de regle "while reclamation form is active"/"while
+    diagnostic is pending" (rules.yml) qui relance le formulaire ou rappelle
+    la question de diagnostic juste apres, dans le MEME tour -- y afficher en
+    plus des boutons de relance generiques donnerait deux invitations a agir
+    contradictoires coup sur coup.
+    """
+    return not tracker.get_slot("pending_field") and tracker.active_loop_name != "reclamation_form"
 
 
 def _already_ran_since_last_user_message(tracker: Tracker, action_name: Text) -> bool:

@@ -1,0 +1,146 @@
+{
+  "n_examples": 507,
+  "rasa_available": true,
+  "rasa": {
+    "accuracy": 0.8747300215982722,
+    "precision_macro": 0.8400557966467388,
+    "recall_macro": 0.8180048116935165,
+    "f1_macro": 0.8247370789270426,
+    "precision_weighted": 0.8799763583234806,
+    "recall_weighted": 0.8747300215982722,
+    "f1_weighted": 0.8739595158696595,
+    "auc_macro_ovr": null,
+    "latency": {
+      "mean_ms": 39.16432603550791,
+      "p50_ms": 37.946200000078534,
+      "p95_ms": 50.79899999964255,
+      "min_ms": 24.355000000014115,
+      "max_ms": 99.14840000010372
+    }
+  },
+  "classifiers": [
+    {
+      "classifier": "knn",
+      "accuracy": 0.9507,
+      "metrics": {
+        "accuracy": 0.9506903353057199,
+        "precision_macro": 0.9129007728457876,
+        "recall_macro": 0.8912795030573253,
+        "f1_macro": 0.8987397586404814,
+        "precision_weighted": 0.9543837892303559,
+        "recall_weighted": 0.9506903353057199,
+        "f1_weighted": 0.9498276703857659,
+        "auc_macro_ovr": NaN
+      },
+      "latency": {
+        "mean_ms": 306.59334122288186,
+        "p50_ms": 275.22700000008626,
+        "p95_ms": 402.2165000001223,
+        "min_ms": 181.95509999986825,
+        "max_ms": 10080.591399999776
+      }
+    }
+  ],
+  "model_sizes": {
+    "bge_m3_weights_mb": 4871.5,
+    "bge_m3_classifier_kb": 7956.4,
+    "bge_m3_params": "1024d (BAAI/bge-m3)",
+    "embedding_model": "BAAI/bge-m3",
+    "classifier_name": "knn",
+    "trained_at": "2026-07-28T18:39:30",
+    "rasa_model_file": "nlu-20260728-142329-affable-bounce.tar.gz",
+    "rasa_latest_model_file": "nlu-20260728-142329-affable-bounce.tar.gz",
+    "rasa_model_mb": 80.3,
+    "rasa_latest_model_mb": 80.3
+  },
+  "n_disagreements": 102,
+  "n_both_wrong": 17,
+  "n_only_rasa_right": 8,
+  "n_only_bge_right": 85,
+  "per_test_file": {
+    "test_nlu.yml": {
+      "n_examples": 283,
+      "rasa": {
+        "accuracy": 0.872093023255814,
+        "precision_macro": 0.6867465383519822,
+        "recall_macro": 0.6588418708017577,
+        "f1_macro": 0.6660185924479867,
+        "precision_weighted": 0.8855596031422225,
+        "recall_weighted": 0.872093023255814,
+        "f1_weighted": 0.872783791449387,
+        "auc_macro_ovr": null
+      },
+      "classifiers": [
+        {
+          "classifier": "knn",
+          "metrics": {
+            "accuracy": 0.911660777385159,
+            "precision_macro": 0.7284366098958192,
+            "recall_macro": 0.7054738246453147,
+            "f1_macro": 0.7090426917232713,
+            "precision_weighted": 0.9242891265654023,
+            "recall_weighted": 0.911660777385159,
+            "f1_weighted": 0.9102984296795374,
+            "auc_macro_ovr": NaN
+          }
+        }
+      ]
+    },
+    "test_nlu_500_supplement.yml": {
+      "n_examples": 149,
+      "rasa": {
+        "accuracy": 0.9104477611940298,
+        "precision_macro": 0.8493278651173387,
+        "recall_macro": 0.8762322472848789,
+        "f1_macro": 0.8556406344185389,
+        "precision_weighted": 0.925101763907734,
+        "recall_weighted": 0.9104477611940298,
+        "f1_weighted": 0.9116354047812852,
+        "auc_macro_ovr": null
+      },
+      "classifiers": [
+        {
+          "classifier": "knn",
+          "metrics": {
+            "accuracy": 1.0,
+            "precision_macro": 0.9473684210526315,
+            "recall_macro": 0.9473684210526315,
+            "f1_macro": 0.9473684210526315,
+            "precision_weighted": 1.0,
+            "recall_weighted": 1.0,
+            "f1_weighted": 1.0,
+            "auc_macro_ovr": NaN
+          }
+        }
+      ]
+    },
+    "test_nlu_adversarial.yml": {
+      "n_examples": 75,
+      "rasa": {
+        "accuracy": 0.8169014084507042,
+        "precision_macro": 0.36182676972150657,
+        "recall_macro": 0.35863697705802966,
+        "f1_macro": 0.354774058893052,
+        "precision_weighted": 0.8247972684592403,
+        "recall_weighted": 0.8169014084507042,
+        "f1_weighted": 0.8157641501181,
+        "auc_macro_ovr": null
+      },
+      "classifiers": [
+        {
+          "classifier": "knn",
+          "metrics": {
+            "accuracy": 1.0,
+            "precision_macro": 0.47368421052631576,
+            "recall_macro": 0.47368421052631576,
+            "f1_macro": 0.47368421052631576,
+            "precision_weighted": 1.0,
+            "recall_weighted": 1.0,
+            "f1_weighted": 1.0,
+            "auc_macro_ovr": NaN
+          }
+        }
+      ]
+    }
+  }
+}

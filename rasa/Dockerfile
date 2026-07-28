@@ -1,30 +1,32 @@
-FROM rasa/rasa:3.6.20 AS trainer
+FROM python:3.9-slim
 
 WORKDIR /app
 
-USER root
+ENV PIP_NO_CACHE_DIR=1 \
+    PYTHONUNBUFFERED=1
 
+# Dépendances système de base
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Installation des dépendances Python
+COPY requirements.txt /tmp/requirements.txt
+RUN pip install --upgrade "pip<24" "setuptools<70" wheel && \
+    pip install -r /tmp/requirements.txt
+
+# Téléchargement du modèle de langue français SpaCy
+RUN python -m spacy download fr_core_news_md
+
+# Copie du code source dans le conteneur
 COPY . /app
 
-RUN rasa train
+# Entraînement du modèle NLU Rasa
+RUN python -m rasa train nlu --config config.yml --nlu data --out models
 
-FROM rasa/rasa:3.6.20
+# Exposition du port Rasa
+EXPOSE 5005
 
-WORKDIR /app
-
-USER root
-
-# CamemBERT (LanguageModelFeaturizer, config-embedding-experiment.yml)
-# abandonne formellement le 2026-07-23 : gain mesure +1.2pt d'accuracy
-# globale sur le corpus adversarial (16.8), pour un cout de latence ~15-20x
-# (0.05-0.07s -> ~0.95s par appel /model/parse) juge disproportionne pour un
-# assistant conversationnel temps reel, sans regler le desequilibre de fond
-# diagnostic/ask_faq (387 vs 210 exemples). transformers/sentencepiece
-# retires en consequence -- config.yml (pipeline reellement servi) ne les a
-# jamais references, seul config-embedding-experiment.yml en a besoin,
-# conserve pour reference avec les modeles associes (models/experiments/).
-
-COPY . /app
-COPY --from=trainer /app/models /app/models
-
-CMD ["run", "--enable-api", "--port", "5005"]
+# Lancement du serveur d'API Rasa
+CMD ["python", "-m", "rasa", "run", "--enable-api", "--port", "5005", "--debug"]

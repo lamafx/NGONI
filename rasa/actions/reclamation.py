@@ -16,6 +16,7 @@ from rasa_sdk.executor import CollectingDispatcher
 from rasa_sdk.forms import FormValidationAction
 
 from .common import (
+    QUICK_ACTION_BUTTONS,
     _already_ran_since_last_user_message,
     _extract_trailing_faq_question,
     _search_faq,
@@ -1122,7 +1123,13 @@ class ActionCreateTicket(Action):
                 f"Merci, votre réclamation est bien enregistrée et en cours de traitement (numéro de ticket : {ticket_id}, statut : {status_label}).",
                 f"C'est noté ! Votre réclamation a été créée avec succès (numéro de ticket : {ticket_id}, statut : {status_label}).",
                 f"Votre réclamation est bien prise en compte (numéro de ticket : {ticket_id}, statut : {status_label}).",
-            )
+            ),
+            # Relance rapide (experience conversationnelle, 2026-07) : le
+            # formulaire vient de se terminer, aucun autre flux n'est en
+            # attente a ce point -- moment naturel pour reproposer les
+            # actions rapides plutot que de laisser la conversation en
+            # suspens.
+            buttons=QUICK_ACTION_BUTTONS,
         )
 
         # Reinitialise aussi les champs du formulaire (pas seulement
@@ -1174,7 +1181,11 @@ class ActionCancelReclamation(Action):
         tracker: Tracker,
         domain: Dict[Text, Any],
     ) -> List[Dict[Text, Any]]:
-        dispatcher.utter_message(response="utter_reclamation_cancelled")
+        # buttons= merge avec le texte tire au hasard par le response= (voir
+        # domain.yml, utter_reclamation_cancelled) : pas de nouveau message,
+        # juste des raccourcis concrets sur la relance deja presente dans ce
+        # texte ("je peux continuer a vous aider...").
+        dispatcher.utter_message(response="utter_reclamation_cancelled", buttons=QUICK_ACTION_BUTTONS)
         return [
             {"event": "slot", "name": "claim_requested", "value": False},
             {"event": "slot", "name": "awaiting_cancel_choice", "value": False},

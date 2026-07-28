@@ -7,11 +7,18 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Session
 
-from app.database import get_db
-from app.domains.complaints.schemas import TicketCreateResponse
-from app.domains.complaints.service import ComplaintService
-from app.shared.embeddings import cosine_similarity, embed_query
-from app.shared.logging_utils import redact_entities
+try:
+    from app.database import get_db
+    from app.domains.complaints.schemas import TicketCreateResponse
+    from app.domains.complaints.service import ComplaintService
+    from app.shared.embeddings import cosine_similarity, embed_query
+    from app.shared.logging_utils import redact_entities
+except ImportError:  # pragma: no cover - support running as `main`
+    from database import get_db
+    from domains.complaints.schemas import TicketCreateResponse
+    from domains.complaints.service import ComplaintService
+    from shared.embeddings import cosine_similarity, embed_query
+    from shared.logging_utils import redact_entities
 from .adapter import HttpDiagnosticAdapter
 from .audit_repository import DiagnosticAuditRepository
 from .contracts import (

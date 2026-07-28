@@ -1,84 +1,32 @@
 language: fr
 
 pipeline:
-- name: WhitespaceTokenizer
 
-- name: RegexFeaturizer
+- name: SpacyNLP
+  model: "fr_core_news_md"
 
-- name: LexicalSyntacticFeaturizer
+- name: SpacyTokenizer
+
+- name: SpacyFeaturizer
+  pooling: "mean"
 
 - name: CountVectorsFeaturizer
+  analyzer: "word"
+  min_ngram: 1
+  max_ngram: 2
+  min_df: 1
 
-# char_wb capture des fragments de mots (sous-chaines) plutot que des mots
-# entiers : c'est ce qui permet de reconnaitre "retra" comme proche de
-# "retrait", ou "mon compt es bloké" comme proche de "mon compte est bloqué",
-# meme si le mot exact n'a jamais ete vu tel quel a l'entrainement.
-# min_ngram=2 (au lieu de 3) capture aussi les tres courtes fautes (2 lettres).
 - name: CountVectorsFeaturizer
-  analyzer: char_wb
-  min_ngram: 2
-  max_ngram: 4
+  analyzer: "char"
+  min_ngram: 3
+  max_ngram: 5
+  min_df: 1
 
 - name: DIETClassifier
   epochs: 80
   constrain_similarities: true
-  model_confidence: softmax
-  number_of_transformer_layers: 2
-  transformer_size: 256
-  weight_sparsity: 0.8
-  batch_size: 64
-  learning_rate: 0.001
-
-- name: EntitySynonymMapper
-
-- name: ResponseSelector
-
-# Sans ce composant, DIETClassifier est oblige de choisir une des intentions
-# connues meme pour un texte jamais vu (insulte, mot hors-vocabulaire, faute
-# de frappe extreme) : c'est la cause directe du bug "fuck" classe en affirm.
-# threshold : confiance minimale pour accepter la prediction du DIET.
-# ambiguity_threshold : si les 2 meilleures intentions sont trop proches,
-# on ne tranche pas non plus -> nlu_fallback.
-#
-# LIMITE CONNUE : avec model_confidence: softmax (ci-dessus), DIET reste
-# sur-confiant (~1.0) meme sur du texte totalement hors-vocabulaire -- ce
-# seuil ne peut alors jamais s'appliquer ("azefg", "xyz", "zzzz" mesures a
-# 1.0000 dans une intention existante prise au hasard, dont
-# inappropriate_language). Voir components/vocabulary_guard.py juste en
-# dessous : un garde-fou complementaire qui force la confiance sous ce seuil
-# quand aucun mot du message n'est reconnu, sans changer model_confidence.
-- name: components.vocabulary_guard.VocabularyCoverageGuard
-
-# Audit FAQ, 16.5 #6 / 16.6 (P2 #12) : un message court/elliptique (1-2
-# mots, ex. "Retrait ?", "KYC") portant sur un sujet FAQ legitime est
-# mesure comme absorbe par `diagnostic` a confiance ~1.0 (16.4) -- pire
-# score du corpus adversarial (25% d'accuracy sur cette categorie). Reroute
-# specifiquement CE cas precis vers ask_faq (dont la recherche hybride,
-# app/domains/faq/service.py, gere correctement ces messages courts une
-# fois l'intention correctement reconnue -- verifie manuellement).
-# Place APRES VocabularyCoverageGuard : un message deja neutralise comme
-# hors-vocabulaire (confidence forcee a 0) n'est jamais rerouter vers une
-# recherche FAQ inutile.
-- name: components.short_message_router.ShortMessageFaqRouter
 
 - name: FallbackClassifier
-  threshold: 0.6
-  ambiguity_threshold: 0.1
-
-assistant_id: 20260630-224717-muted-inertia
-policies:
-  # Policies explicites (au lieu de dependre du defaut implicite de Rasa) :
-  # RulePolicy sait nativement gerer l'intention nlu_fallback generee par le
-  # FallbackClassifier ci-dessus -> declenche action_default_fallback.
-  - name: MemoizationPolicy
-  - name: RulePolicy
-    core_fallback_threshold: 0.4
-    core_fallback_action_name: action_default_fallback
-    enable_fallback_prediction: true
-  - name: UnexpecTEDIntentPolicy
-    max_history: 5
-    epochs: 100
-  - name: TEDPolicy
-    max_history: 5
-    epochs: 100
-    constrain_similarities: true
+  threshold: 0.70
+  ambiguity_threshold: 0.10
+assistant_id: 20260728-142324-chilly-frank

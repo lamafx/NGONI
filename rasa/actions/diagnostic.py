@@ -5,7 +5,7 @@ import re
 import threading
 import time
 from os import getenv
-from typing import Any, Callable, Dict, List, Text
+from typing import Any, Callable, Dict, List, Optional, Text
 
 import requests
 from rasa_sdk import Action, Tracker
@@ -23,6 +23,7 @@ logger = logging.getLogger(__name__)
 
 from .common import (
     FALLBACK_ESCALATION_THRESHOLD,
+    QUICK_ACTION_BUTTONS,
     SimpleCircuitBreaker,
     _already_ran_since_last_user_message,
     _consecutive_fallback_count,
@@ -30,6 +31,7 @@ from .common import (
     _human_support_message,
     _search_faq,
     _strip_greeting_preamble,
+    pick,
     request_with_retry,
 )
 
@@ -1219,29 +1221,106 @@ def _call_diagnostic_engine(tracker: Tracker, state: Dict[Text, Any]) -> Dict[Te
 # existe ; sinon, la description renvoyee par /diagnostic/capabilities sert
 # de question de repli -- ajouter un champ a un manifeste ne demande donc
 # aucune modification ici.
-FIELD_QUESTIONS: Dict[Text, Text] = {
-    "issue_status": "Où en est ce problème : en attente, échoué ou bloqué ?",
-    "amount": "Quel est le montant concerné ?",
+#
+# Chaque champ porte 2 formulations (audit UX, 2026-07, point A1) : sans ca,
+# un diagnostic qui redemande le meme champ (invalid_field_attempt, ou apres
+# une reprise post-interruption) posait mot pour mot la meme question,
+# contrastant avec le reste des reponses deja variees (domain.yml). La 1ere
+# variante de chaque liste reste la forme CANONIQUE, seule utilisee par
+# _describe_pending_question (fragment de phrase inline, pas une question
+# affichee telle quelle -- y introduire une 2e variante casserait sa
+# grammaire, voir son propre commentaire) via _field_question_canonical.
+FIELD_QUESTIONS: Dict[Text, List[Text]] = {
+    "issue_status": [
+        "Où en est ce problème : en attente, échoué ou bloqué ?",
+        "Ce problème est-il en attente, échoué, ou bloqué ?",
+    ],
+    "amount": [
+        "Quel est le montant concerné ?",
+        "Pouvez-vous préciser le montant concerné ?",
+    ],
     # Nom aligne sur l'entite NLU "incident_date" (nlu.yml), pas "date" :
     # _capture_opportunistic_nlu_entities/_extract_field_answer matchent par
     # egalite exacte entre nom de champ de manifeste et nom d'entite NLU.
-    "incident_date": "À quelle date (ou depuis quand) le problème s’est-il produit ?",
-    "device": "Sur quelle plateforme rencontrez-vous ce problème ? (Android, iOS, Web)",
-    "payment_method": "Quel moyen de paiement avez-vous utilisé ?",
-    "description": "Pouvez-vous décrire le problème plus précisément ?",
-    "transaction_reference": "Avez-vous une référence de transaction ou de ticket ?",
-    "time": "À quelle heure environ le problème est-il survenu ?",
-    "content_type": "Quel type de contenu est concerné ?",
-    "video_id": "Avez-vous l’identifiant ou le lien de la vidéo concernée ?",
-    "last_message": "Quel était le dernier message reçu ou envoyé ?",
-    "severity": "Diriez-vous que la gravité est faible, moyenne ou élevée ?",
-    "document_type": "Quel type de document est concerné ?",
-    "country": "Dans quel pays est basé votre compte ?",
-    "subscription_type": "Quel abonnement est concerné ?",
-    "channel": "Sur quel canal recevez-vous (ou non) cette notification ?",
-    "contact_channel": "Par quel canal souhaitez-vous être recontacté ?",
-    "urgency": "Quel est le niveau d’urgence : faible, moyenne ou élevée ?",
+    "incident_date": [
+        "À quelle date (ou depuis quand) le problème s’est-il produit ?",
+        "Depuis quand rencontrez-vous ce problème ?",
+    ],
+    "device": [
+        "Sur quelle plateforme rencontrez-vous ce problème ? (Android, iOS, Web)",
+        "Vous êtes sur quelle plateforme : Android, iOS, ou le site Web ?",
+    ],
+    "payment_method": [
+        "Quel moyen de paiement avez-vous utilisé ?",
+        "Pouvez-vous préciser le moyen de paiement utilisé ?",
+    ],
+    "description": [
+        "Pouvez-vous décrire le problème plus précisément ?",
+        "Pouvez-vous m'en dire un peu plus sur ce problème ?",
+    ],
+    "transaction_reference": [
+        "Avez-vous une référence de transaction ou de ticket ?",
+        "Auriez-vous la référence de la transaction ou du ticket concerné ?",
+    ],
+    "time": [
+        "À quelle heure environ le problème est-il survenu ?",
+        "Vous souvenez-vous à quelle heure c'est arrivé ?",
+    ],
+    "content_type": [
+        "Quel type de contenu est concerné ?",
+        "Pouvez-vous préciser le type de contenu concerné ?",
+    ],
+    "video_id": [
+        "Avez-vous l’identifiant ou le lien de la vidéo concernée ?",
+        "Pouvez-vous partager l'identifiant ou le lien de la vidéo concernée ?",
+    ],
+    "last_message": [
+        "Quel était le dernier message reçu ou envoyé ?",
+        "Vous souvenez-vous du dernier message reçu ou envoyé ?",
+    ],
+    "severity": [
+        "Diriez-vous que la gravité est faible, moyenne ou élevée ?",
+        "Sur une échelle faible/moyenne/élevée, comment évalueriez-vous la gravité ?",
+    ],
+    "document_type": [
+        "Quel type de document est concerné ?",
+        "Pouvez-vous préciser le type de document concerné ?",
+    ],
+    "country": [
+        "Dans quel pays est basé votre compte ?",
+        "Votre compte est basé dans quel pays ?",
+    ],
+    "subscription_type": [
+        "Quel abonnement est concerné ?",
+        "Pouvez-vous préciser quel abonnement est concerné ?",
+    ],
+    "channel": [
+        "Sur quel canal recevez-vous (ou non) cette notification ?",
+        "Cette notification concerne quel canal ?",
+    ],
+    "contact_channel": [
+        "Par quel canal souhaitez-vous être recontacté ?",
+        "Comment préférez-vous qu'on vous recontacte ?",
+    ],
+    "urgency": [
+        "Quel est le niveau d’urgence : faible, moyenne ou élevée ?",
+        "Diriez-vous que c'est urgent, moyennement urgent, ou pas urgent ?",
+    ],
 }
+
+
+def _field_question(field_name: Text, fallback: Text) -> Text:
+    variants = FIELD_QUESTIONS.get(field_name)
+    return pick(*variants) if variants else fallback
+
+
+def _field_question_canonical(field_name: Text) -> Optional[Text]:
+    # Seule la 1ere variante (voir le commentaire de FIELD_QUESTIONS) : cet
+    # appelant compose un FRAGMENT de phrase inline (_describe_pending_question),
+    # pas une question affichee telle quelle -- y introduire une 2e variante
+    # casserait sa grammaire sans que ce soit visible ici.
+    variants = FIELD_QUESTIONS.get(field_name)
+    return variants[0] if variants else None
 
 # Libelles courts (pas des questions completes) pour le recapitulatif avant
 # verification (voir _respond_diagnostic_confirmation) -- audit ton/clarite :
@@ -1845,7 +1924,7 @@ def _respond_field_question(
     # Handler par defaut : n'importe quel nom de champ metier (impossible a
     # enumerer a l'avance, vient du manifeste dynamique).
     spec = (state.get("field_specs") or {}).get(pending_field, {})
-    question = FIELD_QUESTIONS.get(pending_field) or spec.get("description") or "Pouvez-vous préciser ce point ?"
+    question = _field_question(pending_field, spec.get("description") or "Pouvez-vous préciser ce point ?")
     if state.get("invalid_field_attempt") == pending_field:
         question = f"Ce format ne semble pas correct. {question}"
     dispatcher.utter_message(text=question)
@@ -1930,6 +2009,18 @@ def _respond_engine_outcome(
 
     if outcome == "RESOLVED":
         dispatcher.utter_message(text=result.get("message", "Votre problème a été résolu."))
+        # Le message ci-dessus vient du moteur de diagnostic (contenu
+        # dynamique, jamais reformule ici) et n'invite jamais lui-meme a
+        # continuer -- message separe, avec ses propres variantes, pour ne
+        # pas repeter la meme relance a chaque resolution.
+        dispatcher.utter_message(
+            text=pick(
+                "Puis-je vous aider sur autre chose ?",
+                "Y a-t-il autre chose que je peux faire pour vous ?",
+                "N'hésitez pas si vous avez une autre question.",
+            ),
+            buttons=QUICK_ACTION_BUTTONS,
+        )
         return reset_events
 
     if outcome == "NEED_MORE_INFO":
@@ -2096,7 +2187,7 @@ def _describe_pending_question(state: Dict[Text, Any]) -> Text:
     if pending == "service_narrowing":
         return "à quel service se rapporte votre problème"
     spec = (state.get("field_specs") or {}).get(pending, {})
-    return FIELD_QUESTIONS.get(pending) or spec.get("description") or "une précision sur votre problème"
+    return _field_question_canonical(pending) or spec.get("description") or "une précision sur votre problème"
 
 
 def _suspend_for_topic_switch(
@@ -2419,6 +2510,28 @@ class ActionRunDiagnosticStep(Action):
             state = {}
         waiting_for = state.get("waiting_for")
 
+        # Bouton "Lancer un diagnostic" (suggestions d'accueil/relance, voir
+        # greeting.py et QUICK_ACTION_BUTTONS dans common.py) : envoie le
+        # payload nu /diagnostic, sans description reelle du probleme. Sans ce
+        # garde-fou, ce texte (vide ou juste "/diagnostic") descendait
+        # directement dans la classification plus bas, qui ne trouve
+        # evidemment aucune capacite correspondante a un texte vide et
+        # proposait IMMEDIATEMENT la creation d'un ticket
+        # (_respond_no_capability_matched) -- avant meme que l'utilisateur
+        # n'ait decrit quoi que ce soit. Ne s'applique qu'a une classification
+        # fraiche (aucun diagnostic deja en cours, waiting_for et state tous
+        # deux vides) : un vrai message utilisateur, meme tres court, ne peut
+        # jamais valoir exactement ce payload nu.
+        if not waiting_for and not state and raw_text.strip() in ("", "/diagnostic"):
+            dispatcher.utter_message(
+                text=pick(
+                    "Bien sûr. Décrivez-moi le problème que vous rencontrez, je vais essayer de le diagnostiquer.",
+                    "D'accord, lançons un diagnostic : quel problème rencontrez-vous exactement ?",
+                    "Avec plaisir. Expliquez-moi ce qui ne fonctionne pas, je vais regarder ça avec vous.",
+                )
+            )
+            return []
+
         if waiting_for == "resume_or_new_topic":
             # Reponse a la question posee par _suspend_for_topic_switch.
             # intent:diagnostic (l'utilisateur redecrit directement un
@@ -2468,7 +2581,12 @@ class ActionRunDiagnosticStep(Action):
         # normal (deny generique ou autre).
         if waiting_for and _looks_like_resolution(text):
             dispatcher.utter_message(
-                text="Tant mieux, ravi que ce soit réglé ! Autre chose pour laquelle je peux vous aider ?"
+                text=pick(
+                    "Tant mieux, ravi que ce soit réglé ! Autre chose pour laquelle je peux vous aider ?",
+                    "Super, content que ça fonctionne à nouveau ! Puis-je faire autre chose pour vous ?",
+                    "Parfait, c'est le principal ! N'hésitez pas si vous avez besoin d'autre chose.",
+                ),
+                buttons=QUICK_ACTION_BUTTONS,
             )
             return [
                 {"event": "slot", "name": "diagnostic_state", "value": "{}"},
@@ -2821,7 +2939,13 @@ class ActionDefaultFallback(Action):
             # _human_support_message, rasa/actions/common.py).
             dispatcher.utter_message(text=_human_support_message())
         else:
-            dispatcher.utter_message(response="utter_default")
+            # Boutons de relance ici (pas dans la branche support humain
+            # au-dessus) : cette branche n'est atteinte que quand ni un
+            # formulaire de reclamation ni une question de diagnostic ne sont
+            # en attente (voir le early-return juste au-dessus pour ce
+            # dernier cas) -- l'incomprehension est donc "sèche", le moment
+            # ideal pour rappeler concretement ce que le bot sait faire.
+            dispatcher.utter_message(response="utter_default", buttons=QUICK_ACTION_BUTTONS)
         # "rewind", pas "user_utterance_reverted" : c'est le nom d'evenement
         # reellement serialise par rasa_sdk pour UserUtteranceReverted (voir
         # rasa_sdk.events) -- le litteral "user_utterance_reverted" est rejete
@@ -2887,7 +3011,10 @@ class ActionOutOfScope(Action):
         if _consecutive_fallback_count(tracker) + 1 >= FALLBACK_ESCALATION_THRESHOLD:
             dispatcher.utter_message(text=_human_support_message())
         else:
-            dispatcher.utter_message(response="utter_out_of_scope")
+            # Memes raisons que ActionDefaultFallback ci-dessus : atteint
+            # seulement hors formulaire/diagnostic en attente (les deux cas
+            # sont deja sortis via followup plus haut).
+            dispatcher.utter_message(response="utter_out_of_scope", buttons=QUICK_ACTION_BUTTONS)
         return []
 
 

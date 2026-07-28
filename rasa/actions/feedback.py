@@ -6,7 +6,7 @@ import requests
 from rasa_sdk import Action, Tracker
 from rasa_sdk.executor import CollectingDispatcher
 
-from .common import pick
+from .common import QUICK_ACTION_BUTTONS, _conversation_is_free, pick
 
 FEEDBACK_SERVICE_URL = getenv("FEEDBACK_SERVICE_URL", "http://fastapi:8000/feedback")
 # Sous-ressource de FEEDBACK_SERVICE_URL (pas une variable d'environnement
@@ -57,6 +57,12 @@ class ActionStoreSuggestion(Action):
         if result is None:
             dispatcher.utter_message(response="utter_suggestion_storage_failed")
             return []
+        # Boutons de relance seulement si aucun flux structure n'est en
+        # attente (voir _conversation_is_free, common.py) : suggestion a ses
+        # propres variantes de regle "while diagnostic is pending"/"while
+        # reclamation form is active" (rules.yml) qui relancent deja le champ
+        # ou le formulaire en attente juste apres, dans le meme tour.
+        extra = {"buttons": QUICK_ACTION_BUTTONS} if _conversation_is_free(tracker) else {}
         ticket_id = result.get("ticket_id")
         if ticket_id:
             # Formulations variees (pas de dispatcher.utter_message(text=f"...")
@@ -71,10 +77,11 @@ class ActionStoreSuggestion(Action):
                     f"Merci pour votre suggestion ! Je la transmets à notre équipe pour étude (référence : {ticket_id}).",
                     f"C'est noté, merci ! Votre suggestion est transmise à notre équipe (référence : {ticket_id}).",
                     f"Merci, bonne idée : je la fais remonter à notre équipe (référence : {ticket_id}).",
-                )
+                ),
+                **extra,
             )
         else:
-            dispatcher.utter_message(response="utter_thanks_for_suggestion")
+            dispatcher.utter_message(response="utter_thanks_for_suggestion", **extra)
         return []
 
 
@@ -106,6 +113,8 @@ class ActionAcknowledgeComplaint(Action):
         if result is None:
             dispatcher.utter_message(response="utter_complaint_storage_failed")
             return []
+        # Voir le commentaire equivalent dans ActionStoreSuggestion ci-dessus.
+        extra = {"buttons": QUICK_ACTION_BUTTONS} if _conversation_is_free(tracker) else {}
         ticket_id = result.get("ticket_id")
         if ticket_id:
             # Memes raisons que ActionStoreSuggestion ci-dessus : ce message
@@ -124,10 +133,11 @@ class ActionAcknowledgeComplaint(Action):
                     "Merci de nous en faire part, je suis désolé pour ce désagrément. "
                     f"C'est transmis à notre équipe (référence : {ticket_id}). "
                     "N'hésitez pas à demander un suivi personnalisé si besoin.",
-                )
+                ),
+                **extra,
             )
         else:
-            dispatcher.utter_message(response="utter_acknowledge_complaint")
+            dispatcher.utter_message(response="utter_acknowledge_complaint", **extra)
         return []
 
 
@@ -166,6 +176,12 @@ class ActionRecordResponseRating(Action):
         reset_events = [
             {"event": "slot", "name": "pending_ratings", "value": json.dumps(pending_ratings, ensure_ascii=False)}
         ]
+        # Boutons de relance seulement si aucun flux structure n'est en
+        # attente (voir _conversation_is_free, common.py) : rate_response_*
+        # a ses propres variantes de regle "while diagnostic is pending"/
+        # "while reclamation form is active" (rules.yml) qui relancent deja
+        # le champ ou le formulaire en attente juste apres, dans le meme tour.
+        extra = {"buttons": QUICK_ACTION_BUTTONS} if _conversation_is_free(tracker) else {}
 
         if not entry:
             # Notation recue hors contexte (ex. l'utilisateur tape "c'etait
@@ -173,7 +189,7 @@ class ActionRecordResponseRating(Action):
             # un bouton perime clique apres que CETTE reference precise ait
             # deja ete notee/retiree) : rien de precis a persister, mais on
             # reste courtois plutot que de laisser le message sans reponse.
-            dispatcher.utter_message(response="utter_thanks_for_rating")
+            dispatcher.utter_message(response="utter_thanks_for_rating", **extra)
             return reset_events
 
         interaction_type = entry.get("type")
@@ -195,8 +211,8 @@ class ActionRecordResponseRating(Action):
         try:
             response = requests.post(RATING_SERVICE_URL, json=payload, timeout=10)
             response.raise_for_status()
-            dispatcher.utter_message(response="utter_thanks_for_rating")
+            dispatcher.utter_message(response="utter_thanks_for_rating", **extra)
         except requests.RequestException:
-            dispatcher.utter_message(response="utter_rating_storage_failed")
+            dispatcher.utter_message(response="utter_rating_storage_failed", **extra)
 
         return reset_events

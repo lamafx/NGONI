@@ -1,256 +1,178 @@
-version: "3.1"
+version: '3.1'
 nlu:
 - intent: ask_faq
-  examples: |
-    - Comment je commence à utiliser NGONI ?
-    - Est-ce que l'application fonctionne sans internet ?
-    - J'aimerais comprendre les services disponibles
-    - À quoi sert exactement NGONI Plus ?
-    - Comment accéder aux fonctionnalités de la plateforme ?
-    - Pourquoi utiliser cette application ?
-    - Comment se passe l'utilisation des pièces ?
-    - Quels services propose NGONI concrètement ?
-    - Je veux comprendre le fonctionnement général
-    - Comment on gagne des pièces sur l'application ?
-    - Est-ce que je peux utiliser NGONI sur iPhone ?
-    - Comment fonctionne le système de récompense ?
-    - Quels sont les moyens de paiement disponibles ?
-    - Comment vérifier mon compte utilisateur ?
-    - Comment consulter mes informations ?
-    - Je ne comprends pas comment ça marche
-    - Comment débuter sur la plateforme NGONI ?
-    - À quoi sert le portefeuille dans l'application ?
-    - Comment suivre mes opérations ?
-    - Quelles sont les options disponibles ?
-    - Comment obtenir de l'aide sur l'application ?
-    - Où trouver les informations sur les services ?
-    - Comment fonctionne le système interne ?
-    - Comment ça marche les retraits ?
-
+  examples: "|\n    - Comment je commence à utiliser NGONI ?\n    - Est-ce que l'application\
+    \ fonctionne sans internet ?\n    - J'aimerais comprendre les services disponibles\n\
+    \    - À quoi sert exactement NGONI Plus ?\n    - Comment accéder aux fonctionnalités\
+    \ de la plateforme ?\n    - Pourquoi utiliser cette application ?\n    - Comment\
+    \ se passe l'utilisation des pièces ?\n    - Quels services propose NGONI concrètement\
+    \ ?\n    - Je veux comprendre le fonctionnement général\n    - Comment on gagne\
+    \ des pièces sur l'application ?\n    - Est-ce que je peux utiliser NGONI sur\
+    \ iPhone ?\n    - Comment fonctionne le système de récompense ?\n    - Quels sont\
+    \ les moyens de paiement disponibles ?\n    - Comment vérifier mon compte utilisateur\
+    \ ?\n    - Comment consulter mes informations ?\n    - Comment débuter sur la\
+    \ plateforme NGONI ?\n    - À quoi sert le portefeuille dans l'application ?\n\
+    \    - Comment suivre mes opérations ?\n    - Quelles sont les options disponibles\
+    \ ?\n    - Comment obtenir de l'aide sur l'application ?\n    - Où trouver les\
+    \ informations sur les services ?\n    - Comment fonctionne le système interne\
+    \ ?\n    - Comment ça marche les retraits ?\n    - c'est quoi le principe des\
+    \ pièces exactement et à quoi ça me sert concrètement dans la vraie vie ?\n  \
+    \  - explik moi comment fonctionne le portefeuille svp j'ai du mal à piger\n \
+    \   - kan on dit ngoni plus c'est un abonnement payant ou bien c'est 100% gratuit\
+    \ ?\n    - est ce que l'appli marche si j'ai pas de connexion internet active\
+    \ ou de data ?\n    - kel sont les moyens pr recharger mon compte rapidement sans\
+    \ trop de frais ?\n    - dis moi comment on fait pour convertir ou utiliser les\
+    \ pièces qu'on a accumulées\n    - est-ce possible de l'utiliser sur un iphone\
+    \ 11 avec iOS à jour ou c'est juste reservé à android ?\n    - eski ya une limite\
+    \ maximale de stockage de pieces dans le wallet virtuel ?\n    - j'aimerais qu'on\
+    \ m'explique le système d'aide et les heures d'ouverture de l'assistance\n   \
+    \ - ou se trouvent les termes et conditions d'utilisation du service NGONI dans\
+    \ le menu ?\n    - esk la verification de piece d'identité est obligatoire dès\
+    \ la premiere connexion ?\n    - comment faire pour lier mon compte de paiement\
+    \ mobile money avec l'appli ?\n    - quelles sont les garanties de sécurité quand\
+    \ on met son argent sur le portefeuille ngoni ?"
 - intent: create_reclamation
-  examples: |
-    - Mon compte ne fonctionne plus depuis ce matin
-    - J'ai un problème avec mon retrait en cours
-    - L'application refuse de charger
-    - Mon solde n'est pas correct
-    - Je n'arrive plus à me connecter à mon compte
-    - Mon paiement a été effectué mais rien n'apparaît
-    - J'ai perdu des pièces sur mon compte
-    - Le système bug quand j'essaie d'ouvrir l'app
-    - Mon retrait est bloqué depuis plusieurs jours
-    - Je n'ai toujours pas reçu mes pièces
-    - L'application s'arrête toute seule
-    - Je rencontre un problème technique
-    - Mon historique ne s'affiche plus
-    - Une erreur apparaît à chaque action
-    - Je ne peux plus utiliser mes fonctionnalités
-    - Mon compte semble désactivé
-    - Le service ne répond plus correctement
-    - Je pense qu'il y a un bug dans le système
-    - Mes transactions ont disparu
-    - Je n'arrive pas à effectuer un paiement
-    - Mon retrait reste sans évolution
-    - L'application est inutilisable actuellement
-    - J'ai un souci urgent avec mon compte
-    - Rien ne fonctionne depuis hier
-    - Le système affiche une erreur inconnue
-
+  examples: "|\n    - J'ai un problème avec mon retrait en cours\n    - L'application\
+    \ refuse de charger\n    - Mon paiement a été effectué mais rien n'apparaît\n\
+    \    - L'application s'arrête toute seule\n    - Je rencontre un problème technique\n\
+    \    - Mon historique ne s'affiche plus\n    - Une erreur apparaît à chaque action\n\
+    \    - j'ai besoin d'un vrai conseiller pour mon dossier\n    - my account got\
+    \ suspended, ouvrez un dossier svp\n    - je me demande s'il est possible qu'un\
+    \ agent reprenne mon cas\n    - application totalement défaillante impossible\
+    \ de faire un moindre retrait depuis ce matin\n    - je veux ouvrir un ticket\
+    \ d'incident urgent pour un virement non reçu dans mon portefeuille\n    - mon\
+    \ historique de transaction a complètement disparu de l'écran, veuiller régler\
+    \ le problème svp\n    - j'en ai marre, ouvrez un dossier de réclamation et donnez\
+    \ moi mon numéro de suivi\n    - j'exige qu'un conseiller humain m'appelle directement\
+    \ sur mon telephone portable\n    - je souhaite porter plainte ou signaler un\
+    \ dysfonctionnement grave sur mon compte bloque"
 - intent: greet
-  examples: |
-    - Bonjour
-    - Salut
-    - Bonsoir
-    - Hello
-    - Hey
-    - Coucou
-    - Salut NGONI
-    - Bonjour support
-    - Hey j'ai une question
-    - Salut j'ai besoin d'aide
-    - Hello est-ce que vous êtes là ?
-    - Bonjour équipe NGONI
-    - Coucou assistance
-    - Salut service client
-    - Hey support
-
+  examples: "|\n    - Bonjour\n    - Salut\n    - Bonsoir\n    - Hello\n    - Hey\n\
+    \    - Coucou\n    - Salut NGONI\n    - Bonjour support\n    - Hey j'ai une question\n\
+    \    - Salut j'ai besoin d'aide\n    - Hello est-ce que vous êtes là ?\n    -\
+    \ Bonjour équipe NGONI\n    - Coucou assistance\n    - Salut service client\n\
+    \    - Hey support\n    - saluut est ce qu'il y a un agent disponible maintenant\
+    \ pour m'aider ?\n    - bjr l'assistance ngoni j'aimerais poser une petite question\n\
+    \    - yo le chat bot comment tu vas depuis la derniere fois\n    - holà amigo\
+    \ j'ai besoin d'un petit renseignement\n    - bonsoir l'equipe technique de ngoni"
 - intent: goodbye
-  examples: |
-    - Au revoir
-    - Bye
-    - À plus tard
-    - Bonne journée
-    - Bonne soirée
-    - Merci je m'arrête là
-    - Je dois y aller
-    - On se parle plus tard
-    - C'était tout merci
-    - Merci pour l'aide
-    - Je reviendrai plus tard
-    - Fin de la conversation
-    - Ok merci je pars
-    - À bientôt
-    - Merci beaucoup au revoir
-
+  examples: "|\n    - Au revoir\n    - Bye\n    - À plus tard\n    - Bonne journée\n\
+    \    - Bonne soirée\n    - Merci je m'arrête là\n    - Je dois y aller\n    -\
+    \ On se parle plus tard\n    - C'était tout merci\n    - Merci pour l'aide\n \
+    \   - Je reviendrai plus tard\n    - Fin de la conversation\n    - Ok merci je\
+    \ pars\n    - À bientôt\n    - Merci beaucoup au revoir\n    - ok c'est bon pour\
+    \ moi je déco a la prochaine\n    - merci pour rien du tout au revoir et bonne\
+    \ continuation\n    - c'est bon j'ai obtenu ce que je voulais bonne journée a\
+    \ l'equipe\n    - cya l'équipe je reviens vers vous si besoin plus tard\n    -\
+    \ bon je dois couper le chat a plus tard\n    - c'est tout pour moi aujourd'hui\
+    \ merci bcp\n    - ok parfait c'est note merci et a bientot"
 - intent: affirm
-  examples: |
-    - oui
-    - ouais
-    - ok
-    - d'accord
-    - yes
-    - bien sûr
-    - c'est bon
-    - exact
-    - oui je confirme
-    - ok vas-y
-    - oui c'est correct
-    - tout à fait
-    - oui pas de problème
-    - oui continue
-    - d'accord je valide
-    - c pas faux
-    - 👍
-    - ok 😊
-
+  examples: "|\n    - oui\n    - ouais\n    - ok\n    - d'accord\n    - yes\n    -\
+    \ bien sûr\n    - c'est bon\n    - exact\n    - oui je confirme\n    - ok vas-y\n\
+    \    - oui c'est correct\n    - tout à fait\n    - oui pas de problème\n    -\
+    \ oui continue\n    - d'accord je valide\n    - \U0001F44D\n    - ok \U0001F60A\
+    \n    - ouais c'est exactement ça vas y lance la procedure\n    - go pour ça on\
+    \ fait comme ca\n    - yap, valide stp c'est parfaitement exact\n    - c'est parfait\
+    \ continue la suite de l'explication\n    - absolutly, tu peux poursuivre sans\
+    \ souci\n    - ouais c'est bien mon adresse mail\n    - totalement d'accord avec\
+    \ ce que tu viens de dire\n    - c'est tout a fait exact tu peux valider"
 - intent: deny
-  examples: |
-    - non
-    - pas du tout
-    - jamais
-    - faux
-    - pas vraiment
-    - non merci
-    - c'est incorrect
-    - pas ça
-    - absolument pas
-    - je ne pense pas
-    - non ce n'est pas bon
-    - pas d'accord
-    - non c'est faux
-    - pas exactement
-    - non ce n'est pas ça
-    - non, c'est pas terminé pour moi
-    - 👎
-
+  examples: "|\n    - non\n    - pas du tout\n    - jamais\n    - faux\n    - pas\
+    \ vraiment\n    - non merci\n    - c'est incorrect\n    - pas ça\n    - absolument\
+    \ pas\n    - je ne pense pas\n    - non ce n'est pas bon\n    - pas d'accord\n\
+    \    - pas exactement\n    - non ce n'est pas ça\n    - non, c'est pas terminé\
+    \ pour moi\n    - \U0001F44E\n    - non surtout pas annule tout tout de suite\n\
+    \    - non pas du tout tu fais fausse route\n    - négatif ce ne sont pas les\
+    \ bonnes informations"
 - intent: bot_challenge
-  examples: |
-    - Est-ce que tu es un bot ?
-    - Tu es humain ou pas ?
-    - Qui es-tu exactement ?
-    - Est-ce un humain qui répond ?
-    - Tu es une intelligence artificielle ?
-    - Comment tu fonctionnes ?
-    - Tu es automatisé ?
-    - Tu es un programme ?
-    - Est-ce un robot ?
-    - Qui est derrière ce chat ?
-    - Tu es réel ?
-    - Tu penses comme un humain ?
-    - Est-ce que je parle à une machine ?
-    - Tu es une IA ?
-    - C'est un assistant automatique ?
-    - t un vrai robo ?
-    - qui ta développé ?
-    - Es-tu capable de penser par toi-même ou tu suis juste un script ?
-
+  examples: "|\n    - Est-ce que tu es un bot ?\n    - Tu es humain ou pas ?\n   \
+    \ - Qui es-tu exactement ?\n    - Est-ce un humain qui répond ?\n    - Tu es une\
+    \ intelligence artificielle ?\n    - Comment tu fonctionnes ?\n    - Tu es automatisé\
+    \ ?\n    - Tu es un programme ?\n    - Est-ce un robot ?\n    - Qui est derrière\
+    \ ce chat ?\n    - Tu es réel ?\n    - Tu penses comme un humain ?\n    - Est-ce\
+    \ que je parle à une machine ?\n    - Tu es une IA ?\n    - C'est un assistant\
+    \ automatique ?\n    - t un vrai robo ?\n    - qui ta développé ?\n    - Es-tu\
+    \ capable de penser par toi-même ou tu suis juste un script ?\n    - frérot c'est\
+    \ un humain qui me répond ou un script automatique codé ?\n    - dis moi la vérité\
+    \ t'es un robot algorithmique non ?\n    - t'as été développé avec quel LLM ou\
+    \ modèle de langage au juste ?\n    - c'est une vraie personne derrière ce compte\
+    \ ou un chatbot ?\n    - est-ce que tu as une vraie conscience ou tu répètes juste\
+    \ tes données d'entraînement ?\n    - t'es animé par chatgpt ou un autre algorithme\
+    \ ?\n    - es-tu un vrai conseiller ou un programme informatique ?"
 - intent: out_of_scope
-  examples: |
-    - Quel temps fait-il demain ?
-    - Raconte-moi une blague drôle
-    - Comment on fait un CV ?
-    - Qui a gagné le match hier soir ?
-    - Donne-moi une recette de cuisine facile
-    - Je veux aller au marché et demain ta réclamation sera prise en compte
-    - Mon chat a mangé mon repas et il pleut dehors
-    - koman ale lé zafer mon fren
-    - test test est-ce que tu m'entends
-    - Sans rapport avec l'application, tu connais un bon restaurant dans le quartier ?
-
+  examples: "|\n    - Quel temps fait-il demain ?\n    - Raconte-moi une blague drôle\n\
+    \    - Qui a gagné le match hier soir ?\n    - Donne-moi une recette de cuisine\
+    \ facile\n    - Je veux aller au marché et demain ta réclamation sera prise en\
+    \ compte\n    - Mon chat a mangé mon repas et il pleut dehors\n    - koman ale\
+    \ lé zafer mon fren\n    - test test est-ce que tu m'entends\n    - Sans rapport\
+    \ avec l'application, tu connais un bon restaurant dans le quartier ?\n    - tu\
+    \ connais le score du match du FC Barcelone ce soir ?\n    - comment on fait de\
+    \ la bonne sauce graine à la maison ?\n    - kel temps il fait aujourd'hui à Abidjan\
+    \ ou Dakar ?\n    - qui est le président actuel de la France ?\n    - c'est quoi\
+    \ le meilleur smartphone à acheter en ce moment ?\n    - donne moi les numeros\
+    \ gagnants de la loterie"
 - intent: inappropriate_language
-  examples: |
-    - espèce d'imbécile
-    - c'est de la merde cette application
-    - fuck this bot
-    - bande d'incapables
-    - t con ou koi
-    - ce chatbot à la con ne sert à rien
-    - va te faire foutre avec ton service pourri
-
+  examples: "|\n    - espèce d'imbécile\n    - c'est de la merde cette application\n\
+    \    - fuck this bot\n    - bande d'incapables\n    - t con ou koi\n    - ce chatbot\
+    \ à la con ne sert à rien\n    - va te faire foutre avec ton service pourri\n\
+    \    - vous êtes une bande d'incapables votre service c'est de la grosse merde\n\
+    \    - tfou sur votre appli de merde qui prend nos sous sans rien donner\n   \
+    \ - ferme ta gueule le bot à la con tu comprends rien\n    - bsartek l'arnaque\
+    \ gros voleur que vous etes\n    - degage de la petit robot inutile\n    - vous\
+    \ etes des escrocs remboursez mon argent salauds"
 - intent: diagnostic
-  examples: |
-    - mon retrait est bloqué depuis hier
-    - je n'arrive plus à me connecter à mon compte
-    - mon paiement a échoué sans raison
-    - le service ne répond plus correctement
-    - j'ai perdu des pièces sur mon compte
-    - mon retra est bloqé depui ce matin
-    - Bonjour, mon application plante à chaque ouverture depuis la dernière mise à jour.
-    - Mes récompenses ne sont toujours pas créditées sur mon compte.
-    - en panne
-    - ça marche plus
-    - my wallet est bloqué depuis ce matin
-    - c'est le bazar avec mon solde en ce moment
-    - mon retrait est toujours bloqué 😡
-
-- intent: create_reclamation
-  examples: |
-    - j'ai besoin d'un vrai conseiller pour mon dossier
-    - ticket svp
-    - my account got suspended, ouvrez un dossier svp
-    - je me demande s'il est possible qu'un agent reprenne mon cas
-    - aide stp j'ai un souci grave avec mon compte
-
-# Audit qualite NLU : ces 6 intentions etaient totalement absentes du jeu de
-# test (intent_report.json ne couvrait donc que 12 des 18 intentions du
-# domaine) -- une regression sur l'une d'elles passait inapercue en CI.
-# Exemples nouveaux (pas de simple copie des exemples d'entrainement) pour
-# mesurer une vraie generalisation, pas juste un rappel par coeur.
+  examples: "|\n    - mon retrait est bloqué depuis hier\n    - mon paiement a échoué\
+    \ sans raison\n    - mon retra est bloqé depui ce matin\n    - Bonjour, mon application\
+    \ plante à chaque ouverture depuis la dernière mise à jour.\n    - Mes récompenses\
+    \ ne sont toujours pas créditées sur mon compte.\n    - my wallet est bloqué depuis\
+    \ ce matin\n    - c'est le bazar avec mon solde en ce moment\n    - mon retrait\
+    \ est toujours bloqué \U0001F621\n    - mon retrait de 10000 est bloqué sur 'en\
+    \ cours' depuis hier soir\n    - impossible de faire un retrait ça met 'erreur\
+    \ 500' tout le temps\n    - my payment failed mais j'ai été débité quand même\
+    \ sur mon compte bancaire\n    - le solde de mon wallet ne s'actualise plus du\
+    \ tout malgré plusieurs relances\n    - je tente de me connecter mais l'appli\
+    \ me jette à chaque fois avec un message d'erreur\n    - le bouton de validation\
+    \ tourne dans le vide et rien ne se passe\n    - l'ecran devient tout blanc quand\
+    \ je clique sur consulter mes pieces\n    - j'ai un code d'erreur 'TIMEOUT_01'\
+    \ qui s'affiche a chaque fois que je fais un transfert"
 - intent: ask_capabilities
-  examples: |
-    - Dis-moi tout ce que tu sais faire
-    - Tu peux m'aider sur quels sujets exactement ?
-    - Quelles sont les choses que tu gères ?
-    - C'est quoi ton champ d'action ?
-    - Sur quoi es-tu compétent ?
-    - Peux-tu résumer tes fonctions ?
-    - Qu'est-ce que je peux te demander ?
-    - Quel type d'assistance proposes-tu ?
-
+  examples: "|\n    - Dis-moi tout ce que tu sais faire\n    - Tu peux m'aider sur\
+    \ quels sujets exactement ?\n    - Quelles sont les choses que tu gères ?\n  \
+    \  - C'est quoi ton champ d'action ?\n    - Sur quoi es-tu compétent ?\n    -\
+    \ Peux-tu résumer tes fonctions ?\n    - Qu'est-ce que je peux te demander ?\n\
+    \    - Quel type d'assistance proposes-tu ?\n    - qu'est ce que tu sais faire\
+    \ d'autre à part répéter les mêmes choses ?\n    - tu peux m'aider sur quoi exactement\
+    \ ? liste moi tes fonctionnalités\n    - donne moi le menu complet de ce que tu\
+    \ es capable de traiter pour moi\n    - quelles sont tes limites et tes possibilités\
+    \ de réponse ?"
 - intent: rate_response_useful
-  examples: |
-    - Super, ça répond parfaitement
-    - Merci, c'était exactement ça
-    - Nickel, j'ai ma réponse
-    - Ça m'a bien aidé merci
-    - Parfait, c'est clair maintenant
-    - Oui exactement ce qu'il me fallait
-    - Top merci pour l'explication
-
+  examples: "|\n    - Super, ça répond parfaitement\n    - Merci, c'était exactement\
+    \ ça\n    - Nickel, j'ai ma réponse\n    - Ça m'a bien aidé merci\n    - Parfait,\
+    \ c'est clair maintenant\n    - Oui exactement ce qu'il me fallait\n    - Top\
+    \ merci pour l'explication\n    - ah nickel c'est super clair merci bcp\n    -\
+    \ propre, exactement l'info qu'il me fallait pour resoudre mon souci\n    - top\
+    \ chef merci pour l'explication detaillee\n    - parfait tu m'as débloqué la situation\n\
+    \    - super merci c'est la meilleure explication possible\n    - genial j'ai\
+    \ tout compris grace a toi\n    - 10/10 pour cette reponse tres pertinente"
 - intent: rate_response_not_useful
-  examples: |
-    - Non ça ne m'avance pas du tout
-    - Ce n'est pas la réponse que j'attendais
-    - Pas clair, ça ne répond pas à ma question
-    - Bof, ça ne m'aide pas vraiment
-    - Aucun rapport avec ce que je demandais
-    - Franchement pas convaincant comme réponse
-
+  examples: "|\n    - Ce n'est pas la réponse que j'attendais\n    - Pas clair, ça\
+    \ ne répond pas à ma question\n    - Bof, ça ne m'aide pas vraiment\n    - Aucun\
+    \ rapport avec ce que je demandais\n    - Franchement pas convaincant comme réponse\n\
+    \    - zéro pointe, ça m'aide pas du tout ton truc générique\n    - aucun rapport\
+    \ avec ma question initiale... relis ce que j'ai ecrit\n    - pff useless ta réponse\
+    \ je suis pas plus avancé\n    - ta reponse est super floue et ne resout pas mon\
+    \ probleme"
 - intent: browse_faq
-  examples: |
-    - Fais-moi voir des questions types
-    - J'aimerais des exemples de questions à poser
-    - Propose-moi quelques questions fréquentes
-    - Tu peux m'afficher la liste de questions ?
-    - J'ai besoin d'idées de questions
-
+  examples: "|\n    - Fais-moi voir des questions types\n    - J'aimerais des exemples\
+    \ de questions à poser\n    - Propose-moi quelques questions fréquentes\n    -\
+    \ Tu peux m'afficher la liste de questions ?\n    - J'ai besoin d'idées de questions\n\
+    \    - montre moi un peu les questions récurrentes que les gens posent d'habitude\n\
+    \    - affiche la liste des FAQ disponibles sur l'application\n    - donne moi\
+    \ des idées de sujets d'aide les plus populaires\n    - balance les questions\
+    \ fréquentes stp pour que je jette un oeil\n    - fais défiler la foire aux questions\
+    \ générale\n    - je veux parcourir les principales interrogations des utilisateurs"
 - intent: select_faq_category
-  examples: |
-    - Plutôt les questions sur [les retraits](faq_category:WITHDRAWAL)
-    - Je voudrais des questions à propos de [NGONI Plus](faq_category:NGONI_PLUS)
-    - Des questions sur [mon compte](faq_category:ACCOUNT) s'il vous plaît
-    - Montre les questions liées aux [pièces](faq_category:COINS)
-
-- intent: select_faq_question
-  examples: |
-    - [comment-fonctionne-le-parrainage-xyz98765](faq_slug)
-    - [pourquoi-mon-retrait-est-il-en-attente-ghi54321](faq_slug)
+  examples: "|\n    - Plutôt les questions sur les retraits\n    - Je voudrais des\
+    \ questions à propos de NGONI Plus\n    - Des questions sur mon compte s'il vous\
+    \ plaît\n    - Montre les questions liées aux pièces\n    - je choisis la catégorie\
+    \ retraits et rechargements de portefeuille"

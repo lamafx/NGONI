@@ -4,7 +4,10 @@ from datetime import datetime, timezone
 from sqlalchemy import Column, DateTime, String
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 
-from app.models import Base
+try:
+    from app.models import Base
+except ImportError:  # pragma: no cover - support running as `main`
+    from models import Base
 
 
 class Complaint(Base):

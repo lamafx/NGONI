@@ -3,6 +3,7 @@ from typing import Any, Dict, List, NamedTuple, Optional, Text
 from rasa_sdk import Action, Tracker
 from rasa_sdk.executor import CollectingDispatcher
 
+from .common import QUICK_ACTION_BUTTONS, _conversation_is_free, pick
 from .diagnostic import _fetch_capabilities
 
 
@@ -59,8 +60,18 @@ def _join_naturally(items: List[Text]) -> Text:
 
 
 def build_capabilities_message() -> Text:
-    lines = ["Je peux vous accompagner sur plusieurs sujets :"]
-    lines.extend(f"- {capability.description} ;" for capability in AGENT_CAPABILITIES)
+    # Ton conversationnel (audit UX) : les puces se terminaient auparavant
+    # toutes par " ;", y compris la derniere -- lisible comme un document
+    # (liste a la Word), pas comme une phrase dite dans une bulle de chat.
+    # Retire, et l'intro varie desormais au lieu d'etre toujours identique.
+    lines = [
+        pick(
+            "Je peux vous accompagner sur plusieurs sujets :",
+            "Voici ce que je peux faire pour vous :",
+            "Je peux notamment vous aider sur ces points :",
+        )
+    ]
+    lines.extend(f"- {capability.description}" for capability in AGENT_CAPABILITIES)
 
     labels = _diagnostic_labels()
     if labels:
@@ -97,5 +108,12 @@ class ActionDescribeCapabilities(Action):
         tracker: Tracker,
         domain: Dict[Text, Any],
     ) -> List[Dict[Text, Any]]:
-        dispatcher.utter_message(text=build_capabilities_message())
+        # Boutons de relance seulement si aucun flux structure n'est en
+        # attente (voir _conversation_is_free, common.py) : ask_capabilities
+        # a ses propres variantes de regle "while diagnostic is pending"/
+        # "while reclamation form is active" (rules.yml) qui relancent deja
+        # le champ ou le formulaire en attente juste apres, dans le meme
+        # tour -- y ajouter des boutons generiques serait premature.
+        extra = {"buttons": QUICK_ACTION_BUTTONS} if _conversation_is_free(tracker) else {}
+        dispatcher.utter_message(text=build_capabilities_message(), **extra)
         return []

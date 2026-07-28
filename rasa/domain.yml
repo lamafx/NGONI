@@ -483,6 +483,8 @@ responses:
 
   utter_please_be_respectful:
     - text: "Je comprends votre frustration, mais je ne peux pas donner suite à un message contenant des propos inappropriés. Décrivez-moi votre problème et je ferai de mon mieux pour vous aider."
+    - text: "Je sens que la situation vous agace, mais je ne peux pas répondre à un message formulé de cette façon. Dites-moi calmement ce qui ne va pas, je ferai le nécessaire pour vous aider."
+    - text: "Je comprends que ce soit frustrant. Je préfère qu'on reste courtois pour avancer efficacement : expliquez-moi votre problème et je m'en occupe."
 
   utter_faq_answer:
     - text: "{faq_answer}"
@@ -493,6 +495,8 @@ responses:
 
   utter_faq_error:
     - text: "Désolé, ce service est momentanément indisponible."
+    - text: "Désolé, je n'arrive pas à accéder à la base de questions pour le moment."
+    - text: "Ce service rencontre un souci passager, désolé. Vous pouvez réessayer dans quelques instants."
 
   utter_reclamation_start:
     - text: "Je peux vous aider à ouvrir une réclamation. Décrivez votre problème et je vais le structurer."
@@ -528,6 +532,8 @@ responses:
 
   utter_wrong_description:
     - text: "La description ne peut pas être vide. Pouvez-vous décrire votre problème plus précisément ?"
+    - text: "Je n'ai rien reçu comme description. Pouvez-vous m'expliquer ce qui se passe ?"
+    - text: "Il me faut une description pour avancer. Qu'est-ce qui ne fonctionne pas exactement ?"
 
   # Distinct de utter_wrong_description (audit "500 tours", 2026-07-18) :
   # une description non vide mais trop courte/vague ("mon solde est faux")
@@ -559,6 +565,8 @@ responses:
 
   utter_wrong_cancel_choice:
     - text: "Je n’ai pas compris. Répondez par : modifier, ou annuler."
+    - text: "Pardon, je n'ai pas saisi. Voulez-vous modifier ou annuler ?"
+    - text: "Petite précision : dites simplement « modifier » ou « annuler »."
 
   utter_ask_field_to_edit:
     - text: "Quel élément souhaitez-vous modifier ? (catégorie / description / date)"
@@ -566,6 +574,8 @@ responses:
 
   utter_wrong_field_to_edit:
     - text: "Je n’ai pas compris. Répondez par : catégorie, description ou date."
+    - text: "Pardon, je n'ai pas saisi. Lequel voulez-vous corriger : catégorie, description ou date ?"
+    - text: "Pouvez-vous préciser ? Un seul mot suffit : catégorie, description ou date."
 
   utter_thanks_for_suggestion:
     - text: "Merci pour votre suggestion ! Je la transmets à notre équipe pour étude."
@@ -573,9 +583,13 @@ responses:
 
   utter_suggestion_storage_failed:
     - text: "Je n'ai pas pu enregistrer votre suggestion pour le moment, le service est indisponible. Vous pouvez réessayer un peu plus tard."
+    - text: "Merci pour l'idée, mais je n'arrive pas à l'enregistrer pour l'instant (service indisponible). Réessayez dans quelques instants ?"
+    - text: "Le service qui enregistre les suggestions est momentanément indisponible, désolé. Votre suggestion n'a pas pu être conservée cette fois-ci."
 
   utter_acknowledge_complaint:
     - text: "Je suis désolé que vous ne soyez pas satisfait. Si vous voulez que j'examine concrètement votre cas, dites-le-moi et j'ouvre une réclamation."
+    - text: "Je comprends votre mécontentement. Si vous préférez que ce soit suivi concrètement, dites-le-moi et j'ouvre une réclamation."
+    - text: "Désolé pour ce désagrément. Si vous souhaitez un suivi personnalisé de votre cas, je peux ouvrir une réclamation, dites-le-moi."
 
   # Audit robustesse : symetrique a utter_suggestion_storage_failed --
   # jusqu'ici, une panne de FEEDBACK_SERVICE_URL affichait le meme message
@@ -583,6 +597,8 @@ responses:
   # plainte etait bien enregistree alors que rien n'avait ete persiste.
   utter_complaint_storage_failed:
     - text: "Je n'ai pas pu enregistrer votre remarque pour le moment, le service est indisponible. Vous pouvez réessayer un peu plus tard."
+    - text: "Le service qui enregistre les retours est momentanément indisponible, désolé. Je n'ai pas pu conserver votre remarque cette fois-ci."
+    - text: "Désolé, je n'arrive pas à enregistrer votre remarque pour l'instant. Un nouvel essai un peu plus tard devrait fonctionner."
 
   utter_thanks_for_rating:
     - text: "Merci pour votre retour !"
@@ -590,6 +606,8 @@ responses:
 
   utter_rating_storage_failed:
     - text: "Merci pour votre retour ! (je n'ai cependant pas pu l'enregistrer pour le moment, le service est indisponible)"
+    - text: "Merci pour votre avis ! Je n'ai malheureusement pas pu l'enregistrer cette fois, le service est momentanément indisponible."
+    - text: "C'est noté de mon côté, merci ! (petit souci technique : votre retour n'a pas pu être sauvegardé pour l'instant)"
 
 actions:
   - action_greet_with_time

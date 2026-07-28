@@ -1,0 +1,29 @@
+{
+  "embedding_model": "BAAI/bge-m3",
+  "classifier": "logreg",
+  "n_examples": 1885,
+  "n_intents": 19,
+  "intent_counts": {
+    "ask_faq": 179,
+    "deny": 173,
+    "diagnostic": 172,
+    "greet": 166,
+    "inappropriate_language": 165,
+    "affirm": 161,
+    "goodbye": 149,
+    "bot_challenge": 141,
+    "out_of_scope": 138,
+    "create_reclamation": 83,
+    "plainte": 60,
+    "suggestion": 60,
+    "ask_capabilities": 48,
+    "ask_complaint_status": 48,
+    "rate_response_useful": 42,
+    "rate_response_not_useful": 38,
+    "browse_faq": 30,
+    "select_faq_category": 30,
+    "select_faq_question": 2
+  },
+  "embed_dim": 1024,
+  "trained_at": "2026-07-28T11:49:09"
+}
