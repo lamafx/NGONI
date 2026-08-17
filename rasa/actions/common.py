@@ -250,6 +250,24 @@ def _search_faq(question: Text) -> Optional[Text]:
     return payload.get("answer") or payload.get("response") or payload.get("result")
 
 
+def is_superagent_mode(tracker: Tracker) -> bool:
+    """Le mode Super-Agent (bascule visible cote frontend, voir
+    frontend/pages/chat/superagent.store.js) est-il actif pour ce tour ?
+
+    Transmis via `metadata.superagent` dans le corps POST vers le webhook
+    Rasa (voir app/main.py::send_to_bot) -- meme mecanisme que le
+    selecteur de modele NLU pour transporter le texte reel a travers une
+    intention structuree (voir get_user_text, docstring similaire) :
+    verifie empiriquement que Rasa preserve `metadata` telle quelle jusque
+    dans tracker.latest_message.
+
+    Un flag PAR MESSAGE (pas un slot persistant) : le super-agent n'agit que
+    sur le tour ou l'utilisateur a explicitement la bascule active, jamais
+    par defaut ni par effet de bord d'un tour precedent."""
+    metadata = tracker.latest_message.get("metadata") or {}
+    return bool(metadata.get("superagent"))
+
+
 def _conversation_is_free(tracker: Tracker) -> bool:
     """True si aucun flux structure (formulaire de reclamation, champ de
     diagnostic en attente) n'est actif -- a verifier avant d'attacher

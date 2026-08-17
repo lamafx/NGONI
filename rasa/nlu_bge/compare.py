@@ -74,7 +74,7 @@ HF_CACHE_DIR = REPO_ROOT / "rasa" / ".cache" / "huggingface" / "hub" / "models--
 # Jeu de test combine
 # --------------------------------------------------------------------------
 
-def load_full_test_set() -> List[Tuple[str, str]]:
+def load_full_test_set() -> List[Tuple[str, str, str]]:
     # Retourne une liste (texte, intention, fichier_source)
     pairs: List[Tuple[str, str, str]] = []
     for path in TEST_NLU_PATHS:
@@ -382,6 +382,39 @@ def latency_stats(values_ms: List[float]) -> Dict:
     }
 
 
+def compute_per_class_metrics(y_true: List[str], y_pred: List[str], classes: List[str]) -> Dict[str, Dict[str, float]]:
+    class_to_idx = {c: i for i, c in enumerate(classes)}
+    kept = [(true_label, pred_label) for true_label, pred_label in zip(y_true, y_pred)
+            if true_label in class_to_idx and pred_label in class_to_idx]
+    if not kept:
+        return {
+            cls: {"precision": 0.0, "recall": 0.0, "f1-score": 0.0, "support": 0}
+            for cls in classes
+        }
+
+    y_true_filtered, y_pred_filtered = zip(*kept)
+    y_true_idx = np.array([class_to_idx[c] for c in y_true_filtered])
+    y_pred_idx = np.array([class_to_idx[c] for c in y_pred_filtered])
+
+    precision, recall, f1, support = precision_recall_fscore_support(
+        y_true_idx,
+        y_pred_idx,
+        labels=list(range(len(classes))),
+        average=None,
+        zero_division=0,
+    )
+
+    report: Dict[str, Dict[str, float]] = {}
+    for idx, cls in enumerate(classes):
+        report[cls] = {
+            "precision": float(precision[idx]),
+            "recall": float(recall[idx]),
+            "f1-score": float(f1[idx]),
+            "support": int(support[idx]),
+        }
+    return report
+
+
 # --------------------------------------------------------------------------
 # Boucle principale
 # --------------------------------------------------------------------------
@@ -434,8 +467,8 @@ def main() -> None:
     parser.add_argument(
         "--classifiers",
         nargs="+",
-        default=["knn"],
-        help="Classifieurs BGE a evaluer (workflow courant : seul KNN)",
+        default=["all"],
+        help="Classifieurs BGE a evaluer (ex. all, knn, logreg, svm, mlp, rf)",
     )
     parser.add_argument(
         "--augment-training",
@@ -485,11 +518,13 @@ def main() -> None:
         print(f"{n_classes} intentions connues : {classes}")
         versions = [{"name": runtime_model["classifier_name"], "clf_path": bge_clf_path, "enc_path": bge_enc_path, "meta": model_meta}]
 
-    requested_classifiers = set(args.classifiers)
-    selected_versions = [v for v in versions if v["name"] in requested_classifiers]
+    requested_classifiers = {name.lower() for name in args.classifiers}
+    if not requested_classifiers or "all" in requested_classifiers:
+        selected_versions = sorted(versions, key=lambda item: item["name"])
+    else:
+        selected_versions = [v for v in versions if v["name"].lower() in requested_classifiers]
+
     if not selected_versions:
-        if "knn" in requested_classifiers:
-            raise FileNotFoundError("Aucun modele KNN disponible pour l'evaluation demandee.")
         raise FileNotFoundError("Aucun classifieur disponible pour l'evaluation demandee.")
 
     selected_versions = sorted(selected_versions, key=lambda item: item["name"])
@@ -638,6 +673,7 @@ def main() -> None:
 
     summary = {
         "n_examples": len(rows),
+        "classes": classes,
         "rasa_available": rasa_available,
         "rasa": {**rasa_metrics, "latency": latency_stats(rasa_latencies)},
         "classifiers": classifier_summaries,
@@ -671,6 +707,16 @@ def main() -> None:
             "classifiers": classifiers_file,
         }
     summary["per_test_file"] = per_file
+
+    per_intent: Dict[str, Any] = {
+        "rasa": compute_per_class_metrics(y_true, y_pred_rasa, classes),
+        "classifiers": {},
+    }
+    for version in selected_versions:
+        name = version["name"]
+        per_intent["classifiers"][name] = compute_per_class_metrics(y_true, bge_predictions[name], classes)
+    summary["per_intent"] = per_intent
+
     (RESULTS_DIR / "comparison_summary.json").write_text(
         json.dumps(summary, indent=2, ensure_ascii=False), encoding="utf-8"
     )
@@ -706,6 +752,34 @@ def write_report(path: Path, summary: Dict, only_rasa_right: List[Dict],
     lines.append(f"| F1 (macro) | {r['f1_macro']:.4f} | " + " | ".join(f"{item['metrics']['f1_macro']:.4f}" for item in summary['classifiers']) + " |")
     lines.append(f"| F1 (weighted) | {r['f1_weighted']:.4f} | " + " | ".join(f"{item['metrics']['f1_weighted']:.4f}" for item in summary['classifiers']) + " |")
     lines.append("")
+
+    lines.append("## Rapport par intention (per-class classification report)\n")
+    per_intent = summary.get("per_intent", {})
+    if per_intent:
+        headers = ["Intention", "Support"]
+        model_names = ["Rasa"] + [v["name"] for v in versions]
+        for model_name in model_names:
+            headers.extend([f"{model_name} Precision", f"{model_name} Recall", f"{model_name} F1"])
+        lines.append("| " + " | ".join(headers) + " |")
+        lines.append("|---|---:" + "|---:|---:|---:" * len(model_names) + "|")
+        for intent in summary.get("classes", []):
+            row = [intent, str(per_intent.get("rasa", {}).get(intent, {}).get("support", 0))]
+            for model_name in model_names:
+                metrics = None
+                if model_name == "Rasa":
+                    metrics = per_intent.get("rasa", {}).get(intent, {})
+                else:
+                    metrics = per_intent.get("classifiers", {}).get(model_name, {}).get(intent, {})
+                if metrics:
+                    row.extend([
+                        f"{metrics.get('precision', 0.0):.4f}",
+                        f"{metrics.get('recall', 0.0):.4f}",
+                        f"{metrics.get('f1-score', 0.0):.4f}",
+                    ])
+                else:
+                    row.extend(["n/a", "n/a", "n/a"])
+            lines.append("| " + " | ".join(row) + " |")
+        lines.append("")
 
     lines.append("## Latence (appel unitaire, pattern de production)\n")
     lines.append("| Classifieur | Moyenne | p50 | p95 |")

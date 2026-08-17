@@ -20,7 +20,7 @@ from typing import Dict, List, Tuple
 
 import joblib
 import numpy as np
-from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix, log_loss
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from dataset import load_adversarial_examples, load_test_examples, normalize_text  # noqa: E402
@@ -65,6 +65,7 @@ def evaluate_split(name: str, pairs: List[Tuple[str, str]], clf, encoder) -> Dic
 
     y_true_idx = encoder.transform(y_true_labels)
     acc = accuracy_score(y_true_idx, y_pred_idx)
+    ll = log_loss(y_true_idx, proba, labels=list(range(len(encoder.classes_))))
 
     # Macro/weighted F1 : uniquement sur les intentions reellement presentes
     # dans CE jeu de test (vraies ou predites) -- sinon une intention jamais
@@ -103,13 +104,14 @@ def evaluate_split(name: str, pairs: List[Tuple[str, str]], clf, encoder) -> Dic
 
     print(f"\n=== {name} ({len(texts)} exemples) ===")
     print(f"accuracy = {acc:.4f}")
+    print(f"log loss = {ll:.4f}")
     print(f"macro F1 = {report['macro avg']['f1-score']:.4f}")
     print(f"weighted F1 = {report['weighted avg']['f1-score']:.4f}")
     n_errors = sum(1 for t, p in zip(y_true_labels, y_pred_labels) if t != p)
     print(f"erreurs : {n_errors}/{len(texts)}")
     print(f"-> {cm_path.name}, {errors_path.name}, {report_path.name}")
 
-    return {"accuracy": acc, "macro_f1": report["macro avg"]["f1-score"],
+    return {"accuracy": acc, "log_loss": ll, "macro_f1": report["macro avg"]["f1-score"],
              "weighted_f1": report["weighted avg"]["f1-score"], "n": len(texts), "n_errors": n_errors}
 
 

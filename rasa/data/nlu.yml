@@ -199,6 +199,33 @@ nlu:
     - Bonjour, comment puis-je vérifier mon identité, merci d'avance.
     - Bonjour, comment fonctionne le parrainage, merci d'avance.
     - Bonjour, pourriez-vous m'indiquer comment recharger mon compte, merci.
+    # Consolides depuis rasa/data/new.yml (2026-07-30) : seuls les exemples
+    # qui n'existaient pas deja ci-dessus, pour ne jamais dupliquer un
+    # exemple d'entrainement.
+    - Pourquoi utiliser cette application ?
+    - Quelles sont les options disponibles ?
+    - Comment ça marche les retraits ?
+    - Comment récupérer l'accès à mon compte si j'ai oublié mon mot de passe ?
+    - Quelle est la démarche pour changer de mot de passe ?
+    - Comment vérifier mon identité ?
+    - Comment fonctionne le système de récompense ?
+    - Comment on gagne des pièces sur l'application ?
+    - Quelles sont les moyens de paiement disponibles ?
+    - Je voudrais comprendre les services disponibles.
+    - Je veux comprendre le fonctionnement général.
+    - Je ne comprends pas comment ça marche
+    - cmt on recupère un compte si on a zapé le mdp
+    - jarive pa a me co koman on fé
+    - kes ki fo pr le kyc
+    - Parrainage ?
+    - Comment on parametre les notifications ?
+    - koman on fé pr changé de numero
+    - c ou ke je vois mon solde exactement
+    - c koi la procedur pr verifié son compte
+    - comment s'inscrire vite ?
+    - y a t'il un tuto ?
+    - j'ai besoin d'aide pour comprendre l'appli
+    - j'ai une question sur le fonctionnement de l'appli
 - intent: greet
   examples: |
     - Bonjour
@@ -365,6 +392,14 @@ nlu:
     - bonjour 👋
     - coucou 😊
     - hello 🙂
+    # Consolides depuis rasa/data/new.yml (2026-07-30), voir meme commentaire
+    # sur le bloc ask_faq ci-dessus.
+    - bjr, vous pouvez m'aider stp
+    - bonsoir, est-ce que quelqu'un peut me répondre ?
+    - coucou, j'ai une petite question
+    - hello, j'ai besoin d'infos
+    - salut, j'ai un souci rapide
+    - slt, je cherche de l'aide
 - intent: goodbye
   examples: |
     - Au revoir
@@ -2174,7 +2209,7 @@ nlu:
     - nickel
     - génial merci
     - ça me va très bien
-    - parfait merci beaucoup
+    - parfait merci beaucoup 
     - ok ça marche merci
     - super utile merci
     - clair merci beaucoup

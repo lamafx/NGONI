@@ -8,29 +8,44 @@ de charger ce modele une 2e fois dans le conteneur actions).
 """
 
 import os
+from pathlib import Path
 from typing import List
 
 import torch
-from sentence_transformers import SentenceTransformer
 
-# Bascule e5-small -> e5-base (2026-07) : mesure empirique sur le catalogue
-# reel (8 problemes wallet+user, 20 phrases hors-sujet, 59 paraphrases
-# leave-one-out) a e5-small un taux de FAUX POSITIFS de 65% au seuil de
-# classification diagnostic (0.83) -- une simple salutation ("Bonsoir
-# comment allez-vous ?") ou un "Merci beaucoup" declenchaient un probleme
-# diagnostic au hasard. e5-base (meme famille/convention query:/passage:,
-# juste plus de parametres) descend ce taux a 10% ET ameliore le rappel
-# (66% -> 76%) sur le MEME seuil -- gain net, pas un compromis. Voir
-# MIN_EMBEDDING_SIMILARITY (rasa/actions/diagnostic.py) et DEFAULT_THRESHOLD
-# (app/domains/faq/service.py), recalibres pour ce nouveau modele.
+# BAAI/bge-m3 est deja telecharge sur disque pour l'atelier d'entrainement
+# BGE-M3 (voir rasa/nlu_bge/embed.py) -- pointer HF_HOME vers le MEME cache
+# ici evite un 2e telechargement (~2 Go) dans le cache par defaut
+# (~/.cache/huggingface) rien que pour ce process FastAPI. Doit etre pose
+# AVANT le premier import de sentence_transformers/huggingface_hub (lu une
+# seule fois a l'initialisation de la lib).
+_REPO_ROOT = Path(__file__).resolve().parents[4]
+os.environ.setdefault("HF_HOME", str(_REPO_ROOT / "rasa" / ".cache" / "huggingface"))
+
+from sentence_transformers import SentenceTransformer  # noqa: E402
+
+# Bascule e5-base -> BGE-M3 (2026-07) : unifie sur le MEME modele que celui
+# utilise par les classifieurs d'intention BGE-M3 (voir
+# rasa/nlu_bge/embed.py et app/domains/nlu/) -- un seul modele d'embedding
+# pour toute la plateforme (FAQ, diagnostic, NLU), au lieu de deux copies
+# differentes (e5-base ici, BGE-M3 cote nlu_bge) qui n'auraient jamais pu
+# partager le moindre vecteur. BGE-M3 ne suit pas la convention E5
+# query:/passage: (voir rasa/nlu_bge/embed.py, aucun prefixe) -- encode()
+# est appele directement sur le texte brut ci-dessous.
 #
-# Consequence : dimension d'embedding passee de 384 a 768 (voir
-# app/domains/faq/models.py, core.faq_items.embedding) -- les vecteurs
-# stockes en base NE SONT PAS reutilisables tels quels, ils ont ete
-# recalcules avec ce modele (voir scripts/reembed_faq.py). Un changement de
-# modele futur devra refaire le meme exercice : deux vecteurs ne sont
-# comparables que s'ils viennent du meme modele.
-MODEL_NAME = "intfloat/multilingual-e5-base"
+# Consequence : dimension d'embedding passee de 768 (e5-base) a 1024
+# (voir app/domains/faq/models.py, ia.faq_items.embedding) -- les vecteurs
+# stockes en base NE SONT PAS reutilisables tels quels, recalcules avec ce
+# modele (voir scripts/reembed_faq.py, migrations/0013_bge_m3_upgrade.sql).
+#
+# ATTENTION calibration : MIN_EMBEDDING_SIMILARITY (rasa/actions/diagnostic.py)
+# et DEFAULT_THRESHOLD/SECONDARY_THRESHOLD/DUPLICATE_THRESHOLD
+# (app/domains/faq/service.py) avaient ete mesures sur la distribution de
+# scores d'e5-base -- BGE-M3 produit une distribution differente. Reportes
+# tels quels pour ce changement (pas de corpus de recalibration dedie
+# disponible), a revalider en priorite si la FAQ ou le diagnostic montrent
+# trop de faux positifs/negatifs en usage reel.
+MODEL_NAME = "BAAI/bge-m3"
 
 
 def get_embedding_model() -> SentenceTransformer:
@@ -47,12 +62,14 @@ def get_embedding_model() -> SentenceTransformer:
 
 
 def embed_query(text: str) -> List[float]:
-    # Convention des modeles E5 : prefixer differemment une requete de
-    # recherche ("query: ") et un document/passage compare ("passage: ") --
-    # necessaire pour de bons resultats avec cette famille de modeles. Oublier
-    # ce prefixe degrade sensiblement la qualite de la similarite.
+    # BGE-M3 (contrairement a la famille E5) n'a pas besoin de prefixe
+    # query:/passage: distinct -- meme fonction d'encodage des deux cotes
+    # (voir rasa/nlu_bge/embed.py, seul point de reference BGE-M3 deja
+    # eprouve dans ce projet). embed_query/embed_passage restent deux
+    # fonctions separees pour ne rien changer a la signature des appelants
+    # (app/domains/faq/service.py, app/domains/diagnostic/registry.py).
     model = get_embedding_model()
-    return model.encode(f"query: {text}", convert_to_numpy=True, normalize_embeddings=True).tolist()
+    return model.encode(text, convert_to_numpy=True, normalize_embeddings=True).tolist()
 
 
 def embed_query_batch(texts: List[str]) -> List[List[float]]:
@@ -62,15 +79,13 @@ def embed_query_batch(texts: List[str]) -> List[List[float]]:
     # Rasa pour scorer plusieurs segments/clauses d'un meme message
     # (audit qualite du code, cas #4) sans multiplier les aller-retours reseau.
     model = get_embedding_model()
-    embeddings = model.encode(
-        [f"query: {text}" for text in texts], convert_to_numpy=True, normalize_embeddings=True
-    )
+    embeddings = model.encode(texts, convert_to_numpy=True, normalize_embeddings=True)
     return embeddings.tolist()
 
 
 def embed_passage(text: str) -> List[float]:
     model = get_embedding_model()
-    return model.encode(f"passage: {text}", convert_to_numpy=True, normalize_embeddings=True).tolist()
+    return model.encode(text, convert_to_numpy=True, normalize_embeddings=True).tolist()
 
 
 def embed_passage_batch(texts: List[str]) -> List[List[float]]:
@@ -83,9 +98,7 @@ def embed_passage_batch(texts: List[str]) -> List[List[float]]:
     if not texts:
         return []
     model = get_embedding_model()
-    embeddings = model.encode(
-        [f"passage: {text}" for text in texts], convert_to_numpy=True, normalize_embeddings=True
-    )
+    embeddings = model.encode(texts, convert_to_numpy=True, normalize_embeddings=True)
     return embeddings.tolist()
 
 

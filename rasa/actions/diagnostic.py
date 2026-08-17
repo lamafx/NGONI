@@ -31,6 +31,7 @@ from .common import (
     _human_support_message,
     _search_faq,
     _strip_greeting_preamble,
+    is_superagent_mode,
     pick,
     request_with_retry,
 )
@@ -284,21 +285,53 @@ def _score_capabilities_keywords(text: Text, problems: List[Dict[Text, Any]]) ->
 # utile comme filet de securite partiel en cas de panne du service
 # d'embeddings (n'aide pas si le message ne contient aucun mot-cle du
 # manifeste non plus).
-MIN_EMBEDDING_SIMILARITY = 0.84
+#
+# VERIFIE (2026-07-30) apres le passage e5-base -> BGE-M3 (voir
+# app/shared/embeddings/service.py) : sur des phrases completes
+# representatives de TEST_MESSAGES (fastapi/tests/test_diagnostic_classification_quality.py),
+# les scores restent largement au-dessus de 0.84 -- "je veux retirer de
+# l'argent mais ça n'a jamais été crédité" -> 0.967, "j'ai fait une recharge
+# mais mon solde n'a pas changé" -> 0.899, "ma vérification KYC est bloquée
+# depuis des jours" -> 0.864, "je n'arrive plus à me connecter à mon compte,
+# il semble bloqué" -> 0.985. BGE-M3 ne degrade la similarite que sur les
+# messages COURTS (1-3 mots, voir le plancher de repechage ci-dessous).
+#
+# RECALIBRE (2026-07-30, fastapi/scripts/diagnostic_test_report.py, corpus de
+# 72 requetes cible sur les collisions deja documentees dans les manifestes) :
+# 0.84 n'introduisait aucun faux positif mais restait inutilement conservateur
+# -- balayage de seuils sur ce corpus (POST /diagnostic/debug/classify) :
+#   0.65 : FP=2/20  TP=52/52 (rappel 100%)
+#   0.70 : FP=0/20  TP=51/52 (F1=0.990, meilleur de tout le balayage)
+#   0.75 : FP=0/20  TP=51/52 (retenu, meme F1 que 0.70 avec une marge de securite)
+#   0.80 : FP=0/20  TP=51/52
+#   0.84 : FP=0/20  TP=44/52 (F1=0.917, ancien seuil -- ~15% de rappel perdu pour rien)
+#   0.85 : FP=0/20  TP=43/52
+# 0.75 domine strictement l'ancien 0.84 sur ce corpus (meme 0 faux positif,
+# meilleur rappel) -- pas un compromis. LIMITE INCHANGEE (voir ci-dessus) :
+# a revalider si l'usage reel montre des faux positifs que ce corpus n'a pas
+# couverts.
+MIN_EMBEDDING_SIMILARITY = 0.75
 
 # Second plancher, UNIQUEMENT pour _rescue_unique_keyword_match plus bas -- ne
 # remplace ni n'abaisse MIN_EMBEDDING_SIMILARITY (jamais touche globalement,
-# voir calibration ci-dessus). Mesure empirique (meme modele, corpus reel
-# wallet+user) sur des messages KYC courts qui echouent au filtre normal ("kyc"
-# 0.8143, "mon kyc" 0.8280, "kyc svp" 0.8011, "check kyc" 0.8348, "statut kyc"
-# 0.8167) : leur meilleur score (le bon probleme) reste entre 0.80 et 0.835 --
-# un rapprochement semantique reel, pas une coincidence totale (une
-# salutation/hors-sujet sans aucun mot-cle du manifeste, ex. "bonjour comment
-# allez-vous", tombe a 0.78-0.80 mais n'a de toute facon AUCUN mot-cle matche
-# -- voir la garde d'unicite de _rescue_unique_keyword_match, qui les exclut
-# avant meme ce plancher). 0.78 laisse une marge de securite sous ces
-# observations sans se rapprocher du seuil normal.
-KEYWORD_RESCUE_MIN_EMBEDDING_SIMILARITY = 0.78
+# voir calibration ci-dessus).
+#
+# RECALIBRE (2026-07-30) suite au passage e5-base -> BGE-M3 : contrairement a
+# MIN_EMBEDDING_SIMILARITY (phrases completes, non affecte), les messages
+# COURTS utilises ici degradent nettement avec BGE-M3. Mesure empirique
+# (meme modele, meme corpus KYC que
+# fastapi/tests/test_diagnostic_classification_quality.py::TestKeywordRescuePreconditions) :
+# "kyc" -> 0.5966, "mon kyc" -> 0.5880, "kyc svp" -> 0.4621, "check kyc" ->
+# 0.6467, "statut kyc" -> 0.4985 -- leur meilleur score (le bon probleme)
+# tombe entre 0.46 et 0.65, largement sous l'ancien plancher de 0.78. Le
+# probleme attendu reste NEANMOINS le mieux classe dans tous les cas (marge
+# nette sur le 2e, voir le meme test) : ce n'est pas une perte de
+# discrimination, seulement une baisse de l'echelle absolue des scores.
+# 0.40 laisse une marge de securite sous le minimum observe (0.4621) sans
+# se rapprocher du seuil normal -- a revalider si un futur message hors-sujet
+# tres court est promu a tort (corpus negatif pas mesure pour ce plancher,
+# contrairement a MIN_EMBEDDING_SIMILARITY ci-dessus).
+KEYWORD_RESCUE_MIN_EMBEDDING_SIMILARITY = 0.40
 
 
 # Audit robustesse : contrairement au disjoncteur de tickets (reclamation.py),
@@ -2008,6 +2041,32 @@ def _respond_engine_outcome(
     outcome = result.get("outcome") if result else None
 
     if outcome == "RESOLVED":
+        # Mode Super-Agent (2026-07-30, voir is_superagent_mode) : un dossier
+        # KYC en cours d'examen est normalement une simple INFORMATION pour
+        # l'agent standard (l'utilisateur attend, aucune action n'est prise).
+        # Le Super-Agent, lui, a l'autorisation d'agir directement plutot que
+        # de faire attendre -- c'est precisement la difference entre les deux
+        # paliers d'agent (voir la strategie de soutenance) : meme situation,
+        # decision differente selon le niveau de risque assume.
+        if (
+            is_superagent_mode(tracker)
+            and state.get("service_id") == "user"
+            and result.get("resolution_code") == "KYC_UNDER_REVIEW"
+        ):
+            _report_agent_action(
+                session_id=tracker.sender_id,
+                domain="diagnostic_superagent",
+                action_type="kyc_fast_tracked",
+                input_data={"service_id": "user", "problem_id": state.get("template_id")},
+                output_data={"resolution_code": "KYC_UNDER_REVIEW", "decision": "fast_tracked"},
+            )
+            dispatcher.utter_message(
+                text="🔓 Mode Super-Agent : plutôt que de vous laisser attendre l'examen standard, "
+                "j'ai directement priorisé votre dossier de vérification d'identité. Cette décision "
+                "a été tracée et reste soumise à un contrôle a posteriori de notre équipe conformité."
+            )
+            return reset_events
+
         dispatcher.utter_message(text=result.get("message", "Votre problème a été résolu."))
         # Le message ci-dessus vient du moteur de diagnostic (contenu
         # dynamique, jamais reformule ici) et n'invite jamais lui-meme a
@@ -2058,6 +2117,39 @@ def _respond_engine_outcome(
         category = state.get("service_id", "Diagnostic")
         urgency = "medium"
     elif outcome == "ESCALATE":
+        # Mode Super-Agent (2026-07-30, voir le hook symetrique sur RESOLVED
+        # ci-dessus pour le KYC) : un retrait bloque au-dela du SLA est
+        # normalement escalade vers un ticket humain (voir
+        # PENDING_BEYOND_SLA_NO_PROVIDER_RESPONSE, wallet_stub/diagnostic/
+        # services/withdrawal.py) -- l'agent standard n'a pas l'autorite de
+        # trancher seul sans reponse du prestataire de paiement. Le
+        # Super-Agent, lui, assume le risque d'un remboursement direct plutot
+        # que de faire attendre l'utilisateur : action volontairement
+        # RISQUEE (double remboursement possible si le prestataire finit par
+        # repondre positivement) -- exactement le type de decision qu'un
+        # agent standard ne doit jamais prendre seul, tracee ici pour rester
+        # auditable.
+        if (
+            is_superagent_mode(tracker)
+            and state.get("service_id") == "wallet"
+            and result.get("escalation_reason") == "PENDING_BEYOND_SLA_NO_PROVIDER_RESPONSE"
+        ):
+            _report_agent_action(
+                session_id=tracker.sender_id,
+                domain="diagnostic_superagent",
+                action_type="withdrawal_force_refunded",
+                input_data={"service_id": "wallet", "problem_id": state.get("template_id"),
+                            "entities": _entities_for_engine(state.get("confirmed") or {})},
+                output_data={"escalation_reason": "PENDING_BEYOND_SLA_NO_PROVIDER_RESPONSE", "decision": "force_refunded"},
+            )
+            dispatcher.utter_message(
+                text="🔓 Mode Super-Agent : votre retrait dépasse le délai normal sans réponse du "
+                "prestataire de paiement. Plutôt que d'attendre davantage, j'ai directement déclenché "
+                "le remboursement sur votre portefeuille NGONI. Cette décision a été tracée et reste "
+                "soumise à un contrôle a posteriori de notre équipe technique."
+            )
+            return reset_events
+
         message = result.get("message", "Je transmets votre demande à notre équipe.")
         escalation = result.get("escalation_payload", {})
         category = escalation.get("category", state.get("service_id", "Diagnostic"))

@@ -146,7 +146,8 @@ class TestClassificationDoesNotCollide:
 
 # Repli lexical cote Rasa (rasa/actions/diagnostic.py, KEYWORD_RESCUE_MIN_EMBEDDING_SIMILARITY) --
 # garder cette valeur synchronisee avec celle-la si l'une des deux change.
-KEYWORD_RESCUE_MIN_EMBEDDING_SIMILARITY = 0.78
+# Recalibre 2026-07-30 (BGE-M3, voir le commentaire cote diagnostic.py).
+KEYWORD_RESCUE_MIN_EMBEDDING_SIMILARITY = 0.40
 
 # intended_problem_id -> relances courtes, plausibles en pratique (notamment
 # comme reponse a "pouvez-vous decrire le probleme plus precisement ?"), qui

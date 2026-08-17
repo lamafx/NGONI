@@ -1,0 +1,24 @@
+intent,support,correct,incorrect,precision,recall,f1_score
+affirm,25,25,0,0.9259,1.0000,0.9615
+ask_capabilities,12,11,1,1.0000,0.9167,0.9565
+ask_complaint_status,0,0,0,0.0000,0.0000,0.0000
+ask_faq,36,36,0,0.9730,1.0000,0.9863
+bot_challenge,25,25,0,0.9259,1.0000,0.9615
+browse_faq,11,11,0,1.0000,1.0000,1.0000
+create_reclamation,16,7,9,0.8750,0.4375,0.5833
+deny,19,18,1,0.9474,0.9474,0.9474
+diagnostic,16,15,1,0.6250,0.9375,0.7500
+goodbye,22,19,3,0.9500,0.8636,0.9048
+greet,20,19,1,0.9500,0.9500,0.9500
+inappropriate_language,13,13,0,0.8667,1.0000,0.9286
+out_of_scope,15,13,2,0.8667,0.8667,0.8667
+plainte,0,0,0,0.0000,0.0000,0.0000
+rate_response_not_useful,9,7,2,1.0000,0.7778,0.8750
+rate_response_useful,14,12,2,1.0000,0.8571,0.9231
+select_faq_category,5,4,1,1.0000,0.8000,0.8889
+select_faq_question,0,0,0,0.0000,0.0000,0.0000
+suggestion,0,0,0,0.0000,0.0000,0.0000
+
+macro avg,258,,,0.7319,0.7029,0.7097
+weighted avg,258,,,0.9244,0.9109,0.9094
+accuracy,235,,,,,

@@ -34,25 +34,38 @@ MIN_LENGTH_FOR_LANGDETECT = 15
 # caracteres, le surplus n'ajoute de toute facon rien d'utile a une question.
 MAX_QUESTION_LENGTH = 500
 
-# RECALIBRE (2026-07) suite au passage e5-small -> e5-base (voir
-# app/shared/embeddings/service.py) : l'ancien seuil de 0.87 avait ete
-# calibre pour e5-small et n'est pas transposable tel quel a e5-base, dont la
-# distribution de scores est differente. Mesure en leave-one-out sur les 15
-# vraies questions FAQ en base + 10 negatifs (salutations, small-talk, et
-# quelques vraies plaintes diagnostic qui ne doivent PAS declencher de
-# reponse FAQ) :
+# RECALIBRE PROVISOIREMENT (2026-07-30) suite au passage e5-base -> BGE-M3
+# (voir app/shared/embeddings/service.py) : le seuil de 0.85 ci-dessous etait
+# calibre pour e5-base et rendait la FAQ totalement muette avec BGE-M3 (verifie
+# en usage reel : "comment fonctionne le systeme de pieces" vs la question du
+# catalogue "Comment fonctionnent les pieces NGONI ?", pourtant une
+# correspondance evidente, ne scorait que 0.55). BGE-M3 produit une distribution
+# de similarite beaucoup plus basse/etalee que e5-base sur cette tache.
+# Mesure rapide (6 paires vraies + 3 negatifs, embed_query/embed_passage,
+# meme methode que le calibrage e5-small->e5-base ci-dessous mais echantillon
+# reduit faute de corpus dedie) :
+#   vrais   : 0.49 / 0.55 / 0.60 / 0.71 / 0.75 / 0.94
+#   negatifs: 0.22 / 0.33 / 0.57
+# Chevauchement entre les deux groupes (une vraie correspondance a 0.49, un
+# negatif a 0.57) : aucun seuil ne separe parfaitement sur cet echantillon,
+# 0.55 est un compromis raisonnable, PAS une valeur rigoureusement calibree.
+# A REFAIRE serieusement (leave-one-out sur tout le catalogue + un vrai jeu de
+# negatifs, comme le calibrage e5-small->e5-base ci-dessous) des que possible.
+DEFAULT_THRESHOLD = 0.55
+#
+# Historique : sous e5-base (2026-07, avant BGE-M3), la valeur retenue etait
+# 0.85, elle-meme recalibree depuis 0.87 sous e5-small -- mesure en
+# leave-one-out sur les 15 vraies questions FAQ en base + 10 negatifs
+# (salutations, small-talk, et quelques vraies plaintes diagnostic qui ne
+# doivent PAS declencher de reponse FAQ) :
 #   0.83 : FP=4/10 (40%)  TP=12/15 (80%)
 #   0.84 : FP=2/10 (20%)  TP=10/15 (67%)  <- des salutations passent encore
-#   0.85 : FP=0/10 (0%)   TP=9/15 (60%)   <- retenu : 1er seuil sans faux positif
+#   0.85 : FP=0/10 (0%)   TP=9/15 (60%)   <- retenu pour e5-base : 1er seuil sans faux positif
 #   0.86 : FP=0/10 (0%)   TP=7/15 (47%)
-#   0.87 : FP=0/10 (0%)   TP=6/15 (40%)   <- ancien seuil : moins bon rappel
+#   0.87 : FP=0/10 (0%)   TP=6/15 (40%)   <- ancien seuil e5-small : moins bon rappel
 #          que 0.85, pour le meme 0% de faux positifs sur ce corpus
-# 0.85 domine strictement l'ancien 0.87 sur ce test (meme absence de faux
-# positif, meilleur rappel) -- pas un compromis, contrairement au choix fait
-# a l'epoque pour 0.87 sur e5-small. Echantillon volontairement petit (15
-# questions reelles) : a recalibrer si le catalogue FAQ grossit
-# significativement ou si l'usage reel montre trop de faux positifs/negatifs.
-DEFAULT_THRESHOLD = 0.85
+# Conserve ici pour memoire ; ces valeurs ne sont PAS transposables a BGE-M3
+# (distribution de scores differente, voir le commentaire ci-dessus).
 
 # Audit FAQ #7 (16.5/16.6) : la colonne `keywords` (ARRAY(Text), deja en
 # base sur les 26 lignes reelles du catalogue) etait ecrite a la creation
@@ -83,7 +96,10 @@ TOP_K_CANDIDATES = 5
 # Second seuil, plus bas que DEFAULT_THRESHOLD (16.6, proposition Top-3) :
 # candidats a proposer en clarification ("vouliez-vous dire : ... ?") quand
 # aucun ne franchit DEFAULT_THRESHOLD, plutot qu'un "je n'ai pas trouve" sec.
-SECONDARY_THRESHOLD = 0.75
+# RECALIBRE PROVISOIREMENT (2026-07-30, BGE-M3) dans les memes proportions que
+# DEFAULT_THRESHOLD ci-dessus (etait 0.75, sous DEFAULT_THRESHOLD=0.85) --
+# meme reserve : echantillon reduit, a revalider serieusement.
+SECONDARY_THRESHOLD = 0.40
 
 # Audit FAQ #9 (16.6, dedup catalogue) : score cosinus au-dela duquel deux
 # questions sont considerees quasi-identiques (garde-fou a l'ecriture,

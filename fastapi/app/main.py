@@ -36,10 +36,13 @@ try:
     from .domains.diagnostic.router import router as diagnostic_router, get_registry
     from .domains.audit.router import router as audit_router
     from .domains.audit.service import record_faq_lookup
+    from .domains.nlu.engines import DEFAULT_ENGINE, predict as nlu_predict
+    from .domains.nlu.router import router as nlu_router
     from .shared.admin_auth import warn_if_admin_secret_missing
     from .shared.rate_limit import InMemoryRateLimitMiddleware
     from .shared.embeddings.router import router as embeddings_router
     from .shared.embeddings import get_embedding_model
+    from .shared.rasa_client import RASA_PARSE_URL, RASA_WEBHOOK_URL, call_rasa_with_retry
     from .domains.faq.service import FaqService
     from .domains.faq.repository import FaqRepository
     from .domains.complaints.schemas import TicketCreateResponse
@@ -53,10 +56,13 @@ except ImportError:  # pragma: no cover - support running as `uvicorn main:app`
     from domains.diagnostic.router import router as diagnostic_router, get_registry
     from domains.audit.router import router as audit_router
     from domains.audit.service import record_faq_lookup
+    from domains.nlu.engines import DEFAULT_ENGINE, predict as nlu_predict
+    from domains.nlu.router import router as nlu_router
     from shared.admin_auth import warn_if_admin_secret_missing
     from shared.rate_limit import InMemoryRateLimitMiddleware
     from shared.embeddings.router import router as embeddings_router
     from shared.embeddings import get_embedding_model
+    from shared.rasa_client import RASA_PARSE_URL, RASA_WEBHOOK_URL, call_rasa_with_retry
     from domains.faq.service import FaqService
     from domains.faq.repository import FaqRepository
     from domains.complaints.schemas import TicketCreateResponse
@@ -67,8 +73,6 @@ logger = logging.getLogger(__name__)
 app = FastAPI(title="NGONI FastAPI", version="1.0.0")
 app.add_middleware(InMemoryRateLimitMiddleware)
 
-RASA_WEBHOOK_URL = getenv("RASA_WEBHOOK_URL", "http://127.0.0.1:5005/webhooks/rest/webhook")
-RASA_PARSE_URL = getenv("RASA_PARSE_URL", "http://127.0.0.1:5005/model/parse")
 RASA_RETRY_COUNT = int(getenv("RASA_RETRY_COUNT", "3"))
 RASA_RETRY_DELAY = float(getenv("RASA_RETRY_DELAY", "1.0"))
 
@@ -79,26 +83,7 @@ app.include_router(feedback_router)
 app.include_router(diagnostic_router)
 app.include_router(audit_router)
 app.include_router(embeddings_router)
-
-
-async def call_rasa_with_retry(url: str, json_body: dict, headers: dict | None = None) -> httpx.Response:
-    last_error = None
-    for attempt in range(1, RASA_RETRY_COUNT + 1):
-        try:
-            async with httpx.AsyncClient() as client:
-                response = await client.post(url, json=json_body, headers=headers, timeout=10.0)
-                response.raise_for_status()
-                return response
-        except httpx.RequestError as exc:
-            last_error = exc
-            logger.warning("Rasa request failed (attempt %s/%s) to %s: %s", attempt, RASA_RETRY_COUNT, url, exc)
-            if attempt < RASA_RETRY_COUNT:
-                await asyncio.sleep(RASA_RETRY_DELAY)
-        except httpx.HTTPStatusError as exc:
-            logger.warning("Rasa HTTP error (attempt %s/%s) to %s: %s", attempt, RASA_RETRY_COUNT, url, exc)
-            raise
-
-    raise HTTPException(status_code=502, detail=f"Impossible de contacter Rasa après {RASA_RETRY_COUNT} tentatives: {last_error}")
+app.include_router(nlu_router)
 
 
 _registry_poll_task: asyncio.Task | None = None
@@ -550,6 +535,9 @@ class ParseRequest(BaseModel):
     # endpoint recoit exactement le meme texte utilisateur, juste envoye a
     # une route Rasa differente (analyse d'intention plutot que webhook).
     text: str = Field(min_length=1, max_length=4000)
+    # None => DEFAULT_ENGINE ("rasa", voir app/domains/nlu/engines.py).
+    # Catalogue expose par GET /api/models -- voir frontend/pages/chat/model.store.js.
+    model: Optional[str] = Field(default=None, max_length=50)
 
 
 class ChatRequest(BaseModel):
@@ -562,21 +550,46 @@ class ChatRequest(BaseModel):
     # fois arrivee dans le formulaire.
     text: str = Field(min_length=1, max_length=4000)
     user_id: Optional[str] = Field(default=None, max_length=200)
+    model: Optional[str] = Field(default=None, max_length=50)
+    # Bascule "Mode Super-Agent" (voir frontend/pages/chat/superagent.store.js) --
+    # transmise a Rasa via metadata (voir plus bas), jamais interpretee ici :
+    # seuls les actions du diagnostic (rasa/actions/diagnostic.py,
+    # is_superagent_mode) en tiennent compte.
+    superagent: bool = False
 
 
 @app.post("/api/parse")
 async def parse_message(request: ParseRequest):
     text = request.text
 
+    # Payload structure (clic sur un bouton, ex. "/select_faq_question{...}",
+    # voir frontend/pages/chat/chat-view.js::addButtons) : deja une intention
+    # pre-classifiee cote frontend -- contourne entierement le selecteur de
+    # modele, interroge Rasa directement comme avant son introduction.
+    if text.startswith("/"):
+        try:
+            response = await call_rasa_with_retry(RASA_PARSE_URL, {"text": text})
+        except HTTPException as error:
+            raise error
+        except Exception as error:
+            raise HTTPException(status_code=502, detail=f"Impossible de contacter Rasa: {error}")
+        logger.info("parse_message succeeded using %s", RASA_PARSE_URL)
+        return response.json()
+
+    model_id = request.model or DEFAULT_ENGINE
     try:
-        response = await call_rasa_with_retry(RASA_PARSE_URL, {"text": text})
+        prediction = await nlu_predict(model_id, text)
     except HTTPException as error:
         raise error
     except Exception as error:
-        raise HTTPException(status_code=502, detail=f"Impossible de contacter Rasa: {error}")
+        raise HTTPException(status_code=502, detail=f"Impossible d'obtenir une prediction NLU (model={model_id}): {error}")
 
-    logger.info("parse_message succeeded using %s", RASA_PARSE_URL)
-    return response.json()
+    logger.info("parse_message succeeded using model=%s", model_id)
+    return {
+        "text": text,
+        "intent": {"name": prediction.intent, "confidence": prediction.confidence},
+        "entities": prediction.entities,
+    }
 
 
 @app.post("/api/chat")
@@ -593,25 +606,25 @@ async def send_to_bot(request: ChatRequest, db=Depends(get_db)):
     repository = FaqRepository(db)
     faq_service = FaqService(repository)
 
-    try:
-        parse_response = await call_rasa_with_retry(
-            RASA_PARSE_URL, {"text": text}, headers={"X-Trace-ID": trace_id}
-        )
-    except HTTPException as error:
-        raise HTTPException(status_code=502, detail=f"Impossible de parser le message Rasa: {error.detail}")
-    except Exception as error:
-        raise HTTPException(status_code=502, detail=f"Impossible de parser le message Rasa: {error}")
-
-    parse_data = parse_response.json()
+    # Payload structure (bouton) : contourne le selecteur de modele, aucune
+    # classification a faire (voir /api/parse ci-dessus, meme garde-fou).
+    is_structured_payload = text.startswith("/")
     intent_name = None
-    if isinstance(parse_data, dict):
-        intent_name = parse_data.get("intent", {}).get("name")
-    elif isinstance(parse_data, list) and parse_data:
-        intent_name = parse_data[0].get("intent", {}).get("name")
 
-    if intent_name:
-        normalized_intent = intent_name.lower()
-        logger.info("[trace_id=%s] Rasa parse intent: %s", trace_id, normalized_intent)
+    if not is_structured_payload:
+        model_id = request.model or DEFAULT_ENGINE
+        try:
+            prediction = await nlu_predict(model_id, text)
+        except HTTPException as error:
+            raise HTTPException(status_code=502, detail=f"Impossible de parser le message (model={model_id}): {error.detail}")
+        except Exception as error:
+            raise HTTPException(status_code=502, detail=f"Impossible de parser le message (model={model_id}): {error}")
+
+        intent_name = prediction.intent
+        logger.info(
+            "[trace_id=%s] NLU intent (model=%s): %s (confidence=%.3f)",
+            trace_id, model_id, intent_name, prediction.confidence,
+        )
         # Egalite stricte (pas "faq" in normalized_intent) : ce test large
         # capturait aussi browse_faq/select_faq_category/select_faq_question
         # (voir rasa/actions/faq.py), qui doivent passer par le webhook Rasa
@@ -619,7 +632,7 @@ async def send_to_bot(request: ChatRequest, db=Depends(get_db)):
         # non par ce court-circuit de recherche semantique -- celui-ci
         # n'a de sens que pour ask_faq, la seule intention ou le texte tape
         # est une vraie question libre a chercher par embedding.
-        if normalized_intent == "ask_faq":
+        if intent_name.lower() == "ask_faq":
             # find_best_answer renvoie desormais un FaqAnswer(question, answer,
             # score) -- l'ancien unpacking a 2 valeurs (faq_answer, score)
             # levait un ValueError sur ce 3-uplet.
@@ -653,10 +666,29 @@ async def send_to_bot(request: ChatRequest, db=Depends(get_db)):
                 }
             logger.info("[trace_id=%s] Aucune réponse FAQ trouvée pour l'intent %s", trace_id, intent_name)
 
+    # Le webhook Rasa recoit toujours le texte BRUT, quel que soit le moteur
+    # NLU selectionne : Core (stories/rules/formulaires -- ex. le formulaire
+    # de reclamation, rasa/actions/reclamation.py) s'appuie sur sa propre
+    # analyse pour gerer un tour de conversation en cours (remplissage de
+    # slot, relance...), un besoin que le moteur choisi ci-dessus ne couvre
+    # pas (simple classification d'intention isolee, sans etat conversationnel).
+    # Verifie empiriquement : remplacer `text` par une intention synthetique
+    # injectee (syntaxe "/intent_name", voir addButtons cote frontend) cassait
+    # la poursuite du formulaire de reclamation des que le moteur selectionne
+    # classifiait la reponse libre de l'utilisateur autrement que Rasa ne
+    # l'aurait fait lui-meme. Le moteur selectionne pilote reellement les deux
+    # endroits ou FastAPI decide seul, sans dependre de l'etat de conversation
+    # cote Rasa : l'intention/confiance renvoyees par /api/parse, et le
+    # raccourci ask_faq ci-dessus.
     try:
+        # metadata.superagent : seul canal utilise par ce endpoint pour
+        # transporter un signal jusqu'aux actions Rasa qui n'est NI le texte
+        # NI une intention -- verifie empiriquement que Rasa preserve
+        # `metadata` telle quelle jusque dans tracker.latest_message (voir
+        # rasa/actions/common.py::is_superagent_mode).
         rasa_response = await call_rasa_with_retry(
             RASA_WEBHOOK_URL,
-            {"sender": sender_id, "message": text},
+            {"sender": sender_id, "message": text, "metadata": {"superagent": request.superagent}},
             headers={"X-Trace-ID": trace_id},
         )
     except HTTPException as error:

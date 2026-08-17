@@ -13,7 +13,16 @@ logger = logging.getLogger(__name__)
 # domaine d'action doit etre ajoute ici explicitement, pour eviter qu'une
 # faute de frappe cote appelant (ex. serveur d'actions Rasa) ne pollue
 # silencieusement la table avec des valeurs incoherentes.
-ALLOWED_DOMAINS = {"faq", "diagnostic_classification"}
+#
+# "diagnostic_superagent" (2026-07-30) : decisions prises par le mode
+# Super-Agent (voir rasa/actions/diagnostic.py, is_superagent_mode) -- une
+# action normalement escaladee vers un ticket humain (remboursement d'un
+# retrait bloque au-dela du SLA, acceleration d'un dossier KYC en attente)
+# est ici executee directement par l'agent. Domaine distinct de
+# "diagnostic_classification" : ce ne sont pas des decisions de
+# classification mais des decisions D'ACTION, avec un niveau de risque
+# different -- separables dans le journal d'activite admin.
+ALLOWED_DOMAINS = {"faq", "diagnostic_classification", "diagnostic_superagent"}
 
 
 class AgentActionService:

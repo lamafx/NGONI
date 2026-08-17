@@ -35,6 +35,13 @@ faire évoluer ou dépanner ce périmètre.
 | 17 | [DevOps — flow Rasa](17-devops.md) | Build/train/test/deploy/rollback des conteneurs `rasa`/`actions`, CI/CD proposée, hors périmètre LLM |
 | 18 | [Rapport des compétences](18-rapport-competences.md) | Classement des compétences de l'assistant, du plus important au plus mineur, et propositions priorisées |
 
+## Rapport transversal
+
+[Rapport complet — du message utilisateur à la réponse](rapport-fonctionnement/00-index.md) :
+20 chapitres courts, chacun un rôle précis, qui relient les chapitres
+5/6/7/8/15 en un seul parcours vérifié directement dans le code
+(2026-07-31), du frontend jusqu'au Diagnostic Engine et retour.
+
 ## Workflows inter-services
 
 Voir [WORKFLOW.md](WORKFLOW.md) pour les flux opérationnels (FAQ, diagnostic, escalade, feedback) et les appels vers `wallet-service` / `user-service`.

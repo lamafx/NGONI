@@ -16,4 +16,4 @@ RUN pip install --upgrade pip \
 COPY . /app
 
 # Use module invocation which is less sensitive to console script layout
-CMD ["python", "-m", "rasa_sdk", "start", "--actions", "actions"]
+CMD ["python", "-m", "rasa_sdk", "--actions", "actions"]

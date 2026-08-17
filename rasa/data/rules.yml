@@ -299,12 +299,34 @@ rules:
   # "Inappropriate language response"/"Out of scope response" -- sans
   # condition, cette regle l'emporterait a tort sur "FAQ semantic search
   # while reclamation form is active" (plus bas) si une reponse au
-  # formulaire etait un jour mal classee ask_faq.
+  # formulaire etait un jour mal classee ask_faq. pending_field:null
+  # (2026-07-30, meme correctif que "Bot presentation response"/"Suggestion
+  # response"/etc. -- trou de couverture trouve par revue de rules.yml :
+  # ask_faq/browse_faq/select_faq_category/select_faq_question etaient les
+  # SEULES intentions "meta" sans variante "while diagnostic is pending",
+  # laissant un diagnostic en cours silencieusement abandonne des qu'une
+  # vraie question FAQ etait posee au milieu) : variante juste en dessous.
   condition:
   - active_loop: null
+  - slot_was_set:
+    - pending_field: null
   steps:
   - intent: ask_faq
   - action: action_faq_search
+
+- rule: FAQ semantic search while diagnostic is pending
+  # Meme mecanique que "Bot presentation response while diagnostic is
+  # pending" (voir son commentaire) -- 2026-07-30, voir "FAQ semantic search"
+  # ci-dessus pour le contexte du trou de couverture corrige.
+  condition:
+  - active_loop: null
+  - slot_was_set:
+    - pending_field
+  steps:
+  - intent: ask_faq
+  - action: action_faq_search
+  - action: action_reask_pending_diagnostic_field
+  - action: action_listen
 
 - rule: FAQ semantic search while reclamation form is active
   # Audit robustesse (fluidite de la conversation) : aucune des 4 regles FAQ
@@ -396,11 +418,28 @@ rules:
 
 - rule: Browse FAQ suggestions
   # active_loop:null : meme raison que "FAQ semantic search" ci-dessus.
+  # pending_field:null (2026-07-30) : meme correctif que "FAQ semantic
+  # search" ci-dessus.
   condition:
   - active_loop: null
+  - slot_was_set:
+    - pending_field: null
   steps:
   - intent: browse_faq
   - action: action_browse_faq
+
+- rule: Browse FAQ suggestions while diagnostic is pending
+  # Meme mecanique que "FAQ semantic search while diagnostic is pending"
+  # ci-dessus (2026-07-30).
+  condition:
+  - active_loop: null
+  - slot_was_set:
+    - pending_field
+  steps:
+  - intent: browse_faq
+  - action: action_browse_faq
+  - action: action_reask_pending_diagnostic_field
+  - action: action_listen
 
 - rule: Browse FAQ suggestions while reclamation form is active
   # Meme mecanique que "FAQ semantic search while reclamation form is active".
@@ -414,11 +453,28 @@ rules:
 
 - rule: Select FAQ category
   # active_loop:null : meme raison que "FAQ semantic search" ci-dessus.
+  # pending_field:null (2026-07-30) : meme correctif que "FAQ semantic
+  # search" ci-dessus.
   condition:
   - active_loop: null
+  - slot_was_set:
+    - pending_field: null
   steps:
   - intent: select_faq_category
   - action: action_select_faq_category
+
+- rule: Select FAQ category while diagnostic is pending
+  # Meme mecanique que "FAQ semantic search while diagnostic is pending"
+  # (2026-07-30).
+  condition:
+  - active_loop: null
+  - slot_was_set:
+    - pending_field
+  steps:
+  - intent: select_faq_category
+  - action: action_select_faq_category
+  - action: action_reask_pending_diagnostic_field
+  - action: action_listen
 
 - rule: Select FAQ category while reclamation form is active
   # Meme mecanique que "FAQ semantic search while reclamation form is active".
@@ -432,11 +488,28 @@ rules:
 
 - rule: Select FAQ question
   # active_loop:null : meme raison que "FAQ semantic search" ci-dessus.
+  # pending_field:null (2026-07-30) : meme correctif que "FAQ semantic
+  # search" ci-dessus.
   condition:
   - active_loop: null
+  - slot_was_set:
+    - pending_field: null
   steps:
   - intent: select_faq_question
   - action: action_select_faq_question
+
+- rule: Select FAQ question while diagnostic is pending
+  # Meme mecanique que "FAQ semantic search while diagnostic is pending"
+  # (2026-07-30).
+  condition:
+  - active_loop: null
+  - slot_was_set:
+    - pending_field
+  steps:
+  - intent: select_faq_question
+  - action: action_select_faq_question
+  - action: action_reask_pending_diagnostic_field
+  - action: action_listen
 
 - rule: Select FAQ question while reclamation form is active
   # Meme mecanique que "FAQ semantic search while reclamation form is active".

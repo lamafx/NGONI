@@ -61,8 +61,7 @@ class FaqItem(Base):
     show_on_web = Column(Boolean, nullable=False, default=True)
     created_by = Column(UUID(as_uuid=True), nullable=True)
     updated_by = Column(UUID(as_uuid=True), nullable=True)
-    # 768 = dimension d'intfloat/multilingual-e5-base (voir
-    # app/shared/embeddings/service.py) -- etait 384 (e5-small) avant
-    # migration, voir fastapi/migrations/0001_e5_base_upgrade.sql et
-    # scripts/reembed_faq.py.
-    embedding = Column(Vector(768), nullable=False)
+    # 1024 = dimension de BAAI/bge-m3 (voir app/shared/embeddings/service.py)
+    # -- etait 768 (e5-base) avant migration, elle-meme etait 384 (e5-small),
+    # voir fastapi/migrations/0013_bge_m3_upgrade.sql et scripts/reembed_faq.py.
+    embedding = Column(Vector(1024), nullable=False)
