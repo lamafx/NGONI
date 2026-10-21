@@ -1,0 +1,536 @@
+# AUDIT COMPLET ET STRICT DU MÉMOIRE
+
+Prends connaissance intégralement du document **`memoire.docx`**.
+Ta mission est de réaliser un **audit académique, rédactionnel, méthodologique et formel complet** du mémoire.
+
+## CONSIGNE ABSOLUE
+
+**NE MODIFIE PAS LE FICHIER `memoire.docx`.**
+
+Tu dois uniquement **analyser le document et me présenter les problèmes détectés ainsi que les corrections proposées**.
+
+Ne considère jamais qu'une formulation est correcte simplement parce qu'elle est compréhensible. Sois **strict**, comme un enseignant-chercheur qui relit le mémoire avant une soutenance.
+
+---
+
+# 1. AUDIT DE LA STRUCTURE ET DE LA NUMÉROTATION
+
+Vérifie l'ensemble de la structure du mémoire :
+
+* parties ;
+* chapitres ;
+* sections ;
+* sous-sections ;
+* paragraphes ;
+* titres et sous-titres ;
+* numérotation des titres ;
+* ordre logique des sections ;
+* cohérence entre le sommaire et le contenu ;
+* présence éventuelle de titres non numérotés alors qu'ils devraient l'être ;
+* titres numérotés alors qu'ils ne devraient pas l'être ;
+* ruptures dans la séquence de numérotation ;
+* doublons de numérotation ;
+* incohérences entre les niveaux de titres.
+
+Vérifie notamment que la hiérarchie est cohérente :
+
+**I. → 1. → 1.1 → 1.1.1**
+
+ou tout autre système réellement utilisé dans le mémoire.
+
+Si plusieurs systèmes de numérotation sont utilisés, signale-le clairement.
+
+Pour chaque problème, indique :
+
+| Localisation | Problème | Pourquoi c'est incorrect | Correction proposée |
+| ------------ | -------- | ------------------------ | ------------------- |
+
+---
+
+# 2. AUDIT DE LA LANGUE ET DE LA SYNTAXE
+
+Relève toutes les erreurs importantes de :
+
+* grammaire ;
+* orthographe ;
+* conjugaison ;
+* accords ;
+* syntaxe ;
+* ponctuation ;
+* construction des phrases ;
+* répétitions ;
+* formulations maladroites ;
+* formulations trop longues ;
+* formulations ambiguës ;
+* mauvaise utilisation des prépositions ;
+* mauvais choix de temps verbaux ;
+* incohérences singulier/pluriel ;
+* fautes typographiques.
+
+Ne te limite pas aux fautes évidentes.
+
+Pour chaque erreur, donne :
+
+**Texte actuel → problème → formulation corrigée**
+
+Ne réécris pas inutilement les passages qui sont déjà corrects.
+
+---
+
+# 3. AUDIT DU VOCABULAIRE SCIENTIFIQUE
+
+Identifie les termes :
+
+* vagues ;
+* imprécis ;
+* trop généraux ;
+* non définis ;
+* utilisés avec plusieurs significations ;
+* trop familiers pour un mémoire scientifique ;
+* insuffisamment techniques ;
+* utilisés sans justification.
+
+Exemples de formulations à surveiller :
+
+* « performant » ;
+* « efficace » ;
+* « rapide » ;
+* « important » ;
+* « optimal » ;
+* « meilleur » ;
+* « intelligent » ;
+* « grande quantité » ;
+* « faible latence » ;
+* « très bon résultat » ;
+* « fonctionne bien ».
+
+Lorsqu'un terme vague est détecté, explique :
+
+1. pourquoi il est vague ;
+2. ce qui devrait être précisé ;
+3. quelle formulation scientifique peut le remplacer.
+
+---
+
+# 4. AUDIT DE LA COHÉRENCE TERMINOLOGIQUE
+
+Vérifie que le même concept porte toujours le même nom.
+
+Par exemple, vérifie les variations éventuelles entre :
+
+* agent conversationnel / chatbot / assistant ;
+* intention / intent ;
+* requête / demande / message ;
+* diagnostic / analyse ;
+* problème / cas de diagnostic ;
+* résolution / traitement ;
+* API / service / microservice ;
+* embedding / représentation vectorielle ;
+* classification / catégorisation.
+
+Si deux termes désignent réellement la même chose, signale l'incohérence et propose **un terme de référence à utiliser dans tout le mémoire**.
+
+---
+
+# 5. AUDIT DES ABRÉVIATIONS, SIGLES ET ACRONYMES
+
+Vérifie :
+
+* la définition lors de la première apparition ;
+* la cohérence des majuscules ;
+* les espaces autour des deux-points ;
+* les traductions ;
+* les acronymes présents dans le glossaire mais jamais utilisés ;
+* les acronymes utilisés mais absents du glossaire ;
+* les définitions incorrectes ;
+* les doublons entre glossaire et liste des acronymes.
+
+Signale également toute erreur technique dans la définition d'un terme.
+
+---
+
+# 6. AUDIT DES CHIFFRES ET DES DONNÉES
+
+C'est un point **critique**.
+
+Recherche toutes les valeurs numériques importantes et vérifie leur cohérence dans l'ensemble du mémoire.
+
+Vérifie notamment :
+
+* nombre total de données ;
+* nombre de données d'entraînement ;
+* nombre de données de test ;
+* nombre d'intentions ;
+* nombre de classes ;
+* nombre de requêtes ;
+* pourcentages ;
+* Accuracy ;
+* Precision ;
+* Recall ;
+* Macro F1 ;
+* Weighted F1 ;
+* Log Loss ;
+* taux de résolution ;
+* latence ;
+* seuils ;
+* performances des modèles ;
+* nombres présents dans les tableaux ;
+* nombres présents dans les figures ;
+* nombres présents dans le texte ;
+* nombres présents dans le résumé et l'abstract.
+
+**Une même donnée doit avoir exactement la même valeur partout, sauf justification explicite.**
+
+Lorsqu'une différence est trouvée :
+
+**Valeur A → Valeur B → Localisations → Valeur à retenir → Justification**
+
+---
+
+# 7. AUDIT DES FORMULES ET NOTATIONS MATHÉMATIQUES
+
+Vérifie :
+
+* les variables ;
+* les indices ;
+* les dimensions ;
+* les notations ;
+* la cohérence entre les formules et leur explication ;
+* les symboles utilisés ;
+* la définition de chaque variable ;
+* les notations différentes pour une même variable ;
+* les erreurs dans les indices ;
+* les incohérences entre les formules et le texte.
+
+Vérifie particulièrement les formules liées :
+
+* aux embeddings ;
+* à la classification ;
+* à la régression logistique ;
+* à la probabilité ;
+* à la similarité cosinus ;
+* aux métriques d'évaluation.
+
+Si une formule semble incorrecte, ne la corrige pas arbitrairement : explique précisément le problème et propose la notation correcte.
+
+---
+
+# 8. AUDIT DES TABLEAUX
+
+Pour chaque tableau, vérifie :
+
+* numéro ;
+* titre ;
+* emplacement ;
+* cohérence avec le texte ;
+* cohérence des données ;
+* unités ;
+* précision des valeurs ;
+* noms des colonnes ;
+* alignement logique ;
+* références dans le texte ;
+* cohérence de la numérotation.
+
+Vérifie également qu'un tableau est introduit avant ou au moment où il est présenté.
+
+---
+
+# 9. AUDIT DES FIGURES, DIAGRAMMES ET ILLUSTRATIONS
+
+Pour chaque figure ou diagramme, vérifie :
+
+* numéro ;
+* titre/légende ;
+* numérotation ;
+* référence dans le texte ;
+* cohérence avec l'explication ;
+* cohérence avec l'architecture ;
+* cohérence avec les règles de gestion ;
+* cohérence avec les fonctionnalités réellement développées.
+
+Signale toute contradiction entre :
+
+**texte ↔ figure ↔ diagramme ↔ architecture ↔ implémentation**
+
+Ne choisis jamais arbitrairement quelle version est correcte : signale la contradiction.
+
+---
+
+# 10. AUDIT DE LA COHÉRENCE SCIENTIFIQUE
+
+Vérifie que le mémoire suit une logique scientifique :
+
+**Problématique → Objectifs → Méthodologie → Conception → Implémentation → Expérimentation → Résultats → Analyse → Conclusion**
+
+Pour chaque chapitre, vérifie :
+
+* ce qui est annoncé ;
+* ce qui est réellement présenté ;
+* ce qui est démontré ;
+* ce qui est simplement affirmé ;
+* les informations introduites trop tôt ;
+* les informations qui apparaissent sans avoir été préparées ;
+* les conclusions qui dépassent les résultats obtenus.
+
+Signale toute affirmation non démontrée.
+
+---
+
+# 11. AUDIT DE LA MÉTHODOLOGIE
+
+Vérifie la cohérence entre :
+
+* problématique ;
+* objectifs général et spécifiques ;
+* hypothèses éventuelles ;
+* méthode utilisée ;
+* données ;
+* expérimentation ;
+* résultats ;
+* conclusions.
+
+Pour chaque choix méthodologique important, vérifie la chaîne :
+
+**Problème → Alternatives → Critères de comparaison → Expérimentation → Résultats → Choix → Justification**
+
+Signale les choix présentés comme « meilleurs », « optimaux » ou « plus performants » lorsqu'ils ne sont pas suffisamment démontrés.
+
+---
+
+# 12. AUDIT SPÉCIFIQUE DU SYSTÈME NGONI
+
+Analyse particulièrement la cohérence du fonctionnement de l'agent conversationnel.
+
+Reconstruis le fonctionnement réel :
+
+**Requête utilisateur
+→ Perception
+→ Compréhension
+→ Détection de l'intention
+→ Identification du problème
+→ Similarité sémantique
+→ Seuil de décision
+→ Collecte éventuelle d'informations
+→ Orchestration
+→ API / microservice
+→ Résultat
+→ Résolution / demande d'informations / escalade**
+
+Vérifie que cette chaîne est cohérente dans :
+
+* le cahier des charges ;
+* l'analyse ;
+* la conception ;
+* les diagrammes ;
+* l'architecture ;
+* la description technique ;
+* l'implémentation ;
+* les tests ;
+* les résultats.
+
+---
+
+# 13. AUDIT DE LA COHÉRENCE ENTRE LE TEXTE ET L'IMPLÉMENTATION
+
+Attention à ne pas présenter comme implémentée une fonctionnalité qui ne l'est pas.
+
+Pour chaque fonctionnalité importante, vérifie :
+
+**Fonctionnalité annoncée → Conception → Implémentation → Test → Résultat**
+
+Signale :
+
+* fonctionnalités annoncées mais non démontrées ;
+* fonctionnalités présentes dans le code mais absentes du mémoire ;
+* fonctionnalités décrites différemment selon les sections ;
+* fonctionnalités théoriques présentées comme opérationnelles.
+
+---
+
+# 14. AUDIT DES CONCLUSIONS
+
+Pour chaque conclusion de chapitre ou de section importante :
+
+1. identifie ce qui a réellement été démontré ;
+2. identifie ce que la conclusion affirme ;
+3. compare les deux ;
+4. détecte les affirmations nouvelles ;
+5. détecte les affirmations non démontrées ;
+6. détecte les informations importantes oubliées.
+
+Une conclusion ne doit pas introduire une information scientifique nouvelle qui n'a pas été établie dans la section qu'elle conclut.
+
+Propose une formulation corrigée lorsque nécessaire.
+
+---
+
+# 15. AUDIT DE LA MISE EN FORME
+
+Sois particulièrement strict sur la présentation académique.
+
+Vérifie :
+
+### Titres
+
+* hiérarchie ;
+* police ;
+* taille ;
+* gras ;
+* capitalisation ;
+* alignement ;
+* espacement ;
+* cohérence entre niveaux.
+
+### Paragraphes
+
+* justification ;
+* retrait ;
+* interligne ;
+* espacement avant/après ;
+* longueur excessive ;
+* paragraphes trop courts ;
+* paragraphes constitués d'une seule phrase lorsque cela nuit à la lecture.
+
+### Énumérations
+
+Vérifie l'utilisation cohérente de :
+
+* virgules ;
+* points-virgules ;
+* points ;
+* deux-points ;
+* puces ;
+* numérotation.
+
+Ne considère pas automatiquement toutes les énumérations comme correctes : vérifie leur structure grammaticale.
+
+### Pages
+
+Vérifie :
+
+* numérotation ;
+* pages blanches ;
+* sauts de page ;
+* titres isolés ;
+* titres en bas de page ;
+* tableaux coupés ;
+* figures mal positionnées ;
+* espaces excessifs.
+
+---
+
+# 16. AUDIT DE LA PONCTUATION ET DE LA TYPOGRAPHIE
+
+Vérifie notamment :
+
+* espaces avant/après les signes ;
+* deux-points ;
+* point-virgule ;
+* parenthèses ;
+* guillemets ;
+* pourcentages ;
+* unités ;
+* symboles ;
+* tirets ;
+* apostrophes ;
+* majuscules ;
+* cohérence des écritures comme « BGE-M3 », « Macro F1-score », etc.
+
+Signale les variations typographiques injustifiées.
+
+---
+
+# 17. AUDIT DU STYLE ACADÉMIQUE
+
+Identifie :
+
+* formulations trop personnelles ;
+* formulations trop conversationnelles ;
+* répétitions ;
+* formulations promotionnelles ;
+* affirmations excessives ;
+* tournures trop vagues ;
+* phrases inutilement complexes ;
+* expressions qui ressemblent à du langage marketing.
+
+Exemple :
+
+❌ « Le système est extrêmement performant et révolutionnaire. »
+
+Préférer une formulation fondée sur les résultats :
+
+✅ « Les résultats obtenus montrent une amélioration de X % selon la métrique Y. »
+
+---
+
+# 18. FORMAT OBLIGATOIRE DU RAPPORT
+
+Ne donne pas simplement une liste générale.
+
+Classe les problèmes par niveau de gravité :
+
+### 🔴 CRITIQUE
+
+Erreur pouvant remettre en cause la cohérence scientifique, les résultats, la méthodologie ou la soutenance.
+
+### 🟠 IMPORTANT
+
+Erreur de structure, terminologie, méthodologie ou présentation qui doit être corrigée.
+
+### 🟡 MINEUR
+
+Erreur de syntaxe, formulation, ponctuation ou typographie.
+
+Pour chaque problème, utilise exactement cette structure :
+
+**[NIVEAU] — Catégorie**
+
+* **Localisation :** chapitre / section / page / paragraphe
+* **Élément concerné :** citation ou description précise
+* **Problème :** explication claire
+* **Pourquoi c'est un problème :** justification
+* **Correction proposée :** formulation ou modification précise
+* **Priorité :** obligatoire / recommandée
+
+---
+
+# 19. TABLEAU DE SYNTHÈSE FINAL
+
+À la fin de l'audit, produis un tableau :
+
+| Priorité     | Catégorie | Nombre d'erreurs | Problèmes principaux | Action recommandée |
+| ------------ | --------: | ---------------: | -------------------- | ------------------ |
+| 🔴 Critique  |       ... |              ... | ...                  | ...                |
+| 🟠 Important |       ... |              ... | ...                  | ...                |
+| 🟡 Mineur    |       ... |              ... | ...                  | ...                |
+
+Puis termine par :
+
+## TOP 10 DES CORRECTIONS À FAIRE AVANT LA SOUTENANCE
+
+Classe les dix corrections les plus importantes selon leur impact sur :
+
+1. la validité scientifique ;
+2. la cohérence du mémoire ;
+3. la crédibilité des résultats ;
+4. la conformité académique ;
+5. la qualité de présentation.
+
+---
+
+# RÈGLES FINALES
+
+* Ne modifie **jamais** le fichier.
+* Ne supprime aucune information.
+* Ne suppose pas qu'une information est correcte sans vérifier sa cohérence avec le reste du mémoire.
+* Ne corrige pas silencieusement.
+* Signale explicitement chaque incohérence importante.
+* Ne te contente pas de dire « à reformuler » : propose une formulation précise.
+* Lorsque plusieurs corrections sont possibles, indique celle que tu recommandes.
+* Sois particulièrement strict sur les chiffres, les résultats, les diagrammes, les formules, la numérotation et la terminologie.
+* Vérifie le document **dans son ensemble**, et pas uniquement section par section.
+* Une incohérence entre deux parties éloignées du mémoire doit être signalée.
+* Si tu ne peux pas vérifier un élément à partir du document, indique clairement **« Non vérifiable à partir du document »** au lieu de supposer.
+* Ne félicite pas inutilement le travail : l'objectif est de détecter les défauts avant la soutenance.
+
+**Objectif final : produire un véritable rapport de pré-soutenance permettant de corriger le mémoire de manière systématique, sans modifier directement le fichier.**

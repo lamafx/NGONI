@@ -2,7 +2,7 @@
 
 Positifs : 156 (paraphrases des 26 questions du catalogue) -- Negatifs : 44 (salutations, hors-sujet, diagnostic/reclamation)
 
-Genere le 2026-07-30 03:47:07 -- modele d'embedding : voir app/shared/embeddings/service.py (MODEL_NAME)
+Genere le 2026-08-20 20:34:52 -- modele d'embedding : voir app/shared/embeddings/service.py (MODEL_NAME)
 
 ## Seuils actuellement configures
 

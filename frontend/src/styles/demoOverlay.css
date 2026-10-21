@@ -1,0 +1,144 @@
+/* ==========================================================================
+   Incrustations de la démonstration.
+
+   Palette imposée pour la vidéo — l'orange ne sert QU'aux événements qui
+   comptent (action, conforme, escalade, résolu), jamais comme couleur de
+   fond général.
+   ========================================================================== */
+.dov{
+  --o-orange:#F26418;
+  --o-charbon:#1F1B18;
+  --o-creme:#FDF3EC;
+  --o-gris:#6B6560;
+  position:fixed;inset:0;z-index:2000;pointer-events:none;
+  font-family:"Sora","Public Sans",system-ui,sans-serif;
+}
+
+/* ---- pastille discrète, coin haut droit ---------------------------------
+   Doit être lisible sans voler l'attention : elle dure une à deux secondes. */
+.dov-badge{
+  position:absolute;top:22px;right:26px;
+  display:flex;flex-direction:column;gap:5px;align-items:flex-end;
+  animation:dov-slide .3s ease-out;
+}
+.dov-badge span{
+  font-family:"IBM Plex Mono",ui-monospace,monospace;
+  font-size:12px;font-weight:600;letter-spacing:.08em;
+  background:var(--o-charbon);color:var(--o-creme);
+  padding:7px 13px;border-radius:4px;
+  box-shadow:0 8px 24px -10px rgba(0,0,0,.55);
+}
+.dov-badge span:last-child{background:var(--o-orange);color:#fff;}
+
+/* ---- carte centrée, socle commun ---------------------------------------- */
+.dov-card{
+  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  background:var(--o-creme);color:var(--o-charbon);
+  border-radius:14px;box-shadow:0 30px 70px -24px rgba(0,0,0,.5);
+  animation:dov-pop .38s cubic-bezier(.2,.9,.3,1.15);
+}
+
+/* ---- bascule d'état : avant → après ------------------------------------- */
+.dov-state{display:flex;align-items:center;gap:26px;padding:26px 34px;}
+.dov-state-col{display:flex;flex-direction:column;gap:6px;min-width:170px;text-align:center;}
+.dov-k{font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--o-gris);}
+.dov-v{font-size:17px;font-weight:700;}
+.dov-state-col.is-before .dov-v{color:var(--o-gris);text-decoration:line-through;text-decoration-thickness:1.5px;}
+.dov-state-col.is-after .dov-v{color:var(--o-orange);}
+.dov-arrow{color:var(--o-orange);display:flex;animation:dov-arrow .7s ease-out .25s both;}
+
+/* ---- contrôles qui s'allument un par un --------------------------------- */
+.dov-checks{padding:28px 36px;min-width:330px;}
+.dov-checks ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:13px;}
+.dov-checks li{
+  display:flex;align-items:center;gap:12px;
+  font-size:16px;font-weight:600;
+  opacity:0;animation:dov-check .32s ease-out both;
+}
+.dov-checks li svg{color:var(--o-orange);flex:0 0 auto;}
+.dov-headline{
+  margin-top:22px;padding-top:20px;border-top:1px solid rgba(31,27,24,.14);
+  font-size:30px;font-weight:800;letter-spacing:-.02em;color:var(--o-orange);
+  text-align:center;opacity:0;animation:dov-pop .4s cubic-bezier(.2,.9,.3,1.15) both;
+}
+
+/* ---- bandeau de rupture : le moment le plus important ------------------- */
+.dov-rupture{
+  position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);
+  background:var(--o-charbon);color:var(--o-creme);
+  padding:38px 40px;text-align:center;
+  animation:dov-band .45s cubic-bezier(.2,.85,.3,1) both;
+  box-shadow:0 0 90px rgba(0,0,0,.45);
+}
+.dov-rupture-title{
+  font-size:clamp(26px,4.2vw,46px);font-weight:800;letter-spacing:-.02em;
+  color:var(--o-orange);
+}
+.dov-rupture-sub{
+  margin-top:12px;font-size:clamp(14px,1.5vw,17px);font-weight:500;
+  color:var(--o-creme);opacity:.72;
+}
+
+/* ---- carte de ticket ----------------------------------------------------- */
+.dov-ticket{padding:26px 34px;min-width:330px;}
+.dov-ticket-id{
+  font-family:"IBM Plex Mono",monospace;font-size:20px;font-weight:600;
+  color:var(--o-orange);margin-bottom:16px;letter-spacing:.02em;
+}
+.dov-ticket dl{margin:0;display:flex;flex-direction:column;gap:9px;}
+.dov-ticket dl > div{display:flex;justify-content:space-between;gap:26px;font-size:14px;}
+.dov-ticket dt{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--o-gris);}
+.dov-ticket dd{margin:0;font-weight:700;}
+
+/* ---- chiffre dominant ---------------------------------------------------- */
+.dov-stat{padding:30px 44px;text-align:center;min-width:280px;}
+.dov-stat-value{font-size:clamp(40px,6vw,62px);font-weight:800;letter-spacing:-.03em;color:var(--o-orange);line-height:1;}
+.dov-stat-label{margin-top:10px;font-size:14px;font-weight:600;color:var(--o-gris);letter-spacing:.02em;}
+
+/* ---- narration : le sens, jamais les gestes ------------------------------ */
+.dov-narration{
+  position:absolute;left:50%;bottom:38px;transform:translateX(-50%);
+  max-width:min(680px,88vw);text-align:center;
+  background:var(--o-charbon);color:var(--o-creme);
+  padding:14px 26px;border-radius:999px;
+  font-size:clamp(15px,1.7vw,18px);font-weight:600;letter-spacing:-.01em;
+  box-shadow:0 16px 40px -16px rgba(0,0,0,.55);
+  animation:dov-slide .34s ease-out;
+}
+
+/* ---- carton final -------------------------------------------------------- */
+.dov-final{
+  position:absolute;inset:0;background:var(--o-creme);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px;
+  animation:dov-fade .5s ease-out;
+}
+.dov-final-lines{display:flex;flex-direction:column;gap:6px;text-align:center;}
+.dov-final-lines div{
+  font-size:clamp(34px,6.5vw,68px);font-weight:800;letter-spacing:-.035em;
+  color:var(--o-charbon);line-height:1.08;
+  opacity:0;animation:dov-rise .55s cubic-bezier(.2,.85,.3,1) both;
+}
+.dov-final-lines div:last-child{color:var(--o-orange);}
+.dov-final-sub{
+  font-size:clamp(13px,1.5vw,16px);font-weight:600;color:var(--o-gris);
+  letter-spacing:.01em;text-align:center;max-width:80vw;
+  opacity:0;animation:dov-fade .5s ease-out both;
+}
+
+@keyframes dov-slide{from{opacity:0;transform:translateY(-10px);}to{opacity:1;transform:none;}}
+@keyframes dov-pop{from{opacity:0;transform:translate(-50%,-50%) scale(.94);}to{opacity:1;transform:translate(-50%,-50%) scale(1);}}
+@keyframes dov-check{from{opacity:0;transform:translateX(-12px);}to{opacity:1;transform:none;}}
+@keyframes dov-band{from{opacity:0;transform:translateY(-50%) scaleY(.7);}to{opacity:1;transform:translateY(-50%) scaleY(1);}}
+@keyframes dov-arrow{from{opacity:0;transform:translateX(-10px);}to{opacity:1;transform:none;}}
+@keyframes dov-fade{from{opacity:0;}to{opacity:1;}}
+@keyframes dov-rise{from{opacity:0;transform:translateY(18px);}to{opacity:1;transform:none;}}
+
+/* .dov-headline et .dov-final-* portent leur delai en style inline */
+.dov-headline,.dov-final-lines div,.dov-final-sub{animation-fill-mode:both;}
+
+@media (prefers-reduced-motion: reduce){
+  .dov-badge,.dov-card,.dov-rupture,.dov-narration,.dov-final,
+  .dov-checks li,.dov-headline,.dov-final-lines div,.dov-final-sub,.dov-arrow{
+    animation:none;opacity:1;
+  }
+}

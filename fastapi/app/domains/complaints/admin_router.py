@@ -11,12 +11,18 @@ from sqlalchemy.orm import Session
 
 try:
     from app.database import get_db
+    from app.domains.agents.service import AgentService
     from app.shared.admin_auth import get_admin_id, require_admin_auth
 except ImportError:  # pragma: no cover - support running as `main`
     from database import get_db
+    from domains.agents.service import AgentService
     from shared.admin_auth import get_admin_id, require_admin_auth
 
-from .schemas import AdminComplaintStatusUpdateRequest, ComplaintResponse
+from .schemas import (
+    AdminComplaintAssignRequest,
+    AdminComplaintStatusUpdateRequest,
+    ComplaintResponse,
+)
 from .service import ComplaintService
 
 router = APIRouter(
@@ -65,4 +71,20 @@ def update_complaint_status(
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     if updated is None:
         raise HTTPException(status_code=404, detail="Réclamation introuvable")
+    return updated
+
+
+@router.post("/{ticket_id}/assign", response_model=ComplaintResponse)
+def assign_complaint(
+    ticket_id: str,
+    payload: AdminComplaintAssignRequest,
+    db: Session = Depends(get_db),
+):
+    """« Prendre en charge une réclamation » : attribue le ticket à un
+    conseiller et le passe en cours de traitement. Jusqu'ici un ticket
+    pouvait changer de statut sans que personne n'en soit responsable."""
+    updated = ComplaintService.from_session(db).assign(ticket_id, payload.agent_id)
+    if updated is None:
+        raise HTTPException(status_code=404, detail="Réclamation introuvable")
+    AgentService.from_session(db).touch(payload.agent_id)
     return updated

@@ -1,0 +1,2042 @@
+text,intent
+"Merci au revoir, à la prochaine ?",goodbye
+"Ça ne va pas du tout, les explications sont toujours confuses. ?",plainte
+"Honnêtement, rien ne fonctionne comme prévu, ça m'énerve.",plainte
+"Franchement, rien ne fonctionne comme prévu, c'est nul. ?",plainte
+"jai un probleme, ma connexion a disparu",diagnostic
+Je suis frustré parce que ça casse à chaque mise à jour.,plainte
+"ma vérification d'identité ne s'affiche plus, vous pouvez verifier ?",diagnostic
+Pouvez-vous m'expliquer le portefeuille ?,ask_faq
+Je souhaite déposer une réclamation.,create_reclamation
+Je souhaite déposer une réclamation. ?,create_reclamation
+"Ciao, bonne continuation",goodbye
+"Sérieusement, tu es une IA ?",bot_challenge
+"Alors, oui tout à fait",affirm
+"Dites-moi, qui a gagné la CAN ?",out_of_scope
+Comment fonctionne la vérification KYC ?,ask_faq
+"Depuis ce matin, mon KYC ne s'affiche plus",diagnostic
+"Depuis ce matin, mon dépôt est en cours depuis trop longtemps",diagnostic
+Pourquoi ne pas proposer une authentification par empreinte digitale ?,suggestion
+"Dites-moi, peux-tu chanter une chanson ?",out_of_scope
+"Bonne journée, j'ai fini ?",goodbye
+"Alors, quelle heure est-il ?",out_of_scope
+"Coucou, vous êtes là ?",greet
+"Écoutez, génial, exactement ça",rate_response_useful
+"Salut, j'ai une question",greet
+"Dites-moi, dégage",inappropriate_language
+Pourquoi mon compte est en cours depuis trop longtemps ?,diagnostic
+"Alors, ok",affirm
+"Aidez-moi svp, mon retrait affiche une erreur",diagnostic
+kesk les pièces au juste,ask_faq
+"Voilà, pas vraiment",deny
+Vous pouvez me dire où ça en est pour mon ticket ?,ask_complaint_status
+"Alors, casse-toi",inappropriate_language
+j'aimerai en savoir plus sur l'assistance client,ask_faq
+"Sérieusement, non ce n'est pas le cas",deny
+Coucou ! ?,greet
+"cc, ça va ?",greet
+"Je suis très déçu, l'application plante tout le temps. ?",plainte
+"Dites-moi, tu es automatisé ?",bot_challenge
+"Je suis très déçu, je n'ai aucune nouvelle depuis des semaines. ?",plainte
+Il faut absolument contacter le support.,create_reclamation
+"Bon, ça n'aide pas trop",rate_response_not_useful
+"Franchement, ça règle mon problème",rate_response_useful
+"Merci au revoir, bonne continuation ?",goodbye
+"Du coup, explique la théorie de la relativité",out_of_scope
+C'est catastrophique : ça casse à chaque mise à jour.,plainte
+"À plus, à la prochaine ?",goodbye
+"Écoutez, hors de question",deny
+"Écoutez, non",deny
+Une suggestion : il faudrait un chat en direct avec un conseiller. ?,suggestion
+"Voilà, ok",affirm
+c koi NGONI Plus exactement,ask_faq
+mon profil refuse de se valider,diagnostic
+"Franchement, comment apprendre l'anglais vite ?",out_of_scope
+"Ça ne va pas du tout, l'application se déconnecte sans arrêt.",plainte
+"Voilà, votre application est pourrie",inappropriate_language
+"ok merci bye, j'ai fini",goodbye
+"Franchement, ce n'est pas correct",deny
+"Franchement, qui t'a développé ?",bot_challenge
+"Bon, j'en ai marre de ce bot pourri",inappropriate_language
+jaimrai ouvrir un ticket svp,create_reclamation
+Vous devriez ajouter un support en plusieurs langues.,suggestion
+"Sérieusement, c'est quoi le machine learning ?",out_of_scope
+"Du coup, quels problèmes peux-tu résoudre ?",ask_capabilities
+Pouvez-vous m'expliquer l'application mobile ?,ask_faq
+Comment fonctionne les cadeaux virtuels ?,ask_faq
+"Bref, hors de question",deny
+j'aimerai en savoir plus sur l'application mobile,ask_faq
+Pourquoi mes pièces affiche une erreur ?,diagnostic
+"Dites-moi, nope",deny
+"Sérieusement, qui est Lionel Messi ?",out_of_scope
+J'ai un souci : mon compte ne s'affiche plus,diagnostic
+Pourquoi ne pas proposer un widget pour suivre son solde ?,suggestion
+Je veux des questions sur les vidéos privées payantes,select_faq_category
+"Alors, oui merci",affirm
+À quoi sert les notifications ?,ask_faq
+C'est vraiment décevant : je perds mon temps à chaque fois.,plainte
+"Sérieusement, oui je confirme",affirm
+jaimrai déposer une réclamation svp,create_reclamation
+J'ai un souci : ma connexion refuse de se valider,diagnostic
+"Franchement, ce bot est nul de merde",inappropriate_language
+"Sérieusement, c'est bon",affirm
+"Bon, parle-moi de l'espace",out_of_scope
+C'est catastrophique : l'application est trop lente. ?,plainte
+J'aimerais des informations sur le retrait d'argent,ask_faq
+"jai un probleme, ma connexion ne passe pas",diagnostic
+"Dites-moi, quel est ton plat préféré ?",out_of_scope
+bsr ! ?,greet
+"Bon, quel est ton plat préféré ?",out_of_scope
+"Franchement, ouais",affirm
+C'est vraiment décevant : on me donne toujours des réponses différentes. ?,plainte
+"Écoutez, c'est quoi ton rôle ?",bot_challenge
+"Voilà, parle-moi de football",out_of_scope
+"Bon, nope",deny
+Je veux déposer une réclamation. ?,create_reclamation
+"merci bye, j'ai fini ?",goodbye
+"Sérieusement, ça ne m'a pas aidé",rate_response_not_useful
+"Du coup, c'est vraiment naze",inappropriate_language
+"jai un probleme, ma connexion est en cours depuis trop longtemps",diagnostic
+"Alors, quel est ton rôle ici ?",ask_capabilities
+"Bref, oui c'est bien ça",affirm
+"ma recharge est bloqué depuis ce matin, vous pouvez verifier ?",diagnostic
+"Franchement, rien ne fonctionne comme prévu, c'est nul. ?",plainte
+"Voilà, faux",deny
+"Voilà, c pas ça",deny
+"Dites-moi, put1 de bot",inappropriate_language
+C'est vraiment décevant : les explications sont toujours confuses. ?,plainte
+"Bref, ferme-la",inappropriate_language
+"Bonjour, mon paiement n'a pas été crédité",diagnostic
+C'est inadmissible que l'application plante tout le temps. ?,plainte
+"Alors, c'est quoi le machine learning ?",out_of_scope
+Je veux faire remonter mon cas.,create_reclamation
+"Alors, connard",inappropriate_language
+"Bon, ça résout mon souci, merci beaucoup",rate_response_useful
+"Écoutez, nickel merci",rate_response_useful
+Il faut absolument contacter le support. ?,create_reclamation
+"Franchement, c pas ça",deny
+"Bonne journée, j'ai fini ?",goodbye
+"À plus, merci pour votre aide ?",goodbye
+Ça fait deux jours que mon retrait affiche une erreur,diagnostic
+"Franchement, absolument pas",deny
+"Bref, peux-tu coder un site web ?",out_of_scope
+kesk l'assistance client au juste,ask_faq
+c koi les frais de transaction exactement,ask_faq
+c koi le programme de fidélité exactement,ask_faq
+mes pièces est en cours depuis trop longtemps,diagnostic
+"Alors, absolument pas",deny
+"Dites-moi, bande d'incapables",inappropriate_language
+"Dites-moi, quelles questions puis-je poser ?",browse_faq
+"je vous laisse, à la prochaine ?",goodbye
+Il faut absolument être mis en relation avec un agent. ?,create_reclamation
+Je suis frustré parce que je perds mon temps à chaque fois. ?,plainte
+Ce serait bien d'avoir la possibilité d'exporter ses relevés. ?,suggestion
+Je veux comprendre le retrait d'argent,ask_faq
+"Dites-moi, exactement",affirm
+Hey l'assistant ?,greet
+Je souhaite signaler ce problème. ?,create_reclamation
+"Ça ne va pas du tout, l'application se déconnecte sans arrêt. ?",plainte
+"Écoutez, jamais",deny
+Quel est le statut de mon dossier ?,ask_complaint_status
+"Dites-moi, tu es un assistant virtuel ?",bot_challenge
+Des questions sur les vidéos privées payantes,select_faq_category
+"Bonne soirée, à la prochaine ?",goodbye
+"Hey, petite question rapide",greet
+jaimrai escalader mon dossier svp,create_reclamation
+"Franchement, explique la théorie de la relativité",out_of_scope
+"Bon, oui tout à fait",affirm
+Il faut absolument signaler ce problème. ?,create_reclamation
+"Je suis très déçu, rien ne fonctionne comme prévu. ?",plainte
+"Ça ne va pas du tout, les frais sont beaucoup trop élevés. ?",plainte
+J'ai un souci : ma vérification d'identité n'a pas été crédité,diagnostic
+j'aimerai en savoir plus sur les vidéos privées payantes,ask_faq
+"ciao, j'ai fini ?",goodbye
+"Du coup, hors de question",deny
+Pouvez-vous m'expliquer la recharge du compte ?,ask_faq
+Je veux avoir un suivi personnalisé de mon dossier. ?,create_reclamation
+J'aimerais que vous ajoutiez un widget pour suivre son solde. ?,suggestion
+"Ça ne va pas du tout, rien ne fonctionne comme prévu. ?",plainte
+"Bref, oui merci ça m'aide",rate_response_useful
+"Je ne suis pas content, ça casse à chaque mise à jour. ?",plainte
+eski NGONI Plus c'est gratuit ou payant,ask_faq
+Pourquoi mon transfert a échoué ?,diagnostic
+À quoi sert le retrait d'argent ?,ask_faq
+Je veux contacter le support. ?,create_reclamation
+"Salut, vous êtes là ?",greet
+"À bientôt, j'ai fini",goodbye
+"Écoutez, est-ce que tu apprends de nos conversations ?",bot_challenge
+Il faut absolument avoir un suivi personnalisé de mon dossier. ?,create_reclamation
+J'aimerais que vous ajoutiez des notifications personnalisables. ?,suggestion
+"À bientôt, j'ai fini ?",goodbye
+"Salut, petite question rapide ?",greet
+Quels sont les détails concernant le système de récompense ?,ask_faq
+Quel est le statut de ma réclamation ?,ask_complaint_status
+"Sérieusement, tu es vraiment inefficace",inappropriate_language
+"Depuis ce matin, mon solde affiche une erreur",diagnostic
+C'est inadmissible que ça casse à chaque mise à jour.,plainte
+"Du coup, ce n'est pas correct",deny
+vous pouvez m'expliquer les lives privés payants stp,ask_faq
+Peux-tu me dire où en est ma dernière réclamation ?,ask_complaint_status
+"Dites-moi, quelles sont tes compétences ?",ask_capabilities
+J'aimerais créer un dossier de réclamation.,create_reclamation
+"Bonne journée, merci pour votre aide ?",goodbye
+"Bon, quelles sont tes compétences ?",ask_capabilities
+"Du coup, c'est ça",affirm
+"Je suis mécontent, les explications sont toujours confuses.",plainte
+"Bref, put1 de bot",inappropriate_language
+"Alors, super, c'est exactement ça",rate_response_useful
+"Bon, pas encore",deny
+"Dites-moi, non ce n'est pas ça du tout",deny
+"Bonne soirée, j'ai fini",goodbye
+"Dites-moi, j'en ai marre de ce bot pourri",inappropriate_language
+"Sérieusement, ça répond à ma question",rate_response_useful
+"Du coup, nope",deny
+Pourquoi mon retrait refuse de se valider ?,diagnostic
+Je veux des questions sur le compte,select_faq_category
+"Voilà, oui c'est correct",affirm
+"Du coup, pas ça",deny
+Pouvez-vous m'aider à créer un dossier de réclamation ?,create_reclamation
+"Dites-moi, oui c'est bien ça",affirm
+"Honnêtement, ça casse à chaque mise à jour, ça m'énerve. ?",plainte
+Vous pouvez me dire où ça en est pour ma dernière réclamation ?,ask_complaint_status
+Montre-moi les questions à propos de le compte,select_faq_category
+"Écoutez, c'est ça",affirm
+bonjour support,greet
+"Franchement, oui c'était utile",rate_response_useful
+"Au revoir, j'ai fini",goodbye
+C'est catastrophique : je perds mon temps à chaque fois.,plainte
+"Alors, bien sûr",affirm
+C'est vraiment décevant : je n'ai aucune nouvelle depuis des semaines. ?,plainte
+J'aimerais que vous ajoutiez des notifications personnalisables.,suggestion
+"Du coup, dégage",inappropriate_language
+"bjr, petite question rapide ?",greet
+"Écoutez, ce bot est nul de merde",inappropriate_language
+salut l'assistant,greet
+"Je suis très déçu, l'application plante tout le temps. ?",plainte
+"Écoutez, montre voir des questions types",browse_faq
+Pouvez-vous m'expliquer le contrôle parental ?,ask_faq
+"Sérieusement, casse-toi",inappropriate_language
+"Franchement, comment réparer une voiture ?",out_of_scope
+Est-ce que ma dernière réclamation a été traité ?,ask_complaint_status
+"Je suis très déçu, ça casse à chaque mise à jour. ?",plainte
+salut !,greet
+Vous devriez ajouter un support en plusieurs langues. ?,suggestion
+Ce serait bien d'avoir un support en plusieurs langues.,suggestion
+"Voilà, hors de question",deny
+"Dites-moi, vous êtes un robot ou un humain ?",bot_challenge
+"Bref, tu es une IA ?",bot_challenge
+Coucou NGONI,greet
+"Bref, je ne pense pas",deny
+Une suggestion : il faudrait plus de moyens de paiement pour recharger. ?,suggestion
+"Alors, tu es un programme ?",bot_challenge
+"Bon, tu es une IA ?",bot_challenge
+"Franchement, nan",deny
+Est-ce que vous pouvez détailler NGONI Plus ?,ask_faq
+Une suggestion : il faudrait une barre de recherche dans la FAQ. ?,suggestion
+"Dites-moi, ce n'est pas correct",deny
+"Depuis ce matin, mes pièces semble erroné",diagnostic
+"Voilà, bande d'incapables",inappropriate_language
+"Bref, non",deny
+"Je suis très déçu, ça casse à chaque mise à jour. ?",plainte
+"Je suis mécontent, l'application plante tout le temps.",plainte
+"Bref, tu es une intelligence artificielle ?",bot_challenge
+Je veux parler à un conseiller humain.,create_reclamation
+À quoi sert le système de récompense ?,ask_faq
+Merci de être mis en relation avec un agent rapidement.,create_reclamation
+"Alors, yes",affirm
+"Du coup, connard",inappropriate_language
+"Franchement, les explications sont toujours confuses, c'est nul. ?",plainte
+Avez-vous prévu un système de parrainage amélioré ?,suggestion
+"Dites-moi, espèce d'idiot",inappropriate_language
+Je souhaite avoir un suivi personnalisé de mon dossier. ?,create_reclamation
+"Bonjour, j'ai besoin d'aide",greet
+Une suggestion : il faudrait un chat en direct avec un conseiller. ?,suggestion
+"Alors, espèce de crétin",inappropriate_language
+"Sérieusement, parle-moi de l'espace",out_of_scope
+dites moi tout sur l'assistance client svp,ask_faq
+"jai un probleme, mon paiement refuse de se valider",diagnostic
+"salut, vous êtes là ?",greet
+Pouvez-vous m'expliquer le système de récompense ?,ask_faq
+je veu escalader mon dossier stp,create_reclamation
+vous pouvez m'expliquer le système de récompense stp,ask_faq
+Est-ce que vous pouvez détailler les frais de transaction ?,ask_faq
+"Sérieusement, pas exactement",deny
+"Merci au revoir, merci pour votre aide",goodbye
+"Alors, bot à la con",inappropriate_language
+"Sérieusement, c'est ça",affirm
+Est-ce que mon dossier a été traité ?,ask_complaint_status
+"Alors, tu es un assistant virtuel ?",bot_challenge
+"Ça ne va pas du tout, l'application se déconnecte sans arrêt. ?",plainte
+"Voilà, quel bordel ce truc",inappropriate_language
+Quels sont les détails concernant la sécurité du compte ?,ask_faq
+"Franchement, je pense pas",deny
+"Franchement, ça casse à chaque mise à jour, c'est nul. ?",plainte
+"Du coup, pas exactement",deny
+Comment ça marche les lives privés payants ?,ask_faq
+"Ciao, merci pour votre aide ?",goodbye
+Je veux formuler une plainte officielle.,create_reclamation
+"Aidez-moi svp, mon KYC est bloqué depuis ce matin",diagnostic
+"Ciao, merci pour votre aide",goodbye
+Je veux des questions sur les cadeaux,select_faq_category
+"Franchement, tu es vraiment inefficace",inappropriate_language
+"Bye, à la prochaine ?",goodbye
+"Bref, oui c'est correct",affirm
+"Dites-moi, quel est ton rôle ici ?",ask_capabilities
+"Sérieusement, espèce d'idiot",inappropriate_language
+"Voilà, qui t'a développé ?",bot_challenge
+"Bref, je veux parcourir la foire aux questions",browse_faq
+"Sérieusement, vous êtes un robot ou un humain ?",bot_challenge
+"Bon, pas vraiment",deny
+Bonsoir NGONI,greet
+C'est inadmissible que je n'ai aucune nouvelle depuis des semaines. ?,plainte
+"Bref, ce n'est pas correct",deny
+Hey !,greet
+"Ça ne va pas du tout, ça casse à chaque mise à jour.",plainte
+"Ça ne va pas du tout, personne ne prend mes messages au sérieux. ?",plainte
+"Du coup, qui parle ?",bot_challenge
+"Bref, parfait",affirm
+"Écoutez, espèce d'idiot",inappropriate_language
+"Bon, jamais",deny
+Ce serait bien d'avoir des notifications personnalisables. ?,suggestion
+"bonjour, ça va ?",greet
+ma recharge ne fonctionne plus,diagnostic
+"jai un probleme, mon solde est bloqué depuis ce matin",diagnostic
+Une suggestion : il faudrait une barre de recherche dans la FAQ.,suggestion
+J'ai un souci : ma recharge n'a pas été crédité,diagnostic
+Hello support ?,greet
+"Voilà, je veux apprendre à programmer en Python",out_of_scope
+Quelles sont les infos sur le programme de fidélité ?,ask_faq
+jaimrai avoir un suivi personnalisé de mon dossier svp ?,create_reclamation
+J'aimerais que vous ajoutiez une barre de recherche dans la FAQ. ?,suggestion
+"Voilà, non ça ne m'aide pas",rate_response_not_useful
+"Écoutez, put1 de bot",inappropriate_language
+"Alors, non",deny
+Hey support,greet
+"Sérieusement, résous-moi cette équation",out_of_scope
+"Je ne suis pas content, rien ne fonctionne comme prévu. ?",plainte
+eski l'application mobile c'est gratuit ou payant,ask_faq
+Vous devriez ajouter un chat en direct avec un conseiller.,suggestion
+Pourquoi mon profil est bloqué depuis ce matin ?,diagnostic
+Ce serait pratique d'avoir un historique des transactions plus détaillé. ?,suggestion
+"mon compte ne fonctionne plus, vous pouvez verifier ?",diagnostic
+Pourquoi ma vérification d'identité ne s'affiche plus ?,diagnostic
+"Du coup, que peux-tu faire pour moi ?",ask_capabilities
+"Alors, ça ne m'a pas aidé",rate_response_not_useful
+Vous pouvez me dire où ça en est pour ma dernière réclamation ?,ask_complaint_status
+"jai un probleme, mon retrait affiche une erreur",diagnostic
+"Bonne soirée, merci pour votre aide ?",goodbye
+Il faut absolument faire remonter mon cas.,create_reclamation
+J'aimerais des informations sur le système de récompense,ask_faq
+"Ça ne va pas du tout, l'application est trop lente. ?",plainte
+J'ai un souci : ma connexion affiche une erreur,diagnostic
+J'ai un souci : ma vérification d'identité ne passe pas,diagnostic
+J'ai un souci : ma recharge ne s'affiche plus,diagnostic
+"merci bye, bonne continuation",goodbye
+"Bonne soirée, merci pour votre aide",goodbye
+"Sérieusement, est-ce que tu es un humain ?",bot_challenge
+"Bref, comment faire un gâteau ?",out_of_scope
+Avez-vous prévu une barre de recherche dans la FAQ ?,suggestion
+"bonjour, petite question rapide",greet
+"Alors, est-ce que tu es réel ?",bot_challenge
+"mon retrait affiche une erreur, vous pouvez verifier ?",diagnostic
+"Alors, qui est le président des États-Unis ?",out_of_scope
+je veu parler à un conseiller humain stp,create_reclamation
+"Bref, qui es-tu ?",bot_challenge
+"bsr, vous êtes là ?",greet
+"ok merci bye, bonne continuation ?",goodbye
+C'est catastrophique : rien ne fonctionne comme prévu. ?,plainte
+"À plus, bonne continuation",goodbye
+"Je suis mécontent, ça casse à chaque mise à jour. ?",plainte
+C'est catastrophique : je n'ai aucune nouvelle depuis des semaines.,plainte
+Je veux voir les questions sur le compte,select_faq_category
+"Bref, effectivement",affirm
+Hey NGONI,greet
+"Bref, quelle heure est-il ?",out_of_scope
+"Écoutez, non ce n'est pas ça du tout",deny
+J'aimerais que vous ajoutiez un widget pour suivre son solde. ?,suggestion
+"Du coup, peux-tu chanter une chanson ?",out_of_scope
+kesk les lives privés payants au juste,ask_faq
+"Dites-moi, c'est quoi l'intelligence artificielle ?",out_of_scope
+"Merci au revoir, à la prochaine",goodbye
+Je veux des questions sur le portefeuille,select_faq_category
+"Voilà, nope",deny
+"À plus, j'ai fini",goodbye
+ma réclamation a-t-elle avancé ?,ask_complaint_status
+"Dites-moi, donne-moi des idées de questions",browse_faq
+"Ça ne va pas du tout, l'application est trop lente. ?",plainte
+"Voilà, voir la FAQ",browse_faq
+Une suggestion : il faudrait une barre de recherche dans la FAQ. ?,suggestion
+"Du coup, d'accord",affirm
+"Écoutez, sur quels services peux-tu effectuer un diagnostic ?",ask_capabilities
+"Alors, qui est derrière toi ?",bot_challenge
+"Bye, merci pour votre aide ?",goodbye
+Quelles sont les infos sur l'application mobile ?,ask_faq
+"Du coup, pas encore",deny
+"Du coup, qui es-tu ?",bot_challenge
+"Bon, j'aimerais voir quelques questions fréquentes",browse_faq
+Ce serait pratique d'avoir un support en plusieurs langues. ?,suggestion
+"Alors, je pense pas",deny
+Vous pouvez me dire où ça en est pour ma réclamation ?,ask_complaint_status
+Ce serait top d'avoir un mode sombre. ?,suggestion
+"Du coup, non merci",deny
+Ce serait pratique d'avoir une authentification par empreinte digitale. ?,suggestion
+"Bref, c'est vraiment naze",inappropriate_language
+"cc, vous êtes là ?",greet
+"Alors, qui t'a programmé ?",bot_challenge
+"Hello, petite question rapide",greet
+"Dites-moi, ok",affirm
+"Dites-moi, pourquoi tu es si nul",inappropriate_language
+"Écoutez, tu es automatisé ?",bot_challenge
+dites moi tout sur le retrait d'argent svp,ask_faq
+Ça fait deux jours que mon profil est en cours depuis trop longtemps,diagnostic
+"ok merci bye, merci pour votre aide ?",goodbye
+Mon idée : ajouter un support en plusieurs langues.,suggestion
+"bonjour, j'ai une question ?",greet
+"Franchement, est-ce que tu as une mémoire ?",bot_challenge
+"Bon, c'est quoi ton rôle ?",bot_challenge
+jaimrai avoir un suivi personnalisé de mon dossier svp,create_reclamation
+Ce serait pratique d'avoir une authentification par empreinte digitale. ?,suggestion
+"jai un probleme, mon compte est en cours depuis trop longtemps",diagnostic
+Avez-vous prévu un système de parrainage amélioré ?,suggestion
+Avez-vous prévu un système de parrainage amélioré ?,suggestion
+"Bon, c'est ça",affirm
+"Bon, c'est quoi le machine learning ?",out_of_scope
+"Du coup, non ça ne m'aide pas",rate_response_not_useful
+"Écoutez, ce n'est pas correct",deny
+"Alors, qui a gagné la CAN ?",out_of_scope
+je veu faire remonter mon cas stp,create_reclamation
+C'est inadmissible que l'interface est illisible. ?,plainte
+Où en est mon dossier ?,ask_complaint_status
+Comment ça marche les notifications ?,ask_faq
+Je veux des questions sur le contrôle parental,select_faq_category
+"Écoutez, ferme-la",inappropriate_language
+"bye, bonne continuation ?",goodbye
+Il faut absolument créer un dossier de réclamation.,create_reclamation
+"Alors, oui c'est bien ça",affirm
+C'est vraiment décevant : ça casse à chaque mise à jour. ?,plainte
+C'est vraiment décevant : je perds mon temps à chaque fois. ?,plainte
+"Sérieusement, c'est n'importe quoi ce bot",inappropriate_language
+"Alors, est-ce que tu es un humain ?",bot_challenge
+Ce serait bien d'avoir un rappel avant l'expiration du KYC.,suggestion
+dites moi tout sur le contrôle parental svp,ask_faq
+Comment fonctionne les frais de transaction ?,ask_faq
+Ce serait bien d'avoir la possibilité d'exporter ses relevés. ?,suggestion
+"Aidez-moi svp, ma connexion n'a pas été crédité",diagnostic
+"Du coup, ça n'aide pas trop",rate_response_not_useful
+Bonsoir l'assistant ?,greet
+vous pouvez m'expliquer l'application mobile stp,ask_faq
+"Franchement, propose-moi des sujets de questions",browse_faq
+Je veux comprendre les vidéos privées payantes,ask_faq
+"Je suis mécontent, les explications sont toujours confuses. ?",plainte
+"Voilà, vous êtes vraiment nuls",inappropriate_language
+"Du coup, c'est de la merde ce service",inappropriate_language
+Je veux créer un dossier de réclamation. ?,create_reclamation
+kesk les vidéos privées payantes au juste,ask_faq
+"Voilà, va te faire foutre",inappropriate_language
+"Bref, oui je confirme",affirm
+"je vous laisse, j'ai fini ?",goodbye
+"Bref, explique la théorie de la relativité",out_of_scope
+C'est vraiment décevant : l'application se déconnecte sans arrêt. ?,plainte
+"jai un probleme, mon paiement ne passe pas",diagnostic
+"Franchement, pas terrible cette réponse",rate_response_not_useful
+J'ai un souci : ma vérification d'identité ne fonctionne plus,diagnostic
+J'aimerais faire remonter mon cas.,create_reclamation
+"Écoutez, c'est bon",affirm
+"Aidez-moi svp, mon KYC reste en attente depuis hier",diagnostic
+"Franchement, comment peux-tu m'aider ?",ask_capabilities
+Quelles sont les infos sur le système de récompense ?,ask_faq
+J'aimerais que vous ajoutiez une barre de recherche dans la FAQ. ?,suggestion
+"Écoutez, ça ne m'a pas aidé",rate_response_not_useful
+Je souhaite signaler ce problème.,create_reclamation
+"Écoutez, quel bordel ce truc",inappropriate_language
+Quel est le statut de mon dossier ?,ask_complaint_status
+"Bon, pas ça",deny
+Une suggestion : il faudrait la possibilité d'exporter ses relevés. ?,suggestion
+"Sérieusement, oui tout à fait",affirm
+"Dites-moi, effectivement",affirm
+jaimrai escalader mon dossier svp ?,create_reclamation
+"Bon, quelle est la météo aujourd'hui ?",out_of_scope
+"Bon, ça répond à ma question",rate_response_useful
+"Je suis mécontent, l'application plante tout le temps. ?",plainte
+"Bon, super, c'est exactement ça",rate_response_useful
+"Franchement, est-ce que tu es un humain ?",bot_challenge
+"Dites-moi, oui c'est correct",affirm
+J'aimerais être mis en relation avec un agent.,create_reclamation
+"Dites-moi, ouais",affirm
+Quelles sont les infos sur la vérification KYC ?,ask_faq
+"Bonne journée, à la prochaine ?",goodbye
+"À bientôt, à la prochaine ?",goodbye
+"Écoutez, t un bot ?",bot_challenge
+"Du coup, non je refuse",deny
+"Ciao, merci pour votre aide ?",goodbye
+"Écoutez, ça répond à ma question",rate_response_useful
+"Bref, peux-tu traduire en anglais ?",out_of_scope
+"Dites-moi, génial, exactement ça",rate_response_useful
+kesk les frais de transaction au juste,ask_faq
+"Voilà, pas ça",deny
+"Du coup, t'es qu'un débile",inappropriate_language
+J'aimerais escalader mon dossier.,create_reclamation
+non ce n'est pas ça du tout,deny
+C'est vraiment décevant : les frais sont beaucoup trop élevés. ?,plainte
+"Bref, c pas ça",deny
+"bsr, j'ai besoin d'aide",greet
+hello support,greet
+"Depuis ce matin, mon transfert n'a pas été crédité",diagnostic
+bjr support,greet
+"Bref, non ce n'est pas le cas",deny
+"Franchement, dégage",inappropriate_language
+slt l'assistant,greet
+"Dites-moi, c'est ça",affirm
+"Ça ne va pas du tout, ça casse à chaque mise à jour. ?",plainte
+"Bye, merci pour votre aide",goodbye
+"Alors, non ce n'est pas le cas",deny
+Quelles sont les infos sur le contrôle parental ?,ask_faq
+"Bref, qui parle ?",bot_challenge
+Une suggestion : il faudrait une barre de recherche dans la FAQ. ?,suggestion
+"Bref, ok",affirm
+Il faut absolument déposer une réclamation.,create_reclamation
+J'aimerais connaître le statut de mon ticket,ask_complaint_status
+"Sérieusement, bof pas vraiment ce que je voulais",rate_response_not_useful
+"Bon, va te faire foutre",inappropriate_language
+bjr NGONI ?,greet
+C'est quoi le contrôle parental exactement ?,ask_faq
+"Du coup, est-ce que je parle à une machine ?",bot_challenge
+"a+, à la prochaine ?",goodbye
+"hello, vous êtes là ?",greet
+"Au revoir, merci pour votre aide ?",goodbye
+"Dites-moi, je pense pas",deny
+J'aimerais formuler une plainte officielle. ?,create_reclamation
+Je suis frustré parce que je perds mon temps à chaque fois. ?,plainte
+"merci bye, bonne continuation ?",goodbye
+"À bientôt, bonne continuation ?",goodbye
+"Bon, putain de bot inutile",inappropriate_language
+Bonsoir l'assistant,greet
+Je veux comprendre le système de récompense,ask_faq
+"bsr, j'ai une question",greet
+Ce serait pratique d'avoir un historique des transactions plus détaillé. ?,suggestion
+"Voilà, non ce n'est pas ça du tout",deny
+"Franchement, oui tout à fait",affirm
+"Bref, comment gagner de l'argent ?",out_of_scope
+Il faut absolument parler à un conseiller humain.,create_reclamation
+"bonjour, j'ai besoin d'aide",greet
+"Ça ne va pas du tout, les délais ne sont jamais respectés. ?",plainte
+"Voilà, pas du tout",deny
+"Bref, franchement pas utile",rate_response_not_useful
+Ce serait bien d'avoir un chat en direct avec un conseiller. ?,suggestion
+"bjr, j'ai besoin d'aide",greet
+"Sérieusement, non merci",deny
+"Écoutez, comment gagner de l'argent ?",out_of_scope
+"Voilà, effectivement",affirm
+"Bonjour, mon profil est en cours depuis trop longtemps",diagnostic
+Comment fonctionne le programme de fidélité ?,ask_faq
+"Bonjour, petite question rapide",greet
+[comment-recevoir-des-revenus-sur-ngoni-x9y8z7],select_faq_question
+"Alors, ferme-la",inappropriate_language
+C'est catastrophique : ça casse à chaque mise à jour. ?,plainte
+"Franchement, put1 de bot",inappropriate_language
+C'est quoi les moyens de paiement exactement ?,ask_faq
+Il faut absolument obtenir une prise en charge officielle.,create_reclamation
+Je veux obtenir une prise en charge officielle.,create_reclamation
+"merci bye, merci pour votre aide ?",goodbye
+Merci de escalader mon dossier rapidement.,create_reclamation
+"Sérieusement, je veux apprendre à programmer en Python",out_of_scope
+"Hello, vous êtes là ?",greet
+"Du coup, t humain ?",bot_challenge
+"Franchement, comment perdre du poids rapidement ?",out_of_scope
+Est-ce que vous pouvez détailler la sécurité du compte ?,ask_faq
+J'aimerais avoir un suivi personnalisé de mon dossier.,create_reclamation
+"salut, j'ai une question",greet
+Est-ce que vous pouvez détailler le portefeuille ?,ask_faq
+"Bref, vous ne servez à rien du tout",inappropriate_language
+"Voilà, ce bot est nul de merde",inappropriate_language
+C'est catastrophique : je perds mon temps à chaque fois. ?,plainte
+J'aimerais contacter le support.,create_reclamation
+"Franchement, je m'ennuie",out_of_scope
+"Bref, pourquoi tu es si nul",inappropriate_language
+eski la recharge du compte c'est gratuit ou payant,ask_faq
+Yo NGONI,greet
+"Voilà, pas encore",deny
+"Bonjour, mon dépôt est en cours depuis trop longtemps",diagnostic
+eski les notifications c'est gratuit ou payant,ask_faq
+"Dites-moi, qui es-tu ?",bot_challenge
+c koi le contrôle parental exactement,ask_faq
+Pourquoi ne pas proposer un récapitulatif mensuel des dépenses ?,suggestion
+"Dites-moi, t un bot ?",bot_challenge
+"Du coup, pas du tout",deny
+Pouvez-vous m'aider à obtenir une prise en charge officielle ?,create_reclamation
+"Dites-moi, non",deny
+"Écoutez, tu me soules",inappropriate_language
+"Sérieusement, peux-tu chanter une chanson ?",out_of_scope
+"Bon, je pense pas",deny
+Pourquoi ne pas proposer un récapitulatif mensuel des dépenses ?,suggestion
+"Depuis ce matin, mon retrait a disparu",diagnostic
+"Du coup, ça ne résout rien",rate_response_not_useful
+"Du coup, j'en ai ras le bol de ce service",inappropriate_language
+"Aidez-moi svp, mon profil semble erroné",diagnostic
+"mes pièces est bloqué depuis ce matin, vous pouvez verifier ?",diagnostic
+"Bon, dégage",inappropriate_language
+"Dites-moi, non je refuse",deny
+"Voilà, comment tu fonctionnes ?",bot_challenge
+Vous pouvez me dire où ça en est pour mon ticket ?,ask_complaint_status
+"Écoutez, je veux apprendre à programmer en Python",out_of_scope
+"Dites-moi, exact",affirm
+"ok merci bye, merci pour votre aide",goodbye
+jaimrai faire remonter mon cas svp ?,create_reclamation
+Je souhaite contacter le support. ?,create_reclamation
+Quels sont les détails concernant les moyens de paiement ?,ask_faq
+"Bon, c'est n'importe quoi ce bot",inappropriate_language
+"Voilà, es-tu un bot ?",bot_challenge
+"Dites-moi, yep",affirm
+Pouvez-vous m'aider à être mis en relation avec un agent ?,create_reclamation
+"Du coup, yep",affirm
+je veu parler à un conseiller humain stp ?,create_reclamation
+Pourquoi ne pas proposer un récapitulatif mensuel des dépenses ?,suggestion
+"Franchement, quelles sont tes capacités ?",ask_capabilities
+"Bref, comment réparer une voiture ?",out_of_scope
+"Yo, vous êtes là ?",greet
+Mon idée : ajouter un rappel avant l'expiration du KYC. ?,suggestion
+merci bye,goodbye
+Pourquoi ma connexion reste en attente depuis hier ?,diagnostic
+"Bref, quels sont tes domaines d'intervention ?",ask_capabilities
+Il faut absolument parler à un conseiller humain. ?,create_reclamation
+Hello l'assistant,greet
+"Depuis ce matin, mon transfert a échoué",diagnostic
+"Bon, pas du tout",deny
+"Écoutez, que peux-tu faire ?",ask_capabilities
+C'est vraiment décevant : l'application se déconnecte sans arrêt.,plainte
+"Écoutez, ok",affirm
+Je veux obtenir une prise en charge officielle. ?,create_reclamation
+"ok merci bye, à la prochaine ?",goodbye
+Merci de ouvrir un ticket rapidement.,create_reclamation
+Pourquoi mon compte reste en attente depuis hier ?,diagnostic
+jaimrai obtenir une prise en charge officielle svp ?,create_reclamation
+J'ai un souci : mon retrait affiche une erreur,diagnostic
+"Franchement, vous êtes un robot ou un humain ?",bot_challenge
+"Aidez-moi svp, mon compte semble erroné",diagnostic
+Mon idée : ajouter un support en plusieurs langues. ?,suggestion
+"Alors, ouais",affirm
+"Franchement, affirmatif",affirm
+"Dites-moi, j'en ai ras le bol de ce service",inappropriate_language
+"Bref, espèce de crétin",inappropriate_language
+Avez-vous prévu la possibilité d'exporter ses relevés ?,suggestion
+"Du coup, faux",deny
+"Honnêtement, ça casse à chaque mise à jour, ça m'énerve.",plainte
+"Aidez-moi svp, mon retrait ne s'affiche plus",diagnostic
+"Voilà, vous ne servez à rien du tout",inappropriate_language
+bjr support ?,greet
+Une suggestion : il faudrait un chat en direct avec un conseiller. ?,suggestion
+"Alors, pas exactement",deny
+"Bon, tu es spécialisé en quoi ?",ask_capabilities
+"a+, j'ai fini ?",goodbye
+"Bref, j'en ai ras le bol de ce service",inappropriate_language
+"Sérieusement, parle-moi de football",out_of_scope
+Une suggestion : il faudrait une barre de recherche dans la FAQ. ?,suggestion
+À quoi sert l'application mobile ?,ask_faq
+"Franchement, c'est de la merde ce service",inappropriate_language
+Je veux comprendre les frais de transaction,ask_faq
+Merci de parler à un conseiller humain rapidement.,create_reclamation
+"Sérieusement, pas du tout",deny
+[comment-faire-un-retrait-q1w2e3],select_faq_question
+Une suggestion : il faudrait la possibilité d'exporter ses relevés. ?,suggestion
+"Dites-moi, comment apprendre l'anglais vite ?",out_of_scope
+j'aimerai en savoir plus sur le retrait d'argent,ask_faq
+"Sérieusement, je pense pas",deny
+jaimrai contacter le support svp,create_reclamation
+je vous laisse ?,goodbye
+Comment fonctionne les moyens de paiement ?,ask_faq
+"Voilà, bien sûr",affirm
+"Sérieusement, faux",deny
+Ce serait bien d'avoir des notifications personnalisables. ?,suggestion
+jaimrai obtenir une prise en charge officielle svp,create_reclamation
+Je veux comprendre NGONI Plus,ask_faq
+J'aimerais connaître le statut de mon dossier,ask_complaint_status
+"Sérieusement, quelle heure est-il ?",out_of_scope
+"Écoutez, ça ne résout rien",rate_response_not_useful
+"Ça ne va pas du tout, l'interface est illisible. ?",plainte
+Quelles sont les infos sur le portefeuille ?,ask_faq
+Je souhaite ouvrir un ticket. ?,create_reclamation
+"Sérieusement, qui t'a développé ?",bot_challenge
+Hello !,greet
+c koi le retrait d'argent exactement,ask_faq
+J'aimerais déposer une réclamation.,create_reclamation
+"Du coup, qui a gagné la CAN ?",out_of_scope
+Je veux voir les questions sur le KYC,select_faq_category
+Je veux comprendre le programme de fidélité,ask_faq
+Ce serait bien d'avoir un rappel avant l'expiration du KYC. ?,suggestion
+Comment ça marche les cadeaux virtuels ?,ask_faq
+"Bon, vous ne servez à rien du tout",inappropriate_language
+"Bon, qui a créé ce chatbot ?",bot_challenge
+[comment-recharger-mon-compte-x9y8z7],select_faq_question
+J'aimerais parler à un conseiller humain.,create_reclamation
+"Bon, sur quels services peux-tu effectuer un diagnostic ?",ask_capabilities
+"Bref, je veux apprendre à programmer en Python",out_of_scope
+Pourquoi mon paiement a échoué ?,diagnostic
+Hey ! ?,greet
+"Du coup, tu es une IA ?",bot_challenge
+"ok merci bye, à la prochaine ?",goodbye
+"Franchement, tout à fait",affirm
+"Du coup, vous êtes un robot ou un humain ?",bot_challenge
+"bye, merci pour votre aide",goodbye
+"merci bye, merci pour votre aide ?",goodbye
+Ce serait bien d'avoir plus de moyens de paiement pour recharger. ?,suggestion
+"Du coup, qui est derrière toi ?",bot_challenge
+Merci de formuler une plainte officielle rapidement. ?,create_reclamation
+"Bon, pourquoi tu es si nul",inappropriate_language
+jaimrai signaler ce problème svp,create_reclamation
+"Alors, pas vraiment",deny
+"Bon, qui parle ?",bot_challenge
+"Franchement, pas vraiment",deny
+Comment fonctionne NGONI Plus ?,ask_faq
+vous pouvez m'expliquer le contrôle parental stp,ask_faq
+c koi l'application mobile exactement,ask_faq
+"Dites-moi, bot à la con",inappropriate_language
+"merci bye, à la prochaine ?",goodbye
+À quoi sert la vérification KYC ?,ask_faq
+"Franchement, parfait",affirm
+J'aimerais que vous ajoutiez une barre de recherche dans la FAQ. ?,suggestion
+"Voilà, non merci",deny
+"Bonne soirée, j'ai fini ?",goodbye
+C'est vraiment décevant : personne ne prend mes messages au sérieux. ?,plainte
+"Écoutez, es-tu un bot ?",bot_challenge
+Avez-vous prévu une barre de recherche dans la FAQ ?,suggestion
+"ciao, merci pour votre aide ?",goodbye
+Une suggestion : il faudrait un historique des transactions plus détaillé. ?,suggestion
+"Dites-moi, pas encore",deny
+"Écoutez, exact",affirm
+"Alors, nan",deny
+Hey l'assistant,greet
+C'est inadmissible que l'application plante tout le temps. ?,plainte
+"Alors, vous êtes vraiment nuls",inappropriate_language
+Ce serait pratique d'avoir une barre de recherche dans la FAQ. ?,suggestion
+C'est vraiment décevant : l'application est trop lente.,plainte
+J'ai un souci : ma vérification d'identité a échoué,diagnostic
+Quelles sont les infos sur les pièces ?,ask_faq
+"Franchement, c'est quoi l'intelligence artificielle ?",out_of_scope
+Quelles sont les infos sur la sécurité du compte ?,ask_faq
+"Bon, ok",affirm
+"Franchement, qui est derrière toi ?",bot_challenge
+Hello support,greet
+Ce serait bien d'avoir un chat en direct avec un conseiller.,suggestion
+Ce serait pratique d'avoir un support en plusieurs langues.,suggestion
+"Écoutez, top ça répond bien",rate_response_useful
+Je souhaite avoir un suivi personnalisé de mon dossier.,create_reclamation
+"Alors, oui bien sûr",affirm
+"Sérieusement, tu es un assistant virtuel ?",bot_challenge
+"Alors, non je refuse",deny
+Montre-moi les questions à propos de les lives privés payants,select_faq_category
+"Dites-moi, sa ser a rien ton bot de merde",inappropriate_language
+C'est catastrophique : l'application est trop lente.,plainte
+"bsr, ça va ?",greet
+"Franchement, ce n'était pas utile",rate_response_not_useful
+Ça fait deux jours que mon KYC reste en attente depuis hier,diagnostic
+"Au revoir, à la prochaine",goodbye
+"Écoutez, bande d'incapables",inappropriate_language
+"Voilà, comment gagner de l'argent ?",out_of_scope
+"Voilà, service de merde",inappropriate_language
+"Franchement, es-tu un bot ?",bot_challenge
+"Bref, oui",affirm
+"bjr, ça va ?",greet
+"Depuis ce matin, ma vérification d'identité ne fonctionne plus",diagnostic
+"Bref, ta gueule",inappropriate_language
+"Aidez-moi svp, mon transfert reste en attente depuis hier",diagnostic
+Ce serait pratique d'avoir des filtres pour trouver les lives plus facilement. ?,suggestion
+"Bref, qui est Lionel Messi ?",out_of_scope
+J'ai un souci : mon KYC affiche une erreur,diagnostic
+"Bref, yep",affirm
+Quels sont les détails concernant NGONI Plus ?,ask_faq
+"Bon, ta gueule",inappropriate_language
+"Franchement, ok parfait",affirm
+"Du coup, c pas ça",deny
+mon paiement ne passe pas,diagnostic
+"Franchement, qui parle ?",bot_challenge
+Je souhaite faire remonter mon cas. ?,create_reclamation
+Bonsoir !,greet
+salut support,greet
+"Du coup, quel bordel ce truc",inappropriate_language
+"Bref, ouais",affirm
+"Yo, ça va ?",greet
+"Écoutez, qui t'a programmé ?",bot_challenge
+Salut support,greet
+J'aimerais que vous ajoutiez des notifications personnalisables. ?,suggestion
+"Alors, quels services prends-tu en charge ?",ask_capabilities
+"Voilà, peux-tu chanter une chanson ?",out_of_scope
+"Alors, qui est Elon Musk ?",out_of_scope
+Une suggestion : il faudrait la possibilité d'exporter ses relevés.,suggestion
+Ce serait pratique d'avoir une barre de recherche dans la FAQ.,suggestion
+"Alors, qui a inventé Internet ?",out_of_scope
+Je veux comprendre le portefeuille,ask_faq
+"Bref, bot à la con",inappropriate_language
+Comment fonctionne la suppression de compte ?,ask_faq
+"Du coup, espèce de crétin",inappropriate_language
+Où en est ma dernière réclamation ?,ask_complaint_status
+"Yo, j'ai besoin d'aide",greet
+"Bon, peux-tu coder un site web ?",out_of_scope
+mon KYC est en cours depuis trop longtemps,diagnostic
+Montre-moi les questions à propos de les vidéos privées payantes,select_faq_category
+J'aimerais des informations sur le contrôle parental,ask_faq
+"Bonne soirée, bonne continuation",goodbye
+J'ai un souci : mes pièces est bloqué depuis ce matin,diagnostic
+je veu être mis en relation avec un agent stp ?,create_reclamation
+je veu avoir un suivi personnalisé de mon dossier stp,create_reclamation
+Ce serait bien d'avoir la possibilité d'exporter ses relevés. ?,suggestion
+"Écoutez, tu es un assistant virtuel ?",bot_challenge
+"Franchement, pas du tout",deny
+C'est inadmissible que je n'ai aucune nouvelle depuis des semaines. ?,plainte
+"Alors, quelles questions puis-je poser ?",browse_faq
+"Alors, tu es vraiment inefficace",inappropriate_language
+"Du coup, t'es specialise dans quoi exactement ?",ask_capabilities
+C'est quoi la vérification KYC exactement ?,ask_faq
+"Bon, raconte-moi une blague",out_of_scope
+Comment ça marche la recharge du compte ?,ask_faq
+"Voilà, tu es vraiment inefficace",inappropriate_language
+"À bientôt, j'ai fini ?",goodbye
+"Alors, top ça répond bien",rate_response_useful
+Une suggestion : il faudrait plus de moyens de paiement pour recharger. ?,suggestion
+bonjour !,greet
+Merci de déposer une réclamation rapidement. ?,create_reclamation
+"Bon, vous êtes vraiment nuls",inappropriate_language
+"Sérieusement, fuck",inappropriate_language
+"Bonjour, mon paiement affiche une erreur",diagnostic
+"Voilà, quels sont tes domaines d'intervention ?",ask_capabilities
+"cc, petite question rapide",greet
+"Bonjour, mon dépôt semble erroné",diagnostic
+"ma vérification d'identité semble erroné, vous pouvez verifier ?",diagnostic
+"Bonne journée, à la prochaine",goodbye
+Pouvez-vous m'expliquer les lives privés payants ?,ask_faq
+Je souhaite ouvrir un ticket.,create_reclamation
+"Bon, oui",affirm
+J'ai un souci : mon compte affiche une erreur,diagnostic
+Coucou !,greet
+"Dites-moi, qui est Elon Musk ?",out_of_scope
+"Voilà, je pense pas",deny
+"Sérieusement, tu es automatisé ?",bot_challenge
+"Voilà, c'est quoi tes fonctionnalités ?",ask_capabilities
+"Écoutez, qui est le président des États-Unis ?",out_of_scope
+Une suggestion : il faudrait un récapitulatif mensuel des dépenses. ?,suggestion
+"Alors, ok parfait",affirm
+J'aimerais que vous ajoutiez un widget pour suivre son solde.,suggestion
+"Franchement, top ça répond bien",rate_response_useful
+Il faut absolument obtenir une prise en charge officielle. ?,create_reclamation
+J'aimerais que vous ajoutiez un widget pour suivre son solde. ?,suggestion
+jaimrai créer un dossier de réclamation svp,create_reclamation
+"Écoutez, quels types de problèmes sais-tu diagnostiquer ?",ask_capabilities
+"Voilà, ouais",affirm
+"ciao, merci pour votre aide",goodbye
+"Bref, exact",affirm
+"Franchement, ça résout mon souci, merci beaucoup",rate_response_useful
+"Dites-moi, oui vas-y",affirm
+"Alors, est-ce que tu apprends de nos conversations ?",bot_challenge
+Mon idée : ajouter un rappel avant l'expiration du KYC.,suggestion
+J'ai un souci : mon paiement n'a pas été crédité,diagnostic
+"Alors, qui a créé ce chatbot ?",bot_challenge
+Pouvez-vous m'aider à faire remonter mon cas ?,create_reclamation
+"Du coup, donne-moi des films à regarder",out_of_scope
+"Bonsoir, petite question rapide",greet
+C'est vraiment décevant : personne ne prend mes messages au sérieux. ?,plainte
+"Bon, non ce n'est pas ça du tout",deny
+Je veux comprendre les pièces,ask_faq
+"Franchement, parfait, merci pour la réponse",rate_response_useful
+Coucou NGONI ?,greet
+"Franchement, peux-tu traduire en anglais ?",out_of_scope
+"Sérieusement, non je refuse",deny
+"Bye, bonne continuation ?",goodbye
+"Bref, vous êtes un robot ou un humain ?",bot_challenge
+"Franchement, connard",inappropriate_language
+Quelles sont les infos sur l'assistance client ?,ask_faq
+"Sérieusement, parfait",affirm
+"Franchement, faux",deny
+"ma connexion ne passe pas, vous pouvez verifier ?",diagnostic
+"Voilà, c bon",affirm
+"Sérieusement, non",deny
+"Franchement, non",deny
+"Sérieusement, jamais",deny
+Ça fait deux jours que mon paiement est bloqué depuis ce matin,diagnostic
+"Franchement, je veux apprendre à programmer en Python",out_of_scope
+"Sérieusement, espèce de crétin",inappropriate_language
+"mon dépôt semble erroné, vous pouvez verifier ?",diagnostic
+ma dernière réclamation a-t-elle avancé ?,ask_complaint_status
+"Voilà, d'accord",affirm
+Coucou l'assistant,greet
+"Du coup, jamais",deny
+"Voilà, oui",affirm
+C'est vraiment décevant : on me donne toujours des réponses différentes.,plainte
+Pouvez-vous m'aider à escalader mon dossier ?,create_reclamation
+Quelles sont les infos sur les vidéos privées payantes ?,ask_faq
+Ce serait bien d'avoir un chat en direct avec un conseiller. ?,suggestion
+"mes pièces ne fonctionne plus, vous pouvez verifier ?",diagnostic
+"Ciao, à la prochaine",goodbye
+c koi les cadeaux virtuels exactement,ask_faq
+Pouvez-vous m'aider à ouvrir un ticket ?,create_reclamation
+Ça fait deux jours que mon profil ne fonctionne plus,diagnostic
+"Hello, ça va ?",greet
+Ce serait pratique d'avoir un rappel avant l'expiration du KYC.,suggestion
+"Franchement, hors de question",deny
+"Franchement, bien sûr",affirm
+C'est vraiment décevant : je n'ai aucune nouvelle depuis des semaines.,plainte
+Ce serait pratique d'avoir des filtres pour trouver les lives plus facilement.,suggestion
+eski les moyens de paiement c'est gratuit ou payant,ask_faq
+"cc, j'ai une question",greet
+"jai un probleme, mon compte ne passe pas",diagnostic
+"Bref, espèce d'idiot",inappropriate_language
+À quoi sert les vidéos privées payantes ?,ask_faq
+Ce serait pratique d'avoir une authentification par empreinte digitale. ?,suggestion
+"Bon, pas utile",rate_response_not_useful
+"Coucou, petite question rapide",greet
+Ce serait bien d'avoir un rappel avant l'expiration du KYC. ?,suggestion
+"Bon, top ça répond bien",rate_response_useful
+"Alors, oui vas-y",affirm
+J'aimerais des informations sur les lives privés payants,ask_faq
+C'est inadmissible que les délais ne sont jamais respectés. ?,plainte
+"Du coup, c'est n'importe quoi ce bot",inappropriate_language
+"Dites-moi, qui est le président des États-Unis ?",out_of_scope
+Pourquoi mon transfert ne s'affiche plus ?,diagnostic
+"Voilà, quelle est la météo aujourd'hui ?",out_of_scope
+c koi le portefeuille exactement,ask_faq
+"Ça ne va pas du tout, les frais sont beaucoup trop élevés. ?",plainte
+"Voilà, bot à la con",inappropriate_language
+ma recharge ne passe pas,diagnostic
+salut NGONI,greet
+Il faut absolument ouvrir un ticket.,create_reclamation
+"mon profil ne passe pas, vous pouvez verifier ?",diagnostic
+"Aidez-moi svp, mon paiement reste en attente depuis hier",diagnostic
+"Voilà, oui merci",affirm
+"À bientôt, merci pour votre aide ?",goodbye
+"Voilà, non",deny
+"Voilà, tout à fait",affirm
+Je veux faire remonter mon cas. ?,create_reclamation
+Pouvez-vous m'aider à créer un dossier de réclamation ?,create_reclamation
+je veu être mis en relation avec un agent stp,create_reclamation
+"Dites-moi, ça ne répond pas à ma question",rate_response_not_useful
+"Bref, parfait, merci pour la réponse",rate_response_useful
+"Bon, oui bien sûr",affirm
+"Voilà, montre voir des questions types",browse_faq
+Pourquoi ne pas proposer un widget pour suivre son solde ?,suggestion
+"Hey, ça va ?",greet
+C'est inadmissible que rien ne fonctionne comme prévu.,plainte
+"Voilà, quelles sont tes compétences ?",ask_capabilities
+je veu contacter le support stp,create_reclamation
+J'aimerais obtenir une prise en charge officielle.,create_reclamation
+"Voilà, pas vraiment ce que je cherchais",rate_response_not_useful
+"Depuis ce matin, mon transfert est en cours depuis trop longtemps",diagnostic
+"Sérieusement, tu es une intelligence artificielle ?",bot_challenge
+eski les pièces c'est gratuit ou payant,ask_faq
+Ce serait bien d'avoir un support en plusieurs langues. ?,suggestion
+Montre-moi les questions à propos de l'assistance,select_faq_category
+"Voilà, exact",affirm
+"Coucou, ça va ?",greet
+"Bref, oui vas-y",affirm
+"Bref, tu es vraiment inefficace",inappropriate_language
+mon dossier a-t-elle avancé ?,ask_complaint_status
+Une suggestion : il faudrait un chat en direct avec un conseiller.,suggestion
+Bonjour NGONI,greet
+Une suggestion : il faudrait un historique des transactions plus détaillé.,suggestion
+"Du coup, tu utilises quel modèle d'IA ?",bot_challenge
+"Bref, que peux-tu faire ?",ask_capabilities
+"Écoutez, oui bien sûr",affirm
+"Voilà, est-ce que tu apprends de nos conversations ?",bot_challenge
+"Bon, non merci",deny
+"Écoutez, votre application est pourrie",inappropriate_language
+"Bref, yes",affirm
+"Alors, donne-moi des idées de questions",browse_faq
+Une suggestion : il faudrait un récapitulatif mensuel des dépenses.,suggestion
+Je suis frustré parce que rien ne fonctionne comme prévu. ?,plainte
+"Voilà, excellent merci, c'était très clair",rate_response_useful
+"mes pièces a échoué, vous pouvez verifier ?",diagnostic
+C'est inadmissible que on me donne toujours des réponses différentes. ?,plainte
+"Bon, c'est quoi Bitcoin ?",out_of_scope
+"Au revoir, j'ai fini ?",goodbye
+kesk le contrôle parental au juste,ask_faq
+j'aimerai en savoir plus sur la vérification KYC,ask_faq
+"Du coup, nan",deny
+"Dites-moi, ce bot est nul de merde",inappropriate_language
+Avez-vous prévu la possibilité d'exporter ses relevés ?,suggestion
+"Merci au revoir, j'ai fini",goodbye
+"jai un probleme, mon dépôt ne s'affiche plus",diagnostic
+Ça fait deux jours que mon KYC est bloqué depuis ce matin,diagnostic
+"Salut, j'ai besoin d'aide",greet
+"Franchement, ok",affirm
+"Bon, c'est bon",affirm
+"mon solde refuse de se valider, vous pouvez verifier ?",diagnostic
+"Sérieusement, est-ce un chatbot ?",bot_challenge
+"Bon, quelle bande de nuls",inappropriate_language
+"a+, à la prochaine",goodbye
+Mon idée : ajouter un support en plusieurs langues. ?,suggestion
+"Voilà, est-ce que tu as une mémoire ?",bot_challenge
+Je suis frustré parce que je perds mon temps à chaque fois.,plainte
+"Franchement, jamais",deny
+"Bonjour, mon dépôt ne passe pas",diagnostic
+"Bon, casse-toi",inappropriate_language
+"Sérieusement, comment perdre du poids rapidement ?",out_of_scope
+"je vous laisse, bonne continuation",goodbye
+c koi le système de récompense exactement,ask_faq
+Quelles sont les infos sur les frais de transaction ?,ask_faq
+"Voilà, je ne pense pas",deny
+"Bref, exactement",affirm
+Comment ça marche le programme de fidélité ?,ask_faq
+Pouvez-vous m'aider à être mis en relation avec un agent ?,create_reclamation
+"Bon, j'en ai ras le bol de ce service",inappropriate_language
+"Ça ne va pas du tout, rien ne fonctionne comme prévu. ?",plainte
+"Alors, c pas ça",deny
+"Dites-moi, pas exactement",deny
+"Sérieusement, c pas ça",deny
+"Franchement, est-ce un chatbot ?",bot_challenge
+"Bref, nope",deny
+Il faut absolument être mis en relation avec un agent.,create_reclamation
+je veu faire remonter mon cas stp ?,create_reclamation
+"Dites-moi, propose-moi des sujets de questions",browse_faq
+"Au revoir, bonne continuation ?",goodbye
+"Bon, non ce n'est pas le cas",deny
+"mon compte est bloqué depuis ce matin, vous pouvez verifier ?",diagnostic
+À quoi sert les pièces ?,ask_faq
+"Bref, c'est bon",affirm
+Vous devriez ajouter un chat en direct avec un conseiller. ?,suggestion
+"Franchement, je veux voir des exemples de questions",browse_faq
+"jai un probleme, mon dépôt refuse de se valider",diagnostic
+"Bon, espèce de crétin",inappropriate_language
+Une suggestion : il faudrait plus de moyens de paiement pour recharger.,suggestion
+Pourquoi mon solde refuse de se valider ?,diagnostic
+"Alors, comment faire un gâteau ?",out_of_scope
+Une suggestion : il faudrait un historique des transactions plus détaillé. ?,suggestion
+"Dites-moi, d'accord",affirm
+"Franchement, tu es une IA ?",bot_challenge
+"Bonjour, mon solde affiche une erreur",diagnostic
+J'ai un souci : mon compte est bloqué depuis ce matin,diagnostic
+C'est vraiment décevant : le support ne comprend jamais le problème. ?,plainte
+Ce serait top d'avoir un mode sombre. ?,suggestion
+"Du coup, fuck",inappropriate_language
+"jai un probleme, ma vérification d'identité refuse de se valider",diagnostic
+"Bon, ça m'a aidé",rate_response_useful
+"Écoutez, oui",affirm
+"Écoutez, je pense pas",deny
+c koi la recharge du compte exactement,ask_faq
+"Bonne soirée, bonne continuation ?",goodbye
+"Écoutez, c'est quoi le machine learning ?",out_of_scope
+"Je suis très déçu, rien ne fonctionne comme prévu. ?",plainte
+"Alors, bande d'incapables",inappropriate_language
+C'est catastrophique : rien ne fonctionne comme prévu.,plainte
+"Bon, explique la théorie de la relativité",out_of_scope
+"Bref, je pense pas",deny
+Ce serait bien d'avoir plus de moyens de paiement pour recharger. ?,suggestion
+"ciao, bonne continuation ?",goodbye
+cc !,greet
+"À plus, merci pour votre aide ?",goodbye
+Pourquoi ma vérification d'identité est bloqué depuis ce matin ?,diagnostic
+Une suggestion : il faudrait un historique des transactions plus détaillé. ?,suggestion
+hello l'assistant,greet
+"Bref, super, c'est exactement ça",rate_response_useful
+"bye, j'ai fini ?",goodbye
+Je veux escalader mon dossier.,create_reclamation
+"Yo, ça va ?",greet
+"Dites-moi, service de merde",inappropriate_language
+"Bonsoir, vous êtes là ?",greet
+"Dites-moi, comment peux-tu m'aider ?",ask_capabilities
+"Yo, j'ai une question ?",greet
+"Alors, parle-moi de l'espace",out_of_scope
+"Franchement, combien font douze fois douze ?",out_of_scope
+C'est vraiment décevant : rien ne fonctionne comme prévu. ?,plainte
+Ce serait pratique d'avoir un support en plusieurs langues. ?,suggestion
+"Bon, espèce d'idiot",inappropriate_language
+"Bon, ouais",affirm
+[quest-ce-que-ngoni-plus-q1w2e3],select_faq_question
+"je vous laisse, bonne continuation ?",goodbye
+"Franchement, quelle bande de nuls",inappropriate_language
+"Je suis mécontent, rien ne fonctionne comme prévu.",plainte
+"Voilà, jamais",deny
+"Dites-moi, tu es une IA ?",bot_challenge
+Pourquoi mon solde ne passe pas ?,diagnostic
+"Du coup, qu'est-ce que tu sais faire ?",ask_capabilities
+"Écoutez, pas du tout",deny
+"Écoutez, vous êtes un robot ou un humain ?",bot_challenge
+"Franchement, tu es vraiment un bot ?",bot_challenge
+"Sérieusement, oui c'est bien ça",affirm
+"Alors, exact",affirm
+"Dites-moi, peux-tu traduire en anglais ?",out_of_scope
+Mon idée : ajouter un chat en direct avec un conseiller.,suggestion
+"Voilà, c'est quoi ton rôle ?",bot_challenge
+Je souhaite obtenir une prise en charge officielle. ?,create_reclamation
+Ce serait pratique d'avoir un rappel avant l'expiration du KYC. ?,suggestion
+[comment-contacter-l-assistance-x9y8z7],select_faq_question
+dites moi tout sur la recharge du compte svp,ask_faq
+"Bref, non merci",deny
+"Franchement, quel bordel ce truc",inappropriate_language
+"Dites-moi, sur quels services peux-tu effectuer un diagnostic ?",ask_capabilities
+"Bref, ce bot est nul de merde",inappropriate_language
+Pourquoi ne pas proposer un widget pour suivre son solde ?,suggestion
+"Bonjour, ça va ?",greet
+"Franchement, sa ser a rien ton bot de merde",inappropriate_language
+"Sérieusement, absolument pas",deny
+"Sérieusement, c'est quoi ton rôle ?",bot_challenge
+"Voilà, sa ser a rien ton bot de merde",inappropriate_language
+"Bref, nan",deny
+Je veux des questions sur les pièces,select_faq_category
+"Depuis ce matin, mon paiement ne fonctionne plus",diagnostic
+Ce serait top d'avoir un support en plusieurs langues. ?,suggestion
+merci bye ?,goodbye
+Ça fait deux jours que mon compte est en cours depuis trop longtemps,diagnostic
+"Je suis très déçu, l'interface est illisible.",plainte
+"Bonne journée, bonne continuation ?",goodbye
+"Écoutez, sa ser a rien ton bot de merde",inappropriate_language
+mon dépôt a disparu,diagnostic
+Pouvez-vous m'aider à contacter le support ?,create_reclamation
+"Bon, peux-tu traduire en anglais ?",out_of_scope
+"Écoutez, oui c'était utile",rate_response_useful
+"Écoutez, bien sûr",affirm
+Ça fait deux jours que mes pièces a échoué,diagnostic
+mon retrait est bloqué depuis ce matin,diagnostic
+Salut support ?,greet
+"Bon, qui t'a développé ?",bot_challenge
+"Dites-moi, est-ce que tu apprends de nos conversations ?",bot_challenge
+"Du coup, tu es une intelligence artificielle ?",bot_challenge
+"Je suis très déçu, ça casse à chaque mise à jour.",plainte
+C'est catastrophique : je perds mon temps à chaque fois. ?,plainte
+Une suggestion : il faudrait la possibilité d'exporter ses relevés. ?,suggestion
+Je veux voir les questions sur les cadeaux,select_faq_category
+"Franchement, yes",affirm
+"Alors, affirmatif",affirm
+"Bonjour, mon KYC ne fonctionne plus",diagnostic
+"Bref, casse-toi",inappropriate_language
+"Bon, ce n'est pas correct",deny
+"Salut, vous êtes là ?",greet
+"Écoutez, explique la théorie de la relativité",out_of_scope
+"Sérieusement, est-ce que je parle à une machine ?",bot_challenge
+"Je suis très déçu, rien ne fonctionne comme prévu.",plainte
+mon solde a échoué,diagnostic
+"Alors, es-tu un bot ?",bot_challenge
+Ce serait bien d'avoir plus de moyens de paiement pour recharger.,suggestion
+"Écoutez, exactement",affirm
+Pouvez-vous m'aider à escalader mon dossier ?,create_reclamation
+Comment fonctionne les lives privés payants ?,ask_faq
+vous pouvez m'expliquer les notifications stp,ask_faq
+"Voilà, non je refuse",deny
+"Dites-moi, je ne pense pas",deny
+C'est vraiment décevant : ça casse à chaque mise à jour. ?,plainte
+"Dites-moi, c un robot ?",bot_challenge
+"Bon, qui est derrière toi ?",bot_challenge
+Montre-moi les questions à propos de le contrôle parental,select_faq_category
+"Bonjour, mon KYC est en cours depuis trop longtemps",diagnostic
+"Sérieusement, quelle bande de nuls",inappropriate_language
+"Du coup, exactement",affirm
+"Bye, j'ai fini",goodbye
+C'est inadmissible que ça casse à chaque mise à jour. ?,plainte
+C'est vraiment décevant : personne ne prend mes messages au sérieux.,plainte
+"Du coup, je pense pas",deny
+bjr NGONI,greet
+"Sérieusement, parfait, merci pour la réponse",rate_response_useful
+eski le retrait d'argent c'est gratuit ou payant,ask_faq
+"Hello, j'ai besoin d'aide",greet
+"Bonsoir, j'ai besoin d'aide",greet
+"ciao, j'ai fini",goodbye
+"Franchement, non ce n'est pas ça du tout",deny
+"Alors, est-ce que je parle à une machine ?",bot_challenge
+"Alors, c'est ça",affirm
+Je veux ouvrir un ticket.,create_reclamation
+J'ai un souci : ma recharge affiche une erreur,diagnostic
+"Franchement, non je refuse",deny
+Où en est ma dernière réclamation ?,ask_complaint_status
+"Bon, qui est Elon Musk ?",out_of_scope
+C'est inadmissible que je n'ai aucune nouvelle depuis des semaines.,plainte
+"Du coup, quelle bande de nuls",inappropriate_language
+"Alors, c'est bon",affirm
+"Ça ne va pas du tout, les frais sont beaucoup trop élevés.",plainte
+Merci de créer un dossier de réclamation rapidement.,create_reclamation
+"Bref, pas du tout",deny
+"Alors, utile, merci",rate_response_useful
+"Écoutez, ok parfait",affirm
+Pourquoi ne pas proposer un widget pour suivre son solde ?,suggestion
+bjr l'assistant,greet
+"Écoutez, ça résout mon souci, merci beaucoup",rate_response_useful
+"Alors, pourquoi tu es si nul",inappropriate_language
+"slt, ça va ?",greet
+"Bon, c'était utile",rate_response_useful
+"Bon, non je refuse",deny
+Merci de signaler ce problème rapidement. ?,create_reclamation
+"Voilà, oui je confirme",affirm
+"Bon, fuck",inappropriate_language
+"Bref, génial, exactement ça",rate_response_useful
+"je vous laisse, j'ai fini",goodbye
+Yo l'assistant,greet
+Quels sont les détails concernant la recharge du compte ?,ask_faq
+"ma connexion a disparu, vous pouvez verifier ?",diagnostic
+Ça fait deux jours que mon solde a échoué,diagnostic
+Je souhaite créer un dossier de réclamation. ?,create_reclamation
+"Bon, non",deny
+"je vous laisse, j'ai fini ?",goodbye
+Je veux déposer une réclamation.,create_reclamation
+C'est catastrophique : on me donne toujours des réponses différentes.,plainte
+C'est vraiment décevant : ça casse à chaque mise à jour.,plainte
+"Voilà, j'en ai marre de ce bot pourri",inappropriate_language
+"Franchement, explique-moi ton périmètre d'action",ask_capabilities
+"hello, ça va ?",greet
+"Dites-moi, est-ce que tu es réel ?",bot_challenge
+slt !,greet
+"Bon, c'est de la merde ce service",inappropriate_language
+Est-ce que vous pouvez détailler les pièces ?,ask_faq
+[comment-verifier-mon-kyc-x9y8z7],select_faq_question
+"Au revoir, j'ai fini ?",goodbye
+"Sérieusement, ouais",affirm
+"Voilà, est-ce que tu es réel ?",bot_challenge
+"Ciao, à la prochaine ?",goodbye
+C'est inadmissible que les délais ne sont jamais respectés. ?,plainte
+"Sérieusement, je m'ennuie",out_of_scope
+Est-ce que vous pouvez détailler le retrait d'argent ?,ask_faq
+"Hello, ça va ?",greet
+"Franchement, voir la FAQ",browse_faq
+"Alors, je ne pense pas",deny
+"Alors, oui c'est correct",affirm
+Ce serait bien d'avoir la possibilité d'exporter ses relevés. ?,suggestion
+"Bref, est-ce un chatbot ?",bot_challenge
+Je souhaite faire remonter mon cas.,create_reclamation
+"Merci au revoir, j'ai fini ?",goodbye
+"À bientôt, bonne continuation ?",goodbye
+"Franchement, tu utilises quel modèle d'IA ?",bot_challenge
+"hello, j'ai une question",greet
+"slt, j'ai une question",greet
+"mon transfert refuse de se valider, vous pouvez verifier ?",diagnostic
+"Écoutez, va te faire foutre",inappropriate_language
+Vous devriez ajouter un chat en direct avec un conseiller. ?,suggestion
+C'est vraiment décevant : les explications sont toujours confuses.,plainte
+C'est catastrophique : on me donne toujours des réponses différentes. ?,plainte
+bjr !,greet
+Merci de obtenir une prise en charge officielle rapidement.,create_reclamation
+"mon paiement n'a pas été crédité, vous pouvez verifier ?",diagnostic
+Mon idée : ajouter un rappel avant l'expiration du KYC. ?,suggestion
+"Du coup, sa ser a rien ton bot de merde",inappropriate_language
+J'aimerais faire remonter mon cas. ?,create_reclamation
+kesk le retrait d'argent au juste,ask_faq
+"Je ne suis pas content, rien ne fonctionne comme prévu.",plainte
+hello support ?,greet
+"Bonjour, mes pièces est bloqué depuis ce matin",diagnostic
+Pouvez-vous m'aider à formuler une plainte officielle ?,create_reclamation
+C'est inadmissible que on me donne toujours des réponses différentes.,plainte
+"Depuis ce matin, mon compte a disparu",diagnostic
+"Écoutez, affirmatif",affirm
+"Écoutez, non ce n'est pas le cas",deny
+"Bref, suggère-moi quelques questions fréquentes",browse_faq
+Bonjour !,greet
+"Bon, je veux apprendre à programmer en Python",out_of_scope
+"Bref, tu es spécialisé en quoi ?",ask_capabilities
+Ça fait deux jours que mes pièces reste en attente depuis hier,diagnostic
+"Je suis très déçu, je n'ai aucune nouvelle depuis des semaines. ?",plainte
+"Depuis ce matin, mon transfert ne fonctionne plus",diagnostic
+Pouvez-vous m'expliquer NGONI Plus ?,ask_faq
+"Franchement, résous-moi cette équation",out_of_scope
+Je veux signaler ce problème.,create_reclamation
+"Je ne suis pas content, ça casse à chaque mise à jour.",plainte
+"Aidez-moi svp, mon transfert a échoué",diagnostic
+"Du coup, exact",affirm
+bonjour NGONI,greet
+"je vous laisse, à la prochaine",goodbye
+"Bon, tu es vraiment un bot ?",bot_challenge
+Ce serait bien d'avoir des notifications personnalisables. ?,suggestion
+"Franchement, quels problèmes peux-tu résoudre ?",ask_capabilities
+"mon KYC ne s'affiche plus, vous pouvez verifier ?",diagnostic
+"bjr, j'ai une question",greet
+"bye, j'ai fini ?",goodbye
+"Merci au revoir, j'ai fini ?",goodbye
+"Voilà, hors sujet je trouve",rate_response_not_useful
+J'ai un souci : ma connexion a disparu,diagnostic
+"Je ne suis pas content, les frais sont beaucoup trop élevés.",plainte
+"Dites-moi, vous ne servez à rien du tout",inappropriate_language
+"Alors, ça ne répond pas à ma question",rate_response_not_useful
+"Dites-moi, est-ce que je parle à une machine ?",bot_challenge
+"Du coup, ferme-la",inappropriate_language
+"Bonsoir, j'ai une question",greet
+"Écoutez, quelle bande de nuls",inappropriate_language
+"Aidez-moi svp, mes pièces n'a pas été crédité",diagnostic
+Je veux des questions sur les retraits,select_faq_category
+"Écoutez, qui est Lionel Messi ?",out_of_scope
+"Sérieusement, comment tu fonctionnes ?",bot_challenge
+"Alors, pas encore",deny
+Il faut absolument créer un dossier de réclamation. ?,create_reclamation
+J'aimerais obtenir une prise en charge officielle. ?,create_reclamation
+Comment ça marche le retrait d'argent ?,ask_faq
+j'aimerai en savoir plus sur NGONI Plus,ask_faq
+Ce serait pratique d'avoir un support en plusieurs langues. ?,suggestion
+je veu créer un dossier de réclamation stp ?,create_reclamation
+"Bon, comment faire un gâteau ?",out_of_scope
+"Sérieusement, tu utilises quel modèle d'IA ?",bot_challenge
+"Bref, c'est n'importe quoi ce bot",inappropriate_language
+"Hey, ça va ?",greet
+"slt, petite question rapide",greet
+Merci de être mis en relation avec un agent rapidement. ?,create_reclamation
+J'ai un souci : mon solde a disparu,diagnostic
+Ce serait bien d'avoir plus de moyens de paiement pour recharger. ?,suggestion
+je veu signaler ce problème stp,create_reclamation
+[comment-faire-un-retrait-x9y8z7],select_faq_question
+C'est quoi le système de récompense exactement ?,ask_faq
+"a+, bonne continuation",goodbye
+"Bref, qui est derrière toi ?",bot_challenge
+"Écoutez, c bon",affirm
+C'est quoi les pièces exactement ?,ask_faq
+"Sérieusement, oui",affirm
+Ce serait top d'avoir un mode sombre. ?,suggestion
+"Du coup, comment investir en bourse ?",out_of_scope
+"Sérieusement, a quoi tu sers exactement dans cette appli",ask_capabilities
+Quel est le statut de ma réclamation ?,ask_complaint_status
+"Franchement, yep",affirm
+"Voilà, qui es-tu ?",bot_challenge
+"Du coup, non",deny
+"mon transfert affiche une erreur, vous pouvez verifier ?",diagnostic
+"Dites-moi, non ce n'est pas le cas",deny
+"Bon, faux",deny
+"Franchement, service de merde",inappropriate_language
+"salut, ça va ?",greet
+j'aimerai en savoir plus sur la recharge du compte,ask_faq
+"Franchement, tu es un assistant virtuel ?",bot_challenge
+Yo l'assistant ?,greet
+"Voilà, donne-moi une recette de cuisine",out_of_scope
+"a+, j'ai fini",goodbye
+"a+, merci pour votre aide ?",goodbye
+je veu déposer une réclamation stp,create_reclamation
+"Écoutez, pas ça",deny
+[comment-recharger-mon-compte-a1b2c3],select_faq_question
+"jai un probleme, ma recharge a échoué",diagnostic
+Il faut absolument ouvrir un ticket. ?,create_reclamation
+"Merci au revoir, bonne continuation",goodbye
+"Alors, c'est n'importe quoi ce bot",inappropriate_language
+"Franchement, d'accord",affirm
+"Du coup, qui t'a développé ?",bot_challenge
+Je veux comprendre la recharge du compte,ask_faq
+"À bientôt, merci pour votre aide",goodbye
+"Sérieusement, bien sûr",affirm
+bsr support,greet
+"Dites-moi, hors de question",deny
+"Bref, quelle est la capitale du Japon ?",out_of_scope
+J'ai un souci : mon solde ne passe pas,diagnostic
+"Bon, exactement",affirm
+"ciao, bonne continuation ?",goodbye
+"Sérieusement, montre voir des questions types",browse_faq
+slt NGONI ?,greet
+Je veux comprendre l'application mobile,ask_faq
+"Écoutez, non merci",deny
+"Voilà, tu me soules",inappropriate_language
+"Alors, qui t'a développé ?",bot_challenge
+Ce serait bien d'avoir un support en plusieurs langues. ?,suggestion
+Coucou support,greet
+"Écoutez, qui est derrière toi ?",bot_challenge
+"Bonne journée, bonne continuation ?",goodbye
+"Alors, est-ce un chatbot ?",bot_challenge
+J'aimerais des informations sur la suppression de compte,ask_faq
+"Du coup, pourquoi tu es si nul",inappropriate_language
+"Sérieusement, qui est Elon Musk ?",out_of_scope
+"Du coup, qui est Lionel Messi ?",out_of_scope
+"Voilà, fuck",inappropriate_language
+C'est vraiment décevant : les frais sont beaucoup trop élevés.,plainte
+"Bon, tu es automatisé ?",bot_challenge
+hello NGONI,greet
+"Sérieusement, hors de question",deny
+Merci de faire remonter mon cas rapidement. ?,create_reclamation
+"Du coup, raconte-moi une blague",out_of_scope
+Je souhaite être mis en relation avec un agent.,create_reclamation
+"Voilà, yes",affirm
+C'est vraiment décevant : les délais ne sont jamais respectés. ?,plainte
+"Franchement, non merci",deny
+C'est inadmissible que ça casse à chaque mise à jour. ?,plainte
+C'est vraiment décevant : les frais sont beaucoup trop élevés. ?,plainte
+"Sérieusement, oui c'est correct",affirm
+J'aimerais que vous ajoutiez des notifications personnalisables. ?,suggestion
+"Je suis mécontent, rien ne fonctionne comme prévu. ?",plainte
+C'est vraiment décevant : je perds mon temps à chaque fois. ?,plainte
+"ciao, à la prochaine",goodbye
+"Dites-moi, quelle est la météo aujourd'hui ?",out_of_scope
+"Je suis mécontent, les explications sont toujours confuses. ?",plainte
+"bjr, vous êtes là ?",greet
+C'est inadmissible que l'interface est illisible. ?,plainte
+"cc, vous êtes là ?",greet
+Je veux parler à un conseiller humain. ?,create_reclamation
+"a+, merci pour votre aide",goodbye
+"Du coup, peux-tu coder un site web ?",out_of_scope
+"Bon, sa ser a rien ton bot de merde",inappropriate_language
+"Ça ne va pas du tout, les explications sont toujours confuses.",plainte
+J'aimerais contacter le support. ?,create_reclamation
+"Écoutez, qui parle ?",bot_challenge
+"Voilà, ça répond à ma question",rate_response_useful
+"Alors, vous êtes un robot ou un humain ?",bot_challenge
+Peux-tu me dire où en est mon dossier ?,ask_complaint_status
+"Du coup, parle-moi de l'espace",out_of_scope
+"bye, merci pour votre aide ?",goodbye
+"Écoutez, oui merci",affirm
+"Ciao, j'ai fini",goodbye
+"Sérieusement, quelles sont tes compétences ?",ask_capabilities
+"Bref, comment apprendre à jouer de la guitare ?",out_of_scope
+J'aimerais des informations sur les vidéos privées payantes,ask_faq
+"Sérieusement, top ça répond bien",rate_response_useful
+"Franchement, nope",deny
+Pourquoi ne pas proposer une authentification par empreinte digitale ?,suggestion
+je veu créer un dossier de réclamation stp,create_reclamation
+je veu obtenir une prise en charge officielle stp ?,create_reclamation
+"Sérieusement, es-tu un bot ?",bot_challenge
+"Alors, c'est de la merde ce service",inappropriate_language
+Ce serait pratique d'avoir des filtres pour trouver les lives plus facilement. ?,suggestion
+"Bonjour, vous êtes là ?",greet
+Ce serait pratique d'avoir une authentification par empreinte digitale.,suggestion
+Je propose d'intégrer la possibilité d'exporter ses relevés. ?,suggestion
+"Écoutez, faux",deny
+"Écoutez, casse-toi",inappropriate_language
+Pouvez-vous m'expliquer la sécurité du compte ?,ask_faq
+Je veux créer un dossier de réclamation.,create_reclamation
+"Du coup, est-ce que tu es un humain ?",bot_challenge
+"bsr, j'ai besoin d'aide ?",greet
+"Franchement, que peux-tu faire ?",ask_capabilities
+Pourquoi mon compte a disparu ?,diagnostic
+"Bonjour, mon compte n'a pas été crédité",diagnostic
+"Bref, t'es qu'un débile",inappropriate_language
+C'est vraiment décevant : les délais ne sont jamais respectés.,plainte
+Pouvez-vous m'aider à déposer une réclamation ?,create_reclamation
+"Écoutez, oui tout à fait",affirm
+"Bon, ce bot est nul de merde",inappropriate_language
+Il faut absolument formuler une plainte officielle.,create_reclamation
+"Alors, d'accord",affirm
+dites moi tout sur les vidéos privées payantes svp,ask_faq
+"Franchement, est-ce que tu es réel ?",bot_challenge
+C'est catastrophique : on me donne toujours des réponses différentes. ?,plainte
+je veu formuler une plainte officielle stp ?,create_reclamation
+J'aimerais avoir un suivi personnalisé de mon dossier. ?,create_reclamation
+"Voilà, j'aimerais voir quelques questions fréquentes",browse_faq
+Pourquoi mon KYC affiche une erreur ?,diagnostic
+ma recharge est bloqué depuis ce matin,diagnostic
+"Bon, quelle est la capitale de la France ?",out_of_scope
+"Franchement, oui bien sûr",affirm
+C'est vraiment décevant : les délais ne sont jamais respectés. ?,plainte
+"Du coup, c un robot ?",bot_challenge
+C'est quoi les vidéos privées payantes exactement ?,ask_faq
+"Coucou, j'ai une question",greet
+"Voilà, comment apprendre à jouer de la guitare ?",out_of_scope
+Ce serait top d'avoir un support en plusieurs langues.,suggestion
+"Alors, ce bot est nul de merde",inappropriate_language
+"Sérieusement, est-ce que tu apprends de nos conversations ?",bot_challenge
+Ça fait deux jours que mes pièces semble erroné,diagnostic
+"Je ne suis pas content, ça casse à chaque mise à jour. ?",plainte
+"Alors, ce n'est pas correct",deny
+"Ciao, j'ai fini ?",goodbye
+"Franchement, les explications sont toujours confuses, c'est nul. ?",plainte
+"Du coup, non ce n'est pas le cas",deny
+"Du coup, oui c'est bien ça",affirm
+"Dites-moi, yes",affirm
+J'aimerais que vous ajoutiez une barre de recherche dans la FAQ. ?,suggestion
+Des questions sur les lives privés payants,select_faq_category
+"Bon, montre voir des questions types",browse_faq
+jaimrai formuler une plainte officielle svp ?,create_reclamation
+"Voilà, quelle bande de nuls",inappropriate_language
+je veu formuler une plainte officielle stp,create_reclamation
+je vous laisse ?,goodbye
+J'aimerais des informations sur le programme de fidélité,ask_faq
+"Sérieusement, c'est vraiment naze",inappropriate_language
+"Voilà, aucun rapport avec ma question",rate_response_not_useful
+C'est vraiment décevant : l'application est trop lente. ?,plainte
+Salut l'assistant,greet
+"Alors, tu es vraiment un bot ?",bot_challenge
+Est-ce que vous pouvez détailler le contrôle parental ?,ask_faq
+"mon paiement affiche une erreur, vous pouvez verifier ?",diagnostic
+"Aidez-moi svp, mon profil refuse de se valider",diagnostic
+"Écoutez, est-ce un chatbot ?",bot_challenge
+C'est vraiment décevant : l'interface est illisible.,plainte
+"Alors, j'en ai ras le bol de ce service",inappropriate_language
+mon dépôt est bloqué depuis ce matin,diagnostic
+Mon idée : ajouter un rappel avant l'expiration du KYC. ?,suggestion
+"Franchement, pas convaincant du tout comme réponse",rate_response_not_useful
+C'est inadmissible que l'interface est illisible.,plainte
+"Du coup, propose-moi des sujets de questions",browse_faq
+"Au revoir, à la prochaine ?",goodbye
+"Ciao, bonne continuation ?",goodbye
+mon transfert est bloqué depuis ce matin,diagnostic
+C'est vraiment décevant : l'application se déconnecte sans arrêt. ?,plainte
+Vous devriez ajouter un support en plusieurs langues. ?,suggestion
+"Bref, d'accord",affirm
+Quels sont les détails concernant le mode hors-ligne ?,ask_faq
+je veu escalader mon dossier stp ?,create_reclamation
+"hello, ça va ?",greet
+C'est vraiment décevant : l'application plante tout le temps. ?,plainte
+Pouvez-vous m'aider à obtenir une prise en charge officielle ?,create_reclamation
+Yo support ?,greet
+"Alors, exactement",affirm
+"Du coup, affirmatif",affirm
+"Écoutez, quel est ton plat préféré ?",out_of_scope
+"Écoutez, quel est ton rôle ici ?",ask_capabilities
+"Voilà, qui t'a programmé ?",bot_challenge
+C'est catastrophique : je n'ai aucune nouvelle depuis des semaines. ?,plainte
+Montre-moi les questions à propos de les cadeaux,select_faq_category
+"Voilà, quels services prends-tu en charge ?",ask_capabilities
+Je propose d'intégrer la possibilité d'exporter ses relevés. ?,suggestion
+mon compte n'a pas été crédité,diagnostic
+J'aimerais formuler une plainte officielle.,create_reclamation
+c koi l'assistance client exactement,ask_faq
+mes pièces est bloqué depuis ce matin,diagnostic
+"Hello, j'ai une question",greet
+"Bref, fuck",inappropriate_language
+"Sérieusement, je ne pense pas",deny
+"Voilà, qui parle ?",bot_challenge
+"Sérieusement, pas ça",deny
+"Dites-moi, oui merci",affirm
+Je souhaite formuler une plainte officielle.,create_reclamation
+"bye, à la prochaine ?",goodbye
+Est-ce que ma réclamation a été traité ?,ask_complaint_status
+Ce serait top d'avoir un support en plusieurs langues. ?,suggestion
+J'aimerais connaître le statut de ma dernière réclamation,ask_complaint_status
+"Franchement, pas ça",deny
+Je veux comprendre le contrôle parental,ask_faq
+"Du coup, propose-moi des questions types à poser",browse_faq
+Pouvez-vous m'expliquer la vérification KYC ?,ask_faq
+"Au revoir, merci pour votre aide ?",goodbye
+Avez-vous prévu une barre de recherche dans la FAQ ?,suggestion
+"Bon, génial, exactement ça",rate_response_useful
+Comment ça marche l'assistance client ?,ask_faq
+"Alors, quelle est la population du monde ?",out_of_scope
+"Bref, est-ce que tu apprends de nos conversations ?",bot_challenge
+bsr l'assistant,greet
+"Bon, absolument pas",deny
+"Écoutez, c un robot ?",bot_challenge
+"mon retrait n'a pas été crédité, vous pouvez verifier ?",diagnostic
+Pouvez-vous m'aider à avoir un suivi personnalisé de mon dossier ?,create_reclamation
+Est-ce que vous pouvez détailler la vérification KYC ?,ask_faq
+"slt, j'ai besoin d'aide ?",greet
+"Bon, est-ce que tu es un humain ?",bot_challenge
+"Alors, que peux-tu faire ?",ask_capabilities
+"Ça ne va pas du tout, l'interface est illisible. ?",plainte
+"Bon, tu es un programme ?",bot_challenge
+"Du coup, réponse trop vague pour m'aider",rate_response_not_useful
+"Bon, nan",deny
+"ciao, à la prochaine ?",goodbye
+"Alors, nope",deny
+"ok merci bye, bonne continuation",goodbye
+Bonsoir support,greet
+Vous pouvez me dire où ça en est pour mon dossier ?,ask_complaint_status
+"Voilà, put1 de bot",inappropriate_language
+"Dites-moi, faux",deny
+"Je suis très déçu, l'interface est illisible. ?",plainte
+jaimrai parler à un conseiller humain svp,create_reclamation
+"Bon, parfait",affirm
+"Franchement, pas exactement",deny
+Je veux escalader mon dossier. ?,create_reclamation
+"Hey, vous êtes là ?",greet
+"À plus, j'ai fini ?",goodbye
+Bonjour l'assistant,greet
+Pourquoi mon dépôt a disparu ?,diagnostic
+J'ai un souci : ma vérification d'identité est en cours depuis trop longtemps,diagnostic
+"Voilà, tu es automatisé ?",bot_challenge
+Pouvez-vous m'aider à signaler ce problème ?,create_reclamation
+Je veux formuler une plainte officielle. ?,create_reclamation
+Je veux être mis en relation avec un agent. ?,create_reclamation
+"Sérieusement, oui bien sûr",affirm
+"Ça ne va pas du tout, l'interface est illisible.",plainte
+ma dernière réclamation a-t-elle avancé ?,ask_complaint_status
+"Franchement, les explications sont toujours confuses, c'est nul.",plainte
+"Alors, t un bot ?",bot_challenge
+Quelles sont les infos sur le mode hors-ligne ?,ask_faq
+Ce serait pratique d'avoir un rappel avant l'expiration du KYC. ?,suggestion
+"Bonjour, mon compte ne passe pas",diagnostic
+C'est inadmissible que l'application plante tout le temps.,plainte
+C'est vraiment décevant : les explications sont toujours confuses. ?,plainte
+j'aimerai en savoir plus sur le système de récompense,ask_faq
+"Du coup, absolument pas",deny
+"Je ne suis pas content, les frais sont beaucoup trop élevés. ?",plainte
+Ça fait deux jours que mon dépôt est bloqué depuis ce matin,diagnostic
+"Alors, ce truk est vrémen nul",inappropriate_language
+"Alors, tu me soules",inappropriate_language
+Salut !,greet
+"Écoutez, je ne pense pas",deny
+J'aimerais ouvrir un ticket.,create_reclamation
+"ciao, bonne continuation",goodbye
+j'aimerai en savoir plus sur les frais de transaction,ask_faq
+"Bref, es-tu un bot ?",bot_challenge
+"Du coup, va te faire foutre",inappropriate_language
+"Sérieusement, donne-moi des films à regarder",out_of_scope
+"Voilà, qui a créé ce chatbot ?",bot_challenge
+"Franchement, c'est vraiment naze",inappropriate_language
+"Dites-moi, affiche-moi des sujets fréquents",browse_faq
+Pouvez-vous m'aider à faire remonter mon cas ?,create_reclamation
+"Franchement, je ne pense pas",deny
+Avez-vous prévu une barre de recherche dans la FAQ ?,suggestion
+Je suis frustré parce que rien ne fonctionne comme prévu.,plainte
+J'aimerais escalader mon dossier. ?,create_reclamation
+"Bon, ça ne résout rien",rate_response_not_useful
+"Voilà, comment perdre du poids rapidement ?",out_of_scope
+"Yo, j'ai une question",greet
+"Écoutez, utile, merci",rate_response_useful
+J'aimerais que vous ajoutiez une barre de recherche dans la FAQ.,suggestion
+"Bref, c'est quoi l'intelligence artificielle ?",out_of_scope
+"Écoutez, peux-tu chanter une chanson ?",out_of_scope
+"Franchement, parle-moi de football",out_of_scope
+"bjr, j'ai besoin d'aide ?",greet
+bonjour l'assistant ?,greet
+"Alors, hors de question",deny
+"bsr, petite question rapide",greet
+C'est vraiment décevant : l'application plante tout le temps.,plainte
+Ce serait pratique d'avoir un rappel avant l'expiration du KYC. ?,suggestion
+"Bref, peux-tu chanter une chanson ?",out_of_scope
+"Bon, ferme-la",inappropriate_language
+"Franchement, qu'est-ce que tu sais faire ?",ask_capabilities
+Est-ce que vous pouvez détailler les notifications ?,ask_faq
+"Sérieusement, pas vraiment",deny
+"Bon, qui t'a programmé ?",bot_challenge
+Je souhaite escalader mon dossier.,create_reclamation
+"Dites-moi, oui",affirm
+"Voilà, quel est ton plat préféré ?",out_of_scope
+"Dites-moi, non merci",deny
+"Franchement, c'est quoi le machine learning ?",out_of_scope
+"Sérieusement, exactement",affirm
+dites moi tout sur les lives privés payants svp,ask_faq
+Pouvez-vous m'expliquer les frais de transaction ?,ask_faq
+Pourquoi mon solde a disparu ?,diagnostic
+"Ça ne va pas du tout, les explications sont toujours confuses. ?",plainte
+Je souhaite obtenir une prise en charge officielle.,create_reclamation
+"Sérieusement, comment faire un gâteau ?",out_of_scope
+"Franchement, que peux-tu faire pour moi ?",ask_capabilities
+"Bref, vous êtes vraiment nuls",inappropriate_language
+"Bye, à la prochaine ?",goodbye
+"Écoutez, pas exactement",deny
+Des questions sur les questions générales,select_faq_category
+eski les vidéos privées payantes c'est gratuit ou payant,ask_faq
+"Écoutez, absolument pas",deny
+Est-ce que ma dernière réclamation a été traité ?,ask_complaint_status
+cc NGONI,greet
+"je vous laisse, merci pour votre aide",goodbye
+"ok merci bye, j'ai fini ?",goodbye
+je vous laisse,goodbye
+"merci bye, à la prochaine",goodbye
+"Voilà, non ce n'est pas le cas",deny
+Je propose d'intégrer la possibilité d'exporter ses relevés.,suggestion
+"slt, vous êtes là ?",greet
+Yo ! ?,greet
+"Bref, service de merde",inappropriate_language
+Pourquoi mon KYC semble erroné ?,diagnostic
+Ce serait pratique d'avoir un historique des transactions plus détaillé. ?,suggestion
+"Bref, qui t'a développé ?",bot_challenge
+"Alors, combien font douze fois douze ?",out_of_scope
+"Voilà, ça n'aide pas trop",rate_response_not_useful
+C'est quoi l'assistance client exactement ?,ask_faq
+mon KYC ne s'affiche plus,diagnostic
+Des questions sur les cadeaux,select_faq_category
+Je veux comprendre les notifications,ask_faq
+Pouvez-vous m'aider à formuler une plainte officielle ?,create_reclamation
+"Voilà, tu es un assistant virtuel ?",bot_challenge
+"Bonne soirée, bonne continuation ?",goodbye
+"Bref, quelle est la météo aujourd'hui ?",out_of_scope
+"Écoutez, qui a créé ce chatbot ?",bot_challenge
+Peux-tu me dire où en est ma dernière réclamation ?,ask_complaint_status
+"Bon, peux-tu chanter une chanson ?",out_of_scope
+"Du coup, non ce n'est pas ça du tout",deny
+"Dites-moi, qui est derrière toi ?",bot_challenge
+"Écoutez, parfait",affirm
+"Voilà, donne-moi des idées de questions",browse_faq
+"Dites-moi, je m'ennuie",out_of_scope
+"bye, à la prochaine ?",goodbye
+"Sérieusement, peux-tu traduire en anglais ?",out_of_scope
+Ce serait bien d'avoir la possibilité d'exporter ses relevés.,suggestion
+"Franchement, ça casse à chaque mise à jour, c'est nul.",plainte
+"Écoutez, comment réparer une voiture ?",out_of_scope
+"Du coup, franchement pas utile",rate_response_not_useful
+"Écoutez, bot à la con",inappropriate_language
+j'aimerai en savoir plus sur les lives privés payants,ask_faq
+"Voilà, je veux voir des exemples de questions",browse_faq
+"Bon, tu es vraiment inefficace",inappropriate_language
+"ma connexion reste en attente depuis hier, vous pouvez verifier ?",diagnostic
+"Aidez-moi svp, mon profil ne fonctionne plus",diagnostic
+"bonjour, petite question rapide ?",greet
+Est-ce que vous pouvez détailler les moyens de paiement ?,ask_faq
+"Franchement, qui est Elon Musk ?",out_of_scope
+Merci de avoir un suivi personnalisé de mon dossier rapidement.,create_reclamation
+"merci bye, bonne continuation ?",goodbye
+Ce serait bien d'avoir un chat en direct avec un conseiller. ?,suggestion
+"Voilà, pas exactement",deny
+"Sérieusement, nan",deny
+Je veux contacter le support.,create_reclamation
+Comment fonctionne les notifications ?,ask_faq
+"Bref, non je refuse",deny
+"bye, bonne continuation",goodbye
+"Voilà, yep",affirm
+"Franchement, effectivement",affirm
+"Franchement, c'est ça",affirm
+"merci bye, j'ai fini",goodbye
+"Alors, oui je confirme",affirm
+"Écoutez, qui est Elon Musk ?",out_of_scope
+"Bref, quel bordel ce truc",inappropriate_language
+bonjour l'assistant,greet
+Pouvez-vous m'aider à avoir un suivi personnalisé de mon dossier ?,create_reclamation
+"Écoutez, vous êtes vraiment nuls",inappropriate_language
+"Sérieusement, t humain ?",bot_challenge
+"Dites-moi, est-ce un chatbot ?",bot_challenge
+"Franchement, non ce n'est pas le cas",deny
+Ce serait pratique d'avoir une barre de recherche dans la FAQ. ?,suggestion
+Il faut absolument déposer une réclamation. ?,create_reclamation
+"Salut, ça va ?",greet
+"Franchement, c un robot ?",bot_challenge
+dites moi tout sur les cadeaux virtuels svp,ask_faq
+je veu avoir un suivi personnalisé de mon dossier stp ?,create_reclamation
+"Sérieusement, vous ne servez à rien du tout",inappropriate_language
+"bye, à la prochaine",goodbye
+merci bye ?,goodbye
+Pouvez-vous m'expliquer les pièces ?,ask_faq
+"bjr, petite question rapide",greet
+"Du coup, suggère-moi quelques questions fréquentes",browse_faq
+"Bref, tu es un programme ?",bot_challenge
+"Bref, tu me gonfles",inappropriate_language
+"Bon, ce truk est vrémen nul",inappropriate_language
+"Dites-moi, va te faire foutre",inappropriate_language
+C'est inadmissible que les délais ne sont jamais respectés.,plainte
+"Dites-moi, j'aimerais voir quelques questions fréquentes",browse_faq
+"Écoutez, nan",deny
+[comment-verifier-mon-kyc-a1b2c3],select_faq_question
+"Voilà, oui c'est bien ça",affirm
+Pouvez-vous m'expliquer le retrait d'argent ?,ask_faq
+"slt, ça va ?",greet
+"Dites-moi, tu es une intelligence artificielle ?",bot_challenge
+"Franchement, quel est ton plat préféré ?",out_of_scope
+"Voilà, parle-moi de l'espace",out_of_scope
+"Alors, non ce n'est pas ça du tout",deny
+kesk NGONI Plus au juste,ask_faq
+"Salut, petite question rapide",greet
+Je veux avoir un suivi personnalisé de mon dossier.,create_reclamation
+J'aimerais déposer une réclamation. ?,create_reclamation
+Je souhaite parler à un conseiller humain.,create_reclamation
+"Franchement, putain de bot inutile",inappropriate_language
+C'est vraiment décevant : je n'ai aucune nouvelle depuis des semaines. ?,plainte
+"Franchement, donne-moi des films à regarder",out_of_scope
+Ça fait deux jours que mon solde ne fonctionne plus,diagnostic
+"Bonjour, ma recharge affiche une erreur",diagnostic
+"Dites-moi, quelle heure est-il ?",out_of_scope
+Ça fait deux jours que mon profil affiche une erreur,diagnostic
+"Alors, non merci",deny
+"À plus, à la prochaine",goodbye
+"Merci au revoir, bonne continuation ?",goodbye
+C'est inadmissible que rien ne fonctionne comme prévu. ?,plainte
+C'est vraiment décevant : l'interface est illisible. ?,plainte
+J'aimerais des informations sur NGONI Plus,ask_faq
+Bonjour l'assistant ?,greet
+"Franchement, pas encore",deny
+"Bref, dégage",inappropriate_language
+"hello, j'ai une question ?",greet
+"Voilà, j'en ai ras le bol de ce service",inappropriate_language
+"Dites-moi, c pas ça",deny
+Je veux comprendre les lives privés payants,ask_faq
+C'est inadmissible que rien ne fonctionne comme prévu. ?,plainte
+"Franchement, comment tu fonctionnes ?",bot_challenge
+C'est vraiment décevant : on me donne toujours des réponses différentes. ?,plainte
+"Voilà, explique la théorie de la relativité",out_of_scope
+"Bon, tout à fait",affirm
+"bonjour, j'ai une question",greet
+"Bon, quelle est la capitale du Japon ?",out_of_scope
+Peux-tu me dire où en est mon ticket ?,ask_complaint_status
+C'est inadmissible que on me donne toujours des réponses différentes. ?,plainte
+"Coucou, j'ai une question ?",greet
+"Ça ne va pas du tout, personne ne prend mes messages au sérieux.",plainte
+"À bientôt, bonne continuation",goodbye
+"Écoutez, yep",affirm
+vous pouvez m'expliquer le portefeuille stp,ask_faq
+Yo support,greet
+jaimrai faire remonter mon cas svp,create_reclamation
+"Sérieusement, affirmatif",affirm
+C'est quoi le portefeuille exactement ?,ask_faq
+"Voilà, quel est ton rôle ici ?",ask_capabilities
+Comment fonctionne la sécurité du compte ?,ask_faq
+Mon idée : ajouter un chat en direct avec un conseiller. ?,suggestion
+c koi les moyens de paiement exactement,ask_faq
+"Bon, c pas ça",deny
+"salut, j'ai besoin d'aide ?",greet
+"a+, j'ai fini ?",goodbye
+Pourquoi mon profil ne s'affiche plus ?,diagnostic
+Ce serait bien d'avoir des notifications personnalisables.,suggestion
+"Sérieusement, ferme-la",inappropriate_language
+"Du coup, je veux apprendre à programmer en Python",out_of_scope
+Vous devriez ajouter un support en plusieurs langues. ?,suggestion
+"Sérieusement, tu peux me suggérer des questions types stp",browse_faq
+C'est vraiment décevant : le support ne comprend jamais le problème.,plainte
+bsr !,greet
+"Voilà, exactement",affirm
+"Écoutez, quelle est la population du monde ?",out_of_scope
+"Bon, oui c'est correct",affirm
+"Bon, oui c'est bien ça",affirm
+"Bref, est-ce que tu es un humain ?",bot_challenge
+"Alors, faux",deny
+"Bonne journée, bonne continuation",goodbye
+"Sérieusement, pas encore",deny
+"mon retrait reste en attente depuis hier, vous pouvez verifier ?",diagnostic
+"Écoutez, pas encore",deny
+"Du coup, oui merci",affirm
+Comment fonctionne les vidéos privées payantes ?,ask_faq
+[quest-ce-que-ngoni-plus-x9y8z7],select_faq_question
+Pourquoi mon transfert est bloqué depuis ce matin ?,diagnostic
+"hello, petite question rapide",greet
+C'est catastrophique : l'application est trop lente. ?,plainte
+Je veux être mis en relation avec un agent.,create_reclamation
+"Écoutez, ouais",affirm
+Quels sont les détails concernant l'assistance client ?,ask_faq
+"Depuis ce matin, ma recharge reste en attente depuis hier",diagnostic
+Je souhaite créer un dossier de réclamation.,create_reclamation
+"Bye, j'ai fini ?",goodbye
+Il faut absolument signaler ce problème.,create_reclamation
+dites moi tout sur les pièces svp,ask_faq
+"Dites-moi, nan",deny
+"Voilà, oui bien sûr",affirm
+"jai un probleme, mon profil ne s'affiche plus",diagnostic
+"Alors, tu me gonfles",inappropriate_language
+"Dites-moi, ce truk est vrémen nul",inappropriate_language
+"jai un probleme, mon KYC ne s'affiche plus",diagnostic
+Des questions sur le portefeuille,select_faq_category
+Yo !,greet
+"Écoutez, tu es vraiment inefficace",inappropriate_language
+"bye, j'ai fini",goodbye
+"Bref, affirmatif",affirm
+"Du coup, oui tout à fait",affirm
+Il faut absolument avoir un suivi personnalisé de mon dossier.,create_reclamation
+À quoi sert la recharge du compte ?,ask_faq
+Ça fait deux jours que ma recharge ne passe pas,diagnostic
+"Franchement, oui je confirme",affirm
+"hello, j'ai besoin d'aide",greet
+Je veux voir les questions sur NGONI Plus,select_faq_category
+"salut, j'ai besoin d'aide",greet
+"Sérieusement, franchement pas utile",rate_response_not_useful
+C'est vraiment décevant : rien ne fonctionne comme prévu. ?,plainte
+"je vous laisse, merci pour votre aide ?",goodbye
+"Sérieusement, j'en ai ras le bol de ce service",inappropriate_language
+"Écoutez, pas terrible cette réponse",rate_response_not_useful
+"Alors, excellent merci, c'était très clair",rate_response_useful
+"Dites-moi, tu me gonfles",inappropriate_language
+"Bonne journée, merci pour votre aide",goodbye
+À quoi sert les moyens de paiement ?,ask_faq
+"Du coup, t'es utile pour quoi exactement ?",ask_capabilities
+Ce serait pratique d'avoir un historique des transactions plus détaillé.,suggestion
+"Ça ne va pas du tout, les délais ne sont jamais respectés.",plainte
+"Bref, pas vraiment",deny
+"Alors, qui est Lionel Messi ?",out_of_scope
+"Bonjour, mon dépôt a échoué",diagnostic
+[comment-faire-un-retrait-a1b2c3],select_faq_question
+"jai un probleme, mon retrait a échoué",diagnostic
+"Alors, tu peux m'aider avec quoi ?",ask_capabilities
+"Bonsoir, ça va ?",greet
+J'aimerais être mis en relation avec un agent. ?,create_reclamation
+mon transfert semble erroné,diagnostic
+"Bonjour, mon compte affiche une erreur",diagnostic
+Je souhaite être mis en relation avec un agent. ?,create_reclamation
+"Voilà, oui vas-y",affirm
+"Bref, que peux-tu faire pour moi ?",ask_capabilities
+Avez-vous prévu la possibilité d'exporter ses relevés ?,suggestion
+"Dites-moi, donne-moi des films à regarder",out_of_scope
+"Du coup, ce bot est nul de merde",inappropriate_language
+"ciao, j'ai fini ?",goodbye
+"Bon, affirmatif",affirm
+Ce serait bien d'avoir un support en plusieurs langues. ?,suggestion
+"Franchement, votre application est pourrie",inappropriate_language
+"Aidez-moi svp, mon dépôt ne passe pas",diagnostic
+"Franchement, comment gagner de l'argent ?",out_of_scope
+ma connexion a disparu,diagnostic
+"ok merci bye, à la prochaine",goodbye
+"Dites-moi, c bon",affirm
+"Bon, c'est vraiment naze",inappropriate_language
+"Bref, tu es un assistant virtuel ?",bot_challenge
+"Écoutez, c'est vraiment naze",inappropriate_language
+Vous devriez ajouter un chat en direct avec un conseiller. ?,suggestion
+"Du coup, pas vraiment",deny
+"Bonjour, mon paiement est bloqué depuis ce matin",diagnostic
+Hello l'assistant ?,greet
+"Coucou, j'ai besoin d'aide",greet
+"Sérieusement, yep",affirm
+Je veux signaler ce problème. ?,create_reclamation
+"Bref, c'est ça",affirm
+bsr NGONI,greet
+ma réclamation a-t-elle avancé ?,ask_complaint_status
+"Sérieusement, non ce n'est pas ça du tout",deny
+"Du coup, bot à la con",inappropriate_language
+J'ai un souci : mon paiement semble erroné,diagnostic
+"Du coup, ok parfait",affirm
+Est-ce que vous pouvez détailler l'application mobile ?,ask_faq
+"Du coup, oui c'est correct",affirm
+"Je ne suis pas content, les frais sont beaucoup trop élevés. ?",plainte
+"Franchement, tu es une intelligence artificielle ?",bot_challenge
+"Franchement, oui merci ça m'aide",rate_response_useful
+"Hey, j'ai besoin d'aide",greet
+Je propose d'intégrer la possibilité d'exporter ses relevés. ?,suggestion
+"Yo, petite question rapide",greet
+Pourquoi mon retrait a échoué ?,diagnostic
+"Écoutez, comment perdre du poids rapidement ?",out_of_scope
+Bonsoir support ?,greet
+mon ticket a-t-elle avancé ?,ask_complaint_status
+À quoi sert le programme de fidélité ?,ask_faq
+"Écoutez, tout à fait",affirm
+"Honnêtement, rien ne fonctionne comme prévu, ça m'énerve. ?",plainte
+"Franchement, rien ne fonctionne comme prévu, c'est nul.",plainte
+Ce serait top d'avoir un support en plusieurs langues. ?,suggestion
+"Bonne journée, j'ai fini",goodbye
+"Aidez-moi svp, mon transfert a disparu",diagnostic
+"Voilà, affirmatif",affirm
+cc support,greet
+"Sérieusement, ça résout mon souci, merci beaucoup",rate_response_useful
+"merci bye, à la prochaine ?",goodbye
+Des questions sur le compte,select_faq_category
+mon dossier a-t-elle avancé ?,ask_complaint_status
+[comment-contacter-l-assistance-a1b2c3],select_faq_question
+"Sérieusement, t un bot ?",bot_challenge
+"Franchement, c'est quoi ton rôle ?",bot_challenge
+Pouvez-vous m'expliquer le programme de fidélité ?,ask_faq
+"Bon, non ça ne m'aide pas",rate_response_not_useful
+"Dites-moi, fuck",inappropriate_language
+"Écoutez, oui merci ça m'aide",rate_response_useful
+kesk le mode hors-ligne au juste,ask_faq
+"salut, petite question rapide",greet
+j'aimerai en savoir plus sur la sécurité du compte,ask_faq
+"Bref, est-ce que tu as une mémoire ?",bot_challenge
+"merci bye, merci pour votre aide",goodbye
+J'aimerais créer un dossier de réclamation. ?,create_reclamation
+"Voilà, qui a inventé Internet ?",out_of_scope
+"Sérieusement, qui parle ?",bot_challenge
+Je suis frustré parce que ça casse à chaque mise à jour. ?,plainte
+Une suggestion : il faudrait un chat en direct avec un conseiller. ?,suggestion
+C'est vraiment décevant : rien ne fonctionne comme prévu.,plainte
+"Au revoir, bonne continuation",goodbye
+"Sérieusement, donne-moi une recette de cuisine",out_of_scope
+Hello NGONI,greet
+"Bref, qui est le président des États-Unis ?",out_of_scope
+"Du coup, qui est le président des États-Unis ?",out_of_scope
+"Dites-moi, oui bien sûr",affirm
+"mes pièces ne passe pas, vous pouvez verifier ?",diagnostic
+"mon KYC a disparu, vous pouvez verifier ?",diagnostic
+J'aimerais des informations sur les moyens de paiement,ask_faq
+"Voilà, qui est Elon Musk ?",out_of_scope
+"Franchement, tu es spécialisé en quoi ?",ask_capabilities
+"Du coup, yes",affirm
+Ça fait deux jours que mon profil refuse de se valider,diagnostic
+"mon dépôt reste en attente depuis hier, vous pouvez verifier ?",diagnostic
+Pourquoi ne pas proposer une authentification par empreinte digitale ?,suggestion
+"Sérieusement, c bon",affirm
+"Voilà, donne-moi des films à regarder",out_of_scope
+Je souhaite contacter le support.,create_reclamation
+"À bientôt, à la prochaine",goodbye
+"Bye, à la prochaine",goodbye
+"Ça ne va pas du tout, l'application est trop lente.",plainte
+"Ça ne va pas du tout, rien ne fonctionne comme prévu.",plainte
+"Sérieusement, oui vas-y",affirm
+"Sérieusement, non ça ne m'aide pas",rate_response_not_useful
+Avez-vous prévu la possibilité d'exporter ses relevés ?,suggestion
+"Je suis très déçu, l'application plante tout le temps.",plainte
+"Alors, comment apprendre l'anglais vite ?",out_of_scope
+"Merci au revoir, merci pour votre aide ?",goodbye
+Ce serait top d'avoir un mode sombre.,suggestion
+Quels sont les détails concernant les pièces ?,ask_faq
+Ça fait deux jours que ma vérification d'identité reste en attente depuis hier,diagnostic
+J'aimerais connaître le statut de ma dernière réclamation ?,ask_complaint_status
+Je propose d'intégrer la possibilité d'exporter ses relevés. ?,suggestion
+Mon idée : ajouter un chat en direct avec un conseiller. ?,suggestion
+"Écoutez, peux-tu coder un site web ?",out_of_scope
+Merci de signaler ce problème rapidement.,create_reclamation
+Merci de formuler une plainte officielle rapidement.,create_reclamation
+"Écoutez, putain de bot inutile",inappropriate_language
+Merci de faire remonter mon cas rapidement.,create_reclamation
+"slt, j'ai besoin d'aide",greet
+bsr NGONI ?,greet
+"À bientôt, à la prochaine ?",goodbye
+"Bref, qui a gagné la CAN ?",out_of_scope
+Pourquoi ne pas proposer un récapitulatif mensuel des dépenses ?,suggestion
+"Franchement, c'est bon",affirm
+"Du coup, est-ce que tu as une mémoire ?",bot_challenge
+"Franchement, qui a créé ce chatbot ?",bot_challenge
+Vous pouvez me dire où ça en est pour ma réclamation ?,ask_complaint_status
+Quelles sont les infos sur les lives privés payants ?,ask_faq
+jaimrai être mis en relation avec un agent svp,create_reclamation
+Une suggestion : il faudrait un récapitulatif mensuel des dépenses. ?,suggestion
+Mon idée : ajouter un support en plusieurs langues. ?,suggestion
+"Honnêtement, rien ne fonctionne comme prévu, ça m'énerve. ?",plainte
+Je veux voir les questions sur les retraits,select_faq_category
+"a+, bonne continuation ?",goodbye
+"Alors, donne-moi une recette de cuisine",out_of_scope
+"Écoutez, oui c'est bien ça",affirm
+Est-ce que vous pouvez détailler le mode hors-ligne ?,ask_faq
+"Bye, bonne continuation",goodbye
+J'aimerais signaler ce problème.,create_reclamation
+"Du coup, oui",affirm
+"Franchement, oui merci",affirm
+"Dites-moi, tu es vraiment un bot ?",bot_challenge
+"Sérieusement, comment apprendre l'anglais vite ?",out_of_scope
+"Du coup, c'est quoi tes fonctionnalités ?",ask_capabilities
+"Bon, effectivement",affirm
+"Voilà, c un robot ?",bot_challenge
+Ce serait bien d'avoir un rappel avant l'expiration du KYC. ?,suggestion
+"Alors, peux-tu coder un site web ?",out_of_scope
+"Sérieusement, c un robot ?",bot_challenge
+"Sérieusement, ok",affirm
+Ça fait deux jours que mon solde ne passe pas,diagnostic
+Mon idée : ajouter un chat en direct avec un conseiller. ?,suggestion
+Montre-moi les questions à propos de les questions générales,select_faq_category
+kesk la vérification KYC au juste,ask_faq
+Avez-vous prévu un système de parrainage amélioré ?,suggestion
+"Bref, donne-moi des films à regarder",out_of_scope
+Ce serait pratique d'avoir une barre de recherche dans la FAQ. ?,suggestion
+"Sérieusement, tu me gonfles",inappropriate_language
+je veu obtenir une prise en charge officielle stp,create_reclamation
+"Dites-moi, comment tu fonctionnes ?",bot_challenge
+Ce serait pratique d'avoir des filtres pour trouver les lives plus facilement. ?,suggestion
+"Je ne suis pas content, rien ne fonctionne comme prévu. ?",plainte
+"Écoutez, connard",inappropriate_language
+"À plus, j'ai fini ?",goodbye
+"Dites-moi, jamais",deny
+cc l'assistant,greet
+"Bon, exact",affirm
+Pouvez-vous m'aider à parler à un conseiller humain ?,create_reclamation
+kesk la recharge du compte au juste,ask_faq
+Est-ce que vous pouvez détailler le programme de fidélité ?,ask_faq
+"Dites-moi, qui parle ?",bot_challenge
+"Franchement, comment investir en bourse ?",out_of_scope
+"Je suis mécontent, rien ne fonctionne comme prévu. ?",plainte
+"Sérieusement, nope",deny
+"Voilà, t humain ?",bot_challenge
+je veu signaler ce problème stp ?,create_reclamation
+"Écoutez, c'est n'importe quoi ce bot",inappropriate_language
+Merci de déposer une réclamation rapidement.,create_reclamation
+"Alors, ta gueule",inappropriate_language
+"Sérieusement, sa ser a rien ton bot de merde",inappropriate_language
+"Du coup, tu me gonfles",inappropriate_language
+Pouvez-vous m'expliquer les notifications ?,ask_faq
+"salut, petite question rapide ?",greet
+C'est vraiment décevant : le support ne comprend jamais le problème. ?,plainte
+"Alors, pas du tout",deny
+Il faut absolument escalader mon dossier.,create_reclamation
+Merci de contacter le support rapidement.,create_reclamation
+"Bonne soirée, à la prochaine",goodbye
+"Écoutez, quelles sont tes compétences ?",ask_capabilities
+"À plus, bonne continuation ?",goodbye
+"Voilà, ok parfait",affirm
+"Au revoir, merci pour votre aide",goodbye
+"Bref, pas encore",deny
+"jai un probleme, mon compte reste en attente depuis hier",diagnostic
+"Franchement, oui vas-y",affirm
+vous pouvez m'expliquer la suppression de compte stp,ask_faq
+"Dites-moi, tu utilises quel modèle d'IA ?",bot_challenge
+"Bref, jamais",deny
+"mon transfert ne s'affiche plus, vous pouvez verifier ?",diagnostic
+Une suggestion : il faudrait plus de moyens de paiement pour recharger. ?,suggestion
+"Bon, hors de question",deny
+"Bref, comment apprendre l'anglais vite ?",out_of_scope
+"Écoutez, ça règle mon problème",rate_response_useful
+"À plus, merci pour votre aide",goodbye
+C'est quoi la suppression de compte exactement ?,ask_faq
+"Voilà, nan",deny
+"Dites-moi, pas terrible cette réponse",rate_response_not_useful
+dites moi tout sur NGONI Plus svp,ask_faq
+"Hey, j'ai une question",greet
+"Du coup, oui je confirme",affirm
+Vous devriez ajouter un chat en direct avec un conseiller. ?,suggestion
+"Je suis très déçu, je n'ai aucune nouvelle depuis des semaines.",plainte
+"Je suis mécontent, ça casse à chaque mise à jour.",plainte
+"Sérieusement, quels problèmes peux-tu résoudre ?",ask_capabilities
+slt NGONI,greet
+"cc, j'ai besoin d'aide",greet
+Ce serait bien d'avoir des notifications personnalisables. ?,suggestion
+"Dites-moi, pas du tout",deny
+"Franchement, vous êtes vraiment nuls",inappropriate_language
+"Voilà, comment peux-tu m'aider ?",ask_capabilities
+"je vous laisse, à la prochaine ?",goodbye
+Comment fonctionne l'assistance client ?,ask_faq
+Comment ça marche la suppression de compte ?,ask_faq
+dites moi tout sur les moyens de paiement svp,ask_faq
+Une suggestion : il faudrait un récapitulatif mensuel des dépenses. ?,suggestion
+"Bref, t'es specialise dans quoi exactement ?",ask_capabilities
+jaimrai formuler une plainte officielle svp,create_reclamation
+"Bref, qui a inventé Internet ?",out_of_scope
+"Bon, qui a inventé Internet ?",out_of_scope
+eski la vérification KYC c'est gratuit ou payant,ask_faq
+"Alors, service de merde",inappropriate_language
+"Écoutez, c'était utile",rate_response_useful
+"Dites-moi, casse-toi",inappropriate_language
+mon KYC est bloqué depuis ce matin,diagnostic
+"Bon, c bon",affirm
+"Bref, absolument pas",deny
+Pourquoi ne pas proposer une authentification par empreinte digitale ?,suggestion

@@ -34,6 +34,8 @@ faire évoluer ou dépanner ce périmètre.
 | 15 | [Modèle de données](15-modele-donnees.md) | Schémas PostgreSQL réels, pgvector, tables, conventions |
 | 17 | [DevOps — flow Rasa](17-devops.md) | Build/train/test/deploy/rollback des conteneurs `rasa`/`actions`, CI/CD proposée, hors périmètre LLM |
 | 18 | [Rapport des compétences](18-rapport-competences.md) | Classement des compétences de l'assistant, du plus important au plus mineur, et propositions priorisées |
+| 19 | [Prise en charge humaine](19-prise-en-charge-humaine.md) | Escalade réelle, file des conseillers, prise en charge d'une demande ou d'une réclamation, supervision associée |
+| 20 | [Mémoire conversationnelle](20-memoire-conversationnelle.md) | Contexte de la conversation dans le classifieur, mémoire entre conversations, réponses de repli générées, mise au point mesurée du classifieur |
 
 ## Rapport transversal
 

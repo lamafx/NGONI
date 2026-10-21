@@ -268,6 +268,163 @@ def is_superagent_mode(tracker: Tracker) -> bool:
     return bool(metadata.get("superagent"))
 
 
+def stable_user_id(tracker: Tracker) -> Optional[Text]:
+    """Identite STABLE de l'utilisateur, d'une conversation a l'autre --
+    `metadata.user_id` envoye par le frontend (voir stableUserId,
+    frontend/src/services/chatService.js). Distincte de tracker.sender_id, qui
+    change a chaque rechargement de page (tracker Rasa neuf, voir
+    rasaSenderId) et reste la cle de la conversation EN COURS (tickets, file
+    des conseillers). Cherchee dans le dernier message utilisateur qui la
+    porte, pas seulement le tout dernier : un rewind d'ActionDefaultFallback
+    n'efface pas tracker.events."""
+    for event in reversed(tracker.events):
+        if event.get("event") == "user":
+            user_id = (event.get("metadata") or {}).get("user_id")
+            if user_id:
+                return str(user_id)
+    return None
+
+
+# Tournures qui, en tete de message, en font une SUITE de la question
+# precedente ("et depuis Android ?", "pour un retrait ?"). Volontairement
+# etroit : une question courte mais autonome ("C'est quoi le KYC ?") ne doit
+# jamais etre melangee a la precedente.
+_FOLLOW_UP_OPENERS = ("et ", "pour ", "sur ", "avec ", "depuis ", "en ", "par ")
+
+
+def _previous_user_text(tracker: Tracker) -> Optional[Text]:
+    """Texte du message utilisateur PRECEDENT le dernier (clics de bouton
+    "/..." ignores)."""
+    seen_latest = False
+    for event in reversed(tracker.events):
+        if event.get("event") != "user":
+            continue
+        if not seen_latest:
+            seen_latest = True
+            continue
+        text = (event.get("text") or "").strip()
+        if text and not text.startswith("/"):
+            return text
+    return None
+
+
+def standalone_question(tracker: Tracker) -> Optional[Text]:
+    """Texte du dernier message, remplace par sa reformulation autonome
+    quand le classifieur en a produit une a partir du contexte ("et sur
+    Android ?" -> "Comment recharger mon portefeuille sur Android ?", voir
+    REFORMULATION_KEY dans rasa/components/qwen_intent_classifier.py)."""
+    return tracker.latest_message.get("standalone_text") or tracker.latest_message.get("text")
+
+
+def follow_up_question(tracker: Tracker) -> Optional[Text]:
+    """Pour une suite evidente (_FOLLOW_UP_OPENERS) : la question precedente
+    suivie de celle-ci, sinon None. A n'utiliser qu'EN SECOND RECOURS, si la
+    question seule ne trouve rien -- mesure (2026-10-21) : "et combien de
+    temps ca prend ?" seule trouve "Combien de temps prend un retrait ?",
+    alors que combinee a "Comment retirer mes revenus ?" la precedente
+    domine et ressort a l'identique."""
+    text = (tracker.latest_message.get("text") or "").strip()
+    if not text.lower().startswith(_FOLLOW_UP_OPENERS):
+        return None
+    previous = _previous_user_text(tracker)
+    return f"{previous} {text}" if previous else None
+
+
+# Reponse conversationnelle generee (Qwen via Ollama), UNIQUEMENT sur le
+# chemin de repli (incomprehension / hors-sujet) : c'est la que le texte fige
+# sonnait le plus robotique, et c'est le seul endroit ou un appel LLM
+# supplementaire ne ralentit pas un parcours qui fonctionne deja.
+# DESACTIVE PAR DEFAUT (LLM_REPLY_ENABLED=true dans rasa/actions/.env pour
+# l'activer). Qualite constatee bonne ("Je ne suis pas specialiste des
+# competitions sportives, mais je peux vous aider a suivre une reclamation
+# ou a diagnostiquer un probleme...") mais trop lente sans GPU : ~30s de
+# generation EN PLUS de la classification (48s mesures au total sur "qui va
+# gagner la CAN ?"), inacceptable en demonstration en direct.
+LLM_REPLY_ENABLED = getenv("LLM_REPLY_ENABLED", "false").strip().lower() in ("1", "true", "yes", "oui")
+OLLAMA_CHAT_URL = getenv("OLLAMA_CHAT_URL", "http://host.docker.internal:11434/api/chat")
+LLM_REPLY_MODEL = getenv("LLM_REPLY_MODEL", "qwen3:1.7b")
+# Au-dela, le texte fixe est servi : mieux vaut une reponse un peu raide
+# qu'un silence de 30s sans GPU.
+LLM_REPLY_TIMEOUT = float(getenv("LLM_REPLY_TIMEOUT", "20"))
+# MEME valeur que OLLAMA_NUM_CTX du classifieur (rasa/components/
+# qwen_intent_classifier.py) : une fenetre differente pour le meme modele
+# force Ollama a le recharger entre deux appels.
+LLM_REPLY_NUM_CTX = int(getenv("OLLAMA_NUM_CTX", "6144"))
+LLM_REPLY_MAX_CHARS = 320
+# Une reponse de repli ne doit JAMAIS affirmer un fait verifiable (montant,
+# delai, numero, lien) : elle n'a acces a aucune donnee reelle. Un chiffre,
+# une URL ou un e-mail dans la sortie = sortie rejetee, texte fixe a la place.
+_UNSAFE_REPLY_PATTERN = re.compile(r"\d|https?://|www\.|@")
+
+
+def recent_turns(tracker: Tracker, limit: int = 6) -> List[Dict[Text, Text]]:
+    """Derniers echanges (utilisateur ET assistant) lus dans le journal brut
+    du tracker -- y compris les messages "rewind" par un repli, qui ont bien
+    ete dits."""
+    turns: List[Dict[Text, Text]] = []
+    for event in tracker.events:
+        if event.get("event") == "user" and event.get("text"):
+            turns.append({"role": "user", "text": event["text"]})
+        elif event.get("event") == "bot" and event.get("text"):
+            turns.append({"role": "bot", "text": event["text"]})
+    return turns[-limit:]
+
+
+def generate_redirect_reply(tracker: Tracker, situation: Text, capabilities: Text) -> Optional[Text]:
+    """Une ou deux phrases naturelles qui (1) reagissent a ce que
+    l'utilisateur vient de dire, avec le fil de la conversation, (2) le
+    ramenent vers ce que l'assistant sait faire. None si desactive, en
+    panne, trop lent ou si la sortie enfreint un garde-fou : l'appelant sert
+    alors son texte fixe habituel."""
+    if not LLM_REPLY_ENABLED:
+        return None
+    turns = recent_turns(tracker)
+    if not turns:
+        return None
+    history = "\n".join(
+        f"{'Utilisateur' if t['role'] == 'user' else 'Assistant'} : {' '.join(t['text'].split())[:200]}"
+        for t in turns
+    )
+    prompt = "\n".join(
+        [
+            "Tu es l'assistant virtuel de support de NGONI, une application de portefeuille et de contenus.",
+            f"Ce que tu sais faire : {capabilities}.",
+            f"Situation : {situation}",
+            "",
+            "Conversation recente (le dernier message est celui auquel tu reponds) :",
+            history,
+            "",
+            "Ecris ta reponse au DERNIER message de l'utilisateur, en francais, vouvoiement, 2 phrases maximum :",
+            "- d'abord une reaction naturelle et polie a ce qu'il vient de dire (tiens compte de la conversation) ;",
+            "- puis ramene-le vers ce que tu sais faire, en une phrase.",
+            "Interdits : aucun chiffre, montant, delai, numero, lien ou adresse ; aucune promesse ; "
+            "n'invente aucune information sur son compte ; ne reponds pas a une question hors sujet.",
+            "Reponds uniquement par le texte de ta reponse, sans guillemets.",
+        ]
+    )
+    try:
+        response = requests.post(
+            OLLAMA_CHAT_URL,
+            json={
+                "model": LLM_REPLY_MODEL,
+                "messages": [{"role": "user", "content": prompt}],
+                "stream": False,
+                "think": False,
+                "keep_alive": "30m",
+                "options": {"temperature": 0.4, "num_predict": 90, "num_ctx": LLM_REPLY_NUM_CTX},
+            },
+            timeout=LLM_REPLY_TIMEOUT,
+        )
+        response.raise_for_status()
+        text = " ".join(((response.json().get("message") or {}).get("content") or "").split())
+    except (requests.RequestException, ValueError):
+        return None
+    text = text.strip().strip('"').strip()
+    if not text or len(text) > LLM_REPLY_MAX_CHARS or _UNSAFE_REPLY_PATTERN.search(text):
+        return None
+    return text
+
+
 def _conversation_is_free(tracker: Tracker) -> bool:
     """True si aucun flux structure (formulaire de reclamation, champ de
     diagnostic en attente) n'est actif -- a verifier avant d'attacher

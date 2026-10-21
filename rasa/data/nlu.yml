@@ -1218,6 +1218,71 @@ nlu:
     - je parle à quoi là
     - c'est quoi en face de moi
     - c'est automatique ce chat ?
+- intent: request_human_agent
+  # Distinct de bot_challenge (qui INTERROGE la nature du bot : "es-tu un
+  # humain ?") : ici l'utilisateur DEMANDE explicitement a etre mis en
+  # relation avec un humain, sans forcement poser de question. Cree apres
+  # bug constate : "Je veux parler a un conseiller humain" (texte exact des
+  # boutons "Contactez-nous"/"Contactez un conseiller", ChatPage.jsx) etait
+  # classe bot_challenge par le classifieur few-shot (composant LLM,
+  # examples_per_intent: 5) -- ses 5 premiers exemples mentionnent "humain"
+  # a plusieurs reprises ("Est-ce que tu es un humain ?" en position 2),
+  # alors qu'aucun des 5 premiers exemples de create_reclamation n'evoquait
+  # de conseiller/humain. Les 5 PREMIERS exemples ci-dessous sont donc
+  # deliberement les plus explicites et les plus proches du texte reel des
+  # boutons (voir train() dans le composant de classification : seuls les
+  # `examples_per_intent` premiers exemples de chaque intention, dans
+  # l'ordre du fichier, entrent dans le prompt few-shot).
+  examples: |
+    - Je veux parler à un conseiller humain.
+    - Je veux parler à un humain.
+    - Passe-moi un humain s'il te plaît.
+    - Je veux un conseiller, pas un robot.
+    - Mets-moi en relation avec un agent humain.
+    - Je veux discuter avec une vraie personne.
+    - Est-ce que je peux avoir un humain au bout du fil ?
+    - Transfère-moi vers un conseiller.
+    - J'aimerais parler à quelqu'un de l'équipe, pas au bot.
+    - Peux-tu me passer un agent humain ?
+    - je veu un humain la
+    - Ya moyen d'avoir un vrai conseiller ?
+    - Je ne veux plus parler à un robot, donnez-moi un humain.
+    - Connecte-moi à un conseiller s'il vous plaît.
+    - Je préfère parler à une personne réelle.
+    - besoin de parler a quelqu'un pas un bot
+    - Pouvez-vous me transférer vers un humain ?
+    - Je souhaite être mis en relation avec un conseiller humain, pas avec vous.
+    - Non merci, je veux un vrai conseiller.
+    - Donnez-moi un humain, pas un chatbot.
+- intent: cancel_human_agent_request
+  # Symetrique de request_human_agent ci-dessus : l'usager RETIRE sa demande
+  # de mise en relation ("finalement ca va, je continue avec toi").
+  #
+  # Risque de confusion assume et traite ici : "laisse tomber" / "finalement
+  # non" tout seuls appartiennent a `deny` (refus d'une proposition en cours,
+  # ex. pendant le formulaire de reclamation). Les 5 PREMIERS exemples --
+  # seuls a entrer dans le prompt few-shot, voir examples_per_intent dans
+  # config.yml -- mentionnent donc TOUS explicitement le conseiller/l'humain
+  # ou la mise en relation, jamais un simple refus. Les formulations courtes
+  # et ambigues sont volontairement absentes : mieux vaut que le moteur
+  # classe "non laisse tomber" en `deny` (comportement actuel, inchange) que
+  # d'annuler une escalade sur un refus qui ne parlait pas d'elle.
+  examples: |
+    - Finalement je n'ai plus besoin d'un conseiller.
+    - Annule ma demande de mise en relation avec un conseiller.
+    - Laisse tomber le conseiller, je continue avec toi.
+    - Je ne veux plus parler à un humain finalement.
+    - Oublie ma demande d'agent humain s'il te plaît.
+    - Plus besoin d'un conseiller, j'ai trouvé la réponse.
+    - Ce n'est plus la peine de me transférer à quelqu'un.
+    - Annule le transfert vers un conseiller.
+    - Retire ma demande de conseiller.
+    - Finalement continue à m'aider toi-même, pas besoin d'humain.
+    - je veux plus de conseiller ca va merci
+    - pas besoin d'agent humain finalement
+    - C'est bon, mon problème est réglé, plus besoin du conseiller.
+    - Annulez la mise en relation avec le support humain.
+    - Je préfère finalement rester avec l'assistant.
 - intent: out_of_scope
   examples: |
     - Désolé, je ne peux pas répondre à cette demande...
@@ -1659,7 +1724,7 @@ nlu:
     - Le [login](type_problem:login) ne fonctionne pas depuis ce matin.
     - Le [chat](type_problem:chat) ne fonctionne plus.
     # Audit qualite NLU : "de" precedant l'entite mal etiquete par le modele
-    # entraine (DIETClassifier_errors.json, confiance 0.57-0.70 sur "problème
+    # entraine (le classifieur Rasa historique_errors.json, confiance 0.57-0.70 sur "problème
     # de mot de passe"/"problème de connexion") malgre des annotations deja
     # correctement delimitees ci-dessus -- ces variantes SANS "de" avant
     # l'entite, et avec d'autres prepositions, diversifient le contexte
@@ -1692,13 +1757,140 @@ nlu:
     - [Depuis ce matin](incident_date:depuis ce matin), impossible de me [connecter](type_problem:login) [sur android](platform:Android).
     - Mon [paiement](operation_type:payment) a [échoué](issue_status:failed) [ce matin](incident_date:ce matin) [sur iphone](platform:iOS).
     # Audit qualite NLU : seulement 7 occurrences avant ce fix (recall 0.917
-    # sur 12 exemples de test seulement, DIETClassifier_report.json), aucune
+    # sur 12 exemples de test seulement, le classifieur Rasa historique_report.json), aucune
     # date absolue ni formulation relative variee -- ajoute des formes
     # supplementaires (date absolue, jour de semaine, duree ecoulee,
     # week-end) pour couvrir des reponses courtes, isolees, comme celles
     # tapees directement en reponse a utter_ask_incident_date.
     - C'est arrivé [mardi dernier](incident_date:mardi dernier).
     - Le problème date [du 3 juillet](incident_date:du 3 juillet).
+
+    # Audit qualite NLU (2026-08-20) : evaluation live sur un jeu de
+    # paraphrases tenu a l'ecart du corpus (entity_eval.py) -- rappel mesure
+    # a 0 % pour incident_date et issue_status (10 et 6 occurrences testees,
+    # 0 retrouvee), 33 % pour type_problem, 25 % pour platform. Les exemples
+    # ci-dessus etaient trop peu nombreux et trop proches les uns des autres
+    # (memes 5 dates, memes 5 statuts) pour generaliser au-dela des phrases
+    # d'entrainement -- le modele n'invente jamais une entite a tort
+    # (precision 1.0 sur ce meme test), il manque juste de diversite pour la
+    # detecter. Ajouts ci-dessous : formulations relatives, absolues, durees
+    # ecoulees, jours de semaine, registre informel/SMS, et positions
+    # syntaxiques variees (debut/milieu/fin de phrase, forme isolee), pour
+    # chacune des 3 valeurs categorielles fermees (issue_status, type_problem,
+    # platform -- voir domain.yml) ou en texte libre (incident_date).
+
+    # --- incident_date : expressions relatives ---
+    - Mon compte est bloqué depuis [avant-hier](incident_date:avant-hier).
+    - [Cette nuit](incident_date:cette nuit), mon paiement a été rejeté.
+    - Ça ne marche plus depuis [cet après-midi](incident_date:cet après-midi).
+    - [Ce week-end](incident_date:ce week-end), impossible de me connecter.
+    - Le problème dure depuis [cette semaine](incident_date:cette semaine).
+    - Ça a commencé [la semaine dernière](incident_date:la semaine dernière).
+    - Rien ne fonctionne depuis [le mois dernier](incident_date:le mois dernier).
+    - J'attends une réponse depuis [tout à l'heure](incident_date:tout à l'heure).
+    - Mon retrait est bloqué depuis [il y a une heure](incident_date:il y a une heure).
+    - Ça bug depuis [il y a deux jours](incident_date:il y a deux jours).
+    - Toujours pas de réponse depuis [il y a trois heures](incident_date:il y a trois heures).
+    - Mon dossier est en attente depuis [plusieurs jours](incident_date:plusieurs jours).
+    - Je n'ai plus accès depuis [plusieurs heures](incident_date:plusieurs heures).
+    - Ça fait bloqué depuis [une semaine](incident_date:une semaine).
+    - Toujours rien depuis [un mois](incident_date:un mois).
+    - Ça traîne depuis [longtemps](incident_date:longtemps).
+
+    # --- incident_date : jours de semaine, formes "depuis X" ---
+    - Impossible de me connecter depuis [lundi](incident_date:lundi).
+    - Mon retrait est en attente depuis [mardi](incident_date:mardi).
+    - Ma transaction est bloquée depuis [mercredi](incident_date:mercredi).
+    - Le souci a commencé [jeudi](incident_date:jeudi).
+    - Ça ne fonctionne plus depuis [vendredi](incident_date:vendredi).
+    - Rien ne s'est passé depuis [samedi](incident_date:samedi).
+    - Toujours pas résolu depuis [dimanche](incident_date:dimanche).
+
+    # --- incident_date : dates absolues ---
+    - C'est arrivé le [15 août](incident_date:15 août).
+    - Le blocage date du [20 juillet](incident_date:20 juillet).
+    - Ça a commencé le [3/08](incident_date:3/08).
+    - Depuis le [10 juin](incident_date:10 juin) rien n'a bougé.
+
+    # --- incident_date : formes courtes/isolees (reponse a utter_ask_incident_date) ---
+    - hier soir
+    - avant-hier
+    - ce matin
+    - cet après-midi
+    - il y a 2 jours
+    - il y a une semaine
+    - depuis ce matin
+    - depuis hier soir
+    - depuis 3 jours
+    - depuis une semaine
+    - la semaine dernière
+    - mardi dernier
+
+    # --- incident_date : registre informel/SMS ---
+    - sa fai 2 jour ke sa march pa
+    - dpuis hier soir sa bug
+    - ct hier ke jai eu le probleme
+    - ya 3 jour de sa
+
+    # --- issue_status : pending, formulations variees ---
+    - Ma transaction est [en cours de traitement](issue_status:pending) depuis trop longtemps.
+    - Mon dossier reste [en instance](issue_status:pending).
+    - Ma demande est [toujours pas traitée](issue_status:pending).
+    - Mon retrait n'est [pas encore validé](issue_status:pending).
+    - Ça reste [en cours](issue_status:pending) sans avancer.
+    - Ma vérification est [toujours en cours](issue_status:pending).
+    - Le paiement [stagne](issue_status:pending) depuis hier.
+    - Ma demande [ne progresse plus](issue_status:pending).
+    - [en cours de traitement](issue_status:pending)
+    - [toujours en attente](issue_status:pending)
+
+    # --- issue_status : failed, formulations variees ---
+    - Mon virement a été [annulé](issue_status:failed) sans explication.
+    - Ma demande a été [rejetée](issue_status:failed) automatiquement.
+    - Le paiement [n'a pas abouti](issue_status:failed).
+    - Ma transaction [ne passe pas](issue_status:failed) du tout.
+    - Mon retrait a été [invalidé](issue_status:failed) par le système.
+    - Le virement est [annulé](issue_status:failed) depuis ce matin.
+    - [rejetée](issue_status:failed)
+    - [annulé](issue_status:failed)
+    - [n'a pas abouti](issue_status:failed)
+
+    # --- issue_status : blocked, formulations variees ---
+    - Mon compte est [gelé](issue_status:blocked) depuis hier.
+    - Mon accès est [figé](issue_status:blocked) depuis ce matin.
+    - Ma demande reste [coincée](issue_status:blocked).
+    - Mon compte est [suspendu](issue_status:blocked) sans raison.
+    - Mon profil est [verrouillé](issue_status:blocked).
+    - L'application est [inaccessible](issue_status:blocked) depuis hier.
+    - Le service reste [indisponible](issue_status:blocked).
+    - [gelé](issue_status:blocked)
+    - [figé](issue_status:blocked)
+    - [coincée](issue_status:blocked)
+    - [verrouillé](issue_status:blocked)
+
+    # --- type_problem : login/password/chat, formulations supplementaires ---
+    - Je n'arrive pas à accéder à mon [compte](type_problem:login).
+    - Mon [identifiant](type_problem:login) ne fonctionne plus.
+    - Ma [session](type_problem:login) se déconnecte tout le temps.
+    - L'[authentification](type_problem:login) échoue à chaque fois.
+    - Mon [code](type_problem:password) ne passe plus.
+    - Mon [mdp](type_problem:password) est refusé.
+    - Impossible de réinitialiser mon [mot de passe](type_problem:password).
+    - La [messagerie](type_problem:chat) ne charge plus.
+    - Le [chatbot](type_problem:chat) ne répond plus.
+    - La [discussion en direct](type_problem:chat) est coupée.
+
+    # --- platform : Android/iOS/Web, formulations supplementaires ---
+    - J'utilise un [samsung](platform:Android).
+    - Ça bug sur mon [téléphone android](platform:Android).
+    - Depuis ma [tablette android](platform:Android) impossible de me connecter.
+    - Ça plante sur mon [ipad](platform:iOS).
+    - Depuis mon [iphone](platform:iOS) rien ne fonctionne.
+    - Sous [ios](platform:iOS) l'application crash.
+    - Depuis mon [pc](platform:Web) impossible de valider.
+    - Ça bug sur le [navigateur](platform:Web).
+    - Depuis la [version web](platform:Web) ça ne fonctionne pas.
+    - Sur mon [ordinateur](platform:Web) l'appli ne s'affiche pas.
 
     - [en attente](issue_status:pending)
 

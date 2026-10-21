@@ -1,34 +1,41 @@
 language: fr
 
+# Classification d'intention par le LLM local 1.7B (Ollama local, host.docker.internal:11434)
+# en remplacement du le classifieur Rasa historique -- voir rasa/components/le composant de classification.
+# WhitespaceTokenizer suffit : le composant travaille sur le texte brut du
+# message (prompting), pas sur des features bag-of-words -- SpacyNLP/
+# SpacyFeaturizer/CountVectorsFeaturizer n'avaient plus aucun autre
+# consommateur dans ce pipeline une fois le classifieur Rasa historique retire (verifie :
+# ni EntitySynonymMapper ni ResponseSelector ne sont dans ce config.yml).
+# L'extraction d'entites de DIET n'est pas reprise par ce composant lui-meme,
+# mais le classifieur d'intention fait sa propre extraction (incident_date, amount,
+# platform, operation_type, issue_status) dans le meme appel Ollama -- voir
+# EXTRACTABLE_ENTITIES dans le composant de classification.
 pipeline:
 
-- name: SpacyNLP
-  model: "fr_core_news_md"
+- name: WhitespaceTokenizer
 
-- name: SpacyTokenizer
-
-- name: SpacyFeaturizer
-  pooling: "mean"
-
-- name: CountVectorsFeaturizer
-  analyzer: "word"
-  min_ngram: 1
-  max_ngram: 2
-  min_df: 1
-
-- name: CountVectorsFeaturizer
-  analyzer: "char"
-  min_ngram: 3
-  max_ngram: 5
-  min_df: 1
-
-- name: DIETClassifier
-  epochs: 80
-  constrain_similarities: true
+- name: components.qwen_intent_classifier.QwenIntentClassifier
+  model: "qwen3:1.7b"
+  # 8 et non 5 : exemples desormais repartis sur toute la liste de chaque
+  # intention (voir train() du composant) -- le surplus fait partie du
+  # prefixe fixe du prompt, relu depuis le cache KV d'Ollama.
+  examples_per_intent: 8
 
 - name: FallbackClassifier
   threshold: 0.70
-  ambiguity_threshold: 0.10
+  # 0.08 et non 0.10 : un ecart de "0.10" entre deux scores LLM (ex. 0.95 vs
+  # 0.85, des valeurs rondes tres frequentes chez un LLM prompte pour donner
+  # une confiance) se calcule en float64 comme 0.09999999999999998 -- donc
+  # strictement < 0.10, ce qui declenchait un repli sur nlu_fallback pour des
+  # messages pourtant classes avec une confiance tres nette (0.95, largement
+  # au-dessus du threshold=0.70). Constate en test manuel (voir audit de
+  # session) : "mon retrait de 50000 FCFA est bloque depuis le 15 aout sur
+  # Android, reference WDR-8842QZ" -> diagnostic 0.95 vs plainte 0.85,
+  # repli a tort. 0.08 absorbe cette marge flottante sur l'ecart "rond" de
+  # 10 points tout en gardant la detection d'ecarts reellement serres
+  # (5 points ou moins).
+  ambiguity_threshold: 0.08
 assistant_id: 20260728-142324-chilly-frank
 policies:
 # # No configuration for policies was provided. The following default policies were used to train your model.

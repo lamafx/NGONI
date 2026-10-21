@@ -1,17 +1,199 @@
-cd C:\DEV\NGONI\ngoni-ia-service
+============================================================
+ NGONI IA SERVICE -- Lancement des serveurs (PowerShell)
+ Racine du depot : C:\DEV\NGONI\ngoni-ia-service
+ Ordre de demarrage : Postgres -> Rasa -> Moteur -> Stubs -> Frontend
+ (le moteur attend que Rasa reponde avant de finir son demarrage)
+============================================================
 
-docker compose up -d postgres rasa actions
+ Ports utilises
+   5432  PostgreSQL (service Windows natif)
+   5005  Rasa                    (Docker)
+   5055  Serveur d'actions Rasa  (Docker)
+   8000  Moteur FastAPI          (natif, venv)
+   3103  wallet_stub             (natif, meme venv)
+   3104  user_stub               (natif, meme venv)
+   5173  Frontend Vite           (natif, npm)
 
-cd fastapi
+ Chaque serveur natif occupe SA propre fenetre PowerShell : les commandes
+ ci-dessous ne rendent pas la main. Voir le paragraphe 6 pour tout lancer
+ d'un coup dans des fenetres separees.
 
+
+# ============================================================
+# 0. INSTALLATION -- une seule fois
+# ============================================================
+
+Set-Location C:\DEV\NGONI\ngoni-ia-service\fastapi
 python -m venv .venv
-.\.venv\Scripts\Activate.ps1
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+Copy-Item .env.example .env            # puis editer les valeurs
 
-pip install -r requirements.txt
+Set-Location C:\DEV\NGONI\ngoni-ia-service
+Copy-Item rasa\.env.example rasa\.env
+Copy-Item rasa\actions\.env.example rasa\actions\.env
 
-uvicorn app.main:app --reload --host localhost --port 8000
+Set-Location C:\DEV\NGONI\ngoni-ia-service\frontend
+npm install
 
-uvicorn wallet_stub.main:app --port 3103
-uvicorn user_stub.main:app --port 3104
 
-http://localhost:8000/chat
+# ============================================================
+# 1. POSTGRESQL -- service Windows, deja installe
+# ============================================================
+
+Get-Service postgresql-x64-17                  # attendu : Status = Running
+Start-Service postgresql-x64-17                # seulement si Stopped
+
+# Verifier la base (mot de passe : voir fastapi\.env, DATABASE_URL)
+$env:PGPASSWORD = "L@djilama123"
+& "C:\Program Files\PostgreSQL\17\bin\psql.exe" -h 127.0.0.1 -U chatbot_user -d chatbotdb -c "\dt ia.*"
+
+
+# ============================================================
+# 2. RASA + SERVEUR D'ACTIONS -- Docker
+# ============================================================
+# Docker Desktop doit tourner. NE PAS lancer les services `postgres` ni
+# `fastapi` du docker-compose : ils entreraient en concurrence avec les
+# processus natifs sur les memes ports (5432 / 8000).
+
+Set-Location C:\DEV\NGONI\ngoni-ia-service
+docker compose up -d rasa actions
+docker compose ps
+docker compose logs -f rasa                    # suivre le demarrage
+
+# Reentrainer le modele NLU (apres modification de data\nlu.yml, domain.yml...)
+docker compose run --rm rasa train
+docker compose restart rasa
+
+
+# ============================================================
+# 3. MOTEUR FASTAPI -- natif, port 8000        [fenetre dediee]
+# ============================================================
+# Le 1er demarrage prend 10-20 s de plus : le modele d'embeddings et le
+# Capability Registry sont charges AVANT d'accepter du trafic.
+
+Set-Location C:\DEV\NGONI\ngoni-ia-service\fastapi
+.\.venv\Scripts\python.exe -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
+
+# Variante : surcharger la cible du Diagnostic Engine pour cette session
+# seulement, sans toucher au .env
+Set-Location C:\DEV\NGONI\ngoni-ia-service\fastapi
+$env:WALLET_SERVICE_BASE_URL = "http://127.0.0.1:3103/api/v1"
+$env:WALLET_SERVICE_INTERNAL_SECRET = "test-secret"
+.\.venv\Scripts\python.exe -m uvicorn app.main:app --port 8000
+
+
+# ============================================================
+# 4. STUBS DIAGNOSTIC -- natifs, memes venv    [2 fenetres dediees]
+# ============================================================
+# Sans eux, le Diagnostic Engine n'a aucun service a interroger et
+# /diagnostic/capabilities renvoie une liste vide.
+
+Set-Location C:\DEV\NGONI\ngoni-ia-service\fastapi
+.\.venv\Scripts\python.exe -m uvicorn wallet_stub.main:app --app-dir C:\DEV\NGONI\ngoni-ia-service\fastapi --port 3103
+
+Set-Location C:\DEV\NGONI\ngoni-ia-service\fastapi
+.\.venv\Scripts\python.exe -m uvicorn user_stub.main:app --app-dir C:\DEV\NGONI\ngoni-ia-service\fastapi --port 3104
+
+
+# ============================================================
+# 5. FRONTEND -- Vite, port 5173               [fenetre dediee]
+# ============================================================
+# C'est CE serveur qui sert le chat, l'espace conseiller, l'administration
+# et la demonstration. Sans lui, http://localhost:5173 ne repond pas du
+# tout. Il proxyfie /engine vers le moteur (8000) et /rasa vers Rasa (5005),
+# voir frontend\vite.config.js.
+
+Set-Location C:\DEV\NGONI\ngoni-ia-service\frontend
+npm run dev
+http://localhost:5173/?demo=1#/chat
+
+
+# ============================================================
+# 6. TOUT LANCER D'UN COUP -- une fenetre par serveur
+# ============================================================
+# A coller dans une seule console PowerShell, apres avoir demarre Docker
+# Desktop. Chaque Start-Process ouvre une fenetre qui reste ouverte (-NoExit)
+# et que l'on ferme avec Ctrl+C.
+
+Set-Location C:\DEV\NGONI\ngoni-ia-service
+docker compose up -d rasa actions
+
+$racine  = "C:\DEV\NGONI\ngoni-ia-service"
+$python  = "$racine\fastapi\.venv\Scripts\python.exe"
+
+Start-Process powershell -ArgumentList "-NoExit","-Command","Set-Location '$racine\fastapi'; & '$python' -m uvicorn wallet_stub.main:app --app-dir '$racine\fastapi' --port 3103"
+Start-Process powershell -ArgumentList "-NoExit","-Command","Set-Location '$racine\fastapi'; & '$python' -m uvicorn user_stub.main:app --app-dir '$racine\fastapi' --port 3104"
+Start-Process powershell -ArgumentList "-NoExit","-Command","Set-Location '$racine\fastapi'; & '$python' -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8000"
+Start-Process powershell -ArgumentList "-NoExit","-Command","Set-Location '$racine\frontend'; npm run dev"
+
+
+# ============================================================
+# 7. VERIFICATIONS
+# ============================================================
+
+# Qui ecoute quoi (rien affiche = serveur non demarre)
+Get-NetTCPConnection -State Listen -LocalPort 5432,5005,5055,8000,3103,3104,5173 |
+  Select-Object LocalPort, OwningProcess | Sort-Object LocalPort
+
+# Rasa a bien charge un modele -> model_file non vide
+Invoke-RestMethod http://localhost:5005/status
+
+# Moteur operationnel -> liste non vide si les stubs tournent
+Invoke-RestMethod http://localhost:8000/diagnostic/capabilities
+
+# Stubs joignables -> manifeste JSON
+Invoke-RestMethod http://localhost:3103/api/v1/diagnostic/manifest
+Invoke-RestMethod http://localhost:3104/api/v1/diagnostic/manifest
+
+# Statistiques admin (route protegee : secret = ADMIN_INTERNAL_SECRET du .env)
+Invoke-RestMethod http://localhost:8000/admin/stats/overview `
+  -Headers @{ "X-Internal-Secret" = "dev-admin-secret-change-me" } |
+  Select-Object -ExpandProperty kpis
+
+# Le frontend passe bien par son proxy jusqu'au moteur
+Invoke-WebRequest "http://localhost:5173/engine/faq/" -UseBasicParsing |
+  Select-Object StatusCode
+
+
+# ============================================================
+# 8. ADRESSES
+# ============================================================
+
+  http://localhost:5173/#/chat                  Chat client
+  http://localhost:5173/#/agent                 Espace conseiller
+  http://localhost:5173/#/admin                 Administration
+  http://localhost:5173/#/admin/statistiques    Statistiques
+  http://localhost:5173/?demo=1#/chat           Demonstration automatique
+  http://localhost:8000/docs                    API du moteur (Swagger)
+  http://localhost:8000/chat                    Ancienne interface de test
+
+ Le parametre ?demo=1 doit etre place AVANT le # (forme /?demo=1#/chat) :
+ place apres, il disparait a la premiere navigation et les actes suivants
+ de la demonstration ne partent jamais (voir demoDirector.js).
+
+
+# ============================================================
+# 9. ARRET
+# ============================================================
+
+# Serveurs natifs : Ctrl+C dans chaque fenetre, ou par port :
+Get-NetTCPConnection -State Listen -LocalPort 8000,3103,3104,5173 |
+  ForEach-Object { Stop-Process -Id $_.OwningProcess -Force }
+
+# Conteneurs Rasa
+Set-Location C:\DEV\NGONI\ngoni-ia-service
+docker compose stop rasa actions
+
+
+# ============================================================
+# 10. TESTS
+# ============================================================
+
+Set-Location C:\DEV\NGONI\ngoni-ia-service\fastapi
+.\.venv\Scripts\python.exe -m pytest tests -q
+
+Set-Location C:\DEV\NGONI\ngoni-ia-service\frontend
+npm run build
+
+docker compose exec rasa rasa test nlu --out results
+docker compose exec rasa rasa test

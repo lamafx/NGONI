@@ -5,6 +5,8 @@ intents:
   - greet
   - goodbye
   - bot_challenge
+  - request_human_agent
+  - cancel_human_agent_request
   - create_reclamation
   - diagnostic
   - affirm
@@ -72,6 +74,11 @@ slots:
       - type: from_text
         not_intent: &reclamation_meta_intents
           - bot_challenge
+          - request_human_agent
+          # Meme raison que request_human_agent juste au-dessus : "annule ma
+          # demande de conseiller" est une meta-demande sur la conversation,
+          # jamais une categorie de reclamation a enregistrer telle quelle.
+          - cancel_human_agent_request
           - ask_capabilities
           - suggestion
           - plainte
@@ -473,6 +480,17 @@ responses:
     - text: "Je suis l'assistant virtuel NGONI, conçu pour répondre à vos questions sur la plateforme."
     - text: "Je suis un assistant virtuel, pas un humain : je suis là pour répondre à vos questions sur NGONI."
 
+  # Ne fait PAS d'escalade directe : demande la raison, puis laisse la
+  # classification NLU normale du message suivant decider -- si c'est un
+  # probleme diagnosticable, le moteur de diagnostic tente une resolution
+  # automatique et n'escalade en ticket que s'il echoue (voir diagnostic.py,
+  # ActionDecideEscalation) ; sinon (hors perimetre diagnostic, plainte,
+  # demande generale), create_reclamation/plainte cree directement un ticket
+  # -- c'est deja, dans ce cas, la mise en relation humaine demandee.
+  utter_ask_human_reason:
+    - text: "Bien sûr, je peux vous mettre en relation avec un conseiller. Dites-moi d'abord ce qui vous amène : je vais essayer de vous aider directement, et si je n'y arrive pas, je transmets votre dossier à un conseiller."
+    - text: "Pas de souci. Avant de vous transmettre à un conseiller, expliquez-moi votre problème : je peux peut-être le résoudre tout de suite, sinon je fais remonter votre dossier."
+
   utter_out_of_scope:
     - text: "Désolé, je ne peux pas répondre à cette demande. Je peux vous aider à consulter la FAQ ou ouvrir une réclamation."
     - text: "Ce sujet dépasse ce que je sais traiter. Je peux en revanche vous aider avec la FAQ ou une réclamation."
@@ -635,4 +653,5 @@ actions:
   - action_select_faq_category
   - action_select_faq_question
   - action_consult_complaints
+  - action_cancel_human_agent_request
  

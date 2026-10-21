@@ -2,13 +2,13 @@
 
 Positifs : 52 (paraphrases des 8 problemes wallet+user, cible sur les collisions deja documentees dans les manifestes) -- Negatifs : 20 (salutations, questions FAQ generales, hors-sujet)
 
-Genere le 2026-07-30 04:09:12
+Genere le 2026-08-20 20:34:18
 
 **Limite assumee** : mesure le score d'embedding brut via POST /diagnostic/debug/classify, PAS le pipeline complet de desambiguisation (tiebreak mots-cles, repechage, repli par clause) qui vit cote rasa/actions/diagnostic.py et peut corriger certains cas signales ici. Voir le docstring de ce script.
 
-## Seuil actuellement configure (MIN_EMBEDDING_SIMILARITY = 0.84)
+## Seuil actuellement configure (MIN_EMBEDDING_SIMILARITY = 0.75)
 
-TP=44 FP=0 FN=8 TN=20 -- precision=1.000 rappel=0.846 F1=0.917 accuracy=0.889
+TP=51 FP=0 FN=1 TN=20 -- precision=1.000 rappel=0.981 F1=0.990 accuracy=0.986
 
 ## Balayage de seuils (0.40 a 0.90, pas de 0.05)
 
@@ -40,11 +40,4 @@ Aucun.
 
 | Requete | Probleme attendu (bon candidat, score trop bas) | Score |
 |---|---|---:|
-| 'ça fait deux jours que mon retrait reste en attente' | withdrawal_pending | 0.8209 |
-| 'mon retrait a été refusé sans raison' | withdrawal_pending | 0.8307 |
-| 'ma demande de retrait ne progresse plus du tout' | withdrawal_pending | 0.8144 |
-| "j'ai envoyé mes papiers pour le KYC mais rien ne se passe" | kyc_status_issue | 0.8207 |
-| "où en est ma vérification d'identité ?" | kyc_status_issue | 0.8369 |
-| 'ça dit compliance hold sur mon compte' | compliance_hold_blocking | 0.8376 |
 | "le consentement parental n'a jamais été traité" | parental_consent_status | 0.6765 |
-| "pourquoi le compte de ma fille reste verrouillé faute d'accord parental" | parental_consent_status | 0.8183 |

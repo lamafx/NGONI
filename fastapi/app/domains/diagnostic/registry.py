@@ -20,6 +20,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import os
+import time
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -54,6 +55,24 @@ SERVICES_REGISTRY_PATH = os.getenv(
 # voir checklist production) -- un nouveau probleme/service reste pris en
 # compte au plus tard 5 minutes apres sa publication, sans redemarrage.
 REGISTRY_POLL_INTERVAL_SECONDS = float(os.getenv("REGISTRY_POLL_INTERVAL_SECONDS", "300"))
+
+# Delai minimal entre deux tentatives de chargement A LA DEMANDE lorsque le
+# registre est ressorti VIDE du dernier refresh (voir ensure_loaded).
+#
+# Sans cette temporisation, `is_empty()` signifiait a la fois "jamais charge"
+# et "charge, mais aucun service n'a repondu" : ensure_loaded() relancait donc
+# un refresh complet a CHAQUE appel tant qu'aucun microservice n'etait
+# joignable. Or ensure_loaded() est sur le chemin chaud de
+# GET /diagnostic/capabilities ET de chaque tour de DiagnosticPipeline --
+# avec les stubs eteints, chaque requete repayait le cout de connexion des
+# services injoignables (mesure : ~2,4 s par service sous Windows, la pile
+# TCP reemettant plusieurs SYN avant d'abandonner), soit ~5 s par appel.
+# C'est ce qui rendait la page d'administration "Statistiques" lente a
+# afficher alors que ses propres compteurs arrivent en 40 ms.
+#
+# La reprise reste rapide quand un service redemarre : au plus tard apres ce
+# delai a la demande, et de toute facon au prochain cycle de poll_forever.
+REGISTRY_EMPTY_RETRY_SECONDS = float(os.getenv("REGISTRY_EMPTY_RETRY_SECONDS", "30"))
 
 
 @dataclass(frozen=True)
@@ -146,6 +165,10 @@ class CapabilityRegistry:
         self._registry_path = registry_path if registry_path is not None else SERVICES_REGISTRY_PATH
         self._transport = transport
         self._index: dict[tuple[str, str], RoutableProblem] = {}
+        # Instant (monotone) du dernier refresh ayant produit un index vide --
+        # None des qu'un refresh a ramene au moins un probleme. Voir
+        # REGISTRY_EMPTY_RETRY_SECONDS et ensure_loaded.
+        self._empty_since: float | None = None
 
     def _current_services(self) -> list[RegisteredService]:
         if self._explicit_services is not None:
@@ -156,9 +179,21 @@ class CapabilityRegistry:
         return not self._index
 
     async def ensure_loaded(self) -> None:
-        """Charge l'index au premier appel. Idempotent tant que refresh() n'est pas rappele."""
-        if self.is_empty():
-            await self.refresh()
+        """Charge l'index au premier appel. Idempotent tant que refresh() n'est
+        pas rappele.
+
+        Si le dernier chargement a ramene un index VIDE (aucun microservice
+        joignable), les appels suivants n'en redeclenchent pas un nouveau
+        avant REGISTRY_EMPTY_RETRY_SECONDS : sinon chaque requete rejouerait
+        l'attente de connexion vers des services eteints, sur le chemin chaud
+        de /diagnostic/capabilities comme du pipeline de diagnostic.
+        """
+        if not self.is_empty():
+            return
+        if self._empty_since is not None:
+            if time.monotonic() - self._empty_since < REGISTRY_EMPTY_RETRY_SECONDS:
+                return
+        await self.refresh()
 
     async def refresh(self) -> None:
         """Recharge entierement l'index en interrogeant GET /diagnostic/manifest
@@ -180,13 +215,23 @@ class CapabilityRegistry:
         # seul appel au modele juste apres (_compute_all_embeddings), plutot
         # que d'embedder chaque probleme des qu'il est decouvert.
         entries: dict[tuple[str, str], tuple[ProblemDefinition, CapabilityManifest, RegisteredService]] = {}
+        # Manifestes interroges EN PARALLELE (asyncio.gather) et non plus l'un
+        # apres l'autre : le cout d'un cycle etait la SOMME des temps de
+        # reponse (ou d'echec) de tous les services, alors que ces appels sont
+        # totalement independants. Avec deux services injoignables, le refresh
+        # passe de ~5 s a ~2,4 s ; l'ecart grandit avec chaque service ajoute
+        # au YAML. L'ordre de `services` est preserve par gather, donc en cas
+        # de cle (service, probleme) dupliquee entre deux manifestes, c'est
+        # toujours le dernier service du fichier qui l'emporte -- comme avant.
         async with httpx.AsyncClient(timeout=5.0, transport=self._transport) as client:
-            for service in services:
-                manifest = await self._fetch_manifest(client, service)
-                if manifest is None:
-                    continue
-                for problem in manifest.problems:
-                    entries[(manifest.service, problem.id)] = (problem, manifest, service)
+            manifests = await asyncio.gather(
+                *(self._fetch_manifest(client, service) for service in services)
+            )
+        for service, manifest in zip(services, manifests):
+            if manifest is None:
+                continue
+            for problem in manifest.problems:
+                entries[(manifest.service, problem.id)] = (problem, manifest, service)
 
         embeddings_by_key = await self._compute_all_embeddings(entries)
 
@@ -202,6 +247,7 @@ class CapabilityRegistry:
                 example_embeddings=example_embeddings,
             )
         self._index = index
+        self._empty_since = None if index else time.monotonic()
 
     async def poll_forever(self, interval_seconds: float = REGISTRY_POLL_INTERVAL_SECONDS) -> None:
         """Boucle de rafraichissement periodique (Phase 5, etape 23) -- a

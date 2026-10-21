@@ -36,6 +36,14 @@ try:
     from .domains.diagnostic.router import router as diagnostic_router, get_registry
     from .domains.audit.router import router as audit_router
     from .domains.audit.service import record_faq_lookup
+    from .domains.settings.router import router as settings_router
+    from .domains.stats.router import router as stats_router
+    from .domains.stats.dashboard_router import router as dashboard_router
+    from .domains.conversations.router import router as conversations_router
+    from .domains.conversations.admin_router import router as conversations_admin_router
+    from .domains.conversations.service import ConversationService
+    from .domains.agents.admin_router import router as agents_admin_router
+    from .domains.users.admin_router import router as users_admin_router
     from .domains.nlu.engines import DEFAULT_ENGINE, predict as nlu_predict
     from .domains.nlu.router import router as nlu_router
     from .shared.admin_auth import warn_if_admin_secret_missing
@@ -56,6 +64,14 @@ except ImportError:  # pragma: no cover - support running as `uvicorn main:app`
     from domains.diagnostic.router import router as diagnostic_router, get_registry
     from domains.audit.router import router as audit_router
     from domains.audit.service import record_faq_lookup
+    from domains.settings.router import router as settings_router
+    from domains.stats.router import router as stats_router
+    from domains.stats.dashboard_router import router as dashboard_router
+    from domains.conversations.router import router as conversations_router
+    from domains.conversations.admin_router import router as conversations_admin_router
+    from domains.conversations.service import ConversationService
+    from domains.agents.admin_router import router as agents_admin_router
+    from domains.users.admin_router import router as users_admin_router
     from domains.nlu.engines import DEFAULT_ENGINE, predict as nlu_predict
     from domains.nlu.router import router as nlu_router
     from shared.admin_auth import warn_if_admin_secret_missing
@@ -82,6 +98,13 @@ app.include_router(complaints_admin_router)
 app.include_router(feedback_router)
 app.include_router(diagnostic_router)
 app.include_router(audit_router)
+app.include_router(settings_router)
+app.include_router(stats_router)
+app.include_router(dashboard_router)
+app.include_router(conversations_router)
+app.include_router(conversations_admin_router)
+app.include_router(agents_admin_router)
+app.include_router(users_admin_router)
 app.include_router(embeddings_router)
 app.include_router(nlu_router)
 
@@ -592,6 +615,43 @@ async def parse_message(request: ParseRequest):
     }
 
 
+# --- Journalisation de la conversation (voir app/domains/conversations) -------
+#
+# Tout ce bloc est BEST-EFFORT, sans exception : une panne d'ecriture ici ne
+# doit jamais empecher une reponse deja calculee d'arriver a l'utilisateur.
+# Meme principe que app.domains.diagnostic.audit_repository et
+# app.domains.audit (record_faq_lookup).
+
+
+def _record_user_turn(db, sender_id: str, text: str, intent: Optional[str], confidence: Optional[float], trace_id: str) -> None:
+    try:
+        ConversationService.from_session(db).record_user_message(
+            sender_id, text, intent=intent, confidence=confidence, metadata={"trace_id": trace_id},
+        )
+    except Exception as error:  # pragma: no cover - jamais bloquant
+        logger.warning("[trace_id=%s] Journalisation du message utilisateur impossible (%s)", trace_id, error)
+
+
+def _record_bot_turn(db, sender_id: str, messages: list, trace_id: str) -> None:
+    try:
+        ConversationService.from_session(db).record_bot_messages(sender_id, messages)
+    except Exception as error:  # pragma: no cover - jamais bloquant
+        logger.warning("[trace_id=%s] Journalisation de la reponse du bot impossible (%s)", trace_id, error)
+
+
+def _conversation_is_muted(db, sender_id: str) -> bool:
+    """Un conseiller a-t-il pris cette conversation en charge ? Si oui, le
+    bot ne repond plus (voir domains/conversations/service.py pour le
+    raisonnement complet). En cas d'erreur de lecture : on considere que NON,
+    et l'assistant repond -- rester muet sur une panne de base laisserait
+    l'utilisateur sans aucune reponse."""
+    try:
+        return ConversationService.from_session(db).is_muted(sender_id)
+    except Exception as error:  # pragma: no cover - jamais bloquant
+        logger.warning("Etat de prise en charge illisible pour %s (%s)", sender_id, error)
+        return False
+
+
 @app.post("/api/chat")
 async def send_to_bot(request: ChatRequest, db=Depends(get_db)):
     text = request.text
@@ -606,10 +666,26 @@ async def send_to_bot(request: ChatRequest, db=Depends(get_db)):
     repository = FaqRepository(db)
     faq_service = FaqService(repository)
 
+    # Prise en charge humaine en cours : le bot se tait, le message est
+    # simplement depose dans le fil ou le conseiller le lit (espace Agent).
+    # Aucune classification NLU n'est faite dans ce cas -- elle ne servirait a
+    # rien, personne ne route ce message automatiquement.
+    if _conversation_is_muted(db, sender_id):
+        _record_user_turn(db, sender_id, text, None, None, trace_id)
+        logger.info("[trace_id=%s] Conversation %s prise en charge par un conseiller : bot en silence", trace_id, sender_id)
+        return {
+            "messages": [],
+            "handoff": {
+                "active": True,
+                "message": "Un conseiller suit votre demande, sa réponse s'affichera ici.",
+            },
+        }
+
     # Payload structure (bouton) : contourne le selecteur de modele, aucune
     # classification a faire (voir /api/parse ci-dessus, meme garde-fou).
     is_structured_payload = text.startswith("/")
     intent_name = None
+    intent_confidence = None
 
     if not is_structured_payload:
         model_id = request.model or DEFAULT_ENGINE
@@ -621,10 +697,19 @@ async def send_to_bot(request: ChatRequest, db=Depends(get_db)):
             raise HTTPException(status_code=502, detail=f"Impossible de parser le message (model={model_id}): {error}")
 
         intent_name = prediction.intent
+        intent_confidence = prediction.confidence
         logger.info(
             "[trace_id=%s] NLU intent (model=%s): %s (confidence=%.3f)",
             trace_id, model_id, intent_name, prediction.confidence,
         )
+
+    # Un seul point d'ecriture pour les deux chemins (texte classifie ou
+    # payload structure), place AVANT les branchements qui peuvent repondre et
+    # sortir : un message auquel le moteur repond par un raccourci FAQ doit
+    # apparaitre dans le fil du conseiller comme n'importe quel autre.
+    _record_user_turn(db, sender_id, text, intent_name, intent_confidence, trace_id)
+
+    if not is_structured_payload:
         # Egalite stricte (pas "faq" in normalized_intent) : ce test large
         # capturait aussi browse_faq/select_faq_category/select_faq_question
         # (voir rasa/actions/faq.py), qui doivent passer par le webhook Rasa
@@ -656,14 +741,14 @@ async def send_to_bot(request: ChatRequest, db=Depends(get_db)):
                     "[trace_id=%s] FAQ answer returned for intent %s with score=%.3f (matched=%r)",
                     trace_id, intent_name, faq_match.score, faq_match.question,
                 )
-                return {
-                    "messages": [
-                        {
-                            "text": faq_match.answer,
-                            "similarity_score": faq_match.score,
-                        }
-                    ]
-                }
+                faq_messages = [
+                    {
+                        "text": faq_match.answer,
+                        "similarity_score": faq_match.score,
+                    }
+                ]
+                _record_bot_turn(db, sender_id, faq_messages, trace_id)
+                return {"messages": faq_messages}
             logger.info("[trace_id=%s] Aucune réponse FAQ trouvée pour l'intent %s", trace_id, intent_name)
 
     # Le webhook Rasa recoit toujours le texte BRUT, quel que soit le moteur
@@ -697,7 +782,9 @@ async def send_to_bot(request: ChatRequest, db=Depends(get_db)):
         raise HTTPException(status_code=502, detail=f"Impossible de contacter le bot Rasa: {error}")
 
     logger.info("[trace_id=%s] send_to_bot succeeded using %s", trace_id, RASA_WEBHOOK_URL)
-    return {"messages": rasa_response.json()}
+    rasa_messages = rasa_response.json()
+    _record_bot_turn(db, sender_id, rasa_messages, trace_id)
+    return {"messages": rasa_messages}
 
 
 # Monte APRES toutes les routes explicites ci-dessus : Starlette verifie les

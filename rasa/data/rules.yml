@@ -139,6 +139,87 @@ rules:
   - action: reclamation_form
   - active_loop: reclamation_form
 
+- rule: Human agent request response
+  # Meme garde-fou que "Bot presentation response" ci-dessus : ne fait
+  # JAMAIS d'escalade directe. Demande la raison (utter_ask_human_reason)
+  # puis attend le prochain message -- classe naturellement par le NLU au
+  # tour suivant : s'il correspond a un probleme diagnosticable, le moteur
+  # de diagnostic tente une resolution automatique et n'escalade que s'il
+  # echoue (voir "Route diagnostic requests" plus bas) ; sinon
+  # create_reclamation/plainte cree directement un ticket, ce qui EST la
+  # mise en relation humaine demandee dans ce cas.
+  condition:
+  - active_loop: null
+  - slot_was_set:
+    - pending_field: null
+  steps:
+  - intent: request_human_agent
+  - action: utter_ask_human_reason
+
+- rule: Human agent request response while diagnostic is pending
+  # Repond d'abord a la demande, PUIS rappelle la question de diagnostic en
+  # attente -- meme mecanique que "Bot presentation response while
+  # diagnostic is pending".
+  condition:
+  - active_loop: null
+  - slot_was_set:
+    - pending_field
+  steps:
+  - intent: request_human_agent
+  - action: utter_ask_human_reason
+  - action: action_reask_pending_diagnostic_field
+  - action: action_listen
+
+- rule: Human agent request response while reclamation form is active
+  # Deja EN TRAIN de constituer un dossier pour un conseiller : repond puis
+  # reprend le formulaire au lieu de le redemarrer -- meme mecanique que
+  # "Bot presentation response while reclamation form is active".
+  condition:
+  - active_loop: reclamation_form
+  steps:
+  - intent: request_human_agent
+  - action: utter_ask_human_reason
+  - action: reclamation_form
+  - active_loop: reclamation_form
+
+- rule: Cancel human agent request
+  # Retrait d'une demande de mise en relation encore en attente. L'action
+  # appelle le moteur (POST /conversations/withdraw) : sans cet appel, dire
+  # "c'est annule" laisserait la conversation dans la file du conseiller.
+  # Memes garde-fous que "Human agent request response" ci-dessus.
+  condition:
+  - active_loop: null
+  - slot_was_set:
+    - pending_field: null
+  steps:
+  - intent: cancel_human_agent_request
+  - action: action_cancel_human_agent_request
+
+- rule: Cancel human agent request while diagnostic is pending
+  # Annule la demande PUIS rappelle la question de diagnostic en attente --
+  # meme mecanique que la variante "while diagnostic is pending" des autres
+  # demandes meta.
+  condition:
+  - active_loop: null
+  - slot_was_set:
+    - pending_field
+  steps:
+  - intent: cancel_human_agent_request
+  - action: action_cancel_human_agent_request
+  - action: action_reask_pending_diagnostic_field
+  - action: action_listen
+
+- rule: Cancel human agent request while reclamation form is active
+  # Le dossier en cours de constitution n'est PAS abandonne : annuler la mise
+  # en relation et abandonner la reclamation sont deux choses differentes.
+  condition:
+  - active_loop: reclamation_form
+  steps:
+  - intent: cancel_human_agent_request
+  - action: action_cancel_human_agent_request
+  - action: reclamation_form
+  - active_loop: reclamation_form
+
 - rule: Capabilities description response
   # Meme garde-fou que "Bot presentation response" juste au-dessus (meme
   # famille de question meta sur l'agent) : sans active_loop: null, une

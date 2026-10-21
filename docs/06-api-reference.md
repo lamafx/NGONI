@@ -225,6 +225,42 @@ Si aucune correspondance ne dépasse le seuil de similarité configuré
 | `POST` | `/feedback/ratings` | Notation d'une réponse FAQ (`interaction_type`, `question`, `answer`, `is_useful`, `user_id`). |
 | `GET` | `/feedback/ratings?interaction_type=&is_useful=` | Liste les notations, filtres optionnels. |
 
+## 6.4bis FastAPI — Conversations et prise en charge humaine
+
+Ajouté le 2026-09-16. Raisonnement complet (cycle de vie, mise en silence du
+bot, qui écrit l'historique) : [19. Prise en charge humaine](19-prise-en-charge-humaine.md).
+
+### Côté usager
+
+| Méthode | Route | Description |
+|---|---|---|
+| `POST` | `/conversations/escalate` | `{ conversation_id, user_id?, reason? }` → place la conversation dans la file des conseillers. N'interrompt PAS l'assistant : tant que personne n'a repris la main, il continue de répondre. |
+| `POST` | `/conversations/turns` | Journalise un tour (`user_text`, `intent?`, `confidence?`, `bot_messages[]`) pour les clients qui interrogent Rasa directement. Réponse : `handoff` — `true` signifie « cesse d'interroger Rasa, un humain répond ». Inutile pour les clients qui passent par `POST /api/chat`, déjà journalisés côté serveur. |
+| `POST` | `/conversations/withdraw` | `{ conversation_id, reason? }` — retire une demande de conseiller encore EN ATTENTE. Réponse `withdrawn: false` (et non une erreur) quand un conseiller a déjà pris le dossier : on ne l'efface pas de sa file dans son dos. Idempotent sur une conversation qui n'était pas escaladée. Appelée par `action_cancel_human_agent_request` (intention `cancel_human_agent_request`). |
+| `GET` | `/conversations/{id}/updates?after=` | Messages écrits depuis `after` (bot et conseiller ; jamais ceux de l'usager, déjà affichés chez lui) + état de la prise en charge. |
+
+### Côté conseiller / administration — `X-Internal-Secret` obligatoire
+
+| Méthode | Route | Description |
+|---|---|---|
+| `GET` | `/admin/conversations/?status=&assigned_to=&escalated=&unassigned=` | La file, sans les messages (liste légère). |
+| `GET` | `/admin/conversations/{id}` | Le fil complet. |
+| `GET` | `/admin/conversations/{id}/context` | Résumé de reprise : intentions vues, diagnostic tenté, tickets liés, chronologie — reconstitué depuis les traces réelles. |
+| `POST` | `/admin/conversations/{id}/assign` | `{ agent_id }` — prise en charge. `409` si un autre conseiller la tient (`?force=true` pour reprendre). Le bot se tait à partir de là. |
+| `POST` | `/admin/conversations/{id}/messages` | `{ text, agent_id? }` — réponse humaine. `409` tant que la conversation n'est pas prise en charge. |
+| `POST` | `/admin/conversations/{id}/resolve` | `{ agent_id?, note? }` — clôture ; le bot reprend la main au prochain message de l'usager. |
+| `POST` | `/admin/complaints/{ticket_id}/assign` | `{ agent_id }` — prise en charge d'une réclamation (attribue et passe en `IN_PROGRESS`, sauf ticket déjà résolu/clos). |
+| `GET`/`POST` | `/admin/agents/` | Annuaire des conseillers. Le statut renvoyé est dérivé de l'activité (15 min sans action = hors ligne), `declared_status` conserve le statut déclaré. |
+| `PATCH` | `/admin/agents/{id}/status` | `{ status }` parmi `online` / `away` / `offline`. |
+| `GET` | `/admin/dashboard/summary?days=` | KPI + variation par rapport à la période précédente de même durée. |
+| `GET` | `/admin/dashboard/conversation-volume?days=` | Série journalière (conversations et messages). |
+| `GET` | `/admin/dashboard/intent-distribution?days=` | Répartition réelle des intentions classées par le moteur ; payloads structurés comptés à part (`unclassified`). |
+| `GET` | `/admin/dashboard/recent-activity?limit=` | Flux d'événements (tickets, escalades, prises en charge, actions autonomes). |
+| `GET` | `/admin/diagnostics/runs?days=` | Diagnostics exécutés, latence moyenne, répartition par issue. |
+| `GET` | `/admin/system/health` | Sonde réelle : PostgreSQL, Rasa, et chaque service de `services_registry.yaml`. Statut global = le pire des statuts individuels. |
+| `GET` | `/admin/users/?limit=&offset=` | Usagers vus par le support : identifiant de contact, volumes, tickets, dernière activité. Agrégation pure — aucune table d'utilisateurs n'existe dans `ia`, et aucun nom/email n'est inventé (les profils appartiennent à `ngoni-user-service`). |
+| `GET` | `/admin/users/{user_id}` | Historique : conversations et tickets de cet usager. |
+
 ## 6.5 FastAPI — Embeddings (`/embeddings`)
 
 | Méthode | Route | Description |

@@ -8,6 +8,8 @@ import requests
 from rasa_sdk import Action, Tracker
 from rasa_sdk.executor import CollectingDispatcher
 
+from .common import _search_faq, follow_up_question, standalone_question
+
 FAQ_SERVICE_URL = getenv("FAQ_SERVICE_URL", "http://fastapi:8000/faq/search")
 FAQ_SUGGESTIONS_SERVICE_URL = getenv("FAQ_SUGGESTIONS_SERVICE_URL", "http://fastapi:8000/faq/suggestions")
 # Base URL, sans slug (le slug est ajoute a l'appel, voir ActionSelectFaqQuestion) --
@@ -191,11 +193,20 @@ class ActionFaqSearch(Action):
         tracker: Tracker,
         domain: Dict[Text, Any],
     ) -> List[Dict[Text, Any]]:
-        user_question = tracker.latest_message.get("text")
+        # Reformulation autonome si le classifieur en a produit une, sinon le
+        # texte tel quel -- voir standalone_question (common.py).
+        user_question = standalone_question(tracker)
 
         if not user_question:
             dispatcher.utter_message(text="Je n'ai pas reçu de question.")
             return []
+
+        # Suite de question ("et combien de temps ca prend ?") que la
+        # question seule ne suffit pas a resoudre : on retente avec la
+        # question precedente en tete (voir follow_up_question).
+        combined = follow_up_question(tracker)
+        if combined and _search_faq(user_question) is None:
+            user_question = combined
 
         return _present_faq_answer(dispatcher, tracker, user_question)
 

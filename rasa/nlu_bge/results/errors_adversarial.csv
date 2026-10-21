@@ -1,4 +1,0 @@
-text,true_intent,predicted_intent,confidence
-sa fait 3 jours ke jatend mon argen apre un retré,diagnostic,out_of_scope,0.3727
-"Mon compte est bloqué, comment le débloquer concrètement pour MOI ?",diagnostic,ask_faq,0.4770
-Vous pouvez me dire ce qui se passe avec le ticket que j'ai ouvert ?,ask_complaint_status,ask_faq,0.4221

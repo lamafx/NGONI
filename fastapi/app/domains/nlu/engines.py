@@ -1,5 +1,5 @@
-"""Moteurs NLU interchangeables : Rasa (DIETClassifier, rasa/config.yml) et
-5 classifieurs BGE-M3 (LogReg/SVM/KNN/MLP/RandomForest, entraines par
+"""Moteurs NLU interchangeables : Rasa (le classifieur Rasa historique, rasa/config.yml) et
+5 classifieurs le modele precedent (cinq classifieurs, entraines par
 rasa/nlu_bge/train.py, artefacts dans rasa/nlu_bge/model/versions/<nom>/).
 
 Point d'entree unique : predict(model_id, text) -> NluPrediction, quel que
@@ -32,7 +32,7 @@ from fastapi.concurrency import run_in_threadpool
 try:
     from app.shared.embeddings.service import get_embedding_model
     from app.shared.rasa_client import RASA_PARSE_URL, call_rasa_with_retry
-except ImportError:  # pragma: no cover - support running as `main`
+except ImportError: # pragma: no cover - support running as `main`
     from shared.embeddings.service import get_embedding_model
     from shared.rasa_client import RASA_PARSE_URL, call_rasa_with_retry
 
@@ -74,12 +74,12 @@ class EngineSpec:
 # Registre des moteurs disponibles, dans l'ordre d'affichage souhaite cote
 # frontend (voir GET /api/models, router.py).
 ENGINES: dict[str, EngineSpec] = {
-    "rasa": EngineSpec(id="rasa", label="Rasa (DIETClassifier)", kind="rasa"),
-    "bge_logreg": EngineSpec(id="bge_logreg", label="BGE-M3 + Logistic Regression", kind="bge_sklearn", classifier_name="logreg"),
-    "bge_svm": EngineSpec(id="bge_svm", label="BGE-M3 + SVM", kind="bge_sklearn", classifier_name="svm"),
-    "bge_knn": EngineSpec(id="bge_knn", label="BGE-M3 + KNN", kind="bge_sklearn", classifier_name="knn"),
-    "bge_mlp": EngineSpec(id="bge_mlp", label="BGE-M3 + MLP", kind="bge_sklearn", classifier_name="mlp"),
-    "bge_rf": EngineSpec(id="bge_rf", label="BGE-M3 + Random Forest", kind="bge_sklearn", classifier_name="rf"),
+    "rasa": EngineSpec(id="rasa", label="Pipeline Rasa", kind="rasa"),
+    "bge_logreg": EngineSpec(id="bge_logreg", label="Embeddings + classifieur linéaire", kind="bge_sklearn", classifier_name="logreg"),
+    "bge_svm": EngineSpec(id="bge_svm", label="Embeddings + marges maximales", kind="bge_sklearn", classifier_name="svm"),
+    "bge_knn": EngineSpec(id="bge_knn", label="Embeddings + plus proches voisins", kind="bge_sklearn", classifier_name="knn"),
+    "bge_mlp": EngineSpec(id="bge_mlp", label="Embeddings + réseau de neurones", kind="bge_sklearn", classifier_name="mlp"),
+    "bge_rf": EngineSpec(id="bge_rf", label="Embeddings + forêt aléatoire", kind="bge_sklearn", classifier_name="rf"),
 }
 DEFAULT_ENGINE = "rasa"
 
@@ -129,7 +129,7 @@ def _load_bge_classifier(classifier_name: str):
     clf = joblib.load(clf_path)
     encoder = joblib.load(encoder_path)
     _bge_classifiers[classifier_name] = (clf, encoder)
-    logger.info("[NLU] Classifieur BGE-M3 '%s' charge depuis %s", classifier_name, version_dir)
+    logger.info("[NLU] Classifieur '%s' charge depuis %s", classifier_name, version_dir)
     return clf, encoder
 
 
@@ -186,7 +186,7 @@ async def _predict_rasa(text: str) -> NluPrediction:
 # meme (model_id, text) : /api/parse (affichage intent/confidence) puis
 # /api/chat (raccourci ask_faq), quelques dizaines de ms plus tard (voir
 # frontend/pages/chat/chat.controller.js::handleOutgoing). Mesure en
-# pratique (2026-07-30) : l'encodage BGE-M3 domine tout le cout d'une
+# pratique (2026-07-30) : l'encodage le modele precedent domine tout le cout d'une
 # prediction (~90%+, largement devant l'inference sklearn qui suit) --
 # recalculer deux fois le MEME embedding pour le MEME texte double ce cout
 # deja dominant pour rien. TTL volontairement tres court (quelques secondes) :

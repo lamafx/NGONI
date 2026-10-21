@@ -69,9 +69,10 @@ docker-compose.override.yml
 # Local generated files
 migrations/versions/__pycache__/
 
-# Local stubs
-wallet_stub/
-user_stub/
+# Local stubs -- ancres a la racine : sans "/", ces motifs excluaient aussi
+# fastapi/wallet_stub et fastapi/user_stub, necessaires au diagnostic.
+/wallet_stub/
+/user_stub/
 
 rasa/.rasa/
 rasa/models/
@@ -80,8 +81,11 @@ rasa/models/
 rasa/.config/
 rasa/.keras/
 
-# Frontend (module independant, voir frontend/README le cas echeant)
-frontend/
+# Frontend : versionne (son propre frontend/.gitignore exclut node_modules,
+# dist et .vite).
+
+# Corbeille locale (plusieurs centaines de Mo, jamais versionnee)
+trash/
 
 # Artefacts de developpement / experimentation (non necessaires en prod)
 scratchpad/

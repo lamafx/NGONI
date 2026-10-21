@@ -1,0 +1,85 @@
+:root {
+  /* Fond/surfaces/encre -- encre chaude reprise du Chat (--ns-ink*), mais
+     fond BLANC / blanc casse (pas la creme saturee --ns-bg du Chat, trop
+     forte pour un tableau de bord blanc sur blanc casse avec touches beige
+     tres legeres -- cahier des charges Admin, section 3). Agent et Admin
+     partageaient avant ca un gris-froid heritee de l'ancien theme teal,
+     tout aussi disjoint : ce blanc casse est le point d'equilibre entre
+     les deux. */
+  --bg: #faf9f6;
+  --surface: #ffffff;
+  --surface-2: #f6f3ee;
+  --surface-3: #ede6da;
+
+  --ink: #2b2118;
+  --ink-muted: #8c7c6a;
+  --ink-faint: #bbaa95;
+
+  --line: #ede6da;
+  --line-strong: #e0d5c2;
+
+  /* Marque -- orange Ngoni (logo, navigation active, accents de marque sur
+     Agent/Admin) : mêmes valeurs que le thème de la page Chat (voir
+     --ns-orange dans ngoniSupportTheme.css) pour une identité cohérente
+     entre les 3 espaces de la démo. */
+  --teal: #f0762b;
+  --teal-strong: #d65e17;
+  --teal-soft: #fde7d3;
+  --teal-ink: #ffffff;
+
+  /* Secondaire -- corail (notifications, statuts urgents/"en cours") : relevé
+     sur dashbord.jpeg, inchangé par le passage à l'orange de marque ci-dessus. */
+  --coral: #e8564a;
+  --coral-strong: #c93f34;
+  --coral-soft: #fbe1de;
+
+  /* Sémantique positive/négative -- volontairement INDÉPENDANTES de la
+     couleur de marque : l'orange n'est pas un signal de succès lisible.
+     --good reprend --ns-good du thème Chat pour rester cohérent. */
+  --good: #2fae62;
+  --good-soft: #d9f2e3;
+  --risk: var(--coral);
+  --risk-soft: var(--coral-soft);
+  /* Ambre -- "degrade"/priorite moyenne : le nom "warn" n'avait plus de sens
+     avec un ardoise neutre (#4b5265), aucun statut ne s'y lisait comme un
+     avertissement. */
+  --warn: #b7791f;
+  --warn-soft: #fdf1dc;
+  /* Bleu -- statut "en cours" (tickets), distinct de --risk (rouge, reserve
+     aux priorites elevees) pour eviter la confusion entre "en cours de
+     traitement" et "urgent" dans le tableau des demandes. */
+  --info: #3b82c4;
+  --info-soft: #e3eff8;
+
+  --brand: var(--teal);
+  --brand-strong: var(--teal-strong);
+  --brand-soft: var(--teal-soft);
+  --brand-ink: var(--teal-ink);
+
+  --bubble-user: #e3e9fc;
+  --bubble-ai: var(--surface-2);
+
+  /* Ombres teintees brun chaud (rgba(43,33,24,...)), comme --ns-shadow-*
+     sur le Chat -- des ombres neutre-froid (rgba(17,20,34,...)) juraient
+     avec un fond creme. */
+  --shadow-sm: 0 1px 2px rgba(43, 33, 24, 0.05);
+  --shadow-md: 0 1px 2px rgba(43, 33, 24, 0.04), 0 8px 20px -10px rgba(43, 33, 24, 0.14);
+  --shadow-lg: 0 4px 8px rgba(43, 33, 24, 0.05), 0 20px 40px -16px rgba(43, 33, 24, 0.18);
+
+  --radius-sm: 8px;
+  --radius-md: 16px;
+  --radius-lg: 20px;
+  --radius-pill: 999px;
+
+  --font-display: "Sora", ui-sans-serif, system-ui, sans-serif;
+  --font-body: "Public Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+}
+
+/* Pas de variante sombre automatique : la page Chat (ngoniSupportTheme.css,
+   .ns-app) code ses couleurs en dur et ne change jamais avec le systeme --
+   Agent/Admin doivent se comporter pareil pour rester visuellement
+   identiques a la maquette validee, quel que soit le reglage du systeme
+   d'exploitation de la personne qui regarde (constate : un
+   prefers-color-scheme:dark laissait ici passer un theme sombre non
+   travaille, jamais demande, et incoherent avec le Chat). */

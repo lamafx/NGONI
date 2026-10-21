@@ -84,6 +84,23 @@ class ComplaintService:
             return None
         return _to_response(complaint)
 
+    def assign(self, ticket_id: str, agent_id: str) -> Optional[ComplaintResponse]:
+        """« Prendre en charge une réclamation ». Passe le ticket en
+        IN_PROGRESS s'il était encore OPEN -- mais ne touche PAS au statut
+        d'un ticket déjà résolu ou clos : réattribuer un dossier archivé
+        (pour le reprendre, le vérifier) ne doit pas le rouvrir dans le dos
+        de celui qui l'a fermé."""
+        if self.repository is None:
+            raise RuntimeError("ComplaintService requiert un repository pour attribuer un ticket")
+        existing = self.repository.get_by_ticket_id(ticket_id)
+        if existing is None:
+            return None
+        next_status = "IN_PROGRESS" if existing.status == "OPEN" else None
+        complaint = self.repository.assign(ticket_id, agent_id, status=next_status)
+        if complaint is None:
+            return None
+        return _to_response(complaint)
+
     @classmethod
     def from_session(cls, session: Session) -> "ComplaintService":
         return cls(ComplaintRepository(session))
@@ -104,6 +121,8 @@ def _to_response(complaint: Complaint) -> ComplaintResponse:
         additional_info=complaint.additional_info,
         context=complaint.context or {},
         created_by=complaint.created_by,
+        assigned_to=complaint.assigned_to,
+        assigned_at=complaint.assigned_at.isoformat() if complaint.assigned_at else None,
         updated_by=complaint.updated_by,
         created_at=complaint.created_at.isoformat() if complaint.created_at else None,
         updated_at=complaint.updated_at.isoformat() if complaint.updated_at else None,

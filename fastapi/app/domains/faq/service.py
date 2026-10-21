@@ -34,15 +34,15 @@ MIN_LENGTH_FOR_LANGDETECT = 15
 # caracteres, le surplus n'ajoute de toute facon rien d'utile a une question.
 MAX_QUESTION_LENGTH = 500
 
-# RECALIBRE PROVISOIREMENT (2026-07-30) suite au passage e5-base -> BGE-M3
+# RECALIBRE PROVISOIREMENT (2026-07-30) suite au passage un modele anterieur -> le modele precedent
 # (voir app/shared/embeddings/service.py) : le seuil de 0.85 ci-dessous etait
-# calibre pour e5-base et rendait la FAQ totalement muette avec BGE-M3 (verifie
+# calibre pour un modele anterieur et rendait la FAQ totalement muette avec le modele precedent (verifie
 # en usage reel : "comment fonctionne le systeme de pieces" vs la question du
 # catalogue "Comment fonctionnent les pieces NGONI ?", pourtant une
-# correspondance evidente, ne scorait que 0.55). BGE-M3 produit une distribution
-# de similarite beaucoup plus basse/etalee que e5-base sur cette tache.
+# correspondance evidente, ne scorait que 0.55). le modele precedent produit une distribution
+# de similarite beaucoup plus basse/etalee que un modele anterieur sur cette tache.
 # Mesure rapide (6 paires vraies + 3 negatifs, embed_query/embed_passage,
-# meme methode que le calibrage e5-small->e5-base ci-dessous mais echantillon
+# meme methode que le calibrage un modele plus ancien->un modele anterieur ci-dessous mais echantillon
 # reduit faute de corpus dedie) :
 #   vrais   : 0.49 / 0.55 / 0.60 / 0.71 / 0.75 / 0.94
 #   negatifs: 0.22 / 0.33 / 0.57
@@ -50,21 +50,32 @@ MAX_QUESTION_LENGTH = 500
 # negatif a 0.57) : aucun seuil ne separe parfaitement sur cet echantillon,
 # 0.55 est un compromis raisonnable, PAS une valeur rigoureusement calibree.
 # A REFAIRE serieusement (leave-one-out sur tout le catalogue + un vrai jeu de
-# negatifs, comme le calibrage e5-small->e5-base ci-dessous) des que possible.
-DEFAULT_THRESHOLD = 0.55
+# negatifs, comme le calibrage un modele plus ancien->un modele anterieur ci-dessous) des que possible.
 #
-# Historique : sous e5-base (2026-07, avant BGE-M3), la valeur retenue etait
-# 0.85, elle-meme recalibree depuis 0.87 sous e5-small -- mesure en
+# RECALIBRE PROVISOIREMENT (2026-08-21) suite au passage le modele precedent -> le nouveau modele d'embeddings
+# (voir app/shared/embeddings/service.py).
+# Meme methode que le calibrage le modele precedent ci-dessus (6 vraies paires + 3 negatifs,
+# script scratchpad/calibrate_ _embed.py, PAS un leave-one-out complet) :
+#   vrais   : 0.588 / 0.667 / 0.737 / 0.754 / 0.816 / 0.828
+#   negatifs: 0.427 / 0.473 / 0.552
+# Separation nette sur cet echantillon (min(vrais)=0.588 > max(negatifs)=0.552,
+# contrairement au chevauchement observe sous le modele precedent) -- 0.57 choisi entre les
+# deux, cote prudent (proche du negatif le plus haut). A revalider serieusement
+# des que le corpus de l'audit (docs/16-audit-faq-nlu-2026-07.md) est disponible.
+DEFAULT_THRESHOLD = 0.57
+#
+# Historique : sous un modele anterieur (2026-07, avant le modele precedent), la valeur retenue etait
+# 0.85, elle-meme recalibree depuis 0.87 sous un modele plus ancien -- mesure en
 # leave-one-out sur les 15 vraies questions FAQ en base + 10 negatifs
 # (salutations, small-talk, et quelques vraies plaintes diagnostic qui ne
 # doivent PAS declencher de reponse FAQ) :
 #   0.83 : FP=4/10 (40%)  TP=12/15 (80%)
 #   0.84 : FP=2/10 (20%)  TP=10/15 (67%)  <- des salutations passent encore
-#   0.85 : FP=0/10 (0%)   TP=9/15 (60%)   <- retenu pour e5-base : 1er seuil sans faux positif
+#   0.85 : FP=0/10 (0%)   TP=9/15 (60%)   <- retenu pour un modele anterieur : 1er seuil sans faux positif
 #   0.86 : FP=0/10 (0%)   TP=7/15 (47%)
-#   0.87 : FP=0/10 (0%)   TP=6/15 (40%)   <- ancien seuil e5-small : moins bon rappel
+#   0.87 : FP=0/10 (0%)   TP=6/15 (40%)   <- ancien seuil un modele plus ancien : moins bon rappel
 #          que 0.85, pour le meme 0% de faux positifs sur ce corpus
-# Conserve ici pour memoire ; ces valeurs ne sont PAS transposables a BGE-M3
+# Conserve ici pour memoire ; ces valeurs ne sont PAS transposables a le modele precedent
 # (distribution de scores differente, voir le commentaire ci-dessus).
 
 # Audit FAQ #7 (16.5/16.6) : la colonne `keywords` (ARRAY(Text), deja en
@@ -96,10 +107,13 @@ TOP_K_CANDIDATES = 5
 # Second seuil, plus bas que DEFAULT_THRESHOLD (16.6, proposition Top-3) :
 # candidats a proposer en clarification ("vouliez-vous dire : ... ?") quand
 # aucun ne franchit DEFAULT_THRESHOLD, plutot qu'un "je n'ai pas trouve" sec.
-# RECALIBRE PROVISOIREMENT (2026-07-30, BGE-M3) dans les memes proportions que
+# RECALIBRE PROVISOIREMENT (2026-07-30, le modele precedent) dans les memes proportions que
 # DEFAULT_THRESHOLD ci-dessus (etait 0.75, sous DEFAULT_THRESHOLD=0.85) --
 # meme reserve : echantillon reduit, a revalider serieusement.
-SECONDARY_THRESHOLD = 0.40
+#
+# RECALIBRE PROVISOIREMENT (2026-08-21, le nouveau modele d'embeddings) meme proportion que
+# ci-dessus (~0.73 x DEFAULT_THRESHOLD) : 0.57 x 0.73 ~= 0.42, meme reserve.
+SECONDARY_THRESHOLD = 0.42
 
 # Audit FAQ #9 (16.6, dedup catalogue) : score cosinus au-dela duquel deux
 # questions sont considerees quasi-identiques (garde-fou a l'ecriture,

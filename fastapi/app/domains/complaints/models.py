@@ -39,6 +39,13 @@ class Complaint(Base):
     # fournissent pas (anciens clients, appels API directs) ne sont pas
     # affectes, une contrainte UNIQUE Postgres autorisant plusieurs NULL.
     idempotency_key = Column(String, nullable=True, unique=True)
+    # Conseiller ayant PRIS EN CHARGE ce ticket (cas d'utilisation "Prendre
+    # en charge une reclamation", voir migrations/0016). Distinct de
+    # updated_by juste en dessous, qui ne dit que "qui a touche la ligne en
+    # dernier" : un ticket peut etre modifie par quelqu'un qui ne le traite
+    # pas, et rester attribue a son titulaire.
+    assigned_to = Column(String, nullable=True)
+    assigned_at = Column(DateTime(timezone=True), nullable=True)
     # Identite de l'admin ayant modifie ce ticket en dernier (X-User-ID, voir
     # app/shared/admin_auth.py::get_admin_id et admin_router.py) -- None tant
     # qu'aucun admin n'a jamais touche le ticket depuis sa creation.

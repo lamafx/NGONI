@@ -31,6 +31,7 @@ from .common import (
     _human_support_message,
     _search_faq,
     _strip_greeting_preamble,
+    generate_redirect_reply,
     is_superagent_mode,
     pick,
     request_with_retry,
@@ -260,14 +261,14 @@ def _score_capabilities_keywords(text: Text, problems: List[Dict[Text, Any]]) ->
 # En dessous de cette similarite cosinus, un candidat n'est pas retenu (voir
 # _score_capabilities_embeddings).
 #
-# RECALIBRE (2026-07) suite au passage e5-small -> e5-base (voir
+# RECALIBRE (2026-07) suite au passage un modele plus ancien -> un modele anterieur (voir
 # app/shared/embeddings/service.py) : l'ancien seuil de 0.83, calibre sur
-# e5-small avec un seul probleme de reference, laissait passer un taux de
+# un modele plus ancien avec un seul probleme de reference, laissait passer un taux de
 # FAUX POSITIFS de 65% sur un corpus de 20 messages neutres (salutations,
 # remerciements, questions hors-sujet) teste contre le catalogue reel a 8
 # problemes (wallet+user) -- une simple salutation ("Bonsoir comment
 # allez-vous ?") suffisait a declencher un probleme diagnostic au hasard.
-# Mesure sur ce meme corpus avec e5-base, seuil balaye de 0.83 a 0.88 :
+# Mesure sur ce meme corpus avec un modele anterieur, seuil balaye de 0.83 a 0.88 :
 #   0.83 : FP=2/20 (10%)  TP=45/59 (76%)
 #   0.84 : FP=0/20 (0%)   TP=45/59 (76%)  <- retenu, aucune perte de rappel
 #   0.85 : FP=0/20 (0%)   TP=45/59 (76%)
@@ -275,7 +276,7 @@ def _score_capabilities_keywords(text: Text, problems: List[Dict[Text, Any]]) ->
 #   0.87 : FP=0/20 (0%)   TP=30/59 (51%)
 # 0.84 est le plus bas seuil qui elimine tous les faux positifs du corpus de
 # test SANS sacrifier de rappel par rapport a 0.83 -- pas de compromis a
-# faire ici, contrairement a e5-small.
+# faire ici, contrairement a un modele plus ancien.
 #
 # LIMITE INCHANGEE : ce corpus (20 negatifs, 59 positifs en leave-one-out sur
 # les 8 problemes actuels) reste petit face a la diversite reelle des
@@ -286,14 +287,14 @@ def _score_capabilities_keywords(text: Text, problems: List[Dict[Text, Any]]) ->
 # d'embeddings (n'aide pas si le message ne contient aucun mot-cle du
 # manifeste non plus).
 #
-# VERIFIE (2026-07-30) apres le passage e5-base -> BGE-M3 (voir
+# VERIFIE (2026-07-30) apres le passage un modele anterieur -> le modele precedent (voir
 # app/shared/embeddings/service.py) : sur des phrases completes
 # representatives de TEST_MESSAGES (fastapi/tests/test_diagnostic_classification_quality.py),
 # les scores restent largement au-dessus de 0.84 -- "je veux retirer de
 # l'argent mais ça n'a jamais été crédité" -> 0.967, "j'ai fait une recharge
 # mais mon solde n'a pas changé" -> 0.899, "ma vérification KYC est bloquée
 # depuis des jours" -> 0.864, "je n'arrive plus à me connecter à mon compte,
-# il semble bloqué" -> 0.985. BGE-M3 ne degrade la similarite que sur les
+# il semble bloqué" -> 0.985. le modele precedent ne degrade la similarite que sur les
 # messages COURTS (1-3 mots, voir le plancher de repechage ci-dessous).
 #
 # RECALIBRE (2026-07-30, fastapi/scripts/diagnostic_test_report.py, corpus de
@@ -310,15 +311,32 @@ def _score_capabilities_keywords(text: Text, problems: List[Dict[Text, Any]]) ->
 # meilleur rappel) -- pas un compromis. LIMITE INCHANGEE (voir ci-dessus) :
 # a revalider si l'usage reel montre des faux positifs que ce corpus n'a pas
 # couverts.
-MIN_EMBEDDING_SIMILARITY = 0.75
+#
+# RECALIBRE PROVISOIREMENT (2026-08-21) suite au passage le modele precedent -> le nouveau modele d'embeddings
+# (voir app/shared/embeddings/service.py).
+# Mesure rapide sur les 4 memes phrases completes que le commentaire le modele precedent
+# ci-dessus (scratchpad/calibrate_diagnostic.py) :
+#   "je veux retirer... jamais credite" -> 0.564 (etait 0.967 sous le modele precedent)
+#   "j'ai fait une recharge... n'a pas change" -> 0.741 (etait 0.899)
+#   "ma verification KYC est bloquee..." -> 0.866 (etait 0.864)
+#   "je n'arrive plus a me connecter..." -> 0.660 (etait 0.985)
+#  Le nouveau modele degrade nettement plus que le precedent sur les phrases longues
+# et composees -- PAS le meme profil que la degradation "messages courts
+# uniquement" observee lors du passage un modele anterieur -> le modele precedent (voir
+# KEYWORD_RESCUE_MIN_EMBEDDING_SIMILARITY plus bas, dont la premisse ne tient
+# plus non plus). 0.55 choisi juste sous le minimum observe (0.564), MAIS
+# **aucune mesure negative dediee** pour ce corpus avec ce modele (contrairement
+# au balayage FP=0/20 ci-dessus, non refait) -- a valider en priorite avant
+# tout usage au-dela de la demonstration.
+MIN_EMBEDDING_SIMILARITY = 0.55
 
 # Second plancher, UNIQUEMENT pour _rescue_unique_keyword_match plus bas -- ne
 # remplace ni n'abaisse MIN_EMBEDDING_SIMILARITY (jamais touche globalement,
 # voir calibration ci-dessus).
 #
-# RECALIBRE (2026-07-30) suite au passage e5-base -> BGE-M3 : contrairement a
+# RECALIBRE (2026-07-30) suite au passage un modele anterieur -> le modele precedent : contrairement a
 # MIN_EMBEDDING_SIMILARITY (phrases completes, non affecte), les messages
-# COURTS utilises ici degradent nettement avec BGE-M3. Mesure empirique
+# COURTS utilises ici degradent nettement avec le modele precedent. Mesure empirique
 # (meme modele, meme corpus KYC que
 # fastapi/tests/test_diagnostic_classification_quality.py::TestKeywordRescuePreconditions) :
 # "kyc" -> 0.5966, "mon kyc" -> 0.5880, "kyc svp" -> 0.4621, "check kyc" ->
@@ -331,7 +349,17 @@ MIN_EMBEDDING_SIMILARITY = 0.75
 # se rapprocher du seuil normal -- a revalider si un futur message hors-sujet
 # tres court est promu a tort (corpus negatif pas mesure pour ce plancher,
 # contrairement a MIN_EMBEDDING_SIMILARITY ci-dessus).
-KEYWORD_RESCUE_MIN_EMBEDDING_SIMILARITY = 0.40
+#
+# RECALIBRE PROVISOIREMENT (2026-08-21, le nouveau modele d'embeddings) : la premisse
+# ci-dessus ("messages courts degrades") ne se verifie plus avec ce modele --
+# mesure (scratchpad/calibrate_diagnostic.py) : "kyc"/"mon kyc"/"kyc svp"/
+# "check kyc"/"statut kyc" vs KYC scorent tous 0.70-0.77, PLUS HAUT que le
+# minimum observe sur les phrases completes (0.564, voir
+# MIN_EMBEDDING_SIMILARITY ci-dessus). Le role de ce second plancher reste le
+# meme (repechage volontairement plus permissif, jamais utilise seul pour
+# verrouiller un probleme) : conserve nettement sous MIN_EMBEDDING_SIMILARITY
+# par prudence, meme sans degradation mesuree qui le justifierait strictement.
+KEYWORD_RESCUE_MIN_EMBEDDING_SIMILARITY = 0.45
 
 
 # Audit robustesse : contrairement au disjoncteur de tickets (reclamation.py),
@@ -345,7 +373,7 @@ _embeddings_circuit_breaker = SimpleCircuitBreaker()
 
 
 def _embed_message(text: Text) -> List[float] | None:
-    # Le modele d'embeddings (intfloat/multilingual-e5-small) tourne cote
+    # Le modele d'embeddings (intfloat/multilingual-un modele plus ancien) tourne cote
     # FastAPI (voir app.shared.embeddings), pas ici : un seul exemplaire du
     # modele pour toute la plateforme plutot que de le recharger dans ce
     # process actions. None = panne reseau, gere par le repli sur
@@ -1627,8 +1655,17 @@ def _extract_field_answer(ctx: _DiagnosticContext) -> None:
         if match and _looks_like_identifier(match):
             ctx.confirmed[waiting_for] = match
             ctx.state.pop("invalid_field_attempt", None)
+            ctx.state.pop("affirmed_field", None)
+        elif _is_bare_affirmation(raw_text):
+            # "oui" en reponse a "Avez-vous une reference ... ?" annonce la
+            # valeur, ce n'est pas une valeur au mauvais format (constate :
+            # "Ce format ne semble pas correct" repondu a un simple "oui").
+            # Voir _respond_field_question pour la relance.
+            ctx.state["affirmed_field"] = waiting_for
+            ctx.state.pop("invalid_field_attempt", None)
         else:
             ctx.state["invalid_field_attempt"] = waiting_for
+            ctx.state.pop("affirmed_field", None)
     else:
         # Absence de pattern = aucune contrainte de FORMAT, mais un plafond
         # de longueur reste applique (audit "robustesse comportementale",
@@ -1958,7 +1995,12 @@ def _respond_field_question(
     # enumerer a l'avance, vient du manifeste dynamique).
     spec = (state.get("field_specs") or {}).get(pending_field, {})
     question = _field_question(pending_field, spec.get("description") or "Pouvez-vous préciser ce point ?")
-    if state.get("invalid_field_attempt") == pending_field:
+    if state.get("affirmed_field") == pending_field:
+        question = pick(
+            "Parfait, pouvez-vous me l'indiquer ?",
+            "Très bien, vous pouvez me la donner telle quelle.",
+        )
+    elif state.get("invalid_field_attempt") == pending_field:
         question = f"Ce format ne semble pas correct. {question}"
     dispatcher.utter_message(text=question)
     return state_events
@@ -2510,6 +2552,20 @@ def _looks_like_cannot_provide_field(text: Text) -> bool:
     return any(phrase in text for phrase in _CANNOT_PROVIDE_FIELD_PHRASES)
 
 
+# "oui", "oui j'en ai une", "d'accord"... SEULS : une confirmation qui annonce
+# la valeur sans la donner. Aucun chiffre : "oui WDR-1234" porte la valeur et
+# suit le chemin normal d'extraction.
+_BARE_AFFIRMATION_PATTERN = re.compile(
+    r"^\s*(oui|ouais|ok|okay|d'accord|daccord|yes|bien s[uû]r|tout à fait|tout a fait)"
+    r"([\s,]+(j'en ai une?|bien s[uû]r|je l'ai|c'est bon))?\s*[.!]*\s*$",
+    re.IGNORECASE,
+)
+
+
+def _is_bare_affirmation(text: Text) -> bool:
+    return bool(_BARE_AFFIRMATION_PATTERN.match(text))
+
+
 class ActionReaskPendingDiagnosticField(Action):
     """Re-affiche la question de diagnostic en attente, SANS reinterpreter le
     dernier message de l'utilisateur comme une tentative de reponse --
@@ -3037,7 +3093,18 @@ class ActionDefaultFallback(Action):
             # en attente (voir le early-return juste au-dessus pour ce
             # dernier cas) -- l'incomprehension est donc "sèche", le moment
             # ideal pour rappeler concretement ce que le bot sait faire.
-            dispatcher.utter_message(response="utter_default", buttons=QUICK_ACTION_BUTTONS)
+            # Reponse generee avec le fil de la conversation si possible
+            # (voir generate_redirect_reply, common.py), texte fixe sinon.
+            reply = generate_redirect_reply(
+                tracker,
+                "tu n'as pas compris ce message avec certitude. Si c'est une simple remarque ou une "
+                "formule de politesse, reponds-y naturellement ; sinon, demande poliment de preciser.",
+                _capabilities_sentence(),
+            )
+            if reply:
+                dispatcher.utter_message(text=reply, buttons=QUICK_ACTION_BUTTONS)
+            else:
+                dispatcher.utter_message(response="utter_default", buttons=QUICK_ACTION_BUTTONS)
         # "rewind", pas "user_utterance_reverted" : c'est le nom d'evenement
         # reellement serialise par rasa_sdk pour UserUtteranceReverted (voir
         # rasa_sdk.events) -- le litteral "user_utterance_reverted" est rejete
@@ -3106,8 +3173,26 @@ class ActionOutOfScope(Action):
             # Memes raisons que ActionDefaultFallback ci-dessus : atteint
             # seulement hors formulaire/diagnostic en attente (les deux cas
             # sont deja sortis via followup plus haut).
-            dispatcher.utter_message(response="utter_out_of_scope", buttons=QUICK_ACTION_BUTTONS)
+            reply = generate_redirect_reply(
+                tracker,
+                "ce message sort du domaine de NGONI. Ne reponds PAS a la question elle-meme ; "
+                "reste aimable, eventuellement avec une pointe d'humour.",
+                _capabilities_sentence(),
+            )
+            if reply:
+                dispatcher.utter_message(text=reply, buttons=QUICK_ACTION_BUTTONS)
+            else:
+                dispatcher.utter_message(response="utter_out_of_scope", buttons=QUICK_ACTION_BUTTONS)
         return []
+
+
+def _capabilities_sentence() -> Text:
+    # Import differe : capabilities.py importe deja ce module (cycle sinon).
+    # Meme source de verite que l'accueil (greeting.py) -- le repli genere ne
+    # promet jamais une capacite que l'agent n'a pas.
+    from .capabilities import AGENT_CAPABILITIES, _join_naturally
+
+    return _join_naturally([c.description for c in AGENT_CAPABILITIES])
 
 
 class ActionRespectfulLanguage(Action):

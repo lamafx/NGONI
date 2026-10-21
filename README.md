@@ -78,6 +78,26 @@ Outcomes : `RESOLVED` · `ESCALATE` · `NEED_MORE_INFO`
 | POST | `/feedback` | Suggestion / plainte |
 | POST | `/feedback/ratings` | Notation utile / pas utile |
 
+### Prise en charge humaine & supervision
+
+Détail complet : [docs/19-prise-en-charge-humaine.md](docs/19-prise-en-charge-humaine.md).
+
+| Méthode | Chemin | Description |
+|---------|--------|-------------|
+| POST | `/conversations/escalate` | Demander un conseiller humain |
+| POST | `/conversations/turns` | Journaliser un tour (clients qui parlent directement à Rasa) |
+| POST | `/conversations/withdraw` | Retirer une demande de conseiller en attente |
+| GET | `/conversations/{id}/updates` | Récupérer les réponses du conseiller |
+| GET | `/admin/conversations/` | File des conversations (secret `X-Internal-Secret`) |
+| POST | `/admin/conversations/{id}/assign` | Prendre en charge une demande |
+| POST | `/admin/conversations/{id}/messages` | Répondre en tant que conseiller |
+| POST | `/admin/complaints/{ticket_id}/assign` | Prendre en charge une réclamation |
+| GET | `/admin/agents/` | Annuaire des conseillers |
+| GET | `/admin/dashboard/summary` | KPI du tableau de bord (+ deltas) |
+| GET | `/admin/dashboard/intent-distribution` | Répartition réelle des intentions |
+| GET | `/admin/system/health` | Sonde réelle de chaque dépendance |
+| GET | `/admin/users/` | Usagers vus par le support (agrégation) |
+
 ### Embeddings (partagés)
 
 | Méthode | Chemin | Description |

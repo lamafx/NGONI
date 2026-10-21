@@ -1,83 +1,111 @@
 """Service d'embeddings partage par toute la plateforme (FAQ, diagnostic...).
 
-Un seul modele charge par process FastAPI (singleton), reutilise par tous les
-domaines qui ont besoin de similarite semantique -- evite de dupliquer un
-modele de plusieurs centaines de Mo dans chaque conteneur qui en aurait
-besoin (voir router.py : POST /embeddings/query, appele par Rasa, plutot que
-de charger ce modele une 2e fois dans le conteneur actions).
+Un seul point d'entree HTTP par process FastAPI (pas de modele charge en
+memoire ici) -- reutilise par tous les domaines qui ont besoin de similarite
+semantique (voir router.py : POST /embeddings/query, appele par Rasa, plutot
+que de dupliquer cet appel dans le conteneur actions).
+
+Bascule le modele precedent -> le LLM local (2026-08) : le modele tourne desormais via Ollama en
+local (http://host.docker.internal:11434 depuis les conteneurs, localhost
+depuis ce process qui tourne nativement sur l'hote -- voir
+docs/10-deploiement.md), plutot que charge en memoire dans le process.
+Meme raison que pour la classification d'intention (rasa/components/) : un seul modele local, pas de dependance a une
+API IA externe tierce.
+
+Dimension INCHANGEE (1024, comme le modele precedent) : le modele d'embeddings produit
+egalement des vecteurs 1024D -- contrairement au changement un modele anterieur->le modele precedent
+(768->1024, voir migrations/0013_bge_m3_upgrade.sql), aucune migration de
+schema n'est necessaire ici, seulement un recalcul des valeurs
+(scripts/reembed_faq.py, reutilise tel quel).
+
+ATTENTION calibration (meme reserve que pour chaque changement de modele
+precedent, voir l'historique dans app/domains/faq/service.py) :
+DEFAULT_THRESHOLD/SECONDARY_THRESHOLD (FAQ) et MIN_EMBEDDING_SIMILARITY/
+KEYWORD_RESCUE_MIN_EMBEDDING_SIMILARITY (rasa/actions/diagnostic.py) avaient
+ete mesures sur la distribution de scores du precedent modele -- le nouveau modele d'embeddings
+produit une distribution differente, mesuree et recalibree provisoirement
+(voir commentaires a cote de chaque seuil), meme methode que le calibrage
+precedent (mesure rapide, pas un leave-one-out complet faute de corpus dedie
+-- docs/16-audit-faq-nlu-2026-07.md, absent du depot).
 """
 
-import os
-from pathlib import Path
-from typing import List
+from typing import List, Union
 
-import torch
+import numpy as np
+import requests
 
-# BAAI/bge-m3 est deja telecharge sur disque pour l'atelier d'entrainement
-# BGE-M3 (voir rasa/nlu_bge/embed.py) -- pointer HF_HOME vers le MEME cache
-# ici evite un 2e telechargement (~2 Go) dans le cache par defaut
-# (~/.cache/huggingface) rien que pour ce process FastAPI. Doit etre pose
-# AVANT le premier import de sentence_transformers/huggingface_hub (lu une
-# seule fois a l'initialisation de la lib).
-_REPO_ROOT = Path(__file__).resolve().parents[4]
-os.environ.setdefault("HF_HOME", str(_REPO_ROOT / "rasa" / ".cache" / "huggingface"))
-
-from sentence_transformers import SentenceTransformer  # noqa: E402
-
-# Bascule e5-base -> BGE-M3 (2026-07) : unifie sur le MEME modele que celui
-# utilise par les classifieurs d'intention BGE-M3 (voir
-# rasa/nlu_bge/embed.py et app/domains/nlu/) -- un seul modele d'embedding
-# pour toute la plateforme (FAQ, diagnostic, NLU), au lieu de deux copies
-# differentes (e5-base ici, BGE-M3 cote nlu_bge) qui n'auraient jamais pu
-# partager le moindre vecteur. BGE-M3 ne suit pas la convention E5
-# query:/passage: (voir rasa/nlu_bge/embed.py, aucun prefixe) -- encode()
-# est appele directement sur le texte brut ci-dessous.
-#
-# Consequence : dimension d'embedding passee de 768 (e5-base) a 1024
-# (voir app/domains/faq/models.py, ia.faq_items.embedding) -- les vecteurs
-# stockes en base NE SONT PAS reutilisables tels quels, recalcules avec ce
-# modele (voir scripts/reembed_faq.py, migrations/0013_bge_m3_upgrade.sql).
-#
-# ATTENTION calibration : MIN_EMBEDDING_SIMILARITY (rasa/actions/diagnostic.py)
-# et DEFAULT_THRESHOLD/SECONDARY_THRESHOLD/DUPLICATE_THRESHOLD
-# (app/domains/faq/service.py) avaient ete mesures sur la distribution de
-# scores d'e5-base -- BGE-M3 produit une distribution differente. Reportes
-# tels quels pour ce changement (pas de corpus de recalibration dedie
-# disponible), a revalider en priorite si la FAQ ou le diagnostic montrent
-# trop de faux positifs/negatifs en usage reel.
-MODEL_NAME = "BAAI/bge-m3"
+# host.docker.internal : alias Docker Desktop pour joindre l'hote depuis un
+# conteneur (voir rasa/components/, meme principe).
+# Ce module tourne nativement sur l'hote (voir docs/10-deploiement.md), donc
+# "localhost" suffirait ici -- mais les deux valent la meme adresse sur
+# Docker Desktop, host.docker.internal est gardee par coherence avec le
+# composant Rasa et pour ne rien casser si ce process est un jour dockerise.
+OLLAMA_URL = "http://localhost:11434/api/embed"
+MODEL_NAME = "qwen3-embedding:0.6b"
+EMBEDDING_DIM = 1024
+REQUEST_TIMEOUT_SECONDS = 45
 
 
-def get_embedding_model() -> SentenceTransformer:
+class _OllamaEmbeddingModel:
+    """Objet retourne par get_embedding_model() -- expose une methode
+    encode() compatible avec l'usage la bibliotheque d'embeddings deja fait ailleurs
+    (voir app/domains/nlu/engines.py::_predict_bge_sync, seul appelant qui
+    utilise .encode() directement plutot que les fonctions embed_query/
+    embed_passage ci-dessous), pour ne rien casser cote appelants."""
+
+    def encode(
+        self,
+        text_or_texts: Union[str, List[str]],
+        convert_to_numpy: bool = True,
+        normalize_embeddings: bool = True,
+        **_kwargs,
+    ) -> np.ndarray:
+        single = isinstance(text_or_texts, str)
+        texts = [text_or_texts] if single else list(text_or_texts)
+        vectors = _embed_via_ollama(texts)
+        array = np.array(vectors, dtype=np.float32)
+        if normalize_embeddings:
+            norms = np.linalg.norm(array, axis=1, keepdims=True)
+            norms[norms == 0] = 1.0
+            array = array / norms
+        return array[0] if single else array
+
+
+def _embed_via_ollama(texts: List[str]) -> List[List[float]]:
+    if not texts:
+        return []
+    response = requests.post(
+        OLLAMA_URL,
+        json={"model": MODEL_NAME, "input": texts, "keep_alive": "30m"},
+        timeout=REQUEST_TIMEOUT_SECONDS,
+    )
+    response.raise_for_status()
+    embeddings = response.json()["embeddings"]
+    if any(len(v) != EMBEDDING_DIM for v in embeddings):
+        raise RuntimeError(
+            f"Le modele d'embeddings a renvoye une dimension inattendue "
+            f"(attendu {EMBEDDING_DIM}) -- verifier le modele Ollama charge."
+        )
+    return embeddings
+
+
+def get_embedding_model() -> _OllamaEmbeddingModel:
     if not hasattr(get_embedding_model, "model"):
-        # Constate en pratique (2026-07) : torch ne se limitait qu'a 2 threads
-        # sur les 4 coeurs logiques disponibles sur cette machine, en dessous
-        # de ce que os.cpu_count() permettrait -- change quasi gratuitement le
-        # temps d'un encode() CPU (pas de GPU disponible ici, voir
-        # torch.cuda.is_available()). Positionne avant le premier encode(),
-        # sans effet une fois des operations tensorielles deja lancees.
-        torch.set_num_threads(os.cpu_count() or 1)
-        get_embedding_model.model = SentenceTransformer(MODEL_NAME)
+        get_embedding_model.model = _OllamaEmbeddingModel()
     return get_embedding_model.model
 
 
 def embed_query(text: str) -> List[float]:
-    # BGE-M3 (contrairement a la famille E5) n'a pas besoin de prefixe
-    # query:/passage: distinct -- meme fonction d'encodage des deux cotes
-    # (voir rasa/nlu_bge/embed.py, seul point de reference BGE-M3 deja
-    # eprouve dans ce projet). embed_query/embed_passage restent deux
-    # fonctions separees pour ne rien changer a la signature des appelants
-    # (app/domains/faq/service.py, app/domains/diagnostic/registry.py).
+    #  Le modele d'embeddings, comme le precedent, n'a pas besoin de prefixe query:/
+    # passage: (contrairement a e5) -- le texte est envoye tel quel.
     model = get_embedding_model()
     return model.encode(text, convert_to_numpy=True, normalize_embeddings=True).tolist()
 
 
 def embed_query_batch(texts: List[str]) -> List[List[float]]:
-    # Un seul appel a `model.encode` sur toute la liste plutot qu'un appel
-    # par texte : sentence-transformers encode le lot en un seul forward pass
-    # vectorise, bien plus efficace que N appels HTTP separes -- utilise par
-    # Rasa pour scorer plusieurs segments/clauses d'un meme message
-    # (audit qualite du code, cas #4) sans multiplier les aller-retours reseau.
+    # Un seul appel HTTP pour tout le lot : c'est le comportement natif de
+    # /api/embed d'Ollama, qui accepte nativement une liste ; meme principe
+    # que le batch la bibliotheque d'embeddings precedent, sans boucle cote client.
     model = get_embedding_model()
     embeddings = model.encode(texts, convert_to_numpy=True, normalize_embeddings=True)
     return embeddings.tolist()
@@ -89,12 +117,6 @@ def embed_passage(text: str) -> List[float]:
 
 
 def embed_passage_batch(texts: List[str]) -> List[List[float]]:
-    # Meme principe que embed_query_batch : un seul forward pass pour tout le
-    # lot. Introduit pour CapabilityRegistry.refresh() (voir
-    # app/domains/diagnostic/registry.py), qui appelait auparavant
-    # embed_passage() UNE FOIS PAR PHRASE (~67 appels par cycle de
-    # rafraichissement avec le catalogue actuel) au lieu d'un seul appel
-    # batche.
     if not texts:
         return []
     model = get_embedding_model()
@@ -103,7 +125,4 @@ def embed_passage_batch(texts: List[str]) -> List[List[float]]:
 
 
 def cosine_similarity(a: List[float], b: List[float]) -> float:
-    # Les deux vecteurs sont deja normalises (normalize_embeddings=True) : le
-    # produit scalaire EST la similarite cosinus, pas besoin de diviser par
-    # les normes.
     return float(sum(x * y for x, y in zip(a, b)))

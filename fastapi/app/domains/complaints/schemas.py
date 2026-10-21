@@ -39,6 +39,8 @@ class ComplaintResponse(BaseModel):
     additional_info: Optional[str] = None
     context: dict = Field(default_factory=dict)
     created_by: str
+    assigned_to: Optional[str] = None
+    assigned_at: Optional[str] = None
     updated_by: Optional[str] = None
     created_at: Optional[str] = None
     updated_at: Optional[str] = None
@@ -48,6 +50,18 @@ class AdminComplaintStatusUpdateRequest(BaseModel):
     model_config = {"extra": "forbid"}
 
     status: str
+
+
+class AdminComplaintAssignRequest(BaseModel):
+    """« Prendre en charge une réclamation » (cas d'utilisation agent
+    humain). Le passage en IN_PROGRESS est fait par le serveur, jamais
+    demandé ici : prendre un ticket et le déclarer en cours sont le même
+    geste métier, les séparer laisserait des tickets attribués mais toujours
+    affichés comme nouveaux."""
+
+    model_config = {"extra": "forbid"}
+
+    agent_id: str = Field(min_length=1, max_length=200)
 
 
 class TicketCreateRequest(BaseModel):

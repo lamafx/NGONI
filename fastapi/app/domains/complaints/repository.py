@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from typing import List, Optional
 
 from sqlalchemy.orm import Session
@@ -62,6 +63,19 @@ class ComplaintRepository:
             .offset(offset)
             .all()
         )
+
+    def assign(self, ticket_id: str, agent_id: str, status: Optional[str] = None) -> Complaint | None:
+        complaint = self.get_by_ticket_id(ticket_id)
+        if complaint is None:
+            return None
+        complaint.assigned_to = agent_id
+        complaint.assigned_at = datetime.now(timezone.utc)
+        complaint.updated_by = agent_id
+        if status is not None:
+            complaint.status = status
+        self.session.commit()
+        self.session.refresh(complaint)
+        return complaint
 
     def update_status(self, ticket_id: str, status: str, updated_by: Optional[str]) -> Complaint | None:
         complaint = self.get_by_ticket_id(ticket_id)
