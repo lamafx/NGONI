@@ -134,6 +134,19 @@ export function ChatPage() {
   const navigate = useNavigate();
   const [draft, setDraft] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  // Secondes d'attente de la reponse en cours : au-dela de quelques secondes,
+  // on dit ce qui se passe plutot que trois points muets (le modele de
+  // langue tourne sans carte graphique : 10 a 35 s par message).
+  const [waitSeconds, setWaitSeconds] = useState(0);
+  useEffect(() => {
+    if (!isTyping) {
+      setWaitSeconds(0);
+      return undefined;
+    }
+    const started = Date.now();
+    const timer = setInterval(() => setWaitSeconds(Math.floor((Date.now() - started) / 1000)), 1000);
+    return () => clearInterval(timer);
+  }, [isTyping]);
   const [verifyAttempt, setVerifyAttempt] = useState(0);
   // "idle" | "running" | "done" -- deroulement automatique de la demonstration
   const [autoplayState, setAutoplayState] = useState("idle");
@@ -255,13 +268,22 @@ export function ChatPage() {
           if (updates.assigned_to && active.assignedAgent !== updates.assigned_to) {
             dispatch({ type: "ASSIGN_AGENT", conversationId: active.id, agent: updates.assigned_to });
           }
-        } else if (active.status === "escalated" && updates.status === "BOT") {
+        } else if (active.status === "escalated" && (updates.status === "BOT" || updates.status === "RESOLUE")) {
           // La demande a ete retiree (« finalement, pas besoin de
           // conseiller » -- voir action_cancel_human_agent_request cote Rasa)
-          // ou la conversation a ete close par le conseiller : l'assistant
-          // reprend la main, l'interface doit le refleter tout de suite.
+          // ou la conversation a ete close par le conseiller (RESOLUE) :
+          // l'assistant reprend la main, l'interface doit le refleter tout de
+          // suite.
           setHandoffPhase("idle");
           dispatch({ type: "SET_STATUS", conversationId: active.id, status: "active" });
+          if (updates.status === "RESOLUE") {
+            pushMessage({
+              id: nextId("msg"),
+              sender: "system",
+              text: "Le conseiller a clôturé l'échange — l'assistant Ngoni reprend la conversation",
+              time: nowLabel(),
+            });
+          }
         }
       } catch {
         // 404 tant que le moteur n'a jamais entendu parler de cette
@@ -934,6 +956,20 @@ export function ChatPage() {
           <div className="ns-brand-mark"><img src={ngoniIcon} alt="Ngoni" /></div>
           <span className="ns-brand-name">Ngoni Support</span>
         </div>
+        <button
+          type="button"
+          className="ns-btn-primary ns-new-chat"
+          onClick={() => {
+            // Fil local vide + rechargement : nouvel identifiant de
+            // conversation cote Rasa et moteur (voir rasaSenderId). Le delai
+            // laisse DemoStore enregistrer le fil vide.
+            dispatch({ type: "RESET" });
+            setTimeout(() => window.location.reload(), 150);
+          }}
+        >
+          <StrokeIcon d="M10 4v12M4 10h12" size={16} stroke="#ffffff" strokeWidth="2" />
+          Nouvelle conversation
+        </button>
         <nav className="ns-nav">
           {NAV_ITEMS.map((item) => (
             <button
@@ -1266,6 +1302,13 @@ export function ChatPage() {
                 <div className="ns-bubble-col">
                   <span className="ns-sender-name">{active.status === "escalated" ? active.assignedAgent : "Ngoni"}</span>
                   <div className="ns-bubble"><span className="ns-typing"><span /><span /><span /></span></div>
+                  {!isDemoMode() && active.status !== "escalated" && waitSeconds >= 6 && (
+                    <span className="ns-wait-hint">
+                      {waitSeconds < 40
+                        ? `Analyse de votre message en cours… (${waitSeconds} s)`
+                        : `Message long ou modèle en cours de chargement, encore un instant… (${waitSeconds} s)`}
+                    </span>
+                  )}
                 </div>
               </div>
             )}

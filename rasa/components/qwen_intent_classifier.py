@@ -175,6 +175,35 @@ def _squash(value: Text) -> Text:
 MODEL_NUM_CTX = int(os.getenv("MODEL_NUM_CTX", "6144"))
 
 
+# Questions de SUIVI sur la verification d'identite (« ou en est ma
+# verification ? », « mon KYC est valide ? »). Le LLM les classe
+# `ask_complaint_status` (« ou en est mon dossier ») -- alors que la reponse
+# juste n'est pas un ticket mais le statut KYC reel, que seul le diagnostic
+# lit (user_service). Correction ciblee : seulement si la phrase parle
+# d'identite/KYC ET ne parle pas de ticket ou de reclamation.
+_IDENTITY_TERMS = ("kyc", "verification d identite", "verification de mon identite",
+                   "piece d identite", "identite", "compte verifie", "compte est verifie",
+                   "ma verification")
+_TICKET_TERMS = ("ticket", "reclamation", "plainte", "cmp-")
+
+
+def _plain(text: Text) -> Text:
+    text = unicodedata.normalize("NFKD", text.lower())
+    text = "".join(c for c in text if not unicodedata.combining(c))
+    return " ".join(text.replace("'", " ").replace("’", " ").split())
+
+
+def _rescue_identity_followup(text: Text, ranking: List[Dict[Text, Any]]) -> List[Dict[Text, Any]]:
+    if not ranking or ranking[0].get(INTENT_NAME_KEY) != "ask_complaint_status":
+        return ranking
+    plain = _plain(text)
+    if not any(term in plain for term in _IDENTITY_TERMS) or any(term in plain for term in _TICKET_TERMS):
+        return ranking
+    logger.info("QwenIntentClassifier : suivi d'identite -> diagnostic (au lieu de ask_complaint_status)")
+    rescued = {INTENT_NAME_KEY: "diagnostic", PREDICTED_CONFIDENCE_KEY: ranking[0].get(PREDICTED_CONFIDENCE_KEY, 0.9)}
+    return [rescued] + [r for r in ranking if r.get(INTENT_NAME_KEY) != "diagnostic"]
+
+
 @DefaultV1Recipe.register(
     DefaultV1Recipe.ComponentType.INTENT_CLASSIFIER, is_trainable=True
 )
@@ -330,6 +359,7 @@ class QwenIntentClassifier(GraphComponent, IntentClassifier):
             )
             if not ranking:
                 ranking = [{INTENT_NAME_KEY: FALLBACK_INTENT, PREDICTED_CONFIDENCE_KEY: 0.0}]
+            ranking = _rescue_identity_followup(text, ranking)
 
             message.set(INTENT, ranking[0], add_to_output=True)
             message.set(INTENT_RANKING_KEY, ranking, add_to_output=True)

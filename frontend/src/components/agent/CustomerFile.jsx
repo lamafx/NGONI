@@ -13,7 +13,24 @@
 import { useCallback, useEffect, useState } from "react";
 import { Icon } from "../ui/Icon";
 import { Avatar } from "../ui/Avatar";
-import { addCustomerNote, decideIdentity, fetchDocumentImage, getCustomerFile } from "../../services/engineClient";
+import {
+  addCustomerNote,
+  assignConversation,
+  decideIdentity,
+  fetchDocumentImage,
+  getCustomerFile,
+  resolveConversation,
+  sendAgentMessage,
+  updateComplaintStatus,
+} from "../../services/engineClient";
+
+/** Reponse proposee au client apres la decision -- relue et modifiable par le
+ *  conseiller avant envoi, rien ne part sans lui. */
+function proposedReply(decision, reason) {
+  return decision === "approved"
+    ? "Bonne nouvelle : votre pièce d'identité est validée, votre compte est maintenant vérifié. Vous pouvez de nouveau recevoir des cadeaux sur vos lives."
+    : `Votre pièce d'identité n'a pas pu être validée (${reason}). Pouvez-vous en envoyer une nouvelle photo, nette et en entier ?`;
+}
 
 const REFUSAL_REASONS = [
   "Photo floue : mentions illisibles",
@@ -104,6 +121,9 @@ export function CustomerFile({ userId, conversationId, agentId, onClose, onDecid
   const [otherReason, setOtherReason] = useState("");
   const [note, setNote] = useState("");
   const [actionError, setActionError] = useState(null);
+  // Apres la decision : reponse proposee au client, puis cloture du dossier.
+  const [followUp, setFollowUp] = useState(null);
+  const [closed, setClosed] = useState(false);
 
   // Ouverture = consultation nominative : tracee une fois, a l'ouverture.
   useEffect(() => {
@@ -180,7 +200,36 @@ export function CustomerFile({ userId, conversationId, agentId, onClose, onDecid
     );
     if (ok) {
       setRefusing(false);
+      setFollowUp({ decision, text: proposedReply(decision, motive) });
       onDecided?.(decision, motive);
+    }
+  }
+
+  /** Envoie la reponse, clot la conversation et resout les reclamations
+   *  encore ouvertes du compte -- le dossier est alors traite de bout en bout. */
+  async function sendAndClose() {
+    const text = followUp?.text.trim();
+    if (!text || !conversationId) return;
+    setBusy(true);
+    setActionError(null);
+    try {
+      try {
+        await assignConversation(conversationId, agentId);
+      } catch (err) {
+        if (err.status !== 409) throw err;
+      }
+      await sendAgentMessage(conversationId, text, agentId);
+      await resolveConversation(conversationId, agentId);
+      const open = (file?.tickets ?? []).filter((t) => t.status === "OPEN" || t.status === "IN_PROGRESS");
+      for (const ticket of open) await updateComplaintStatus(ticket.ticket_id, "RESOLVED");
+      setFile(await getCustomerFile(userId));
+      setClosed(true);
+      onDecided?.(followUp.decision, null, { closed: true });
+    } catch (err) {
+      console.error("[CustomerFile] cloture :", err);
+      setActionError(err.detail || err.message);
+    } finally {
+      setBusy(false);
     }
   }
 
@@ -236,7 +285,15 @@ export function CustomerFile({ userId, conversationId, agentId, onClose, onDecid
                 ) : (
                   <>
                     <div className="cf-doc-image">
-                      {imageUrl ? <img src={imageUrl} alt="Pièce d'identité envoyée par l'usager" /> : <span>Image indisponible</span>}
+                      {imageUrl ? (
+                        <img src={imageUrl} alt="Pièce d'identité envoyée par l'usager" />
+                      ) : (
+                        <span>
+                          {document.review_status === "pending"
+                            ? "Image indisponible"
+                            : "Image effacée après la décision (politique de conservation) — les champs lus et le journal restent."}
+                        </span>
+                      )}
                     </div>
                     <div className="cf-doc-meta">
                       {document.filename} · reçue le {when(document.created_at)}
@@ -340,9 +397,36 @@ export function CustomerFile({ userId, conversationId, agentId, onClose, onDecid
                       {document.review_reason ? ` — ${document.review_reason}` : ""}
                     </div>
                   )}
+                  {followUp && !closed && (
+                    <div className="cf-followup">
+                      <div className="cf-subtitle">Suite à donner</div>
+                      <textarea
+                        className="cf-input"
+                        rows={3}
+                        value={followUp.text}
+                        onChange={(e) => setFollowUp({ ...followUp, text: e.target.value })}
+                      />
+                      <button type="button" className="btn btn-primary" disabled={busy || !conversationId} onClick={sendAndClose}>
+                        <Icon name="send" size={15} /> Envoyer au client et clore le dossier
+                      </button>
+                      <p className="cf-hint">
+                        Envoie la réponse, clôt la conversation (l'assistant reprend la main) et résout les
+                        réclamations encore ouvertes de ce compte.
+                      </p>
+                    </div>
+                  )}
+                  {closed && (
+                    <div className="cf-decided cf-ok">
+                      <Icon name="check-circle" size={16} /> Réponse envoyée, conversation close, réclamations résolues.
+                    </div>
+                  )}
                   {actionError && <div className="cf-error">{actionError}</div>}
                 </div>
               )}
+              <p className="cf-hint">
+                Conservation : l'image d'une pièce est effacée dès la décision, et au plus tard{" "}
+                {file.retention_days ?? 30} jours après réception.
+              </p>
             </section>
 
             {/* ---------------- Colonne droite : le compte -------------------- */}

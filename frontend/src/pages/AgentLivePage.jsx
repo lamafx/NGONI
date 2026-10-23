@@ -589,15 +589,12 @@ export function AgentLivePage() {
           conversationId={detail.conversation_id}
           agentId={ACTING_AGENT_ID}
           onClose={() => setFileFor(null)}
-          onDecided={(decision, reason) =>
-            // Reponse proposee au client -- le conseiller la relit et l'envoie
-            // lui-meme (rien ne part sans lui).
-            setReply(
-              decision === "approved"
-                ? "Bonne nouvelle : votre pièce d'identité est validée, votre compte est maintenant vérifié. Vous pouvez de nouveau recevoir des cadeaux sur vos lives."
-                : `Votre pièce d'identité n'a pas pu être validée (${reason}). Pouvez-vous en envoyer une nouvelle photo, nette et en entier ?`
-            )
-          }
+          onDecided={() => {
+            // Decision prise ou dossier clos depuis le panneau : la file et le
+            // fil refletent tout de suite le nouvel etat.
+            refreshQueue();
+            refreshActive(activeIdRef.current);
+          }}
         />
       )}
     </div>

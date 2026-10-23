@@ -16,7 +16,7 @@ from __future__ import annotations
 
 import logging
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Literal, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Response
@@ -57,6 +57,25 @@ router = APIRouter(prefix="/admin/support", tags=["admin"], dependencies=[Depend
 
 DOMAIN = "support_humain"
 
+# Politique de conservation des pieces d'identite : l'image n'est gardee que
+# le temps de l'examen. Effacee des la decision du conseiller (les champs lus
+# et le journal restent : ils justifient la decision), et au plus tard
+# RETENTION_DAYS apres reception si personne ne l'a examinee.
+RETENTION_DAYS = 30
+
+
+def purge_expired_images(db: Session) -> int:
+    limit = datetime.now(timezone.utc) - timedelta(days=RETENTION_DAYS)
+    purged = (
+        db.query(IdentityDocument)
+        .filter(IdentityDocument.image.isnot(None), IdentityDocument.created_at < limit)
+        .update({IdentityDocument.image: None}, synchronize_session=False)
+    )
+    if purged:
+        db.commit()
+        logger.info("[SUPPORT] %d image(s) de piece effacee(s) (conservation %d j)", purged, RETENTION_DAYS)
+    return purged
+
 
 def _audit(db: Session, user_id: str, action_type: str, agent_id: str, *, conversation_id=None,
            input_data=None, output_data=None) -> None:
@@ -93,6 +112,7 @@ def _documents(db: Session, user_id: str):
 
 
 def build_dossier(db: Session, user_id: str) -> dict:
+    purge_expired_images(db)
     account, account_error = _remote(client.get_account, user_id)
     wallet, wallet_error = _remote(client.get_wallet, user_id)
     documents = _documents(db, user_id)
@@ -114,6 +134,7 @@ def build_dossier(db: Session, user_id: str) -> dict:
         "documents": [document_summary(d) for d in documents],
         "comparison": compare(latest_accepted.fields, account) if latest_accepted else [],
         "compared_document_id": str(latest_accepted.id) if latest_accepted else None,
+        "retention_days": RETENTION_DAYS,
         "conversations": [c.model_dump() for c in conversations.history_for_user(user_id, limit=10)],
         "tickets": [t.model_dump() for t in conversations.tickets_for_user(user_id, limit=10)],
         "actions": [
@@ -221,6 +242,8 @@ def identity_decision(user_id: str, payload: DecisionRequest, db: Session = Depe
         document.reviewed_by = payload.agent_id
         document.reviewed_at = datetime.now(timezone.utc)
         document.review_reason = payload.reason
+        # Conservation : l'image n'a plus de raison d'etre gardee.
+        document.image = None
         db.commit()
 
     _audit(

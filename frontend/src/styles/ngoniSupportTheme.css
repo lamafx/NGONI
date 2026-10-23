@@ -726,3 +726,5 @@ button.ns-stat:hover{border-color:var(--ns-orange-soft);}
   font-size:0.66rem;font-weight:800;display:flex;align-items:center;justify-content:center;
   border:2px solid var(--ns-bg);
 }
+.ns-wait-hint{font-size:0.74rem;color:var(--ns-ink-faint);margin-top:4px;}
+.ns-new-chat{justify-content:center;margin:0 0 18px;padding:11px 16px;}

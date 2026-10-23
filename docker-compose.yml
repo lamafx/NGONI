@@ -233,6 +233,15 @@ services:
                 print(f"{phrase!r} -> {intent} ({time.time() - t:.0f} s)", flush=True)
                 if intent != "nlu_fallback":
                     break
+        # Pret seulement quand un message ordinaire repond vite : un premier
+        # « Bonjour » compris en 50 s n'est pas encore un modele chaud.
+        for essai in range(5):
+            t = time.time()
+            intent = post("http://rasa:5005/model/parse", {"text": "Bonjour"})["intent"]["name"]
+            duree = time.time() - t
+            print(f"controle 'Bonjour' -> {intent} ({duree:.0f} s)", flush=True)
+            if intent == "greet" and duree < 25:
+                break
         print("prechauffage termine", flush=True)
     depends_on:
       fastapi:
