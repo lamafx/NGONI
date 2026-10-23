@@ -1,5 +1,5 @@
-﻿# Arrete ce que scripts\demarrer-live.ps1 a lance : FastAPI, stubs, Vite et
-# les conteneurs rasa/actions. PostgreSQL, Ollama et Docker Desktop restent
+﻿# Arrete ce que scripts\demarrer-live.ps1 a lance : FastAPI, services, Vite et
+# les conteneurs rasa/actions. PostgreSQL, Model et Docker Desktop restent
 # en marche (ils servent aussi en dehors de la demonstration).
 
 $Racine = Split-Path -Parent $PSScriptRoot
@@ -21,7 +21,7 @@ if (Test-Path $FichierPids) {
 # avec leurs processus enfants -- le rechargeur de `--reload` laisse sinon un
 # processus qui garde le port 8000 ouvert.
 $serveurs = @(Get-CimInstance Win32_Process | Where-Object {
-        $_.CommandLine -match 'uvicorn (app|wallet_stub|user_stub)\.main:app' -or
+        $_.CommandLine -match 'uvicorn (app|wallet_service|user_service)\.main:app' -or
         ($_.Name -eq 'node.exe' -and $_.CommandLine -match 'vite')
     })
 if ($serveurs) {

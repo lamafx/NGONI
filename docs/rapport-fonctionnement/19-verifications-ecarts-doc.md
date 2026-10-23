@@ -26,7 +26,7 @@ rédaction. Fichiers lus intégralement ou en grande partie pour ce rapport :
 - `frontend/modules/admin/components/dashboard-shell.js`, `dashboard.controller.js`
 
 Complété par une vérification **en conditions réelles** le même jour :
-Postgres, Rasa, Actions, FastAPI et les stubs wallet/user tous démarrés
+Postgres, Rasa, Actions, FastAPI et les services wallet/user tous démarrés
 simultanément, captures d'écran du chat (sélecteur de modèle peuplé,
 "Rasa (DIETClassifier)") et du dashboard admin (KPI avec données réelles :
 "Réclamations ouvertes 199", "Satisfaction utilisateur 60 %") — voir

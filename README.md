@@ -4,7 +4,7 @@ Microservice d'**assistance conversationnelle** de la plateforme NGONI : un agen
 
 > Principe : *le microservice métier décide, le moteur transporte, Rasa affiche*.
 
-**Toute la pile tourne sous Docker** : une seule commande, `docker compose up -d --build`, lance la base de données, les modèles d'IA, le moteur, les stubs, Rasa et l'interface web.
+**Toute la pile tourne sous Docker** : une seule commande, `docker compose up -d --build`, lance la base de données, les modèles d'IA, le moteur, les services, Rasa et l'interface web.
 
 ---
 
@@ -32,7 +32,7 @@ Microservice d'**assistance conversationnelle** de la plateforme NGONI : un agen
 
 | Domaine | Ce que fait le service |
 |---|---|
-| **Compréhension** | Classification d'intention par un LLM local (`qwen3:1.7b` via Ollama) intégré à Rasa, avec repli vers un conseiller sous un seuil de confiance réglable **à chaud**. |
+| **Compréhension** | Classification d'intention par un LLM local (`qwen3:1.7b` via Model) intégré à Rasa, avec repli vers un conseiller sous un seuil de confiance réglable **à chaud**. |
 | **FAQ** | Recherche sémantique par embeddings (`qwen3-embedding:0.6b`, 1024 dimensions, `pgvector`), résistante aux fautes et aux reformulations. |
 | **Diagnostic** | Interroge les services métier (`wallet`, `user`) via un contrat HTTP versionné (*Capability Registry*) : refus KYC, retraits bloqués, accès compte… |
 | **Pièces d'identité** | Pré-vérification (netteté, type, lisibilité, validité) et extraction des champs par OCR (`rapidocr`). |
@@ -59,8 +59,8 @@ Microservice d'**assistance conversationnelle** de la plateforme NGONI : un agen
                      │  classification (LLM)                 │       │  diagnostic
                      ▼                    embeddings          │       ▼
               ┌─────────────┐ ◄───────────────────────────────┘  ┌───────────────────────┐
-              │ ollama      │                                      │ wallet_stub  :3103    │
-              │ qwen3:1.7b  │                                      │ user_stub    :3104    │
+              │ model      │                                      │ wallet_service  :3103    │
+              │ qwen3:1.7b  │                                      │ user_service    :3104    │
               │ qwen3-emb.  │                                      └──────────┬────────────┘
               └─────────────┘                                                 │
                      ┌────────────────────────────────────────────────────────┘
@@ -74,18 +74,18 @@ Microservice d'**assistance conversationnelle** de la plateforme NGONI : un agen
 | Service | Image | Port hôte | Rôle |
 |---|---|---|---|
 | `postgres` | `pgvector/pgvector:pg17` | 5433 | Base `chatbotdb`, volume persistant `pgdata` |
-| `ollama` | `ollama/ollama:0.40.8` | — (interne) | LLM de classification et modèle d'embeddings, volume `ollama` |
-| `ollama-init` | `ollama/ollama:0.40.8` | — | Télécharge les deux modèles au premier lancement, puis s'arrête |
+| `model` | `model/model:0.40.8` | — (interne) | LLM de classification et modèle d'embeddings, volume `model` |
+| `model-init` | `model/model:0.40.8` | — | Télécharge les deux modèles au premier lancement, puis s'arrête |
 | `prechauffage` | même image que `fastapi` | — | Charge le LLM et son prompt une fois Rasa prêt, puis s'arrête |
 | `fastapi` | construit depuis `fastapi/` | 8000 | Moteur : FAQ, diagnostic, réclamations, conversations, administration |
-| `wallet_stub` | même image que `fastapi` | 3103 | Simule le service portefeuille (contrat diagnostic) |
-| `user_stub` | même image que `fastapi` | 3104 | Simule le service utilisateurs (KYC, compte) |
+| `wallet_service` | même image que `fastapi` | 3103 | Simule le service portefeuille (contrat diagnostic) |
+| `user_service` | même image que `fastapi` | 3104 | Simule le service utilisateurs (KYC, compte) |
 | `rasa` | construit depuis `rasa/` | 5005 | Dialogue (Rasa 3.6) et NLU |
 | `actions` | construit depuis `rasa/actions/` | 5055 | Serveur d'actions Rasa |
 | `frontend` | construit depuis `frontend/` | 5173 | Interface web (React + Vite), servie par nginx |
 | `pgadmin` | `dpage/pgadmin4` | 5050 | Optionnel (profil `outils`) |
 
-Entre conteneurs, chaque service se joint par son **nom** (`http://fastapi:8000`, `http://ollama:11434`…).
+Entre conteneurs, chaque service se joint par son **nom** (`http://fastapi:8000`, `http://model:11434`…).
 
 Documentation détaillée : [`docs/`](docs/README.md) · flux complet d'un message : [`docs/rapport-fonctionnement/`](docs/rapport-fonctionnement/00-index.md).
 
@@ -95,11 +95,11 @@ Documentation détaillée : [`docs/`](docs/README.md) · flux complet d'un messa
 
 - **Docker Desktop** (Windows / macOS) ou Docker Engine + Compose v2 (Linux).
 - Mémoire allouée à Docker : **8 Go minimum** (le LLM, Rasa et le moteur tournent ensemble) ; 4 cœurs ou plus.
-- Disque : **~25 Go libres** (images ~17 Go, dont 8 Go pour l'image officielle d'Ollama ; modèles 2 Go ; base 0,2 Go).
-- **Connexion Internet au premier lancement** (images Docker, dépendances, ~2 Go de modèles Ollama).
+- Disque : **~25 Go libres** (images ~17 Go, dont 8 Go pour l'image officielle de Model ; modèles 2 Go ; base 0,2 Go).
+- **Connexion Internet au premier lancement** (images Docker, dépendances, ~2 Go de modèles Model).
 - Aucun GPU requis : tout tourne sur CPU (réponses plus lentes, voir [Dépannage](#dépannage)).
 
-Rien d'autre n'est à installer : ni Python, ni Node, ni PostgreSQL, ni Ollama.
+Rien d'autre n'est à installer : ni Python, ni Node, ni PostgreSQL, ni Model.
 
 ---
 
@@ -137,7 +137,7 @@ La pile est prête quand le préchauffage affiche **`prechauffage termine`** (`d
 | Démonstration rejouée | http://localhost:5173/?demo=1#/chat |
 | API FastAPI (Swagger) | http://localhost:8000/docs |
 | Statut Rasa | http://localhost:5005/status |
-| Stubs (Swagger) | http://localhost:3103/docs · http://localhost:3104/docs |
+| Services (Swagger) | http://localhost:3103/docs · http://localhost:3104/docs |
 | PostgreSQL depuis l'hôte | `localhost:5433`, base `chatbotdb`, compte `chatbot_user` |
 | pgAdmin (optionnel) | http://localhost:5050 |
 
@@ -147,14 +147,14 @@ La pile est prête quand le préchauffage affiche **`prechauffage termine`** (`d
 
 1. **Construction des images** `fastapi` (PyTorch CPU inclus), `rasa`, `actions`, `frontend` — 10 à 20 min selon la connexion.
 2. **`postgres`** initialise le volume `pgdata` : crée le compte `chatbot_user`, la base `chatbotdb`, les extensions `vector`, `pgcrypto`, `uuid-ossp`, puis **restaure `docker/postgres/chatbotdb.dump`** s'il est présent ([détails](#base-de-données)).
-3. **`ollama-init`** télécharge `qwen3:1.7b` et `qwen3-embedding:0.6b` (~2 Go) dans le volume `ollama`, puis s'arrête (état `exited (0)` : c'est normal).
-4. **`fastapi`**, les stubs, **`rasa`** et **`actions`** démarrent ; Rasa charge le modèle le plus récent de `rasa/models/`.
+3. **`model-init`** télécharge `qwen3:1.7b` et `qwen3-embedding:0.6b` (~2 Go) dans le volume `model`, puis s'arrête (état `exited (0)` : c'est normal).
+4. **`fastapi`**, les services, **`rasa`** et **`actions`** démarrent ; Rasa charge le modèle le plus récent de `rasa/models/`.
 5. **`frontend`** sert l'interface sur le port 5173.
 6. **`prechauffage`** envoie quelques messages au classifieur : sans GPU, le tout premier appel charge le LLM et lit tout son prompt (2 à 5 min, quelques essais en `nlu_fallback` sont normaux). Il affiche `prechauffage termine` puis s'arrête.
 
 Les lancements suivants (`docker compose up -d`) prennent quelques minutes au plus : images, base et modèles sont conservés, seul le préchauffage est rejoué.
 
-> **Temps de réponse sans GPU** : 10 à 35 s par message une fois le préchauffage terminé. Le LLM reste ensuite en mémoire (`OLLAMA_KEEP_ALIVE=-1`).
+> **Temps de réponse sans GPU** : 10 à 35 s par message une fois le préchauffage terminé. Le LLM reste ensuite en mémoire en permanence.
 
 ---
 
@@ -165,10 +165,10 @@ Un seul fichier, à la racine, lu par `docker-compose.yml`. Modèle : [`.env.exa
 | Variable | Défaut | Rôle |
 |---|---|---|
 | `POSTGRES_PASSWORD` | — | Superutilisateur `postgres` du conteneur |
-| `APP_DB_USER` / `APP_DB_PASSWORD` / `APP_DB_NAME` | `chatbot_user` / — / `chatbotdb` | Compte utilisé par FastAPI, les stubs et Rasa. **Mot de passe : lettres et chiffres uniquement** (il est inséré dans l'URL de connexion). |
+| `APP_DB_USER` / `APP_DB_PASSWORD` / `APP_DB_NAME` | `chatbot_user` / — / `chatbotdb` | Compte utilisé par FastAPI, les services et Rasa. **Mot de passe : lettres et chiffres uniquement** (il est inséré dans l'URL de connexion). |
 | `POSTGRES_HOST_PORT` | `5433` | Port PostgreSQL publié sur l'hôte |
 | `ADMIN_INTERNAL_SECRET` | `dev-admin-secret-change-me` | Secret des routes d'administration. Il est figé dans l'interface **au build** : après modification, `docker compose up -d --build frontend fastapi`. |
-| `STUBS_INTERNAL_SECRET` | `test-secret` | Secret partagé entre FastAPI et les stubs |
+| `SERVICES_INTERNAL_SECRET` | `test-secret` | Secret partagé entre FastAPI et les services |
 | `REGISTRY_POLL_INTERVAL_SECONDS` | `300` | Rafraîchissement du catalogue de diagnostic |
 | `NLU_CONTEXT_ENABLED` | `false` | Mémoire de conversation dans le classifieur (lent sans GPU) |
 | `LLM_REPLY_ENABLED` | `false` | Réponse de repli générée par le LLM (~30 s de plus sans GPU) |
@@ -203,7 +203,7 @@ Ce fichier est celui à transporter vers un autre poste : placé dans `docker/po
 ### Repartir d'une base propre
 
 ```bash
-docker compose down -v                  # supprime pgdata (et le volume ollama)
+docker compose down -v                  # supprime pgdata (et le volume model)
 docker compose up -d                    # réinitialise depuis docker/postgres/chatbotdb.dump
 ```
 
@@ -221,8 +221,8 @@ Depuis l'hôte (DBeaver, pgAdmin…) : `localhost:5433`.
 |---|---|
 | `ia` | FAQ, conversations et messages, réclamations, diagnostics, réglages du moteur et leur historique, conseillers, audit des actions de l'agent |
 | `public` | Historique des conversations Rasa (`events`) |
-| `users` | Comptes et dossiers KYC (lus par `user_stub`) |
-| `wallet_stub` | Portefeuilles et retraits simulés (`wallet_stub`) |
+| `users` | Comptes et dossiers KYC (lus par `user_service`) |
+| `wallet_service` | Portefeuilles et retraits simulés (`wallet_service`) |
 
 Modèle de données : [`docs/15-modele-donnees.md`](docs/15-modele-donnees.md).
 
@@ -230,9 +230,9 @@ Modèle de données : [`docs/15-modele-donnees.md`](docs/15-modele-donnees.md).
 
 ## Modèles d'IA
 
-### Ollama
+### Model
 
-Les deux modèles sont téléchargés une fois par `ollama-init` dans le volume `ollama` :
+Les deux modèles sont téléchargés une fois par `model-init` dans le volume `model` :
 
 | Modèle | Usage |
 |---|---|
@@ -319,7 +319,7 @@ Les routes `/admin/*` exigent l'en-tête `X-Internal-Secret` (= `ADMIN_INTERNAL_
 
 ### Contrat diagnostic
 
-Tout service diagnosticable expose `GET /diagnostic/manifest` et `POST /diagnostic/{problem_id}` (en-têtes `X-Internal-Secret`, `X-Request-ID`). Schémas : [`contracts/diagnostic/`](contracts/diagnostic/). Les stubs `wallet_stub` / `user_stub` implémentent ce contrat ; pour brancher les vrais services, faire pointer `WALLET_SERVICE_BASE_URL` / `USER_SERVICE_BASE_URL` (service `fastapi` dans `docker-compose.yml`) vers eux.
+Tout service diagnosticable expose `GET /diagnostic/manifest` et `POST /diagnostic/{problem_id}` (en-têtes `X-Internal-Secret`, `X-Request-ID`). Schémas : [`contracts/diagnostic/`](contracts/diagnostic/). Les services `wallet_service` / `user_service` implémentent ce contrat ; pour brancher les vrais services, faire pointer `WALLET_SERVICE_BASE_URL` / `USER_SERVICE_BASE_URL` (service `fastapi` dans `docker-compose.yml`) vers eux.
 
 ---
 
@@ -328,7 +328,7 @@ Tout service diagnosticable expose `GET /diagnostic/manifest` et `POST /diagnost
 | Symptôme | Cause et solution |
 |---|---|
 | `port is already allocated` | Un programme local occupe le port (PostgreSQL Windows, ancien lancement natif…). Arrêter ce programme, ou changer le port publié (`POSTGRES_HOST_PORT`, ou la partie gauche de `ports:` dans `docker-compose.yml`). |
-| `fastapi` / `rasa` restent en `starting` au premier lancement | Normal tant qu'`ollama-init` télécharge les modèles : `docker compose logs -f ollama-init`. |
+| `fastapi` / `rasa` restent en `starting` au premier lancement | Normal tant qu'`model-init` télécharge les modèles : `docker compose logs -f model-init`. |
 | L'agent répond « Je n'ai pas bien saisi votre demande » à tout | Le préchauffage n'est pas terminé (`docker compose logs prechauffage`), ou le classifieur dépasse son délai de 90 s : vérifier la mémoire et les cœurs alloués à Docker, puis `docker compose up -d prechauffage`. |
 | Tests de contrat en échec sous Git Bash | Git Bash réécrit `/contracts` en chemin Windows : préfixer la commande par `MSYS_NO_PATHCONV=1`, ou la lancer depuis PowerShell / cmd. |
 | Pages d'administration en erreur 401 | `ADMIN_INTERNAL_SECRET` a changé sans reconstruire l'interface : `docker compose up -d --build frontend fastapi`. |
@@ -346,9 +346,9 @@ ngoni-ia-service/
 ├── docker-compose.yml        # toute la pile
 ├── .env.example              # modèle de configuration
 ├── docker/postgres/          # restauration initiale de la base (+ chatbotdb.dump, hors Git)
-├── fastapi/                  # moteur métier + stubs wallet/user (une seule image)
+├── fastapi/                  # moteur métier + services wallet/user (une seule image)
 │   ├── app/domains/          # faq, diagnostic, complaints, conversations, settings, stats…
-│   ├── wallet_stub/ user_stub/
+│   ├── wallet_service/ user_service/
 │   ├── migrations/ seeds/    # historique du schéma
 │   └── tests/
 ├── rasa/                     # dialogue : config.yml, domain.yml, data/, models/
@@ -368,6 +368,6 @@ ngoni-ia-service/
 - Environnement de **développement** : pas d'authentification utilisateur sur le périmètre assistant ; secrets par défaut à remplacer.
 - **Français** uniquement.
 - **CPU uniquement** : la classification par LLM prend plusieurs secondes par message sans GPU.
-- Diagnostic branché sur des **stubs** `wallet` / `user` en attendant que les services réels implémentent le contrat.
+- Diagnostic branché sur des **services** `wallet` / `user` en attendant que les services réels implémentent le contrat.
 
 Voir [`docs/13-limitations.md`](docs/13-limitations.md) et [`docs/14-evolutions.md`](docs/14-evolutions.md).

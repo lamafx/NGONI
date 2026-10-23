@@ -51,8 +51,8 @@ résumé ici :
 sequenceDiagram
     participant M as app/main.py (startup)
     participant Reg as CapabilityRegistry
-    participant W as wallet_stub
-    participant U as user_stub
+    participant W as wallet_service
+    participant U as user_service
 
     M->>Reg: ensure_loaded() (précharge au démarrage)
     Reg->>W: GET /diagnostic/manifest
@@ -76,7 +76,7 @@ sequenceDiagram
     participant R as Rasa Core
     participant A as Action Server
     participant F as Moteur FastAPI
-    participant W as wallet_stub
+    participant W as wallet_service
 
     U->>R: "mon retrait est bloqué depuis hier"
     R->>R: NLU : intent=diagnostic (DIETClassifier)

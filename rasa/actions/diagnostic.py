@@ -668,7 +668,7 @@ def _rescue_unique_keyword_match(
 # pratique (grande vague de tests conversationnels, 3e passage) : une
 # premiere version sans cette liste filtrait a tort topup_not_credited sur
 # "n'est pas creditee". Cette liste reprend les mots des `keywords` deja
-# declares dans les manifestes concernes (voir wallet_stub/user_stub
+# declares dans les manifestes concernes (voir wallet_service/user_service
 # diagnostic/manifest.py) -- pas invente ici.
 _NEGATIVE_STATE_WORDS = (
     "bloqu[ée]e?s?", "suspendu[e]?s?", "banni[e]?s?", "refus[ée]e?s?", "rejet[ée]e?s?",
@@ -2170,7 +2170,7 @@ def _respond_engine_outcome(
         # Mode Super-Agent (2026-07-30, voir le hook symetrique sur RESOLVED
         # ci-dessus pour le KYC) : un retrait bloque au-dela du SLA est
         # normalement escalade vers un ticket humain (voir
-        # PENDING_BEYOND_SLA_NO_PROVIDER_RESPONSE, wallet_stub/diagnostic/
+        # PENDING_BEYOND_SLA_NO_PROVIDER_RESPONSE, wallet_service/diagnostic/
         # services/withdrawal.py) -- l'agent standard n'a pas l'autorite de
         # trancher seul sans reponse du prestataire de paiement. Le
         # Super-Agent, lui, assume le risque d'un remboursement direct plutot

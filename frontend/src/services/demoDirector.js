@@ -1,5 +1,5 @@
 // Pilote du mode demonstration : rejoue le scenario 1 (variante 1) sans
-// aucun appel a Rasa ni a Ollama.
+// aucun appel a Rasa ni a Model.
 //
 // Actif uniquement si l'URL porte ?demo=1, ou si VITE_DEMO_MODE=1 est defini
 // au build. Hors de ce mode, rien n'est modifie : chatService continue de

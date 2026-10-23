@@ -9,8 +9,8 @@ flowchart LR
     U[Utilisateur<br/>web / mobile] -->|texte libre| R[Rasa<br/>NLU + Core<br/>:5005]
     R <-->|webhook action| A[Action Server<br/>rasa/actions<br/>:5055]
     A -->|HTTP JSON| F[Moteur FastAPI<br/>NGONI Engine<br/>:8000]
-    F -->|GET manifest<br/>POST diagnostic/problem_id| W[wallet-service<br/>ou wallet_stub<br/>:3103]
-    F -->|GET manifest<br/>POST diagnostic/problem_id| US[user-service<br/>ou user_stub<br/>:3104]
+    F -->|GET manifest<br/>POST diagnostic/problem_id| W[wallet-service<br/>ou wallet_service<br/>:3103]
+    F -->|GET manifest<br/>POST diagnostic/problem_id| US[user-service<br/>ou user_service<br/>:3104]
     F <-->|SQL| PG[(PostgreSQL<br/>:5432)]
     R <-->|tracker store<br/>SQL| PG
     Admin[pgAdmin<br/>:5050] --> PG
@@ -35,7 +35,7 @@ Trois zones se dégagent :
 2. **Logique métier et orchestration** (moteur FastAPI) : FAQ, diagnostic,
    réclamations, feedback, embeddings partagés. C'est le seul composant qui
    parle SQL et qui appelle les microservices métier.
-3. **Microservices métier** (wallet, user — réels ou stubs en développement) :
+3. **Microservices métier** (wallet, user — réels ou services en développement) :
    propriétaires de leurs propres données et décisions ; le moteur ne fait
    que les interroger via un contrat standardisé (chapitre 7 des contrats,
    voir [`contracts/diagnostic/README.md`](../contracts/diagnostic/README.md)).
@@ -47,7 +47,7 @@ Trois zones se dégagent :
 | **Rasa (Core + NLU)** | Comprend le langage naturel (intention, entités), maintient les slots et le contexte de conversation, décide de la prochaine action via ses policies. | N'exécute aucune logique métier ni requête SQL directement — délègue toujours à une action personnalisée. |
 | **Action Server** (`rasa/actions`) | Exécute le code Python métier déclenché par le dialogue : appelle le moteur FastAPI, construit les réponses utilisateur, gère les formulaires (réclamation, diagnostic). | Ne stocke aucun état durable au-delà des slots de la conversation en cours ; aucune donnée persistante ne vit dans ce processus. |
 | **Moteur FastAPI** | Point de vérité pour FAQ, tickets, feedback ; orchestre le Diagnostic Engine (Capability Registry, pipeline de résolution) ; expose le modèle d'embeddings partagé. | Ne décide jamais, à la place d'un microservice, si un problème est résolu ou non — il relaie et normalise la décision prise par le microservice concerné. |
-| **wallet-service / user-service** (ou leurs stubs de dev) | Propriétaires des données et de la logique métier réelle (état d'un retrait, d'un KYC...). Décident eux-mêmes `RESOLVED` / `ESCALATE` / `NEED_MORE_INFO` pour leurs propres problèmes. | N'ont aucune connaissance du dialogue, de Rasa, ni des autres microservices. |
+| **wallet-service / user-service** (ou leurs services de dev) | Propriétaires des données et de la logique métier réelle (état d'un retrait, d'un KYC...). Décident eux-mêmes `RESOLVED` / `ESCALATE` / `NEED_MORE_INFO` pour leurs propres problèmes. | N'ont aucune connaissance du dialogue, de Rasa, ni des autres microservices. |
 | **PostgreSQL** | Stockage relationnel unique : FAQ, tickets, feedback, embeddings, audit du diagnostic, et tracker Rasa (historique de conversation). | — |
 | **pgAdmin** | Administration/inspection de la base en développement. | N'est jamais appelé par un composant applicatif. |
 
@@ -91,7 +91,7 @@ calcul des embeddings associés à ce registre.
 | **FastAPI** avec une architecture par domaine (`app/domains/{faq,diagnostic,complaints,feedback}`) | Un monolithe Django/Flask, ou un split plus fin en microservices Python | Async natif (utile pour les appels HTTP concurrents vers les microservices), typage Pydantic partagé avec les contrats JSON Schema, granularité de domaine suffisante sans le coût opérationnel de microservices supplémentaires côté assistant. |
 | **`sentence-transformers` / `intfloat/multilingual-e5-base`** pour la similarité sémantique | Correspondance par mots-clés uniquement, ou un modèle d'embeddings plus petit (e5-small) | Résiste aux fautes de frappe et reformulations ; le passage e5-small → e5-base a été justifié empiriquement (taux de faux positifs FAQ/diagnostic de 65 % → 10 %, voir [07-integration-ia.md](07-integration-ia.md)). |
 | **PostgreSQL unique**, partagé entre le moteur FastAPI et le tracker store Rasa | Une base par service | Un seul système à opérer en développement ; les schémas restent logiquement séparés (`core`, `complaints`, tracker Rasa dans son propre schéma). |
-| **Docker Compose limité à `rasa` + `actions`** | Conteneuriser l'ensemble de la stack (y compris FastAPI et Postgres) | Choix opérationnel délibéré de ce projet en développement : FastAPI, Postgres et les stubs tournent nativement sur l'hôte (`.venv` + `uvicorn`) pour un cycle d'itération plus rapide (rechargement à chaud, débogueur local) — voir [10. Déploiement](10-deploiement.md). `docker-compose.yml` définit néanmoins des services `postgres`/`fastapi` de repli, non utilisés dans le flux de travail actuel. |
+| **Docker Compose limité à `rasa` + `actions`** | Conteneuriser l'ensemble de la stack (y compris FastAPI et Postgres) | Choix opérationnel délibéré de ce projet en développement : FastAPI, Postgres et les services tournent nativement sur l'hôte (`.venv` + `uvicorn`) pour un cycle d'itération plus rapide (rechargement à chaud, débogueur local) — voir [10. Déploiement](10-deploiement.md). `docker-compose.yml` définit néanmoins des services `postgres`/`fastapi` de repli, non utilisés dans le flux de travail actuel. |
 | **Contrat versionné en JSON Schema** (`contracts/diagnostic/v1/`), avec miroir Pydantic | Documentation informelle du format d'échange | Rend le contrat vérifiable indépendamment du langage (Python côté moteur, PHP côté microservices Laravel), avec des exemples valides/invalides testables en CI. |
 
 ## 2.6 Contraintes actuelles

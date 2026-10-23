@@ -70,16 +70,16 @@ Etape "1/7  PostgreSQL (:5432)"
 Noter "PostgreSQL" (Port-Ouvert 5432) $(if (Port-Ouvert 5432) { "port 5432 ouvert" } else { "demarrer le service PostgreSQL Windows" })
 
 # ---------------------------------------------------------------------------
-Etape "2/7  Ollama (:11434)"
+Etape "2/7  Model (:11434)"
 if (-not (Attendre-Http "http://localhost:11434/api/version" 2)) {
-    $ollama = Join-Path $env:LOCALAPPDATA "Programs\Ollama\ollama.exe"
-    Ecrire "   Ollama arrete -> demarrage"
-    Start-Process -FilePath $ollama -ArgumentList "serve" -WindowStyle Hidden | Out-Null
+    $model = Join-Path $env:LOCALAPPDATA "Programs\Model\model.exe"
+    Ecrire "   Model arrete -> demarrage"
+    Start-Process -FilePath $model -ArgumentList "serve" -WindowStyle Hidden | Out-Null
 }
-$ollamaOk = Attendre-Http "http://localhost:11434/api/version" 30
-$modeles = if ($ollamaOk) { (Invoke-RestMethod "http://localhost:11434/api/tags").models.name } else { @() }
+$modelOk = Attendre-Http "http://localhost:11434/api/version" 30
+$modeles = if ($modelOk) { (Invoke-RestMethod "http://localhost:11434/api/tags").models.name } else { @() }
 $manquants = @("qwen3:1.7b", "qwen3-embedding:0.6b") | Where-Object { $modeles -notcontains $_ }
-Noter "Ollama" ($ollamaOk -and -not $manquants) $(if ($manquants) { "modeles manquants : $($manquants -join ', ') (ollama pull ...)" } else { "qwen3:1.7b + qwen3-embedding:0.6b" })
+Noter "Model" ($modelOk -and -not $manquants) $(if ($manquants) { "modeles manquants : $($manquants -join ', ') (model pull ...)" } else { "qwen3:1.7b + qwen3-embedding:0.6b" })
 
 # ---------------------------------------------------------------------------
 Etape "3/7  Docker Desktop"
@@ -98,7 +98,7 @@ if (-not $dockerOk) { Ecrire "Impossible de continuer sans Docker." Red; exit 1 
 Etape "4/7  Rasa (:5005) + serveur d'actions (:5055)"
 # docker-compose.local.yml et NON docker-compose.yml : ce dernier decrit la
 # pile 100 % Docker (ses conteneurs Rasa visent http://fastapi:8000 et
-# http://ollama:11434, et entraineraient PostgreSQL/Ollama en conteneurs).
+# http://model:11434, et entraineraient PostgreSQL/Model en conteneurs).
 Push-Location $Racine
 try {
     if ($Entrainer) {
@@ -115,15 +115,15 @@ $actionsOk = Attendre-Http "http://localhost:5055/health" 120
 Noter "Actions" $actionsOk $(if ($actionsOk) { "serveur d'actions pret" } else { "voir : docker compose logs actions" })
 
 # ---------------------------------------------------------------------------
-Etape "5/7  Moteur FastAPI (:8000) + stubs wallet (:3103) / user (:3104)"
+Etape "5/7  Moteur FastAPI (:8000) + services wallet (:3103) / user (:3104)"
 $fastapi = Join-Path $Racine "fastapi"
 # python -m uvicorn et NON .venv\Scripts\uvicorn.exe : ce lanceur, copie
 # d'un autre venv, execute le Python de C:\DEV\PFE (sans rapidocr...).
 $python = Join-Path $fastapi ".venv\Scripts\python.exe"
 foreach ($s in @(
         @{ Nom = "fastapi"; Module = "app.main:app"; Port = 8000 },
-        @{ Nom = "wallet_stub"; Module = "wallet_stub.main:app"; Port = 3103 },
-        @{ Nom = "user_stub"; Module = "user_stub.main:app"; Port = 3104 })) {
+        @{ Nom = "wallet_service"; Module = "wallet_service.main:app"; Port = 3103 },
+        @{ Nom = "user_service"; Module = "user_service.main:app"; Port = 3104 })) {
     if (Port-Ouvert $s.Port) { Ecrire "   $($s.Nom) deja en ecoute sur :$($s.Port)" }
     else { Lancer $s.Nom $python "-m uvicorn $($s.Module) --host localhost --port $($s.Port)" $fastapi | Out-Null }
     $ok = Attendre-Http "http://localhost:$($s.Port)/docs" 90

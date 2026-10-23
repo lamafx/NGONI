@@ -1,8 +1,8 @@
-"""Verifie le contrat HTTP de wallet_stub (securite, manifeste, cas
+"""Verifie le contrat HTTP de wallet_service (securite, manifeste, cas
 generiques ne dependant d'aucune donnee precise).
 
-Depuis que wallet_stub lit en lecture seule le schema Postgres `wallet` (un
-CLONE de la vraie base de ngoni-wallet-service, voir wallet_stub/main.py),
+Depuis que wallet_service lit en lecture seule le schema Postgres `wallet` (un
+CLONE de la vraie base de ngoni-wallet-service, voir wallet_service/main.py),
 il n'y a plus de mecanisme de seed pour forcer des cas precis (SUCCESS,
 PENDING dans/hors SLA, KYC manquant...). Ces cas-la restent couverts par
 tests/Feature/DiagnosticControllerTest.php cote PHP, la seule source de
@@ -18,8 +18,8 @@ from fastapi.testclient import TestClient
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from wallet_stub.main import app  # noqa: E402
-from wallet_stub.security import INTERNAL_SECRET  # noqa: E402
+from wallet_service.main import app  # noqa: E402
+from wallet_service.security import INTERNAL_SECRET  # noqa: E402
 
 HEADERS = {"X-Internal-Secret": INTERNAL_SECRET}
 

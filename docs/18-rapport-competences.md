@@ -110,10 +110,10 @@ produit sur "ce que fait ce bot".
   différenciante du projet par rapport à un chatbot FAQ classique. C'est
   aussi celle qui a reçu le plus d'investissement de calibration mesurable
   (386 exemples NLU, dizaines de commentaires d'audit qualité dans
-  `wallet_stub`/`user_stub`/`manifest.py` documentant des corrections
+  `wallet_service`/`user_service`/`manifest.py` documentant des corrections
   chiffrées avant/après). 8 problèmes diagnosticables aujourd'hui (3 côté
   `wallet`, 5 côté `user` — voir `services_registry.yaml` et les deux
-  `manifest.py` des stubs).
+  `manifest.py` des services).
 - **Maturité mesurée** : c'est aussi la compétence au cœur du **problème le
   plus critique identifié par l'audit** — des questions FAQ légitimes
   contenant du vocabulaire "compte / mot de passe / retrait" sont
@@ -274,7 +274,7 @@ stable, sans incident documenté.
 
 Rafraîchissement périodique des manifestes, disjoncteur partagé, journal
 d'audit (`DiagnosticAuditLog`). Fonctionnel mais **jamais éprouvé au-delà de
-deux stubs de développement** — la bascule vers les vrais
+deux services de développement** — la bascule vers les vrais
 `ngoni-wallet-service`/`ngoni-user-service` reste, à ce jour, un changement
 de configuration non exécuté en pratique ([14.3](14-evolutions.md#143-étendre-le-capability-registry-aux-microservices-réels)).
 
@@ -404,8 +404,8 @@ lecture par compétence de ce rapport.
 Classement établi à partir de : `rasa/domain.yml`, `rasa/data/nlu.yml`
 (comptage d'exemples par intention), `rasa/data/rules.yml`,
 `rasa/actions/*.py`, `fastapi/services_registry.yaml`,
-`fastapi/wallet_stub/diagnostic/manifest.py`,
-`fastapi/user_stub/diagnostic/manifest.py`, et les chapitres
+`fastapi/wallet_service/diagnostic/manifest.py`,
+`fastapi/user_service/diagnostic/manifest.py`, et les chapitres
 [01](01-presentation.md), [03](03-taxonomie.md), [04](04-services.md),
 [06](06-api-reference.md), [13](13-limitations.md), [14](14-evolutions.md)
 et [16](16-audit-faq-nlu-2026-07.md) de cette documentation. Aucune donnée

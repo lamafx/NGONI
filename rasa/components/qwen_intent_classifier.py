@@ -30,7 +30,7 @@ RESOURCE_FILE = " _intent_examples.json"
 FALLBACK_INTENT = "nlu_fallback"
 
 # Champs alignes sur domain.yml (`entities:`) ET sur les manifestes de
-# diagnostic (voir fastapi/wallet_stub/diagnostic/manifest.py, commentaire
+# diagnostic (voir fastapi/wallet_service/diagnostic/manifest.py, commentaire
 # "Noms alignes sur les entites NLU deja entrainees") -- ce chemin existait
 # deja cote actions (_capture_opportunistic_nlu_entities, rasa/actions/
 # diagnostic.py) mais restait mort faute d'extraction reelle (DIET n'avait
@@ -62,7 +62,7 @@ EXTRACTABLE_ENTITIES = {
 #   avec contexte : 36-43s, diagnostic + entites inventees (faux)
 # Un modele 1.7B tire plus de confusion que d'aide de l'historique, et le
 # bloc de contexte, different a chaque message, n'est pas reutilise par le
-# cache d'Ollama. Les suites de question FAQ restent gerees sans LLM (voir
+# cache de Model. Les suites de question FAQ restent gerees sans LLM (voir
 # standalone_question, rasa/actions/common.py). A reessayer avec un GPU ou un
 # modele plus grand.
 CONTEXT_ENABLED = os.getenv("NLU_CONTEXT_ENABLED", "false").strip().lower() in ("1", "true", "yes", "oui")
@@ -104,7 +104,7 @@ REFORMULATION_KEY = "standalone_text"
 # "Comment recharger mon portefeuille ?" -> request_human_agent,
 # "tu supportes quelle equipe de foot ?" -> bot_challenge, toujours a 0.95.
 # Cout en latence nul en regime normal : ce texte fait partie du prefixe fixe,
-# relu depuis le cache KV d'Ollama (voir _build_prompt). Une intention absente
+# relu depuis le cache KV de Model (voir _build_prompt). Une intention absente
 # d'ici garde simplement ses seuls exemples.
 INTENT_DESCRIPTIONS = {
     "affirm": "acquiescement ou reponse positive a la question de l'assistant",
@@ -166,13 +166,13 @@ def _squash(value: Text) -> Text:
     return "".join(ch for ch in stripped if ch.isalnum())
 
 
-# Fenetre de contexte demandee a Ollama, IDENTIQUE pour tous les appels a ce
+# Fenetre de contexte demandee a Model, IDENTIQUE pour tous les appels a ce
 # modele (voir aussi LLM_REPLY_NUM_CTX, rasa/actions/common.py) : une valeur
-# differente d'un appel a l'autre force Ollama a recharger le modele. Le
-# defaut d'Ollama (4096) etait trop juste : prompt fixe ~3300 tokens + bloc
-# de contexte ~400 + reponse jusqu'a 250 -- au-dela, Ollama tronque le DEBUT
+# differente d'un appel a l'autre force Model a recharger le modele. Le
+# defaut de Model (4096) etait trop juste : prompt fixe ~3300 tokens + bloc
+# de contexte ~400 + reponse jusqu'a 250 -- au-dela, Model tronque le DEBUT
 # du prompt (consignes et premieres intentions) sans aucune erreur.
-OLLAMA_NUM_CTX = int(os.getenv("OLLAMA_NUM_CTX", "6144"))
+MODEL_NUM_CTX = int(os.getenv("MODEL_NUM_CTX", "6144"))
 
 
 @DefaultV1Recipe.register(
@@ -180,8 +180,8 @@ OLLAMA_NUM_CTX = int(os.getenv("OLLAMA_NUM_CTX", "6144"))
 )
 class QwenIntentClassifier(GraphComponent, IntentClassifier):
     """Classifieur d'intention ET extracteur d'entites par prompting d'un LLM
-    local (le LLM local, servi par Ollama), en remplacement du le classifieur Rasa historique de ce
-    pipeline -- les deux taches dans le MEME appel Ollama (pas un appel
+    local (le LLM local, servi par Model), en remplacement du le classifieur Rasa historique de ce
+    pipeline -- les deux taches dans le MEME appel Model (pas un appel
     separe), pour ne pas doubler la latence deja mesuree comme genante en
     demo (docs/08-pipeline-traitement.md, retours d'usage).
 
@@ -203,12 +203,12 @@ class QwenIntentClassifier(GraphComponent, IntentClassifier):
     def get_default_config() -> Dict[Text, Any]:
         return {
             # Rasa tourne dans un conteneur Docker (voir docker-compose.yml) ;
-            # Ollama tourne nativement sur l'hote -- host.docker.internal est
+            # Model tourne nativement sur l'hote -- host.docker.internal est
             # l'alias Docker Desktop standard pour joindre l'hote depuis le
             # conteneur (meme principe deja utilise pour actions -> FastAPI,
             # voir README.md principal). "localhost" ici viserait le
             # conteneur lui-meme, pas l'hote.
-            "ollama_url": "http://host.docker.internal:11434/api/chat",
+            "model_url": "http://host.docker.internal:11434/api/chat",
             "model": "qwen3:1.7b",
             "examples_per_intent": 5,
             # 90 et non 30 : sur une machine sans GPU, un message porteur
@@ -412,7 +412,7 @@ class QwenIntentClassifier(GraphComponent, IntentClassifier):
 
     def _build_prompt(self, text: Text, context_block: Text = "") -> Text:
         # Le message a classer vient en DERNIER : tout ce qui le precede est
-        # identique d'un appel a l'autre, et Ollama reutilise ce prefixe deja
+        # identique d'un appel a l'autre, et Model reutilise ce prefixe deja
         # calcule (cache KV) au lieu de relire ~1600 tokens a chaque message.
         # Mesure sans GPU (qwen3:1.7b) : lecture du prompt ~19s -> ~3s, memes
         # intentions et memes confiances sur les messages de test.
@@ -461,7 +461,7 @@ class QwenIntentClassifier(GraphComponent, IntentClassifier):
         ]
         # Le contexte va APRES tout le texte fixe ci-dessus et AVANT le
         # message : le prefixe reste identique d'un appel a l'autre, le cache
-        # KV d'Ollama continue donc de servir (voir le commentaire en tete).
+        # KV de Model continue donc de servir (voir le commentaire en tete).
         if context_block:
             lines.append(context_block)
         lines += [
@@ -478,10 +478,12 @@ class QwenIntentClassifier(GraphComponent, IntentClassifier):
 
         try:
             response = requests.post(
-                # OLLAMA_CHAT_URL prime sur la config figee dans le modele
-                # entraine : sous Docker Compose, Ollama est le service
-                # `ollama`, pas l'hote (voir docker-compose.yml).
-                os.getenv("OLLAMA_CHAT_URL") or self.component_config["ollama_url"],
+                # MODEL_CHAT_URL prime sur la config figee dans le modele
+                # entraine : sous Docker Compose, Model est le service
+                # `model`, pas l'hote (voir docker-compose.yml).
+                os.getenv("MODEL_CHAT_URL")
+                or self.component_config.get("model_url")
+                or "http://model:11434/api/chat",
                 json={
                     "model": self.component_config["model"],
                     "messages": [{"role": "user", "content": self._build_prompt(text, context_block)}],
@@ -489,7 +491,7 @@ class QwenIntentClassifier(GraphComponent, IntentClassifier):
                     "format": "json",
                     "think": False,
                     "keep_alive": self.component_config["keep_alive"],
-                    "options": {"temperature": 0.0, "num_predict": 250, "num_ctx": OLLAMA_NUM_CTX},
+                    "options": {"temperature": 0.0, "num_predict": 250, "num_ctx": MODEL_NUM_CTX},
                 },
                 timeout=self.component_config["request_timeout"],
             )
@@ -499,9 +501,9 @@ class QwenIntentClassifier(GraphComponent, IntentClassifier):
             raw_ranking = parsed.get("ranking", [])
             raw_entities = parsed.get("entities", {})
             raw_reformulation = parsed.get("reformulation")
-        except Exception as exc:  # Ollama injoignable, timeout, JSON malforme...
+        except Exception as exc:  # Model injoignable, timeout, JSON malforme...
             logger.error(
-                "QwenIntentClassifier : echec de l'appel a Ollama (%s) -- "
+                "QwenIntentClassifier : echec de l'appel a Model (%s) -- "
                 "repli sur nlu_fallback pour ce message, aucune entite extraite.",
                 exc,
             )

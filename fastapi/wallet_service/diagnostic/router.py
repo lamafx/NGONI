@@ -27,7 +27,7 @@ router = APIRouter(
 def _log_outcome(endpoint: str, payload: DiagnosticInvocationRequest, result: dict) -> dict:
     detail = result.get("escalation_reason") or result.get("resolution_code")
     logger.info(
-        "[DIAG][WALLET_STUB] session=%s trace_id=%s stage=endpoint_out endpoint=%s outcome=%s %s",
+        "[DIAG][WALLET_SERVICE] session=%s trace_id=%s stage=endpoint_out endpoint=%s outcome=%s %s",
         payload.session_id, payload.trace_id, endpoint, result.get("outcome"), detail,
     )
     return result
@@ -54,7 +54,7 @@ def withdrawal(payload: DiagnosticInvocationRequest, db: Session = Depends(get_d
         )
 
     logger.info(
-        "[DIAG][WALLET_STUB] session=%s trace_id=%s stage=endpoint_in endpoint=withdrawal user=%s reference=%s fallback=%s",
+        "[DIAG][WALLET_SERVICE] session=%s trace_id=%s stage=endpoint_in endpoint=withdrawal user=%s reference=%s fallback=%s",
         payload.session_id, payload.trace_id, payload.user_id, reference, bool(not reference),
     )
     return _log_outcome(
@@ -70,7 +70,7 @@ def topup(payload: DiagnosticInvocationRequest, db: Session = Depends(get_db)):
         raise HTTPException(status_code=422, detail="entities.transaction_reference est obligatoire")
 
     logger.info(
-        "[DIAG][WALLET_STUB] session=%s trace_id=%s stage=endpoint_in endpoint=topup user=%s reference=%s",
+        "[DIAG][WALLET_SERVICE] session=%s trace_id=%s stage=endpoint_in endpoint=topup user=%s reference=%s",
         payload.session_id, payload.trace_id, payload.user_id, reference,
     )
     return _log_outcome("topup", payload, resolve_topup(db, payload.user_id, reference))
@@ -83,7 +83,7 @@ def gift(payload: DiagnosticInvocationRequest, db: Session = Depends(get_db)):
         raise HTTPException(status_code=422, detail="entities.gift_reference est obligatoire")
 
     logger.info(
-        "[DIAG][WALLET_STUB] session=%s trace_id=%s stage=endpoint_in endpoint=gift user=%s reference=%s",
+        "[DIAG][WALLET_SERVICE] session=%s trace_id=%s stage=endpoint_in endpoint=gift user=%s reference=%s",
         payload.session_id, payload.trace_id, payload.user_id, reference,
     )
     return _log_outcome("gift", payload, resolve_gift(db, payload.user_id, reference))

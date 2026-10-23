@@ -62,7 +62,7 @@ prendre comme modèle pour un domaine plus simple.
    considérer le problème correctement intégré — un nouveau problème peut
    entrer en collision sémantique avec un problème existant (voir les
    nombreux exemples de recalibrage documentés dans
-   `wallet_stub`/`user_stub` `diagnostic/manifest.py`).
+   `wallet_service`/`user_service` `diagnostic/manifest.py`).
 
 ## 11.5 Mettre à jour un modèle IA
 
@@ -113,7 +113,7 @@ couvert en profondeur) : `test_diagnostic_pipeline.py`,
 `test_diagnostic_contracts.py`, `test_diagnostic_circuit_breaker.py`,
 `test_diagnostic_adapter_resilience.py`, `test_diagnostic_audit_repository.py`,
 `test_diagnostic_classification_quality.py`, `test_diagnostic_router.py`,
-`test_ticket_creation.py`, `test_wallet_stub.py`.
+`test_ticket_creation.py`, `test_wallet_service.py`.
 
 ---
 

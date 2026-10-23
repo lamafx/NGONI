@@ -1,5 +1,5 @@
 """Tests de FaqRepository contre une VRAIE base Postgres+pgvector -- meme
-convention que tests/test_wallet_stub.py (docstring : "ces tests verifient
+convention que tests/test_wallet_service.py (docstring : "ces tests verifient
 la logique... pas la connectivite Postgres reelle... deja couverte par [des
 tests qui touchent] une vraie base"). Le filtrage/tri (`ORDER BY embedding
 <=> :query`) vit entierement en SQL (pgvector), impossible a verifier

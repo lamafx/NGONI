@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 # Valeurs manifestement non-securisees : les memes que celles deja utilisees
 # comme defauts de developpement ailleurs dans ce projet (voir
-# wallet_stub/security.py, WALLET_STUB_INTERNAL_SECRET="test-secret") --
+# wallet_service/security.py, WALLET_SERVICE_INTERNAL_SECRET="test-secret") --
 # jamais acceptables pour un secret qui protege une route d'administration,
 # meme en developpement.
 _INSECURE_PLACEHOLDER_VALUES = {"", "changeme", "test-secret"}

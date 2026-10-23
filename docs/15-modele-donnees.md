@@ -7,7 +7,7 @@ assistant — absent des chapitres précédents, qui ne couvraient que les
 formats d'échange API (Pydantic, voir [6. Référence API](06-api-reference.md)),
 pas le stockage sous-jacent. Source : `fastapi/init_db.sql`, les modèles
 SQLAlchemy de chaque domaine (`app/domains/*/models.py`), et
-`wallet_stub/db.py` / `user_stub/db.py`.
+`wallet_service/db.py` / `user_service/db.py`.
 
 ## 15.1 Vue d'ensemble
 
@@ -21,8 +21,8 @@ table, l'isolation logique passe entièrement par le schéma Postgres :
 | `complaints` | Moteur FastAPI — domaine Complaints | `complaints` (tickets) |
 | `feedback` | Moteur FastAPI — domaine Feedback | `entries`, `response_ratings` |
 | `diagnostic` | Moteur FastAPI — Diagnostic Engine | `diagnostic_sessions`, `diagnostic_audit_log` |
-| `wallet` | **Lecture seule** — clone de `ngoni-wallet-service`, consulté par `wallet_stub` | `wallets`, `wallet_transactions` |
-| `users` | **Lecture seule** — clone de `ngoni-user-service`, consulté par `user_stub` | `users`, `kyc_submissions`, `compliance_events`, `account_deletions`, `parental_consents` |
+| `wallet` | **Lecture seule** — clone de `ngoni-wallet-service`, consulté par `wallet_service` | `wallets`, `wallet_transactions` |
+| `users` | **Lecture seule** — clone de `ngoni-user-service`, consulté par `user_service` | `users`, `kyc_submissions`, `compliance_events`, `account_deletions`, `parental_consents` |
 | *(public/défaut)* | Tracker Rasa | `events` — créée et gérée automatiquement par Rasa, jamais lue ni écrite par le moteur FastAPI |
 
 Aucune contrainte de clé étrangère n'existe **entre** ces schémas (ex. entre
@@ -325,13 +325,13 @@ qu'il apporterait. Seul le tracker Rasa brut (`events`, voir
 
 ## 15.7 Schémas clones en lecture seule (`wallet`, `users`)
 
-Ces deux schémas ne sont **jamais écrits** par le moteur ni les stubs — ce
+Ces deux schémas ne sont **jamais écrits** par le moteur ni les services — ce
 sont des clones du contenu réel de `ngoni-wallet-service` et
-`ngoni-user-service`, utilisés uniquement pour que `wallet_stub`/`user_stub`
+`ngoni-user-service`, utilisés uniquement pour que `wallet_service`/`user_service`
 puissent répondre avec des données réalistes (voir
 [4.4](04-services.md#44-microservices-consommés-par-le-diagnostic-engine)).
-Les modèles SQLAlchemy correspondants (`wallet_stub/db.py`,
-`user_stub/db.py`) ne déclarent que le **sous-ensemble de colonnes** lu par
+Les modèles SQLAlchemy correspondants (`wallet_service/db.py`,
+`user_service/db.py`) ne déclarent que le **sous-ensemble de colonnes** lu par
 le diagnostic, pas le schéma complet du service réel.
 
 **`wallet.wallets`** / **`wallet.wallet_transactions`** — champs clés :
@@ -347,15 +347,15 @@ le diagnostic, pas le schéma complet du service réel.
 compte) ; `child_id`/`parent_id`, `status` (consentement parental).
 
 > ⚠️ **Divergence connue avec `init_db.sql`** : ce fichier déclare encore un
-> schéma `wallet_stub` (tables `wallets`/`withdrawals`, colonnes différentes)
+> schéma `wallet_service` (tables `wallets`/`withdrawals`, colonnes différentes)
 > qui ne correspond **plus** aux modèles réellement utilisés par le code
-> actuel de `wallet_stub` (`db.py`, schéma `wallet`) — voir
-> `wallet_stub/README.md`, qui documente explicitement le schéma `wallet`
+> actuel de `wallet_service` (`db.py`, schéma `wallet`) — voir
+> `wallet_service/README.md`, qui documente explicitement le schéma `wallet`
 > comme clone en lecture seule. `init_db.sql` n'a apparemment pas été tenu à
-> jour lors du passage au modèle "clone réel" ; aucun schéma `user_stub`
+> jour lors du passage au modèle "clone réel" ; aucun schéma `user_service`
 > équivalent n'y figure non plus. Comme pour la divergence déjà notée en
 > [13.8](13-limitations.md#138-divergences-constatées-entre-code-et-documentation-existante),
-> c'est du code (`db.py`, `README.md` des stubs) qu'il faut partir pour
+> c'est du code (`db.py`, `README.md` des services) qu'il faut partir pour
 > connaître le schéma réel, pas de `init_db.sql` seul.
 
 ## 15.8 Tracker store Rasa

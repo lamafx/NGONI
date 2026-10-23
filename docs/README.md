@@ -2,7 +2,7 @@
 
 Cette documentation couvre le **périmètre de l'assistant conversationnel** de
 la plateforme NGONI : le bot Rasa, le moteur FastAPI (FAQ, diagnostic,
-réclamations, feedback, embeddings), les stubs de microservices utilisés en
+réclamations, feedback, embeddings), les services de microservices utilisés en
 développement, et les contrats qui relient le moteur de diagnostic aux
 microservices métier. Les autres domaines de la plateforme (vidéos,
 paiements, modération, LCB-FT, gestion des comptes...) ne sont documentés ici

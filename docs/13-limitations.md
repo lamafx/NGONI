@@ -10,7 +10,7 @@ adressés (voir [14. Perspectives d'évolution](14-evolutions.md)).
 
 ## 13.1 Absence d'authentification et d'autorisation
 
-Aucun endpoint du périmètre assistant (FastAPI, Rasa, stubs wallet/user)
+Aucun endpoint du périmètre assistant (FastAPI, Rasa, services wallet/user)
 n'est protégé par une authentification utilisateur — à l'exception du
 module admin de `ngoni-core-service` (`assertInternalAuth`) et du header
 `X-Internal-Secret` déjà en place entre le moteur et les microservices de
@@ -50,7 +50,7 @@ quitte la machine de développement.
 identifiants PostgreSQL : de simples valeurs dans des fichiers `.env` non
 commités, sans rotation ni coffre-fort de secrets (Vault, AWS Secrets
 Manager...). Valeur de développement observée par défaut :
-`WALLET_STUB_INTERNAL_SECRET=test-secret`.
+`WALLET_SERVICE_INTERNAL_SECRET=test-secret`.
 
 ## 13.4 Pas de limitation de débit (rate limiting)
 
@@ -92,7 +92,7 @@ réévaluation, pas seulement plus de ressources matérielles.
 moment de la rédaction de cette documentation, que le pipeline du
 Diagnostic Engine est "non implémenté" — alors que
 `app/domains/diagnostic/pipeline.py`, `registry.py`, `adapter.py`,
-`escalation.py` et les stubs `wallet_stub`/`user_stub` existent et sont
+`escalation.py` et les services `wallet_service`/`user_service` existent et sont
 fonctionnels. Cette documentation technique (chapitres 1 à 12) reflète
 l'état réel du code observé ; le tableau du contrat mériterait une mise à
 jour dans le même esprit pour éviter toute confusion future.

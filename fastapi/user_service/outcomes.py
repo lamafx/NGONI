@@ -1,6 +1,6 @@
 """Construction des reponses conformes au contrat service-invocation-response
 (voir app/domains/diagnostic/contracts.py) : RESOLVED ou ESCALATE. Copie
-volontaire de wallet_stub/outcomes.py -- ce stub reste un processus
+volontaire de wallet_service/outcomes.py -- ce service reste un processus
 totalement independant (voir main.py)."""
 
 from app.domains.diagnostic.contracts import EscalateOutcome, EscalationPayload, ResolvedOutcome

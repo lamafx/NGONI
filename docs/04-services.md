@@ -43,7 +43,7 @@ l'inventaire des actions par fichier.
 | Domaine | Responsabilité | Dépend de |
 |---|---|---|
 | **FAQ** (`app/domains/faq`) | CRUD des questions/réponses, recherche sémantique (`find_best_answer`), suggestions groupées par catégorie. | Service d'embeddings partagé |
-| **Diagnostic** (`app/domains/diagnostic`) | Capability Registry, pipeline de résolution générique, résilience (circuit breaker), audit. Voir [3.4](03-taxonomie.md#34-fastapiappdomainsdiagnostic-en-détail) pour le détail interne. | Service d'embeddings, `wallet-service`/`user-service` (ou stubs), domaine Complaints (pour l'escalade auto) |
+| **Diagnostic** (`app/domains/diagnostic`) | Capability Registry, pipeline de résolution générique, résilience (circuit breaker), audit. Voir [3.4](03-taxonomie.md#34-fastapiappdomainsdiagnostic-en-détail) pour le détail interne. | Service d'embeddings, `wallet-service`/`user-service` (ou services), domaine Complaints (pour l'escalade auto) |
 | **Complaints** (`app/domains/complaints`) | Création et consultation de tickets (réclamations, escalades diagnostiques, escalades feedback). | — |
 | **Feedback** (`app/domains/feedback`) | Suggestions, plaintes, notation des réponses (utile/pas utile). Peut créer un ticket associé selon le type. | Domaine Complaints |
 | **Embeddings** (`app/shared/embeddings`) | Charge **une seule fois** par process le modèle `intfloat/multilingual-e5-base` (singleton) et l'expose via `/embeddings/query[/batch]`, réutilisé par le domaine FAQ, le Capability Registry et l'action server Rasa. | — |
@@ -54,22 +54,22 @@ sans dépendre d'un frontend mobile/web (voir [6. Référence API §1.6](06-api-
 
 ## 4.4 Microservices consommés par le Diagnostic Engine
 
-En développement, le Diagnostic Engine s'appuie sur deux **stubs** FastAPI
-indépendants (`fastapi/wallet_stub`, `fastapi/user_stub`) qui simulent le
+En développement, le Diagnostic Engine s'appuie sur deux **services** FastAPI
+indépendants (`fastapi/wallet_service`, `fastapi/user_service`) qui simulent le
 comportement des vrais microservices `ngoni-wallet-service` (Laravel/PHP) et
 `ngoni-user-service` (Laravel/PHP), en implémentant exactement le même
 contrat (`/diagnostic/manifest`, `/diagnostic/{problem_id}`). Cela permet de
 développer et tester le moteur de diagnostic sans dépendre de la
 disponibilité ni de l'état des vraies bases de données wallet/user.
 
-| | Stub de développement | Service réel (hors périmètre détaillé de ce document) |
+| | Service de développement | Service réel (hors périmètre détaillé de ce document) |
 |---|---|---|
-| Wallet | `fastapi/wallet_stub` — port `3103` | `ngoni-wallet-service` (Laravel, gRPC) |
-| User | `fastapi/user_stub` — port `3104` | `ngoni-user-service` (Laravel, gRPC) |
+| Wallet | `fastapi/wallet_service` — port `3103` | `ngoni-wallet-service` (Laravel, gRPC) |
+| User | `fastapi/user_service` — port `3104` | `ngoni-user-service` (Laravel, gRPC) |
 
 Le contrat étant indépendant du langage (JSON Schema autonome, voir
 [3.6](03-taxonomie.md#36-contractsdiagnosticv1--contrat-versionné)), faire
-basculer le Diagnostic Engine du stub vers le service réel ne nécessite
+basculer le Diagnostic Engine du service vers le service réel ne nécessite
 qu'un changement de configuration (`WALLET_SERVICE_BASE_URL`,
 `USER_SERVICE_BASE_URL` dans `services_registry.yaml` / variables
 d'environnement) — voir [9. Configuration](09-configuration.md) — dès lors
@@ -100,7 +100,7 @@ l'extension `pgvector` utilisée par le domaine FAQ), voir
 |---|---|---|---|
 | Rasa Core | Action Server | HTTP (webhook Rasa SDK) | Oui |
 | Action Server | Moteur FastAPI (`/faq/*`, `/diagnostic/*`, `/feedback*`, `/tickets/create`, `/embeddings/*`) | HTTP/JSON | Oui |
-| Moteur FastAPI | `wallet-service` / `user-service` (ou stubs) — `/diagnostic/manifest`, `/diagnostic/{problem_id}` | HTTP/JSON | Oui |
+| Moteur FastAPI | `wallet-service` / `user-service` (ou services) — `/diagnostic/manifest`, `/diagnostic/{problem_id}` | HTTP/JSON | Oui |
 | Moteur FastAPI | PostgreSQL | SQL (SQLAlchemy) | Oui |
 | Rasa Core | PostgreSQL (tracker store) | SQL | Oui |
 | Moteur FastAPI (interface de test `/api/chat`) | Rasa (`/model/parse`, `/webhooks/rest/webhook`) | HTTP/JSON | Oui |

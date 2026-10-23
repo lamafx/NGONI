@@ -744,7 +744,7 @@ export function ChatPage() {
     }
 
     // Mode demonstration : le tour est rejoue depuis demoScenario1.js, aucun
-    // appel a Rasa ni a Ollama. C'est ce qui rend le parcours testable et
+    // appel a Rasa ni a Model. C'est ce qui rend le parcours testable et
     // filmable -- les memes trois messages coutent plusieurs minutes de calcul
     // en conditions reelles (voir capturedMs dans le fichier de donnees).
     if (isDemoMode() && !isDemoFinished()) {

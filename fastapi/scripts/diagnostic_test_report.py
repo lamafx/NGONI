@@ -19,10 +19,10 @@ deja MIN_EMBEDDING_SIMILARITY.
 Interroge le vrai Diagnostic Engine en cours d'execution (POST
 /diagnostic/debug/classify) plutot que de recalculer les embeddings
 localement : mesure le comportement REEL du CapabilityRegistry (manifestes
-wallet_stub/user_stub charges via HTTP, comme en production), pas une
+wallet_service/user_service charges via HTTP, comme en production), pas une
 reimplementation separee qui pourrait diverger.
 
-Prerequis : FastAPI + wallet_stub + user_stub demarres (voir
+Prerequis : FastAPI + wallet_service + user_service demarres (voir
 docs/10-deploiement.md) -- le registre doit avoir charge les 8 problemes
 (verifier : curl http://localhost:8000/diagnostic/capabilities).
 
@@ -44,7 +44,7 @@ import httpx
 # ---------------------------------------------------------------------------
 # Corpus positif : (paraphrase, problem_id attendu). Cible en priorite les
 # collisions DEJA documentees dans les manifestes eux-memes (voir
-# wallet_stub/diagnostic/manifest.py et user_stub/diagnostic/manifest.py,
+# wallet_service/diagnostic/manifest.py et user_service/diagnostic/manifest.py,
 # commentaires "Audit qualite du code") : le vocabulaire "bloque"/"compte"
 # est partage entre withdrawal_pending, account_access_blocked,
 # compliance_hold_blocking, account_deletion_status et kyc_status_issue --
@@ -302,7 +302,7 @@ def main() -> None:
     n_problems = len(caps.get("problems") or [])
     print(f"  -> {n_problems} problemes charges")
     if n_problems == 0:
-        print("ERREUR : le registre est vide -- verifier que wallet_stub/user_stub tournent (voir docs/10-deploiement.md)")
+        print("ERREUR : le registre est vide -- verifier que wallet_service/user_service tournent (voir docs/10-deploiement.md)")
         sys.exit(1)
 
     print(f"Lancement du corpus ({len(POSITIVE_CASES)} positifs + {len(NEGATIVE_CASES)} negatifs)...")

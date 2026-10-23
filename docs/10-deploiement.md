@@ -24,7 +24,7 @@ conteneur dans le fonctionnement réel de ce projet** :
 | `rasa` | Conteneur Docker (`pfe-rasa-1`) | Isolation de l'environnement Rasa (dépendances lourdes, versions figées) |
 | `actions` | Conteneur Docker (`pfe-actions-1`) | Idem, processus séparé du runtime Rasa (voir [4.2](04-services.md#42-service-actions)) |
 | Moteur FastAPI | **Processus natif** (`fastapi/.venv`) | Cycle d'itération plus rapide (rechargement à chaud `--reload`, débogueur local), pas de rebuild d'image à chaque changement |
-| `wallet_stub` / `user_stub` | **Processus natifs** (même venv que le moteur) | Idem |
+| `wallet_service` / `user_service` | **Processus natifs** (même venv que le moteur) | Idem |
 | PostgreSQL | **Instance native** sur l'hôte | Partagée par le moteur natif et le tracker Rasa (atteint depuis les conteneurs via `host.docker.internal`) |
 | pgAdmin | Généralement non utilisé au quotidien | Outil d'inspection ponctuel |
 
@@ -36,7 +36,7 @@ processus natifs déjà en place, avec un état/une configuration différents �
 ## 10.3 Installation
 
 ```powershell
-# Environnement Python du moteur (et des stubs, même venv)
+# Environnement Python du moteur (et des services, même venv)
 cd C:\DEV\PFE\fastapi
 python -m venv .venv
 .venv\Scripts\pip install -r requirements.txt
@@ -62,12 +62,12 @@ Copy-Item rasa\actions\.env.example rasa\actions\.env
    cd C:\DEV\PFE\fastapi
    .venv\Scripts\python.exe -m uvicorn app.main:app --reload --host localhost --port 8000
    ```
-4. **Stubs wallet/user** (natifs, nécessaires pour que le Diagnostic Engine
+4. **Services wallet/user** (natifs, nécessaires pour que le Diagnostic Engine
    ait au moins un service à interroger) :
    ```powershell
    cd C:\DEV\PFE\fastapi
-   .venv\Scripts\python.exe -m uvicorn wallet_stub.main:app --app-dir C:\DEV\PFE\fastapi --port 3103
-   .venv\Scripts\python.exe -m uvicorn user_stub.main:app --app-dir C:\DEV\PFE\fastapi --port 3104
+   .venv\Scripts\python.exe -m uvicorn wallet_service.main:app --app-dir C:\DEV\PFE\fastapi --port 3103
+   .venv\Scripts\python.exe -m uvicorn user_service.main:app --app-dir C:\DEV\PFE\fastapi --port 3104
    ```
 
 > Le moteur FastAPI précharge le modèle d'embeddings et le Capability
@@ -92,8 +92,8 @@ $env:WALLET_SERVICE_INTERNAL_SECRET = "test-secret"
 | Vérification | Commande | Attendu |
 |---|---|---|
 | Rasa a chargé un modèle | `curl http://localhost:5005/status` | `model_file` non vide |
-| Moteur FastAPI opérationnel | `curl http://localhost:8000/diagnostic/capabilities` | Liste non vide si les stubs tournent |
-| Stubs joignables | `curl http://localhost:3103/api/v1/diagnostic/manifest` (idem `3104`) | `CapabilityManifest` JSON valide |
+| Moteur FastAPI opérationnel | `curl http://localhost:8000/diagnostic/capabilities` | Liste non vide si les services tournent |
+| Services joignables | `curl http://localhost:3103/api/v1/diagnostic/manifest` (idem `3104`) | `CapabilityManifest` JSON valide |
 | Bout-en-bout | Ouvrir `http://localhost:8000/chat` et envoyer un message | Réponse du bot affichée, intent/confiance visibles |
 
 ## 10.7 Réentraînement du modèle avant déploiement

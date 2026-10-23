@@ -8,20 +8,20 @@ Chaque processus lit son propre fichier `.env`, jamais commité (voir
 `.gitignore`) — seuls les `.env.example` sont versionnés et servent de
 modèle.
 
-### `fastapi/.env` (moteur NGONI + stubs, mêmes venv/process family)
+### `fastapi/.env` (moteur NGONI + services, mêmes venv/process family)
 
 | Variable | Exemple | Rôle |
 |---|---|---|
 | `DATABASE_URL` | `postgresql+psycopg://chatbot_user:changeme@127.0.0.1:5432/chatbotdb` | Connexion SQLAlchemy vers PostgreSQL |
 | `RASA_PARSE_URL` | `http://127.0.0.1:5005/model/parse` | Utilisé par `/api/parse` (interface de test) |
 | `RASA_WEBHOOK_URL` | `http://127.0.0.1:5005/webhooks/rest/webhook` | Utilisé par `/api/chat` |
-| `WALLET_SERVICE_INTERNAL_SECRET` | `changeme` | Secret envoyé en `X-Internal-Secret` vers `wallet-service`/`wallet_stub` |
-| `USER_SERVICE_INTERNAL_SECRET` | `changeme` | Idem pour `user-service`/`user_stub` |
+| `WALLET_SERVICE_INTERNAL_SECRET` | `changeme` | Secret envoyé en `X-Internal-Secret` vers `wallet-service`/`wallet_service` |
+| `USER_SERVICE_INTERNAL_SECRET` | `changeme` | Idem pour `user-service`/`user_service` |
 | `REGISTRY_POLL_INTERVAL_SECONDS` | `300` (30 en dev pour itérer plus vite) | Fréquence de rafraîchissement du Capability Registry |
-| `WALLET_SERVICE_BASE_URL` | `http://127.0.0.1:3103/api/v1` (défaut dans `services_registry.yaml`) | URL du service wallet (stub ou réel) |
-| `USER_SERVICE_BASE_URL` | `http://127.0.0.1:3104/api/v1` (défaut) | URL du service user (stub ou réel) |
-| `WALLET_STUB_INTERNAL_SECRET` | `test-secret` | Côté `wallet_stub` : secret attendu en entrée, doit correspondre à `WALLET_SERVICE_INTERNAL_SECRET` côté moteur |
-| `USER_STUB_INTERNAL_SECRET` | `test-secret` | Idem côté `user_stub` |
+| `WALLET_SERVICE_BASE_URL` | `http://127.0.0.1:3103/api/v1` (défaut dans `services_registry.yaml`) | URL du service wallet (service ou réel) |
+| `USER_SERVICE_BASE_URL` | `http://127.0.0.1:3104/api/v1` (défaut) | URL du service user (service ou réel) |
+| `WALLET_SERVICE_INTERNAL_SECRET` | `test-secret` | Côté `wallet_service` : secret attendu en entrée, doit correspondre à `WALLET_SERVICE_INTERNAL_SECRET` côté moteur |
+| `USER_SERVICE_INTERNAL_SECRET` | `test-secret` | Idem côté `user_service` |
 
 ### `rasa/.env` (conteneur `rasa`)
 

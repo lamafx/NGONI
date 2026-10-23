@@ -25,10 +25,10 @@ Le **contenu** de chaque manifeste (quels problèmes, quels champs) n'est
 jamais recopié dans ce fichier YAML — il est récupéré réellement via
 `GET {base_url}/diagnostic/manifest` et validé contre le même contrat
 Pydantic que celui décrit au [chapitre 14](14-diagnostic-engine-pipeline-contracts.md#capabilitymanifest).
-`wallet_stub`/`user_stub` implémentent ce même contrat côté microservice —
+`wallet_service`/`user_service` implémentent ce même contrat côté microservice —
 c'est pour cela qu'ils suffisent à faire tourner tout le pipeline en
 développement sans les vrais `ngoni-wallet-service`/`ngoni-user-service`
-(voir [[project-ngoni-diagnostic-stub-scope]]).
+(voir [[project-ngoni-diagnostic-service-scope]]).
 
 ## Rafraîchissement périodique, sans redémarrage
 

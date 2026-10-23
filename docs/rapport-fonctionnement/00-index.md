@@ -27,7 +27,7 @@ flowchart TD
     A -->|"POST /diagnostic/resolve"| F
     A -->|"POST /embeddings/query(-batch)"| F
     A -->|"POST /faq/search, /tickets/create, /audit/actions..."| F
-    F -->|"POST {base_url}/diagnostic/{problem_id}<br/>GET {base_url}/diagnostic/manifest"| W["wallet_stub / user_stub<br/>(natif, ports 3103/3104)"]
+    F -->|"POST {base_url}/diagnostic/{problem_id}<br/>GET {base_url}/diagnostic/manifest"| W["wallet_service / user_service<br/>(natif, ports 3103/3104)"]
     F <--> DB[("PostgreSQL<br/>schéma ia")]
     A -->|"réponse texte + boutons"| R
     R -->|"messages[]"| F
@@ -45,9 +45,9 @@ pour la procédure de démarrage exacte) :
 | **Rasa** (`rasa/`) | Docker (`pfe-rasa-1`), port 5005 | NLU (intent + entités) et Core (quelle action exécuter) |
 | **Actions** (`rasa/actions`) | Docker (`pfe-actions-1`), port 5055 | La quasi-totalité de la logique métier réelle |
 
-`wallet_stub`/`user_stub` (natifs, ports 3103/3104) jouent le rôle des vrais
+`wallet_service`/`user_service` (natifs, ports 3103/3104) jouent le rôle des vrais
 microservices métier pour le Diagnostic Engine (voir
-[[project-ngoni-diagnostic-stub-scope]] — un choix de périmètre assumé, pas
+[[project-ngoni-diagnostic-service-scope]] — un choix de périmètre assumé, pas
 un manque).
 
 ## Table des matières

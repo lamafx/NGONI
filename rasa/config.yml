@@ -1,6 +1,6 @@
 language: fr
 
-# Classification d'intention par le LLM local 1.7B (Ollama local, host.docker.internal:11434)
+# Classification d'intention par le LLM local 1.7B (Model local, host.docker.internal:11434)
 # en remplacement du le classifieur Rasa historique -- voir rasa/components/le composant de classification.
 # WhitespaceTokenizer suffit : le composant travaille sur le texte brut du
 # message (prompting), pas sur des features bag-of-words -- SpacyNLP/
@@ -9,7 +9,7 @@ language: fr
 # ni EntitySynonymMapper ni ResponseSelector ne sont dans ce config.yml).
 # L'extraction d'entites de DIET n'est pas reprise par ce composant lui-meme,
 # mais le classifieur d'intention fait sa propre extraction (incident_date, amount,
-# platform, operation_type, issue_status) dans le meme appel Ollama -- voir
+# platform, operation_type, issue_status) dans le meme appel Model -- voir
 # EXTRACTABLE_ENTITIES dans le composant de classification.
 pipeline:
 
@@ -19,7 +19,7 @@ pipeline:
   model: "qwen3:1.7b"
   # 8 et non 5 : exemples desormais repartis sur toute la liste de chaque
   # intention (voir train() du composant) -- le surplus fait partie du
-  # prefixe fixe du prompt, relu depuis le cache KV d'Ollama.
+  # prefixe fixe du prompt, relu depuis le cache KV de Model.
   examples_per_intent: 8
 
 # FallbackClassifier de Rasa, a l'identique, mais dont les deux seuils

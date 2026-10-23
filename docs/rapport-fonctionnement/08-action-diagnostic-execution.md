@@ -100,7 +100,7 @@ n'agit jamais seule, une décision Super-Agent le fait.
 
 Si le Diagnostic Engine lui-même renvoie `ESCALATE` avec
 `escalation_reason: SERVICE_UNAVAILABLE` (le microservice métier, ex.
-`wallet_stub`, était injoignable — voir
+`wallet_service`, était injoignable — voir
 [15. Adapter et disjoncteur](15-diagnostic-engine-adapter-circuit-breaker.md)),
 un ticket est créé **automatiquement côté FastAPI**, sans confirmation
 utilisateur (voir [14. Pipeline et contrats](14-diagnostic-engine-pipeline-contracts.md)).

@@ -14,7 +14,7 @@
 # l'environnement d'execution (docker-compose, .env, shell...), ce fichier ne
 # fait que declarer quels services existent et quelles variables les
 # configurent. base_url_default sert de repli pratique pour le developpement
-# local (voir README des stubs) quand la variable d'environnement n'est pas
+# local (voir README des services) quand la variable d'environnement n'est pas
 # definie.
 
 services:

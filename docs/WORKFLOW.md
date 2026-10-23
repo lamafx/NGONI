@@ -27,8 +27,8 @@ Moteur FastAPI NGONI Engine (:8000) ← natif
   ├── Feedback / ratings
   └── Embeddings (singleton partagé)
         │
-        ├── GET/POST /diagnostic/* → wallet-service (ou wallet_stub :3103)
-        ├── GET/POST /diagnostic/* → user-service   (ou user_stub :3104)
+        ├── GET/POST /diagnostic/* → wallet-service (ou wallet_service :3103)
+        ├── GET/POST /diagnostic/* → user-service   (ou user_service :3104)
         └── SQL → PostgreSQL (:5432)
               └── tracker store Rasa (table events)
 ```
@@ -112,7 +112,7 @@ Utilisateur confirme "oui"
               2. validation des champs requis → NEED_MORE_INFO si manquants
               3. POST {base_url}/diagnostic/{problem_id}
                    Headers: X-Internal-Secret, X-Request-ID
-                   → wallet / user (réel ou stub)
+                   → wallet / user (réel ou service)
               4. audit_repository.record(trace_id, latence, outcome)
                  │
                  ├── RESOLVED  → message formaté à l'utilisateur
@@ -215,14 +215,14 @@ Navigateur → GET /chat (widget HTML)
 | Client mobile / web (canal rest) | `POST Rasa /webhooks/rest/webhook` | Conversation |
 | Microservices (contrat) | — | Les services métier **exposent** le contrat ; ils n'appellent pas ia-service |
 
-### Stubs de développement (remplacent wallet/user)
+### Services de développement (remplacent wallet/user)
 
-| Stub | Port | Problèmes exposés (exemples) |
+| Service | Port | Problèmes exposés (exemples) |
 |------|------|------------------------------|
-| `wallet_stub` | `3103` | `withdrawal_pending`, `topup_not_credited`, `gift_not_received` |
-| `user_stub` | `3104` | `kyc_status_issue`, `account_access_blocked`, `compliance_hold_blocking`, `account_deletion_status`, `parental_consent_status` |
+| `wallet_service` | `3103` | `withdrawal_pending`, `topup_not_credited`, `gift_not_received` |
+| `user_service` | `3104` | `kyc_status_issue`, `account_access_blocked`, `compliance_hold_blocking`, `account_deletion_status`, `parental_consent_status` |
 
-Basculer stub → service réel = changer `WALLET_SERVICE_BASE_URL` / `USER_SERVICE_BASE_URL` (et secrets) dans la config, dès que le service Laravel implémente le contrat `contracts/diagnostic/v1/`.
+Basculer service → service réel = changer `WALLET_SERVICE_BASE_URL` / `USER_SERVICE_BASE_URL` (et secrets) dans la config, dès que le service Laravel implémente le contrat `contracts/diagnostic/v1/`.
 
 ---
 
@@ -242,7 +242,7 @@ La communication avec le reste de la plateforme passe uniquement par le **contra
 | `complaints` | tickets `CMP-…` |
 | `feedback` | suggestions / plaintes, `response_ratings` |
 | `diagnostic` | sessions + `diagnostic_audit_log` |
-| `wallet` / `users` | clones lecture seule pour les stubs de dev |
+| `wallet` / `users` | clones lecture seule pour les services de dev |
 | *(défaut)* | `events` — tracker store Rasa |
 
 Détail : [15-modele-donnees.md](15-modele-donnees.md).
@@ -256,7 +256,7 @@ Détail : [15-modele-donnees.md](15-modele-donnees.md).
 | Rasa | 5005 |
 | Action Server | 5055 |
 | Moteur FastAPI | 8000 |
-| wallet_stub / wallet-service (diagnostic) | 3103 |
-| user_stub (diagnostic, local) | 3104 |
+| wallet_service / wallet-service (diagnostic) | 3103 |
+| user_service (diagnostic, local) | 3104 |
 | PostgreSQL | 5432 |
 | pgAdmin (dev) | 5050 |

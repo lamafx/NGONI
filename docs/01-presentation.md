@@ -98,7 +98,7 @@ la façon dont ils sont assemblés et utilisés dans ce projet.
 | **Manifest** (manifeste de capacités) | Document exposé par un microservice sur `GET /diagnostic/manifest`, listant les problèmes qu'il sait diagnostiquer, leurs champs requis et leurs libellés. Conforme à `capability-manifest.schema.json`. |
 | **`problem_id`** | Identifiant `snake_case` d'un problème diagnosticable (ex. `withdrawal_pending`), déclaré par un microservice dans son manifeste. |
 | **Escalade** | Décision de créer un ticket de support humain plutôt que de résoudre automatiquement — soit parce que le microservice le décide explicitement, soit parce qu'il est injoignable. |
-| **Stub** | Implémentation minimale d'un microservice (`fastapi/user_stub`, `fastapi/wallet_stub`), utilisée en développement local pour simuler `wallet-service` / `user-service` sans dépendre des vrais services. |
+| **Service** | Implémentation minimale d'un microservice (`fastapi/user_service`, `fastapi/wallet_service`), utilisée en développement local pour simuler `wallet-service` / `user-service` sans dépendre des vrais services. |
 | **DIETClassifier** | Modèle de classification d'intention et de reconnaissance d'entités utilisé par le pipeline NLU de Rasa (voir [07-integration-ia.md](07-integration-ia.md)). |
 | **Action server** | Processus Rasa séparé (`rasa/actions`) qui exécute le code Python personnalisé (`Action.run`) déclenché par le dialogue — c'est lui qui appelle le moteur FastAPI. |
 | **Vocabulary guard** | Composant NLU personnalisé qui abaisse artificiellement la confiance du DIETClassifier quand aucun mot du message n'est reconnu, pour laisser le `FallbackClassifier` s'appliquer correctement. |

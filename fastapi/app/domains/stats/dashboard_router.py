@@ -160,7 +160,7 @@ async def system_health(db: Session = Depends(get_db)):
         try:
             # GET /status (modele charge) plutot que POST /model/parse : le
             # classifieur d'intentions passe par un LLM local (Qwen via
-            # Ollama, ~9 s par phrase), une analyse de "ping" depassait donc
+            # Model, ~9 s par phrase), une analyse de "ping" depassait donc
             # toujours HEALTH_TIMEOUT_SECONDS et Rasa s'affichait "down"
             # alors qu'il repondait -- en consommant au passage un appel LLM
             # a chaque ouverture du tableau de bord.

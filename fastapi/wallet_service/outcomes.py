@@ -1,6 +1,6 @@
 """Construction des reponses conformes au contrat service-invocation-response
 (voir app/domains/diagnostic/contracts.py) : RESOLVED ou ESCALATE.
-Partage par tous les domaines de ce stub (aujourd'hui : diagnostic/)."""
+Partage par tous les domaines de ce service (aujourd'hui : diagnostic/)."""
 
 from app.domains.diagnostic.contracts import EscalateOutcome, EscalationPayload, ResolvedOutcome
 

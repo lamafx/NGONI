@@ -1,4 +1,4 @@
-# user_stub — stub de test local pour le Diagnostic Engine
+# user_service — service de test local pour le Diagnostic Engine
 
 ## Pourquoi ce dossier existe
 
@@ -8,13 +8,13 @@ que le **Diagnostic Engine** (`app/domains/diagnostic/`) sait vraiment
 dialoguer en HTTP avec lui : appeler `GET /diagnostic/manifest`, router vers
 `POST /diagnostic/kyc_status` (et les 4 autres), interpréter la réponse.
 
-`user_stub` est un **second processus**, totalement indépendant, qui répond
+`user_service` est un **second processus**, totalement indépendant, qui répond
 avec le même contrat que le vrai `ngoni-user-service` sur les 5 problèmes
 diagnosticables couverts. Il ne modifie et n'appelle **jamais** aucun
 fichier de `ngoni-user-service` : on redirige simplement le Diagnostic
 Engine vers lui via des variables d'environnement.
 
-**Ce que ce stub prouve** : que le Registry, l'Adapter et le Pipeline du
+**Ce que ce service prouve** : que le Registry, l'Adapter et le Pipeline du
 Diagnostic Engine savent router vers un deuxième service (pas seulement
 `wallet`), sur de vrais sockets HTTP, contre de vraies données. **Ce qu'il
 ne prouve pas** : que les controllers PHP concernés sont corrects — la
@@ -39,7 +39,7 @@ explicites côté PHP) sont implémentés ici :
 - **Certification**, **NgoniCard**, **quota de contenu** — endpoints
   plausibles mais enum de statuts non vérifié en détail.
 - **Retrait via destination de paiement non vérifiée** — chevauche
-  potentiellement `wallet_stub` (`withdrawal_pending`) ; à trancher avec
+  potentiellement `wallet_service` (`withdrawal_pending`) ; à trancher avec
   l'équipe avant d'ajouter un 6e problème ici.
 - **Confusion de rôle/accès** — surtout une opération admin, rarement un
   motif d'appel spontané côté utilisateur.
@@ -47,7 +47,7 @@ explicites côté PHP) sont implémentés ici :
 ## Organisation du code
 
 ```
-user_stub/
+user_service/
 ├── main.py                  # cree l'app FastAPI, inclut le router -- aucune logique
 ├── security.py              # verification du secret partage (header X-Internal-Secret)
 ├── outcomes.py               # construction des reponses RESOLVED / ESCALATE
@@ -67,11 +67,11 @@ user_stub/
 ## Données : lecture seule sur un clone réel
 
 `db.py` lit le schéma Postgres `users` de `chatbotdb` — un **clone** de la
-vraie base de `ngoni-user-service`. Ce stub n'écrit jamais dedans : il n'y a
+vraie base de `ngoni-user-service`. Ce service n'écrit jamais dedans : il n'y a
 pas d'endpoints de seed. Les cas de test se choisissent directement parmi les
 lignes réelles déjà présentes dans le clone (voir les requêtes SQL ci-dessous).
 
-Contrairement à `wallet_stub` (une référence de transaction par problème),
+Contrairement à `wallet_service` (une référence de transaction par problème),
 aucun de ces 5 problèmes ne demande de champ à l'utilisateur : tout se
 résout à partir du seul `user_id`, déjà connu du Diagnostic Engine via le
 contexte de la conversation (`required_fields=[]` partout dans le manifeste).
@@ -89,13 +89,13 @@ GRANT SELECT ON ALL TABLES IN SCHEMA users TO chatbot_user;
 ```
 
 Sans ça, chaque appel échoue avec `psycopg.errors.InsufficientPrivilege:
-droit refusé pour la table users` (constaté en testant ce stub).
+droit refusé pour la table users` (constaté en testant ce service).
 
-## Lancer le stub
+## Lancer le service
 
 ```powershell
 cd C:\DEV\PFE\fastapi
-.venv\Scripts\python.exe -m uvicorn user_stub.main:app --app-dir C:\DEV\PFE\fastapi --port 3104
+.venv\Scripts\python.exe -m uvicorn user_service.main:app --app-dir C:\DEV\PFE\fastapi --port 3104
 ```
 
 Il écoute sur `http://127.0.0.1:3104`, exactement l'URL par défaut attendue
@@ -105,7 +105,7 @@ supplémentaire (comme pour `wallet`).
 
 ## Lancer le Diagnostic Engine pointé dessus
 
-Dans un second terminal (les deux stubs peuvent tourner ensemble) :
+Dans un second terminal (les deux services peuvent tourner ensemble) :
 
 ```powershell
 cd C:\DEV\PFE\fastapi
@@ -116,8 +116,8 @@ $env:USER_SERVICE_INTERNAL_SECRET = "test-secret"
 .venv\Scripts\python.exe -m uvicorn app.main:app --port 8000
 ```
 
-(`test-secret` est la valeur par défaut de `USER_STUB_INTERNAL_SECRET` côté
-stub — changez les deux ensemble si vous la personnalisez.)
+(`test-secret` est la valeur par défaut de `USER_SERVICE_INTERNAL_SECRET` côté
+service — changez les deux ensemble si vous la personnalisez.)
 
 ## Trouver un cas de test dans le clone
 
@@ -175,13 +175,13 @@ apparaissent bien dans `GET /diagnostic/capabilities`.
 ## Tests automatisés
 
 Aucun test automatisé dédié pour l'instant (contrairement à
-`wallet_stub/tests/test_wallet_stub.py`) — à ajouter si ce stub est amené à
+`wallet_service/tests/test_wallet_service.py`) — à ajouter si ce service est amené à
 vivre durablement plutôt que servir de preuve de branchement initiale.
 
 ## Ne jamais faire
 
-- Ne pointez jamais ce stub vers un environnement partagé/staging.
-- Ne considérez pas les tests de ce stub comme une validation du vrai code
+- Ne pointez jamais ce service vers un environnement partagé/staging.
+- Ne considérez pas les tests de ce service comme une validation du vrai code
   PHP de `ngoni-user-service` — seule sa propre suite de tests le valide
   réellement.
 - N'écrivez jamais dans le clone autrement que temporairement pour un test,

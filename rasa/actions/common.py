@@ -330,7 +330,7 @@ def follow_up_question(tracker: Tracker) -> Optional[Text]:
     return f"{previous} {text}" if previous else None
 
 
-# Reponse conversationnelle generee (Qwen via Ollama), UNIQUEMENT sur le
+# Reponse conversationnelle generee (Qwen via Model), UNIQUEMENT sur le
 # chemin de repli (incomprehension / hors-sujet) : c'est la que le texte fige
 # sonnait le plus robotique, et c'est le seul endroit ou un appel LLM
 # supplementaire ne ralentit pas un parcours qui fonctionne deja.
@@ -341,15 +341,15 @@ def follow_up_question(tracker: Tracker) -> Optional[Text]:
 # generation EN PLUS de la classification (48s mesures au total sur "qui va
 # gagner la CAN ?"), inacceptable en demonstration en direct.
 LLM_REPLY_ENABLED = getenv("LLM_REPLY_ENABLED", "false").strip().lower() in ("1", "true", "yes", "oui")
-OLLAMA_CHAT_URL = getenv("OLLAMA_CHAT_URL", "http://host.docker.internal:11434/api/chat")
+MODEL_CHAT_URL = getenv("MODEL_CHAT_URL", "http://host.docker.internal:11434/api/chat")
 LLM_REPLY_MODEL = getenv("LLM_REPLY_MODEL", "qwen3:1.7b")
 # Au-dela, le texte fixe est servi : mieux vaut une reponse un peu raide
 # qu'un silence de 30s sans GPU.
 LLM_REPLY_TIMEOUT = float(getenv("LLM_REPLY_TIMEOUT", "20"))
-# MEME valeur que OLLAMA_NUM_CTX du classifieur (rasa/components/
+# MEME valeur que MODEL_NUM_CTX du classifieur (rasa/components/
 # qwen_intent_classifier.py) : une fenetre differente pour le meme modele
-# force Ollama a le recharger entre deux appels.
-LLM_REPLY_NUM_CTX = int(getenv("OLLAMA_NUM_CTX", "6144"))
+# force Model a le recharger entre deux appels.
+LLM_REPLY_NUM_CTX = int(getenv("MODEL_NUM_CTX", "6144"))
 LLM_REPLY_MAX_CHARS = 320
 # Une reponse de repli ne doit JAMAIS affirmer un fait verifiable (montant,
 # delai, numero, lien) : elle n'a acces a aucune donnee reelle. Un chiffre,
@@ -404,7 +404,7 @@ def generate_redirect_reply(tracker: Tracker, situation: Text, capabilities: Tex
     )
     try:
         response = requests.post(
-            OLLAMA_CHAT_URL,
+            MODEL_CHAT_URL,
             json={
                 "model": LLM_REPLY_MODEL,
                 "messages": [{"role": "user", "content": prompt}],

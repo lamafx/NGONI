@@ -2,7 +2,7 @@
 classification semantique du Diagnostic Engine.
 
 Contexte : un audit manuel (scripts jetables, jamais committes) a decouvert
-que plusieurs problemes du catalogue (wallet_stub + user_stub) partageaient
+que plusieurs problemes du catalogue (wallet_service + user_service) partageaient
 assez de vocabulaire ("compte", "bloque") pour qu'un message clairement
 destine a l'un se fasse voler par un autre -- ex. "mon retrait est bloque
 depuis hier" gagnait a tort vers compliance_hold_blocking avant correction
@@ -12,8 +12,8 @@ fou permanent : si un futur changement de manifeste (nouvel exemple, nouvelle
 description, nouveau probleme) réintroduit une collision, ce test echoue en
 CI au lieu d'attendre qu'un utilisateur reel la decouvre en production.
 
-Import DIRECT des vrais manifestes (wallet_stub.diagnostic.manifest.MANIFEST,
-idem user_stub) plutot qu'une copie codee en dur ici : une copie driverait
+Import DIRECT des vrais manifestes (wallet_service.diagnostic.manifest.MANIFEST,
+idem user_service) plutot qu'une copie codee en dur ici : une copie driverait
 silencieusement du contenu reellement servi des le premier changement de
 manifeste sans mise a jour de ce fichier, ce qui aurait rendu ce test
 inutile (il testerait un catalogue qui n'existe plus). Meme principe que
@@ -34,8 +34,8 @@ import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from app.shared.embeddings import cosine_similarity, embed_passage, embed_query  # noqa: E402
-from user_stub.diagnostic.manifest import MANIFEST as USER_MANIFEST  # noqa: E402
-from wallet_stub.diagnostic.manifest import MANIFEST as WALLET_MANIFEST  # noqa: E402
+from user_service.diagnostic.manifest import MANIFEST as USER_MANIFEST  # noqa: E402
+from wallet_service.diagnostic.manifest import MANIFEST as WALLET_MANIFEST  # noqa: E402
 
 # Marge relative minimale entre le 1er et le 2e candidat pour considerer le
 # gagnant comme non-ambigu -- memes seuils que CLASSIFICATION_RELATIVE_MARGIN

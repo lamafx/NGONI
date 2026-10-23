@@ -64,7 +64,7 @@ REGISTRY_POLL_INTERVAL_SECONDS = float(os.getenv("REGISTRY_POLL_INTERVAL_SECONDS
 # un refresh complet a CHAQUE appel tant qu'aucun microservice n'etait
 # joignable. Or ensure_loaded() est sur le chemin chaud de
 # GET /diagnostic/capabilities ET de chaque tour de DiagnosticPipeline --
-# avec les stubs eteints, chaque requete repayait le cout de connexion des
+# avec les services eteints, chaque requete repayait le cout de connexion des
 # services injoignables (mesure : ~2,4 s par service sous Windows, la pile
 # TCP reemettant plusieurs SYN avant d'abandonner), soit ~5 s par appel.
 # C'est ce qui rendait la page d'administration "Statistiques" lente a

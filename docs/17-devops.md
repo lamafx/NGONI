@@ -5,7 +5,7 @@
 > **Périmètre de ce chapitre** : exclusivement le cycle DevOps du **flow
 > Rasa** (conteneurs `rasa` et `actions` — NLU/Core, entraînement, tests,
 > build, déploiement, CI/CD). Il ne couvre pas l'ordre de démarrage complet
-> du moteur FastAPI ni des stubs (voir [10. Déploiement](10-deploiement.md))
+> du moteur FastAPI ni des services (voir [10. Déploiement](10-deploiement.md))
 > et **ne couvre volontairement aucune brique LLM** : les pistes d'évolution
 > vers un LLM générique (re-ranking, RAG) restées au stade de recommandation
 > — voir [16. Audit qualité NLU + FAQ retrieval §5](16-audit-faq-nlu-2026-07.md)
@@ -85,7 +85,7 @@ Vérification post-démarrage :
 
 Le moteur FastAPI dépend de Rasa au démarrage (`wait_for_rasa()`) — voir
 [10.4](10-deploiement.md#104-ordre-de-démarrage-recommandé) pour l'ordre de
-démarrage complet incluant le moteur et les stubs, hors périmètre de ce
+démarrage complet incluant le moteur et les services, hors périmètre de ce
 chapitre.
 
 ## 17.4 Logs et supervision du flow Rasa
@@ -111,7 +111,7 @@ aux autres services de la plateforme (`ngoni-admin-service`,
 et recommandé par [14.2](14-evolutions.md#142-cicd).
 
 Proposition de pipeline, **limitée au flow Rasa** (le moteur FastAPI et ses
-stubs relèveraient d'un job séparé, hors périmètre de ce chapitre), sur le
+services relèveraient d'un job séparé, hors périmètre de ce chapitre), sur le
 modèle des pipelines GitLab CI déjà en place ailleurs sur la plateforme
 (registre `registry.gitlab.com/ngoni_ci/microservices`, déploiement par
 script SSH) — **non implémentée, à titre d'illustration** :

@@ -1,10 +1,10 @@
-"""Stub local de wallet-service, pour tester le Diagnostic Engine quand le
+"""Service local de wallet-service, pour tester le Diagnostic Engine quand le
 vrai wallet-service (PHP 8.3 + Docker + Postgres) n'est pas accessible en
 local (ex: environnement de test en staging uniquement).
 
 NE REMPLACE JAMAIS les tests Pest de ngoni-wallet-service
 (tests/Feature/DiagnosticControllerTest.php), qui restent la seule source de
-verite sur le comportement du vrai wallet-service. Ce stub sert uniquement a
+verite sur le comportement du vrai wallet-service. Ce service sert uniquement a
 valider que le Diagnostic Engine (registry/adapter/pipeline) sait vraiment
 parler HTTP a un service externe, avec le meme contrat.
 
@@ -34,7 +34,7 @@ production, les cas de test se choisissent directement parmi les lignes
 reelles clonees (voir README.md).
 
 Lancement :
-    fastapi/.venv/Scripts/python.exe -m uvicorn wallet_stub.main:app \
+    fastapi/.venv/Scripts/python.exe -m uvicorn wallet_service.main:app \
         --app-dir C:\\DEV\\PFE\\fastapi --port 3103
 """
 
@@ -46,7 +46,7 @@ from fastapi import FastAPI
 
 # Meme raison que app/main.py : process uvicorn separe, root logger a
 # configurer explicitement pour que les logger.info(...) applicatifs (voir
-# wallet_stub/diagnostic/router.py) s'affichent dans ce terminal.
+# wallet_service/diagnostic/router.py) s'affichent dans ce terminal.
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s %(levelname)-8s %(name)s: %(message)s",
@@ -55,5 +55,5 @@ logging.basicConfig(
 
 from .diagnostic.router import router as diagnostic_router
 
-app = FastAPI(title="wallet-service — stub de diagnostic (usage local uniquement)")
+app = FastAPI(title="wallet-service — service de diagnostic (usage local uniquement)")
 app.include_router(diagnostic_router)

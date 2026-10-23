@@ -15,7 +15,7 @@
     9. Installation (une seule fois), entraînement Rasa, tests
 
   ⚠ DEUX FAÇONS DE FAIRE TOURNER LE PROJET -- NE JAMAIS LES MÉLANGER
-    • Mode LOCAL (ce fichier) : PostgreSQL, Ollama, moteur, stubs et frontend
+    • Mode LOCAL (ce fichier) : PostgreSQL, Model, moteur, services et frontend
       tournent sous Windows ; seuls Rasa et son serveur d'actions sont dans
       Docker, décrits par  docker-compose.local.yml.
     • Mode DOCKER COMPLET (README.md) : docker-compose.yml lance TOUT dans des
@@ -30,16 +30,16 @@
   Port   Serveur                   Tourne où             Sert à
   -----  ------------------------  --------------------  ---------------------------------
   5432   PostgreSQL                service Windows       la base chatbotdb (tout en dépend)
-  11434  Ollama (modèles Qwen)     application Windows   classer chaque message (Rasa)
+  11434  Model (modèles Qwen)     application Windows   classer chaque message (Rasa)
   5005   Rasa                      Docker                comprendre les messages
   5055   Serveur d'actions Rasa    Docker                répondre, diagnostiquer, tickets
   8000   Moteur FastAPI            venv Python           FAQ, diagnostic, admin, OCR
-  3103   wallet_stub               venv Python           diagnostic portefeuille
-  3104   user_stub                 venv Python           diagnostic compte / KYC
+  3103   wallet_service               venv Python           diagnostic portefeuille
+  3104   user_service                 venv Python           diagnostic compte / KYC
   5173   Frontend Vite             npm                   les pages web (chat, agent, admin)
 
-  Ordre d'allumage  : PostgreSQL → Ollama → Docker Desktop → Rasa + actions
-                      → moteur → stubs → frontend
+  Ordre d'allumage  : PostgreSQL → Model → Docker Desktop → Rasa + actions
+                      → moteur → services → frontend
   Ordre d'extinction : l'inverse (frontend en premier).
 
 
@@ -52,8 +52,8 @@
   ou, dans PowerShell :
       powershell -ExecutionPolicy Bypass -File C:\DEV\NGONI\ngoni-ia-service\scripts\demarrer-live.ps1
 
-  Le script démarre Ollama, Docker Desktop, Rasa + actions, le moteur, les
-  deux stubs et le frontend (s'ils ne tournent pas déjà), vérifie chacun,
+  Le script démarre Model, Docker Desktop, Rasa + actions, le moteur, les
+  deux services et le frontend (s'ils ne tournent pas déjà), vérifie chacun,
   préchauffe les modèles puis affiche un bilan OK / ÉCHEC.
 
     • Durée : 5 à 8 min (Rasa met ~3 min à charger son modèle).
@@ -74,8 +74,8 @@
 Get-Service postgresql-x64-17                  # attendu : Status = Running
 Start-Service postgresql-x64-17                # seulement si Stopped (PowerShell ADMIN)
 
-# --- 3.2 Ollama -----------------------------------------------------------------
-Start-Process "$env:LOCALAPPDATA\Programs\Ollama\ollama app.exe"
+# --- 3.2 Model -----------------------------------------------------------------
+Start-Process "$env:LOCALAPPDATA\Programs\Model\model app.exe"
 Invoke-RestMethod http://localhost:11434/api/version     # répond = prêt
 
 # --- 3.3 Docker Desktop ---------------------------------------------------------
@@ -95,13 +95,13 @@ Set-Location C:\DEV\NGONI\ngoni-ia-service\fastapi
 #   ⚠ Toujours .\.venv\Scripts\python.exe -- ni « python » seul (= Anaconda),
 #     ni .venv\Scripts\uvicorn.exe (= Python d'un autre projet). Voir § 8.
 
-# --- 3.6 Stubs du diagnostic, ports 3103 et 3104                [2 fenêtres] -
+# --- 3.6 Services du diagnostic, ports 3103 et 3104                [2 fenêtres] -
 #   Sans eux, le diagnostic n'a aucun service à interroger.
 Set-Location C:\DEV\NGONI\ngoni-ia-service\fastapi
-.\.venv\Scripts\python.exe -m uvicorn wallet_stub.main:app --port 3103
+.\.venv\Scripts\python.exe -m uvicorn wallet_service.main:app --port 3103
 
 Set-Location C:\DEV\NGONI\ngoni-ia-service\fastapi
-.\.venv\Scripts\python.exe -m uvicorn user_stub.main:app --port 3104
+.\.venv\Scripts\python.exe -m uvicorn user_service.main:app --port 3104
 
 # --- 3.7 Frontend Vite, port 5173                                    [fenêtre] -
 #   Sert le chat, l'espace conseiller et l'administration ; relaie /engine
@@ -114,11 +114,11 @@ npm run dev
 #   Chaque fenêtre se ferme avec Ctrl+C.
 $racine = "C:\DEV\NGONI\ngoni-ia-service"
 $python = "$racine\fastapi\.venv\Scripts\python.exe"
-Start-Process "$env:LOCALAPPDATA\Programs\Ollama\ollama app.exe"
+Start-Process "$env:LOCALAPPDATA\Programs\Model\model app.exe"
 docker desktop start
 Set-Location $racine; docker compose -f docker-compose.local.yml up -d
-Start-Process powershell -ArgumentList "-NoExit","-Command","Set-Location '$racine\fastapi'; & '$python' -m uvicorn wallet_stub.main:app --port 3103"
-Start-Process powershell -ArgumentList "-NoExit","-Command","Set-Location '$racine\fastapi'; & '$python' -m uvicorn user_stub.main:app --port 3104"
+Start-Process powershell -ArgumentList "-NoExit","-Command","Set-Location '$racine\fastapi'; & '$python' -m uvicorn wallet_service.main:app --port 3103"
+Start-Process powershell -ArgumentList "-NoExit","-Command","Set-Location '$racine\fastapi'; & '$python' -m uvicorn user_service.main:app --port 3104"
 Start-Process powershell -ArgumentList "-NoExit","-Command","Set-Location '$racine\fastapi'; & '$python' -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8000"
 Start-Process powershell -ArgumentList "-NoExit","-Command","Set-Location '$racine\frontend'; npm run dev"
 
@@ -132,8 +132,8 @@ Start-Process powershell -ArgumentList "-NoExit","-Command","Set-Location '$raci
   ou, dans PowerShell :
       powershell -ExecutionPolicy Bypass -File C:\DEV\NGONI\ngoni-ia-service\scripts\arreter-live.ps1
 
-  Arrête le moteur, les stubs, le frontend (y compris lancés à la main) et
-  les conteneurs Rasa + actions. Laisse tourner PostgreSQL, Ollama et Docker
+  Arrête le moteur, les services, le frontend (y compris lancés à la main) et
+  les conteneurs Rasa + actions. Laisse tourner PostgreSQL, Model et Docker
   Desktop : pour les éteindre aussi, voir § 5.2.
 
 
@@ -148,17 +148,17 @@ Start-Process powershell -ArgumentList "-NoExit","-Command","Set-Location '$raci
 Set-Location C:\DEV\NGONI\ngoni-ia-service
 docker compose -f docker-compose.local.yml stop
 
-#   Moteur, stubs et frontend sans fenêtre (lancés par le script) -- avec
+#   Moteur, services et frontend sans fenêtre (lancés par le script) -- avec
 #   leurs processus enfants, sinon le rechargeur de --reload garde le port
 #   8000 occupé :
 $serveurs = @(Get-CimInstance Win32_Process | Where-Object {
-    $_.CommandLine -match 'uvicorn (app|wallet_stub|user_stub)\.main:app' -or
+    $_.CommandLine -match 'uvicorn (app|wallet_service|user_service)\.main:app' -or
     ($_.Name -eq 'node.exe' -and $_.CommandLine -match 'vite') })
 $enfants = @(Get-CimInstance Win32_Process | Where-Object { $serveurs.ProcessId -contains $_.ParentProcessId })
 $serveurs + $enfants | ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }
 
-#   Ollama :
-Get-Process -Name 'ollama app','ollama' -ErrorAction SilentlyContinue | Stop-Process -Force
+#   Model :
+Get-Process -Name 'model app','model' -ErrorAction SilentlyContinue | Stop-Process -Force
 
 #   Docker Desktop :
 docker desktop stop
@@ -170,7 +170,7 @@ Stop-Service postgresql-x64-17
 #   À coller dans une console PowerShell. Seul PostgreSQL demande une console
 #   ADMIN : sinon il reste allumé (sans conséquence, il ne consomme presque rien).
 powershell -ExecutionPolicy Bypass -File C:\DEV\NGONI\ngoni-ia-service\scripts\arreter-live.ps1
-Get-Process -Name 'ollama app','ollama' -ErrorAction SilentlyContinue | Stop-Process -Force
+Get-Process -Name 'model app','model' -ErrorAction SilentlyContinue | Stop-Process -Force
 docker desktop stop
 Stop-Service postgresql-x64-17 -ErrorAction SilentlyContinue
 
@@ -189,11 +189,11 @@ docker ps --format "{{.Names}}  {{.Status}}"
 # Chaque service répond-il ?
 Invoke-RestMethod http://localhost:5005/status                     # Rasa : model_file rempli
 Invoke-RestMethod http://localhost:5055/health                     # actions : status ok
-Invoke-RestMethod http://localhost:8000/diagnostic/capabilities    # moteur : liste non vide si les stubs tournent
+Invoke-RestMethod http://localhost:8000/diagnostic/capabilities    # moteur : liste non vide si les services tournent
 Invoke-RestMethod http://localhost:3103/api/v1/diagnostic/manifest -Headers @{ "X-Internal-Secret" = "test-secret" }
 Invoke-RestMethod http://localhost:3104/api/v1/diagnostic/manifest -Headers @{ "X-Internal-Secret" = "test-secret" }
 
-# Santé globale vue par le moteur (base, Rasa, stubs)
+# Santé globale vue par le moteur (base, Rasa, services)
 Invoke-RestMethod http://localhost:8000/admin/system/health `
   -Headers @{ "X-Internal-Secret" = "dev-admin-secret-change-me" } |
   Select-Object -ExpandProperty services
@@ -247,15 +247,15 @@ Invoke-WebRequest "http://localhost:5173/engine/faq/" -UseBasicParsing | Select-
 
   Le port 8000 reste occupé par un processus qui n'existe plus
     → C'est le processus enfant du mode --reload : utiliser le bloc
-      « Moteur, stubs et frontend sans fenêtre » du § 5.1.
+      « Moteur, services et frontend sans fenêtre » du § 5.1.
 
   « No module named ... » au démarrage ou à l'analyse d'une pièce (rapidocr)
     → Mauvais Python. Toujours :  .\.venv\Scripts\python.exe -m uvicorn ...
       • « python » seul lance Anaconda (C:\Users\HP\anaconda3), sans les dépendances.
       • .venv\Scripts\uvicorn.exe exécute en réalité le Python de C:\DEV\PFE.
 
-  Rasa ou les actions visent http://fastapi:8000 / http://ollama:11434, ou des
-  conteneurs postgres / ollama / fastapi apparaissent
+  Rasa ou les actions visent http://fastapi:8000 / http://model:11434, ou des
+  conteneurs postgres / model / fastapi apparaissent
     → Une commande docker compose a été lancée SANS « -f docker-compose.local.yml ».
       Set-Location C:\DEV\NGONI\ngoni-ia-service
       docker compose stop                                              # arrête la pile Docker complète
@@ -263,7 +263,7 @@ Invoke-WebRequest "http://localhost:5173/engine/faq/" -UseBasicParsing | Select-
 
   Rasa « down » ou très lent
     → Juste après l'allumage : le modèle se charge (~3 min).
-    → Sinon, Ollama est éteint (§ 3.2). Sans GPU, chaque message prend ~9 s.
+    → Sinon, Model est éteint (§ 3.2). Sans GPU, chaque message prend ~9 s.
 
   Pages d'administration en erreur 401
     → VITE_ADMIN_SECRET (frontend) doit valoir ADMIN_INTERNAL_SECRET (fastapi\.env).
@@ -290,9 +290,9 @@ Copy-Item rasa\actions\.env.example rasa\actions\.env
 Set-Location C:\DEV\NGONI\ngoni-ia-service\frontend
 npm install
 
-#   Modèles Ollama nécessaires
-ollama pull qwen3:1.7b
-ollama pull qwen3-embedding:0.6b
+#   Modèles Model nécessaires
+model pull qwen3:1.7b
+model pull qwen3-embedding:0.6b
 
 # --- Réentraîner Rasa (après modification de data\, domain.yml, config.yml) ----
 Set-Location C:\DEV\NGONI\ngoni-ia-service

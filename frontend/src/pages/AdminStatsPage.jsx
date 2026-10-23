@@ -22,7 +22,7 @@ import { useDemoAdminTour } from "../hooks/useDemoAdminTour";
 // Perimetre du catalogue de diagnostic ANNONCE dans cet encart.
 //
 // Ce ne sont PAS les chiffres du Capability Registry en cours d'execution :
-// en developpement, seuls wallet_stub et user_stub sont declares dans
+// en developpement, seuls wallet_service et user_service sont declares dans
 // services_registry.yaml, soit 8 problemes sur 2 services -- et zero quand
 // ces deux processus ne tournent pas. Les valeurs ci-dessous decrivent le
 // perimetre du catalogue tel qu'il est prevu, independamment de ce qui est

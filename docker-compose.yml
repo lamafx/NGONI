@@ -6,19 +6,19 @@
 #
 # Reglages et secrets : .env a la racine (modele : .env.example).
 # Entre conteneurs, chaque service se joint par son NOM (http://fastapi:8000,
-# http://ollama:11434...) -- plus aucun host.docker.internal.
+# http://model:11434...) -- plus aucun host.docker.internal.
 
 name: pfe
 
 x-moteur-env: &moteur-env
   # Mot de passe sans @ : / ni % -- il est insere tel quel dans l'URL.
   DATABASE_URL: postgresql+psycopg://${APP_DB_USER:-chatbot_user}:${APP_DB_PASSWORD}@postgres:5432/${APP_DB_NAME:-chatbotdb}
-  WALLET_STUB_INTERNAL_SECRET: ${STUBS_INTERNAL_SECRET:-test-secret}
-  USER_STUB_INTERNAL_SECRET: ${STUBS_INTERNAL_SECRET:-test-secret}
+  WALLET_SERVICE_INTERNAL_SECRET: ${SERVICES_INTERNAL_SECRET:-test-secret}
+  USER_SERVICE_INTERNAL_SECRET: ${SERVICES_INTERNAL_SECRET:-test-secret}
 
 x-moteur-build: &moteur-build
   context: ./fastapi
-  # Une seule image pour le moteur et les deux stubs (meme code).
+  # Une seule image pour le moteur et les deux services (meme code).
 x-moteur-image: &moteur-image ngoni-ia/fastapi:local
 
 services:
@@ -55,16 +55,16 @@ services:
     restart: unless-stopped
 
   # ------------------------------------------------------------ modeles IA
-  ollama:
+  model:
     image: ollama/ollama:0.40.8
     environment:
-      # Modeles gardes en memoire indefiniment : par defaut Ollama les
+      # Modeles gardes en memoire indefiniment : par defaut Model les
       # decharge apres 5 min d'inactivite, et chaque reprise recoutait le
       # chargement + la lecture du prompt (1 a 2 min sans GPU, au-dela du
       # delai du classifieur Rasa).
       OLLAMA_KEEP_ALIVE: "-1"
     volumes:
-      - ollama:/root/.ollama
+      - model:/root/.ollama
     healthcheck:
       test: ["CMD", "ollama", "list"]
       interval: 10s
@@ -73,19 +73,19 @@ services:
     restart: unless-stopped
 
   # Telecharge les deux modeles au premier lancement (~2 Go), puis s'arrete.
-  # Les lancements suivants les retrouvent dans le volume `ollama`.
-  ollama-init:
+  # Les lancements suivants les retrouvent dans le volume `model`.
+  model-init:
     image: ollama/ollama:0.40.8
     entrypoint: ["/bin/sh", "-c"]
     command: ["ollama pull qwen3:1.7b && ollama pull qwen3-embedding:0.6b"]
     environment:
-      OLLAMA_HOST: ollama:11434
+      OLLAMA_HOST: model:11434
     depends_on:
-      ollama:
+      model:
         condition: service_healthy
     restart: "no"
 
-  # ------------------------------------------------------- moteur + stubs
+  # ------------------------------------------------------- moteur + services
   fastapi:
     build: *moteur-build
     image: *moteur-image
@@ -93,11 +93,11 @@ services:
       <<: *moteur-env
       RASA_PARSE_URL: http://rasa:5005/model/parse
       RASA_WEBHOOK_URL: http://rasa:5005/webhooks/rest/webhook
-      OLLAMA_EMBED_URL: http://ollama:11434/api/embed
-      WALLET_SERVICE_BASE_URL: http://wallet_stub:3103/api/v1
-      USER_SERVICE_BASE_URL: http://user_stub:3104/api/v1
-      WALLET_SERVICE_INTERNAL_SECRET: ${STUBS_INTERNAL_SECRET:-test-secret}
-      USER_SERVICE_INTERNAL_SECRET: ${STUBS_INTERNAL_SECRET:-test-secret}
+      MODEL_EMBED_URL: http://model:11434/api/embed
+      WALLET_SERVICE_BASE_URL: http://wallet_service:3103/api/v1
+      USER_SERVICE_BASE_URL: http://user_service:3104/api/v1
+      WALLET_SERVICE_INTERNAL_SECRET: ${SERVICES_INTERNAL_SECRET:-test-secret}
+      USER_SERVICE_INTERNAL_SECRET: ${SERVICES_INTERNAL_SECRET:-test-secret}
       ADMIN_INTERNAL_SECRET: ${ADMIN_INTERNAL_SECRET:-dev-admin-secret-change-me}
       REGISTRY_POLL_INTERVAL_SECONDS: ${REGISTRY_POLL_INTERVAL_SECONDS:-300}
     ports:
@@ -105,11 +105,11 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-      ollama-init:
+      model-init:
         condition: service_completed_successfully
-      wallet_stub:
+      wallet_service:
         condition: service_started
-      user_stub:
+      user_service:
         condition: service_started
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/docs', timeout=5)"]
@@ -119,10 +119,10 @@ services:
       start_period: 30s
     restart: unless-stopped
 
-  wallet_stub:
+  wallet_service:
     build: *moteur-build
     image: *moteur-image
-    command: ["uvicorn", "wallet_stub.main:app", "--host", "0.0.0.0", "--port", "3103"]
+    command: ["uvicorn", "wallet_service.main:app", "--host", "0.0.0.0", "--port", "3103"]
     environment: *moteur-env
     ports:
       - "3103:3103"
@@ -131,10 +131,10 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
-  user_stub:
+  user_service:
     build: *moteur-build
     image: *moteur-image
-    command: ["uvicorn", "user_stub.main:app", "--host", "0.0.0.0", "--port", "3104"]
+    command: ["uvicorn", "user_service.main:app", "--host", "0.0.0.0", "--port", "3104"]
     environment: *moteur-env
     ports:
       - "3104:3104"
@@ -160,14 +160,14 @@ services:
       TRACKER_DB_USER: ${APP_DB_USER:-chatbot_user}
       TRACKER_DB_PASSWORD: ${APP_DB_PASSWORD}
       TRACKER_DB_NAME: ${APP_DB_NAME:-chatbotdb}
-      OLLAMA_CHAT_URL: http://ollama:11434/api/chat
+      MODEL_CHAT_URL: http://model:11434/api/chat
       ENGINE_SETTINGS_URL: http://fastapi:8000/settings/engine
       NLU_CONTEXT_ENABLED: ${NLU_CONTEXT_ENABLED:-false}
       NLU_CONTEXT_MAX_TURNS: ${NLU_CONTEXT_MAX_TURNS:-4}
     depends_on:
       postgres:
         condition: service_healthy
-      ollama-init:
+      model-init:
         condition: service_completed_successfully
       actions:
         condition: service_started
@@ -200,7 +200,7 @@ services:
       AGENT_ACTION_AUDIT_URL: http://fastapi:8000/audit/actions
       WITHDRAW_SERVICE_URL: http://fastapi:8000/conversations/withdraw
       MEMORY_SERVICE_URL: http://fastapi:8000/conversations/memory
-      OLLAMA_CHAT_URL: http://ollama:11434/api/chat
+      MODEL_CHAT_URL: http://model:11434/api/chat
       LLM_REPLY_ENABLED: ${LLM_REPLY_ENABLED:-false}
       LLM_REPLY_MODEL: qwen3:1.7b
       LLM_REPLY_TIMEOUT: "20"
@@ -272,4 +272,4 @@ services:
 
 volumes:
   pgdata:
-  ollama:
+  model:

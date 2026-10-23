@@ -78,8 +78,8 @@ fastapi/
 │   │   └── feedback/            # Suggestions, plaintes, notations de réponse
 │   └── shared/
 │       └── embeddings/          # Service d'embeddings partagé (singleton SentenceTransformer)
-├── user_stub/                  # Simulation locale de ngoni-user-service (voir 3.5)
-├── wallet_stub/                # Simulation locale de ngoni-wallet-service (voir 3.5)
+├── user_service/                  # Simulation locale de ngoni-user-service (voir 3.5)
+├── wallet_service/                # Simulation locale de ngoni-wallet-service (voir 3.5)
 ├── migrations/                  # Scripts SQL incrémentaux (voir 09-configuration.md)
 ├── scripts/
 │   └── reembed_faq.py           # Recalcule les embeddings FAQ après changement de modèle
@@ -116,7 +116,7 @@ traçabilité) justifie un découpage plus fin.
 | `audit_repository.py` | `DiagnosticAuditRepository` — trace chaque résolution (trace_id, latence, issue) à des fins d'audit/supervision. |
 | `models.py` / `schemas.py` | Modèles hérités de la route `/diagnostic/search` (table `diagnostic_records`, non liée au Diagnostic Engine par manifeste). |
 
-## 3.5 `fastapi/user_stub/` et `fastapi/wallet_stub/`
+## 3.5 `fastapi/user_service/` et `fastapi/wallet_service/`
 
 Deux applications FastAPI minimales, indépendantes du moteur principal,
 utilisées en développement pour simuler `ngoni-user-service` et
@@ -124,7 +124,7 @@ utilisées en développement pour simuler `ngoni-user-service` et
 `3103`). Structure miroir :
 
 ```
-wallet_stub/                       user_stub/
+wallet_service/                       user_service/
 ├── main.py                        ├── main.py
 ├── db.py                          ├── db.py
 ├── security.py                    ├── security.py
@@ -185,7 +185,7 @@ validable indépendamment côté Python (FastAPI) et côté PHP
   `postgres`, `pgadmin`, `fastapi`) mais seuls `rasa` et `actions` sont
   utilisés en pratique dans ce projet — voir [10.2](10-deploiement.md#102-ce-qui-tourne-en-conteneur-vs-nativement-sur-lhôte).
 - **`utils.txt`** : aide-mémoire des commandes réellement utilisées pour
-  lancer chaque processus natif (moteur FastAPI, stubs) — référence de fait
+  lancer chaque processus natif (moteur FastAPI, services) — référence de fait
   pour le chapitre [10. Déploiement](10-deploiement.md).
 
 ---

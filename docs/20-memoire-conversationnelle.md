@@ -34,7 +34,7 @@ Message de l'utilisateur (frontend)
    │  2. envoie metadata = { user_id, dialogue_context: {turns, slots, active_loop} }
    ▼
 Classifieur Qwen ── contexte inséré APRÈS le préfixe fixe du prompt
-   │                (le cache KV d'Ollama continue de servir)
+   │                (le cache KV de Model continue de servir)
    │  → intention + entités + "reformulation" autonome si le message
    │    ne se comprend qu'avec le contexte
    ▼
@@ -96,7 +96,7 @@ Ce qui a changé, et pourquoi :
 | **Noms explicites** présentés au modèle (`PROMPT_LABELS`) : `question_sur_ngoni`, `competences_de_l_assistant`, `hors_sujet`… | Un modèle de 1,7B se fie au nom de l'étiquette : `ask_capabilities` attirait « est-ce que je peux… » |
 | JSON sur **une seule ligne**, au plus 2 intentions classées | Sans GPU, la génération tourne à environ 3 tokens/s ; un JSON indenté coûtait 86 tokens (26 s) au lieu de 51 |
 | Entités **vérifiées dans le texte** (`_squash`) | Le modèle inventait des valeurs (`"platform": "mobile"` absent du message) |
-| `num_ctx` fixé à 6144 (`OLLAMA_NUM_CTX`), identique partout | Prompt fixe d'environ 3300 tokens + contexte + réponse : au-delà de 4096 (défaut d'Ollama), le **début** du prompt est tronqué sans erreur |
+| `num_ctx` fixé à 6144 (`MODEL_NUM_CTX`), identique partout | Prompt fixe d'environ 3300 tokens + contexte + réponse : au-delà de 4096 (défaut de Model), le **début** du prompt est tronqué sans erreur |
 
 Le panneau « Sous le capot » ne fait plus sa propre classification avant
 l'envoi : il lit l'intention **réellement** retenue dans le tracker après la
@@ -112,7 +112,7 @@ Chaque mécanisme se coupe sans toucher au code, puis on redémarre le conteneur
 | `NLU_CONTEXT_ENABLED` | `rasa/.env` | **`false`** | Contexte de la conversation dans le classifieur |
 | `NLU_CONTEXT_MAX_TURNS` | `rasa/.env` | 4 | Taille du fil récent |
 | `LLM_REPLY_ENABLED` | `rasa/actions/.env` | **`false`** | Réponse de repli générée (sinon textes fixes `utter_default` / `utter_out_of_scope`) |
-| `OLLAMA_NUM_CTX` | les deux | 6144 | Doit rester identique dans les deux fichiers |
+| `MODEL_NUM_CTX` | les deux | 6144 | Doit rester identique dans les deux fichiers |
 
 **Pourquoi les deux fonctions LLM sont désactivées par défaut** (mesures sans
 GPU, 2026-10-21) :
@@ -138,7 +138,7 @@ l'accueil reste celui d'avant.
 
 ## 20.6 Limites connues
 
-- **Latence** : 10 à 20 s par message sans GPU. Le préfixe fixe du prompt (environ 3300 tokens) n'est pas réutilisé de façon fiable par le cache d'Ollama sur cette machine.
+- **Latence** : 10 à 20 s par message sans GPU. Le préfixe fixe du prompt (environ 3300 tokens) n'est pas réutilisé de façon fiable par le cache de Model sur cette machine.
 - **Hors-sujet** encore mal reconnu (1/4 sur le jeu 1) : souvent pris pour `bot_challenge`, dont la réponse (« je suis l'assistant virtuel NGONI… ») reste toutefois acceptable.
 - **FAQ** : la recherche par embeddings sert parfois une mauvaise réponse avec assurance quand le sujet n'existe pas au catalogue. Exemple : « Comment recharger mon portefeuille ? » renvoie la réinitialisation du mot de passe (score 0,676, seuil 0,57 calibré sur seulement 9 paires). Remède : ajouter l'entrée au catalogue, puis recalibrer le seuil sur un vrai corpus.
 - **Confiance** : le LLM déclare presque toujours 0,95. Ce n'est pas une probabilité, et le repli « je n'ai pas compris » se déclenche donc rarement.

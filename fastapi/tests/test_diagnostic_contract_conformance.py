@@ -1,7 +1,7 @@
 """Phase 6, etape 27 (voir docs/diagnostic-roadmap.md) : contrairement a
 test_diagnostic_contracts.py (qui valide des FIXTURES statiques dans
 contracts/diagnostic/v1/examples/), ces tests valident les REPONSES REELLES
-servies par wallet_stub et user_stub -- round-trip complet (objet Python ->
+servies par wallet_service et user_service -- round-trip complet (objet Python ->
 serialisation JSON -> HTTP -> parsing -> validation Pydantic), pour detecter
 toute divergence entre un manifeste/une reponse reellement en production et
 le contrat qu'il est cense respecter. Sans ces tests, un champ mal type
@@ -22,10 +22,10 @@ from app.domains.diagnostic.contracts import (  # noqa: E402
     CapabilityManifest,
     DiagnosticInvocationResponseAdapter,
 )
-from user_stub.main import app as user_app  # noqa: E402
-from user_stub.security import INTERNAL_SECRET as USER_SECRET  # noqa: E402
-from wallet_stub.main import app as wallet_app  # noqa: E402
-from wallet_stub.security import INTERNAL_SECRET as WALLET_SECRET  # noqa: E402
+from user_service.main import app as user_app  # noqa: E402
+from user_service.security import INTERNAL_SECRET as USER_SECRET  # noqa: E402
+from wallet_service.main import app as wallet_app  # noqa: E402
+from wallet_service.security import INTERNAL_SECRET as WALLET_SECRET  # noqa: E402
 
 
 @pytest.fixture
@@ -46,7 +46,7 @@ class TestRealManifestsConformToContract:
         assert response.status_code == 200
 
         # Leve ValidationError (donc echoue le test) si le manifeste
-        # REELLEMENT servi par wallet_stub ne respecte plus le contrat --
+        # REELLEMENT servi par wallet_service ne respecte plus le contrat --
         # pas seulement un exemple fige dans examples/valid/.
         manifest = CapabilityManifest.model_validate(response.json())
         assert manifest.service == "wallet"
@@ -66,7 +66,7 @@ class TestRealManifestsConformToContract:
 class TestRealResponsesConformToEnvelope:
     """Un utilisateur inconnu (UUID aleatoire, jamais dans la base) donne un
     resultat deterministe pour chaque probleme -- pas besoin de seed, meme
-    principe que tests/test_wallet_stub.py."""
+    principe que tests/test_wallet_service.py."""
 
     @pytest.mark.parametrize(
         "path, problem_id, entity_key",

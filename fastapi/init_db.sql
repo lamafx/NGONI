@@ -217,18 +217,18 @@ GRANT ALL ON TABLE audit.agent_actions TO chatbot_user;
 CREATE INDEX IF NOT EXISTS idx_agent_actions_session_id ON audit.agent_actions (session_id);
 CREATE INDEX IF NOT EXISTS idx_agent_actions_domain ON audit.agent_actions (domain);
 
-CREATE SCHEMA IF NOT EXISTS wallet_stub AUTHORIZATION chatbot_user;
-ALTER SCHEMA wallet_stub OWNER TO chatbot_user;
-GRANT ALL ON SCHEMA wallet_stub TO chatbot_user;
+CREATE SCHEMA IF NOT EXISTS wallet_service AUTHORIZATION chatbot_user;
+ALTER SCHEMA wallet_service OWNER TO chatbot_user;
+GRANT ALL ON SCHEMA wallet_service TO chatbot_user;
 
-CREATE TABLE IF NOT EXISTS wallet_stub.wallets (
+CREATE TABLE IF NOT EXISTS wallet_service.wallets (
     user_id TEXT PRIMARY KEY,
     kyc_verified BOOLEAN NOT NULL DEFAULT TRUE
 );
-ALTER TABLE wallet_stub.wallets OWNER TO chatbot_user;
-GRANT ALL ON TABLE wallet_stub.wallets TO chatbot_user;
+ALTER TABLE wallet_service.wallets OWNER TO chatbot_user;
+GRANT ALL ON TABLE wallet_service.wallets TO chatbot_user;
 
-CREATE TABLE IF NOT EXISTS wallet_stub.withdrawals (
+CREATE TABLE IF NOT EXISTS wallet_service.withdrawals (
     user_id TEXT NOT NULL,
     reference_id TEXT NOT NULL,
     status TEXT NOT NULL,
@@ -238,5 +238,5 @@ CREATE TABLE IF NOT EXISTS wallet_stub.withdrawals (
     completed_at TIMESTAMP,
     PRIMARY KEY (user_id, reference_id)
 );
-ALTER TABLE wallet_stub.withdrawals OWNER TO chatbot_user;
-GRANT ALL ON TABLE wallet_stub.withdrawals TO chatbot_user;
+ALTER TABLE wallet_service.withdrawals OWNER TO chatbot_user;
+GRANT ALL ON TABLE wallet_service.withdrawals TO chatbot_user;

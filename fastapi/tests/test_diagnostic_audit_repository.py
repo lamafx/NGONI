@@ -2,7 +2,7 @@
 docs/diagnostic-roadmap.md) avec une fausse Session SQLAlchemy en memoire --
 meme convention que tests/test_ticket_creation.py (FakeSession) : ces tests
 verifient la LOGIQUE d'upsert/ecriture, pas la connectivite Postgres reelle
-(deja couverte par tests/test_wallet_stub.py, qui touche une vraie base)."""
+(deja couverte par tests/test_wallet_service.py, qui touche une vraie base)."""
 
 import sys
 from pathlib import Path

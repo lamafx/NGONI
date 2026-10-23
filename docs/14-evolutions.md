@@ -32,8 +32,8 @@ En réponse directe aux limitations du [chapitre 13](13-limitations.md) :
 ## 14.3 Étendre le Capability Registry aux microservices réels
 
 Le contrat de diagnostic est déjà indépendant du langage et de
-l'implémentation (JSON Schema autonome) : la bascule des stubs
-(`wallet_stub`, `user_stub`) vers `ngoni-wallet-service`/`ngoni-user-service`
+l'implémentation (JSON Schema autonome) : la bascule des services
+(`wallet_service`, `user_service`) vers `ngoni-wallet-service`/`ngoni-user-service`
 réels ne nécessite qu'un changement de configuration côté
 `services_registry.yaml`, **dès lors que ces services implémentent
 eux-mêmes** `GET /diagnostic/manifest` et leurs endpoints de résolution

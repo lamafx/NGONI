@@ -1,4 +1,4 @@
-# wallet_stub — stub de test local pour le Diagnostic Engine
+# wallet_service — service de test local pour le Diagnostic Engine
 
 ## Pourquoi ce dossier existe
 
@@ -8,13 +8,13 @@ que le **Diagnostic Engine** (`app/domains/diagnostic/`) sait vraiment
 dialoguer en HTTP avec un service externe : appeler `GET /diagnostic/manifest`,
 router vers `POST /diagnostic/withdrawal`, interpréter la réponse.
 
-`wallet_stub` est un **second processus**, totalement indépendant, qui répond
+`wallet_service` est un **second processus**, totalement indépendant, qui répond
 exactement aux mêmes routes avec le même contrat que le vrai wallet-service.
 Il ne modifie et n'appelle **jamais** aucun fichier de `ngoni-wallet-service` :
 on redirige simplement le Diagnostic Engine vers lui via une variable
 d'environnement.
 
-**Ce que ce stub prouve** : que le Registry, l'Adapter et le Pipeline du
+**Ce que ce service prouve** : que le Registry, l'Adapter et le Pipeline du
 Diagnostic Engine fonctionnent correctement sur de vrais sockets HTTP, contre
 de vraies données. **Ce qu'il ne prouve pas** : que `DiagnosticController.php`
 est correct — ça, c'est le rôle de
@@ -26,7 +26,7 @@ controller ; elle doit être mise à jour à la main si le controller PHP évolu
 ## Organisation du code
 
 ```
-wallet_stub/
+wallet_service/
 ├── main.py                  # cree l'app FastAPI, inclut le router -- aucune logique
 ├── security.py              # verification du secret partage (header X-Internal-Secret)
 ├── outcomes.py               # construction des reponses RESOLVED / ESCALATE
@@ -49,15 +49,15 @@ existant.
 ## Données : lecture seule sur un clone réel
 
 `db.py` lit le schéma Postgres `wallet` de `chatbotdb` — un **clone** de la
-vraie base de `ngoni-wallet-service`. Ce stub n'écrit jamais dedans : il n'y a
+vraie base de `ngoni-wallet-service`. Ce service n'écrit jamais dedans : il n'y a
 pas d'endpoints de seed. Les cas de test se choisissent directement parmi les
 lignes réelles déjà présentes dans le clone (voir les requêtes SQL ci-dessous).
 
-## Lancer le stub
+## Lancer le service
 
 ```powershell
 cd C:\DEV\PFE\fastapi
-.venv\Scripts\python.exe -m uvicorn wallet_stub.main:app --app-dir C:\DEV\PFE\fastapi --port 3103
+.venv\Scripts\python.exe -m uvicorn wallet_service.main:app --app-dir C:\DEV\PFE\fastapi --port 3103
 ```
 
 Il écoute sur `http://127.0.0.1:3103`, exactement l'URL par défaut attendue
@@ -74,8 +74,8 @@ $env:WALLET_SERVICE_INTERNAL_SECRET = "test-secret"
 .venv\Scripts\python.exe -m uvicorn app.main:app --port 8000
 ```
 
-(`test-secret` est la valeur par défaut de `WALLET_STUB_INTERNAL_SECRET` côté
-stub — changez les deux ensemble si vous la personnalisez.)
+(`test-secret` est la valeur par défaut de `WALLET_SERVICE_INTERNAL_SECRET` côté
+service — changez les deux ensemble si vous la personnalisez.)
 
 ## Trouver un cas de test dans le clone
 
@@ -123,7 +123,7 @@ wallet.wallets SET status = 'FROZEN', frozen_reason = '...' WHERE user_id =
 ## Tests automatisés
 
 ```powershell
-.venv\Scripts\python.exe -m pytest tests\test_wallet_stub.py -v
+.venv\Scripts\python.exe -m pytest tests\test_wallet_service.py -v
 ```
 
 Ces tests ne couvrent que les cas génériques (sécurité, manifeste, wallet
@@ -133,8 +133,8 @@ nécessitent d'aller chercher une vraie ligne à chaque fois.
 
 ## Ne jamais faire
 
-- Ne pointez jamais ce stub vers un environnement partagé/staging.
-- Ne considérez pas les tests de ce stub comme une validation du vrai
+- Ne pointez jamais ce service vers un environnement partagé/staging.
+- Ne considérez pas les tests de ce service comme une validation du vrai
   `DiagnosticController.php` — seuls les tests Pest le valident réellement.
 - N'écrivez jamais dans le clone autrement que temporairement pour un test,
   en restaurant systématiquement l'état d'origine juste après.

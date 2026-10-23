@@ -3,7 +3,7 @@
 # 6. Référence API
 
 > **⚠️ Sécurité — environnement de développement uniquement.** Aucun des
-> endpoints listés ci-dessous (FastAPI, Rasa, stubs wallet/user) n'est
+> endpoints listés ci-dessous (FastAPI, Rasa, services wallet/user) n'est
 > protégé par une authentification utilisateur, à l'exception du module
 > admin de `ngoni-core-service` (§6.11, `assertInternalAuth`) et du header
 > interne `X-Internal-Secret` entre le moteur et les microservices de
@@ -327,9 +327,9 @@ microservice diagnosticable :
 | `/diagnostic/manifest` | `GET` | `capability-manifest.schema.json` |
 | `/diagnostic/{problem_id}` | `POST` | `service-invocation-request.schema.json` → `service-invocation-response.schema.json` |
 
-## 6.10 Stubs wallet/user (backend de développement du Diagnostic Engine)
+## 6.10 Services wallet/user (backend de développement du Diagnostic Engine)
 
-**Wallet stub** — `http://127.0.0.1:3103/api/v1` :
+**Wallet service** — `http://127.0.0.1:3103/api/v1` :
 
 | Méthode | Route | Problème résolu |
 |---|---|---|
@@ -338,7 +338,7 @@ microservice diagnosticable :
 | `POST` | `/diagnostic/topup` | `topup_not_credited` |
 | `POST` | `/diagnostic/gift` | `gift_not_received` |
 
-**User stub** — `http://127.0.0.1:3104/api/v1` :
+**User service** — `http://127.0.0.1:3104/api/v1` :
 
 | Méthode | Route | Problème résolu |
 |---|---|---|

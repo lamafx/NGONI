@@ -67,12 +67,12 @@ MANIFEST = CapabilityManifest(
                 "suspendu, bloqué ou banni, sans en connaître la raison."
             ),
             # Audit qualite du code : symetrique du fix applique a
-            # withdrawal_pending (wallet_stub) -- ces exemples disaient
+            # withdrawal_pending (wallet_service) -- ces exemples disaient
             # "suspendu"/"banni" mais jamais "bloqué", pourtant la
             # formulation la plus naturelle ("mon compte est bloqué"),
             # ce qui le faisait perdre face a compliance_hold_blocking
             # (dont les exemples utilisent, eux, "compte bloqué"
-            # explicitement). Voir wallet_stub/diagnostic/manifest.py pour
+            # explicitement). Voir wallet_service/diagnostic/manifest.py pour
             # le detail chiffre de la mesure avant/apres sur ce meme type
             # de correction.
             # Ajouts suite a la grande vague de tests conversationnels (2026-07) :

@@ -69,10 +69,10 @@ docker-compose.override.yml
 # Local generated files
 migrations/versions/__pycache__/
 
-# Local stubs -- ancres a la racine : sans "/", ces motifs excluaient aussi
-# fastapi/wallet_stub et fastapi/user_stub, necessaires au diagnostic.
-/wallet_stub/
-/user_stub/
+# Local services -- ancres a la racine : sans "/", ces motifs excluaient aussi
+# fastapi/wallet_service et fastapi/user_service, necessaires au diagnostic.
+/wallet_service/
+/user_service/
 
 rasa/.rasa/
 rasa/models/

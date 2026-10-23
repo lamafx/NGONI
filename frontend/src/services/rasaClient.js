@@ -6,8 +6,8 @@
 // vers le serveur Rasa (voir README.md).
 const RASA_BASE_URL = import.meta.env.VITE_RASA_URL || "/rasa";
 // Le NLU (classifieur d'intention, voir rasa/components/) prompte un LLM local
-// via Ollama pour chaque message -- mesuré à ~7-9s en régime normal (modèle
-// déjà chargé), jusqu'à ~30s si Ollama a déchargé le modèle entre deux
+// via Model pour chaque message -- mesuré à ~7-9s en régime normal (modèle
+// déjà chargé), jusqu'à ~30s si Model a déchargé le modèle entre deux
 // messages (keep_alive expiré). Un timeout de 12s coupait des réponses
 // pourtant valides. Sur une machine sans GPU, un message porteur d'entités a
 // été mesuré à ~24s modèle chargé, et le composant NLU attend lui-même

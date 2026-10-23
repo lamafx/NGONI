@@ -1,4 +1,4 @@
-# Image unique du moteur FastAPI ET des deux stubs de diagnostic (wallet :3103,
+# Image unique du moteur FastAPI ET des deux services de diagnostic (wallet :3103,
 # user :3104) : meme code, seule la commande change (voir docker-compose.yml).
 #
 # Python 3.13 : la version du .venv de developpement -- les versions epinglees

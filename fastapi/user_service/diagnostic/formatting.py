@@ -1,5 +1,5 @@
 """Formatage commun des dates dans les messages utilisateur du diagnostic
-user -- meme convention que wallet_stub/diagnostic/formatting.py."""
+user -- meme convention que wallet_service/diagnostic/formatting.py."""
 
 from __future__ import annotations
 
