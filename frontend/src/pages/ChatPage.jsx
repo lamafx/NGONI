@@ -5,6 +5,8 @@ import "../styles/ngoniSupportTheme.css";
 import { useDemoStore } from "../state/DemoStore";
 import { Avatar } from "../components/ui/Avatar";
 import { AGENTS } from "../data/mockData";
+import { DemoCursor, useDemoStage } from "../components/demo/DemoStage";
+import { FakeFileDialog } from "../components/demo/FakeFileDialog";
 import {
   describeAction,
   escalateConversation,
@@ -26,6 +28,7 @@ import {
   beforeAgentActMs,
   consumeAutoStart,
   isDemoFinished,
+  isAutoUploadMode,
   isDemoMode,
   setAct,
   keystrokeDelay,
@@ -36,7 +39,7 @@ import {
   resetDemoParameters,
   wait,
 } from "../services/demoDirector";
-import { DEMO_ID_EXTRACTION, DEMO_PRECHECK } from "../data/demoScenario1";
+import { DEMO_ATTACHMENT, DEMO_ID_EXTRACTION, DEMO_PRECHECK } from "../data/demoScenario1";
 import { clearOverlay, showOverlay } from "../services/demoOverlay";
 import { resetAdminTour } from "../hooks/useDemoAdminTour";
 // Piece d'identite fournie dans demo/, copiee dans les assets pour etre
@@ -96,6 +99,15 @@ export function ChatPage() {
   const [awaitingUpload, setAwaitingUpload] = useState(false);
   const [pickedFile, setPickedFile] = useState(null);
   const fileInputRef = useRef(null);
+  // Envoi de la piece sans operateur (?demo=1&auto=1) : curseur simule et
+  // fenetre « Open » reproduite (voir autoAttachDocument). null = fermee,
+  // sinon { selected } -- le fichier en surbrillance.
+  const [explorer, setExplorer] = useState(null);
+  const stage = useDemoStage();
+  const uploadPromptRef = useRef(null);
+  const sendBtnRef = useRef(null);
+  const explorerFileRef = useRef(null);
+  const explorerOpenRef = useRef(null);
   const uploadResolveRef = useRef(null);
   // Image reellement soumise -- reutilisee par l'animation de scan, pour que
   // ce soit bien LA piece envoyee qui soit analysee a l'ecran.
@@ -263,16 +275,19 @@ export function ChatPage() {
   }
 
   /** Envoi effectif de la piece choisie : pousse le message et debloque le
-   *  deroulement automatique, qui reprend a partir de la. */
-  function sendPickedAttachment() {
-    if (!pickedFile) return;
-    uploadedImageRef.current = pickedFile.dataUrl;
+   *  deroulement automatique, qui reprend a partir de la. Le fichier peut
+   *  etre passe explicitement (envoi automatique, voir autoAttachDocument) :
+   *  depuis la boucle de demonstration, l'etat `pickedFile` lu ici serait
+   *  celui du rendu ou la boucle a demarre, donc toujours vide. */
+  function sendPickedAttachment(file = pickedFile) {
+    if (!file) return;
+    uploadedImageRef.current = file.dataUrl;
     pushMessage({
       id: nextId("msg"),
       sender: "user",
       variant: "attachment",
-      attachment: pickedFile,
-      text: pickedFile.name,
+      attachment: file,
+      text: file.name,
       time: nowLabel(),
     });
     setPickedFile(null);
@@ -281,6 +296,62 @@ export function ChatPage() {
     uploadResolveRef.current = null;
     resolve?.(true);
   }
+
+  /** Variante sans operateur (?demo=1&auto=1) : le meme geste qu'un envoi a
+   *  la main -- clic sur l'invitation, fenetre « Open » sur le dossier
+   *  demo/, selection de la piece, Open, puis envoi -- joue par le curseur
+   *  de la demonstration. La fenetre est reproduite dans la page : la vraie
+   *  n'existe que sur un bureau reel (voir FakeFileDialog). Renvoie false si
+   *  la sequence a ete interrompue. */
+  async function autoAttachDocument(turn) {
+    const p = pacing().upload.explorer;
+    setAwaitingUpload(true);
+    await wait(p.beforeClickMs);
+    if (!autoplayRef.current) return false;
+
+    // Le curseur apparait sur le champ de saisie, la ou se trouve la main
+    // de quelqu'un qui vient d'ecrire, puis part vers l'invitation.
+    stage.moveCursorTo(composerRef.current);
+    await wait(120);
+    if (!(await clickWithCursor(uploadPromptRef.current, p.cursorTravelMs))) return false;
+
+    setExplorer({ selected: null });
+    await wait(p.readFolderMs);
+    if (!(await clickWithCursor(explorerFileRef.current, p.cursorTravelMs))) return false;
+    setExplorer({ selected: turn.attachment.name });
+    await wait(p.afterSelectMs);
+    if (!(await clickWithCursor(explorerOpenRef.current, p.cursorTravelMs))) return false;
+
+    setExplorer(null);
+    const file = { ...turn.attachment, dataUrl: cniRecto };
+    setPickedFile(file);
+    await wait(p.readyMs);
+    if (!(await clickWithCursor(sendBtnRef.current, p.cursorTravelMs))) return false;
+    stage.hideCursor();
+    sendPickedAttachment(file);
+    return true;
+  }
+
+  async function clickWithCursor(el, travelMs) {
+    if (!el) return autoplayRef.current;
+    stage.moveCursorTo(el);
+    await wait(travelMs);
+    if (!autoplayRef.current) return false;
+    await stage.clickCursor();
+    return autoplayRef.current;
+  }
+
+  // Le vrai pointeur reapparait le temps de joindre la piece (voir
+  // demoOverlay.css) : c'est la seule etape ou une main agit a l'ecran.
+  useEffect(() => {
+    if (!isDemoMode()) return undefined;
+    const root = document.documentElement;
+    if (awaitingUpload || pickedFile) root.dataset.demoPointer = "1";
+    else delete root.dataset.demoPointer;
+    return () => {
+      delete root.dataset.demoPointer;
+    };
+  }, [awaitingUpload, pickedFile]);
 
   /** Met le deroulement en pause jusqu'a l'envoi de la piece. */
   function waitForManualUpload() {
@@ -342,6 +413,8 @@ export function ChatPage() {
     dispatch({ type: "RESET" });
     setHandoffPhase("idle");
     setInspector(null);
+    setExplorer(null);
+    stage.hideCursor();
     resetDemo();
     resetAdminTour();
     // Les seuils du moteur repartent eux aussi de leur valeur par defaut :
@@ -362,7 +435,9 @@ export function ChatPage() {
       dispatch({ type: "CLEAR_QUICK_REPLIES", conversationId: CONVERSATION_ID });
 
       if (turn?.kind === "upload") {
-        if (turn.manual) {
+        if (turn.manual && isAutoUploadMode()) {
+          if (!(await autoAttachDocument(turn))) break;
+        } else if (turn.manual) {
           // La demonstration s'arrete ici. Elle ne reprend qu'apres l'envoi
           // d'une vraie piece (voir sendPickedAttachment), qui pousse
           // elle-meme le message dans le fil.
@@ -687,6 +762,24 @@ export function ChatPage() {
 
   return (
     <div className="ns-app">
+      {isAutoUploadMode() && (
+        <>
+          {explorer && (
+            <FakeFileDialog
+              selected={explorer.selected}
+              openRef={explorerOpenRef}
+              files={[
+                // Contenu reel de demo/, filtre comme le selecteur (images).
+                { name: DEMO_ATTACHMENT.name, thumb: cniRecto, ref: explorerFileRef },
+                { name: "profil.jpeg", thumb: clientPhoto },
+              ]}
+            />
+          )}
+          <div className="demo-stage-fixed" ref={stage.stageRef}>
+            <DemoCursor cursor={stage.cursor} />
+          </div>
+        </>
+      )}
       {/* SIDEBAR -- masquee en mode demonstration : la navigation (Chat,
           Historique, FAQ, Profil) ne sert a rien pendant la video et vole de
           la largeur au fil et au panneau "sous le capot", qui sont les deux
@@ -962,7 +1055,7 @@ export function ChatPage() {
 
           {/* Le déroulement est en pause : on attend la vraie pièce. */}
           {awaitingUpload && !pickedFile && (
-            <button type="button" className="ns-upload-prompt" onClick={openFilePicker}>
+            <button type="button" className="ns-upload-prompt" ref={uploadPromptRef} onClick={openFilePicker}>
               <StrokeIcon d="M10 14V4m0 0L6.5 7.5M10 4l3.5 3.5M3.5 13v2a1.5 1.5 0 0 0 1.5 1.5h10a1.5 1.5 0 0 0 1.5-1.5v-2" size={17} />
               Joignez votre pièce d'identité pour continuer
             </button>
@@ -1050,6 +1143,7 @@ export function ChatPage() {
             />
             <button
               className="ns-send-btn"
+              ref={sendBtnRef}
               type="button"
               onClick={() => (pickedFile ? sendPickedAttachment() : handleSend())}
               disabled={pickedFile ? false : isTyping}

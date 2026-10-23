@@ -36,7 +36,7 @@ try:
     from .domains.diagnostic.router import router as diagnostic_router, get_registry
     from .domains.audit.router import router as audit_router
     from .domains.audit.service import record_faq_lookup
-    from .domains.settings.router import router as settings_router
+    from .domains.settings.router import engine_router as settings_engine_router, router as settings_router
     from .domains.stats.router import router as stats_router
     from .domains.stats.dashboard_router import router as dashboard_router
     from .domains.conversations.router import router as conversations_router
@@ -64,7 +64,7 @@ except ImportError:  # pragma: no cover - support running as `uvicorn main:app`
     from domains.diagnostic.router import router as diagnostic_router, get_registry
     from domains.audit.router import router as audit_router
     from domains.audit.service import record_faq_lookup
-    from domains.settings.router import router as settings_router
+    from domains.settings.router import engine_router as settings_engine_router, router as settings_router
     from domains.stats.router import router as stats_router
     from domains.stats.dashboard_router import router as dashboard_router
     from domains.conversations.router import router as conversations_router
@@ -99,6 +99,7 @@ app.include_router(feedback_router)
 app.include_router(diagnostic_router)
 app.include_router(audit_router)
 app.include_router(settings_router)
+app.include_router(settings_engine_router)
 app.include_router(stats_router)
 app.include_router(dashboard_router)
 app.include_router(conversations_router)

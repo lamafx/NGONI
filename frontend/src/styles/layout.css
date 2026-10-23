@@ -1688,6 +1688,11 @@
   padding: 2px 7px;
   border-radius: 999px;
 }
+/* Seuil relu a chaud par le moteur (voir `live` dans data/systemParameters.js). */
+.settings-item-badge.is-live {
+  color: var(--good);
+  background: var(--good-soft);
+}
 .settings-item-value {
   display: inline-flex;
   align-items: center;
@@ -1998,7 +2003,10 @@
    defilent dans .admin-main, et un curseur ancre dans le flux partirait avec
    le contenu. z-index au-dessus de la modale de confirmation (100) -- c'est
    precisement sur son bouton que le dernier clic doit se voir. */
-.demo-stage-admin{
+.demo-stage-admin,
+/* Meme scene fixe pour le chat : le curseur y joint la piece d'identite
+   (envoi sans operateur), au-dessus de la fenetre « Open » (z-index 140). */
+.demo-stage-fixed{
   position:fixed;inset:0;z-index:150;pointer-events:none;
 }
 

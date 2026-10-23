@@ -17,6 +17,12 @@
 -- l'intention et l'identite de qui l'a demandee, mais ne change pas
 -- (encore) le comportement reel du moteur tant que ce pont n'existe pas
 -- (voir api_admin_a_developper.md, section 10).
+--
+-- MISE A JOUR 2026-10-22 : le pont existe pour nlu.confidence_threshold et
+-- nlu.ambiguity_threshold (LIVE_PARAMETERS dans app/domains/settings/
+-- service.py) -- relus a chaud par Rasa (rasa/components/
+-- dynamic_fallback_classifier.py) et par app/domains/settings/live.py. Les
+-- autres seuils sont toujours dans le cas decrit ci-dessus.
 
 CREATE TABLE IF NOT EXISTS ia.system_parameters (
     param_id TEXT PRIMARY KEY,

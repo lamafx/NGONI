@@ -1,12 +1,14 @@
 // Valeurs par defaut = ce qui est REELLEMENT en dur dans le backend a ce
 // jour (chaque `source` pointe le fichier/constante exacts, verifies dans
 // le depot -- pas une estimation). Modifiables depuis AdminSettingsPage,
-// mais persistees UNIQUEMENT dans DemoStore/localStorage (voir
-// state/DemoStore.jsx, action UPDATE_PARAMETER) -- aucune route backend ne
-// permet encore d'ecrire ces constantes (voir api_admin_a_developper.md).
-// Modifier une valeur ici ne change donc rien au comportement reel de Rasa/
-// FastAPI tant que ce pont n'existe pas ; c'est explique dans le bandeau de
-// la page.
+// persistees en base (PATCH /admin/settings/parameters, voir
+// services/engineClient.js) avec l'identite de qui les change.
+//
+// `live: true` : le moteur relit ce seuil a chaud -- Rasa via
+// components/dynamic_fallback_classifier.py, FastAPI via
+// app/domains/settings/live.py (liste LIVE_PARAMETERS, a garder en phase).
+// Les autres sont traces mais toujours lus depuis leur constante au
+// demarrage : l'ecran le dit, item par item.
 export const SYSTEM_PARAMETERS = [
   {
     group: "Compréhension (NLU)",
@@ -19,7 +21,8 @@ export const SYSTEM_PARAMETERS = [
         value: 0.7,
         format: "pct",
         step: 0.01,
-        source: "rasa/config.yml — FallbackClassifier.threshold",
+        source: "rasa/config.yml — DynamicFallbackClassifier.threshold (défaut)",
+        live: true,
       },
       {
         id: "nlu.ambiguity_threshold",
@@ -27,7 +30,8 @@ export const SYSTEM_PARAMETERS = [
         value: 0.08,
         format: "pct",
         step: 0.01,
-        source: "rasa/config.yml — FallbackClassifier.ambiguity_threshold",
+        source: "rasa/config.yml — DynamicFallbackClassifier.ambiguity_threshold (défaut)",
+        live: true,
       },
     ],
   },

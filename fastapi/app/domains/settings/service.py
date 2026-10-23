@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 from sqlalchemy.orm import Session
 
@@ -31,6 +31,14 @@ KNOWN_PARAMETERS = {
     "rate_limit.max_requests": (1, 10000),
 }
 
+# Sous-ensemble de KNOWN_PARAMETERS que le moteur relit A CHAUD (voir
+# GET /settings/engine, router.py) : le FallbackClassifier de Rasa
+# (rasa/components/dynamic_fallback_classifier.py) et le repli manuel des
+# moteurs bge_sklearn (app/domains/nlu/engines.py). Les autres seuils sont
+# traces mais restent lus depuis leurs constantes au demarrage -- les ajouter
+# ici sans brancher leur consommateur ferait mentir l'ecran Parametres.
+LIVE_PARAMETERS = ("nlu.confidence_threshold", "nlu.ambiguity_threshold")
+
 
 class UnknownParameterError(ValueError):
     pass
@@ -48,6 +56,14 @@ class SystemParameterService:
         if self.repository is None:
             return []
         return [_to_response(p) for p in self.repository.list_all()]
+
+    def live_overrides(self) -> Dict[str, float]:
+        """{param_id: valeur} des seuils relus a chaud et surcharges depuis
+        l'admin. Un seuil absent reste a sa valeur par defaut (config.yml /
+        constante Python) -- jamais dupliquee ici, meme regle que la table."""
+        if self.repository is None:
+            return {}
+        return {p.param_id: p.value for p in self.repository.list_all() if p.param_id in LIVE_PARAMETERS}
 
     def update(self, param_id: str, value: float, changed_by: str) -> SystemParameterResponse:
         if param_id not in KNOWN_PARAMETERS:

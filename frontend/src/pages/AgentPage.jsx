@@ -7,7 +7,7 @@ import { ConversationStatusBadge } from "../components/ui/StatusBadge";
 import { Timeline } from "../components/Timeline";
 import { useDemoStore } from "../state/DemoStore";
 import { AGENTS } from "../data/mockData";
-import { DEMO_ID_EXTRACTION, DEMO_PROFILE } from "../data/demoScenario1";
+import { DEMO_ATTACHMENT, DEMO_ID_EXTRACTION, DEMO_PROFILE } from "../data/demoScenario1";
 // Repli quand la conversation ne porte pas la piece reellement soumise
 // (rechargement de page, scenario rejoue) -- meme image que celle de demo/.
 import cniRecto from "../assets/demo-cni-recto.png";
@@ -865,7 +865,7 @@ export function AgentPage() {
                     src={submittedPiece?.dataUrl || cniRecto}
                     alt="Pièce d'identité soumise par le client"
                   />
-                  <figcaption>{submittedPiece?.name ?? "CNI_recto.jpeg"}</figcaption>
+                  <figcaption>{submittedPiece?.name ?? DEMO_ATTACHMENT.name}</figcaption>
                 </figure>
                 <p className="apf-empty">
                   Le verso enregistré lors du dépôt du 25/08 reste valable : il n'a pas été redemandé.

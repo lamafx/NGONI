@@ -22,7 +22,11 @@ pipeline:
   # prefixe fixe du prompt, relu depuis le cache KV d'Ollama.
   examples_per_intent: 8
 
-- name: FallbackClassifier
+# FallbackClassifier de Rasa, a l'identique, mais dont les deux seuils
+# ci-dessous peuvent etre surcharges a chaud depuis l'espace Admin >
+# Parametres (voir components/dynamic_fallback_classifier.py). Les valeurs
+# ecrites ici restent les valeurs par defaut.
+- name: components.dynamic_fallback_classifier.DynamicFallbackClassifier
   threshold: 0.70
   # 0.08 et non 0.10 : un ecart de "0.10" entre deux scores LLM (ex. 0.95 vs
   # 0.85, des valeurs rondes tres frequentes chez un LLM prompte pour donner

@@ -17,7 +17,16 @@ export const DEMO_PACING = {
   // mais l'ecart reste contenu : le rythme prime.
   reply: { baseMs: 1100, perCharMs: 7, minMs: 1400, maxMs: 3400 },
 
-  upload: { pickMs: 1600, transferMs: 1800, transferManualMs: 1200 },
+  upload: {
+    pickMs: 1600,
+    transferMs: 1800,
+    transferManualMs: 1200,
+    // Envoi sans operateur (?demo=1&auto=1) : invitation -> fenetre
+    // « Open » -> selection -> Open -> envoi, au curseur (ChatPage,
+    // autoAttachDocument). cursorTravelMs couvre la transition CSS du
+    // curseur (.demo-cursor, 0,85 s).
+    explorer: { beforeClickMs: 900, cursorTravelMs: 900, readFolderMs: 1100, afterSelectMs: 600, readyMs: 700 },
+  },
 };
 
 // L'identite affichee est celle qui figure REELLEMENT sur la piece fournie
@@ -105,14 +114,16 @@ export const DEMO_TIMELINE = [
   { label: "Escalade prioritaire — live à 20:00", time: "18:06", state: "active" },
 ];
 
-// La piece jointe envoyee au tour 3. L'image vient de demo/ et est bundlee
-// par Vite depuis src/assets (voir import dans ChatPage.jsx).
+// La piece jointe envoyee au tour 3 : demo/carteIDFront.png, TELLE QU'ELLE
+// EST sur le disque (nom, poids, dimensions) -- c'est elle que la fenetre
+// « Open » montre dans le dossier et qu'on choisit (voir FakeFileDialog).
+// Bundlee par Vite depuis src/assets (voir import dans ChatPage.jsx).
 export const DEMO_ATTACHMENT = {
-  name: "CNI_recto.jpeg",
-  size: "46 Ko",
-  kind: "Image · JPEG",
-  width: 584,
-  height: 936,
+  name: "carteIDFront.png",
+  size: "655 Ko",
+  kind: "Image · PNG",
+  width: 759,
+  height: 457,
 };
 
 // Duree de l'animation de scan avant que les resultats s'affichent.
@@ -343,13 +354,13 @@ export const DEMO_TURNS = [
     // du parcours ou une action humaine est attendue -- tout le reste se
     // deroule seul apres le clic sur "Démo".
     manual: true,
-    user: "CNI_recto.jpeg",
+    user: DEMO_ATTACHMENT.name,
     attachment: DEMO_ATTACHMENT,
     nlu: null,
     pipeline: { understandAfter: 700, actAfter: 500, resultAfter: 500 },
     readBefore: 1800,
-    perception: "Pièce jointe reçue — CNI_recto.jpeg",
-    understanding: { label: "Carte nationale d'identité", detail: "image · JPEG · 584 × 936" },
+    perception: `Pièce jointe reçue — ${DEMO_ATTACHMENT.name}`,
+    understanding: { label: "Carte nationale d'identité", detail: "image · PNG · 759 × 457" },
     action: "Analyse automatique du document",
     result: {
       label: "Document conforme",
@@ -423,12 +434,10 @@ export const DEMO_TURNS = [
 
   {
     id: "t5-escalade",
-    afterReplies: {
-      type: "ticket",
-      id: "CMP-20260828-4417",
-      rows: [["Priorité", "Haute"], ["Échéance", "20:00"], ["Pièce jointe", "Oui"], ["Pré-vérification", "5/5"]],
-      ms: 3400,
-    },
+    // Plus de carte "ticket" (CMP-..., priorite, echeance) en fin de tour :
+    // 3,4 s d'arret sur image juste avant la bascule, ressenties comme une
+    // latence au visionnage (2026-10-21). La reference reste lisible dans la
+    // reponse de l'agent et dans le panneau de droite.
     user: "oui s'il te plaît",
     nlu: {
       intent: "affirm",
@@ -514,13 +523,12 @@ export const DEMO_AGENT_ACT = {
     {
       id: "arrivee",
       target: "header",
-      overlay: { type: "badge", lines: ["APPEL ENTRANT", "NGONI IA → AGENT HUMAIN"], ms: 1400 },
       // L'appel sonne un instant sans que personne ne decroche : ce temps
       // mort fait exister la prise en charge comme une decision. Il tenait
-      // 7 s au total (700 ms d'amorce + 700 de trajet du curseur + 2600
-      // d'incrustation + 2400 d'attente + 700 + 260 pour le clic) -- assez
-      // long pour qu'on croie la demonstration figee. Ramene a ~4 s : on
-      // entend encore la sonnerie, on ne l'attend plus.
+      // 7 s au total, puis ~4 s ; les incrustations "APPEL ENTRANT" et
+      // "APPEL DECROCHE" sont retirees (2026-10-21) -- la carte d'appel et le
+      // clic sur "Prise en charge" disent deja la meme chose, et ces 3,8 s
+      // retardaient la lecture du resume, ressenties comme une latence.
       hold: 300,
     },
 
@@ -529,8 +537,7 @@ export const DEMO_AGENT_ACT = {
       target: "takeover",
       cursor: "click",
       action: "TAKE_OVER",
-      overlay: { type: "badge", lines: ["APPEL DÉCROCHÉ", "PRISE EN CHARGE ACCEPTÉE"], ms: 2400 },
-      hold: 1600,
+      hold: 600,
     },
 
     // Le conseiller parcourt la colonne de droite de haut en bas, comme il le
@@ -585,10 +592,9 @@ export const DEMO_AGENT_ACT = {
       scroll: true,
       cursor: "click",
       action: "VALIDATE_IDENTITY",
-      // Incrustation "avant / apres" plutot qu'une pastille : c'est un
-      // CHANGEMENT D'ETAT, et l'incrustation de type "state" existe
-      // exactement pour ca (voir DemoOverlay).
-      overlay: { type: "state", before: "En cours de vérification", after: "Validé", ms: 2600 },
+      // Plus d'incrustation "En cours de verification -> Valide" (2026-10-21) :
+      // les pastilles des champs passent elles-memes au vert "Valide" sous
+      // les yeux du jury, la carte centrale les masquait 2,6 s.
       hold: 2000,
     },
     {
@@ -663,15 +669,13 @@ export const DEMO_AGENT_ACT = {
 //            AdminSettingsPage) -- sa duree est alors celle de la scene, pas
 //            un `hold` fixe.
 export const DEMO_ADMIN_ACT = {
-  // Tableau de bord, base de connaissances, parametres. Les statistiques
-  // sont sorties du parcours : elles montrent des compteurs, la ou la base de
-  // connaissances montre ce que l'agent SAIT -- et la recherche semantique
-  // qu'elle expose repond a la question que le jury pose vraiment (« d'ou
-  // sortent les reponses ? »). La page Statistiques reste accessible, elle
-  // n'est simplement plus filmee.
+  // Tableau de bord (les statistiques : volumes, tickets, temps de reponse,
+  // evolution des demandes, repartition des intentions), puis parametres du
+  // modele. La base de connaissances est sortie du parcours (2026-10-21) pour
+  // raccourcir la video ; elle reste accessible, elle n'est simplement plus
+  // filmee.
   tour: [
     { path: "/admin", settle: 1800, scrollMs: 7600, hold: 9600 },
-    { path: "/admin/base-connaissances", settle: 1800, scrollMs: 6200, hold: 8600 },
     { path: "/admin/settings", settle: 1400, script: true },
   ],
 

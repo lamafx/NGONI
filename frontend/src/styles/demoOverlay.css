@@ -5,6 +5,16 @@
    comptent (action, conforme, escalade, résolu), jamais comme couleur de
    fond général.
    ========================================================================== */
+/* Le vrai pointeur de la souris n'a rien a faire a l'image : ce sont le
+   curseur dessine par la demonstration (DemoStage) et la frappe simulee qui
+   portent l'action. Seule exception, l'envoi de la piece d'identite : la, on
+   DOIT voir une main cliquer, puis l'explorateur de fichiers Windows
+   (data-demo-pointer, pose par ChatPage pendant cette etape). */
+html[data-demo="1"]:not([data-demo-pointer="1"]),
+html[data-demo="1"]:not([data-demo-pointer="1"]) *{
+  cursor:none !important;
+}
+
 .dov{
   --o-orange:#F26418;
   --o-charbon:#1F1B18;

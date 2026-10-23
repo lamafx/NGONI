@@ -30,9 +30,11 @@ from fastapi import HTTPException
 from fastapi.concurrency import run_in_threadpool
 
 try:
+    from app.domains.settings.live import live_value
     from app.shared.embeddings.service import get_embedding_model
     from app.shared.rasa_client import RASA_PARSE_URL, call_rasa_with_retry
 except ImportError: # pragma: no cover - support running as `main`
+    from domains.settings.live import live_value
     from shared.embeddings.service import get_embedding_model
     from shared.rasa_client import RASA_PARSE_URL, call_rasa_with_retry
 
@@ -50,13 +52,17 @@ BGE_VERSIONS_DIR = Path(os.getenv(
     str(Path(__file__).resolve().parents[4] / "rasa" / "nlu_bge" / "model" / "versions"),
 ))
 
-# Memes valeurs que FallbackClassifier (rasa/config.yml, threshold +
-# ambiguity_threshold) -- appliquees manuellement ici pour les moteurs
+# Memes valeurs par defaut que FallbackClassifier (rasa/config.yml, threshold
+# + ambiguity_threshold) -- appliquees manuellement ici pour les moteurs
 # bge_sklearn, qui n'ont pas d'equivalent natif. Rasa applique deja les
 # siennes en interne (voir _predict_rasa : le resultat de /model/parse est
-# retourne tel quel, jamais repasse par ce filtre).
+# retourne tel quel, jamais repasse par ce filtre). Une surcharge ecrite
+# depuis l'admin remplace ces valeurs a chaud, cote Rasa comme ici (voir
+# app/domains/settings/live.py).
 CONFIDENCE_THRESHOLD = 0.70
 AMBIGUITY_THRESHOLD = 0.10
+CONFIDENCE_PARAM_ID = "nlu.confidence_threshold"
+AMBIGUITY_PARAM_ID = "nlu.ambiguity_threshold"
 FALLBACK_INTENT = "nlu_fallback"
 
 EngineKind = Literal["rasa", "bge_sklearn"]
@@ -161,8 +167,10 @@ def _predict_bge_sync(classifier_name: str, text: str) -> NluPrediction:
     # Fallback manuel (seuil de confiance + ambiguite) : Rasa a son propre
     # FallbackClassifier, ces classifieurs sklearn n'en ont pas -- voir
     # CONFIDENCE_THRESHOLD/AMBIGUITY_THRESHOLD ci-dessus.
-    ambiguous = len(order) > 1 and (confidence - float(proba[int(order[1])])) < AMBIGUITY_THRESHOLD
-    if confidence < CONFIDENCE_THRESHOLD or ambiguous:
+    confidence_threshold = live_value(CONFIDENCE_PARAM_ID, CONFIDENCE_THRESHOLD)
+    ambiguity_threshold = live_value(AMBIGUITY_PARAM_ID, AMBIGUITY_THRESHOLD)
+    ambiguous = len(order) > 1 and (confidence - float(proba[int(order[1])])) < ambiguity_threshold
+    if confidence < confidence_threshold or ambiguous:
         intent = FALLBACK_INTENT
 
     return NluPrediction(intent=intent, confidence=confidence, entities=[])

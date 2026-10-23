@@ -280,6 +280,9 @@ export function AdminSettingsPage() {
     if (!alive()) return;
     await wait(cfg.readHistoryMs);
     stage.hideCursor();
+    // Fin de la demonstration, lue par scripts/enregistrer_demo_auto.mjs pour
+    // couper la video a la derniere image utile.
+    document.documentElement.dataset.demoDone = "1";
   }
 
   // Derniere etape du parcours d'administration en demonstration : cet ecran
@@ -297,10 +300,9 @@ export function AdminSettingsPage() {
       <div className="settings-notice">
         <Icon name="alert" size={16} />
         <span>
-          Ces valeurs partent de la configuration réelle du backend, mais une modification ici reste locale à cette
-          démo (aucune route n'existe encore côté FastAPI/Rasa pour les réécrire — voir{" "}
-          <code>api_admin_a_developper.md</code>). Chaque changement exige votre identité et reste tracé dans
-          l'historique ci-dessous.
+          Les seuils marqués « en direct » s'appliquent au moteur dans les secondes qui suivent, sans redémarrage.
+          Les autres sont enregistrés mais ne seront pris en compte qu'au prochain déploiement. Chaque changement
+          exige votre identité et reste tracé dans l'historique ci-dessous.
         </span>
       </div>
 
@@ -322,6 +324,7 @@ export function AdminSettingsPage() {
                     <div className="settings-item-head">
                       <span className="settings-item-label">
                         {item.label}
+                        {item.live && <span className="settings-item-badge is-live">en direct</span>}
                         {isModified && <span className="settings-item-badge">modifié</span>}
                       </span>
 

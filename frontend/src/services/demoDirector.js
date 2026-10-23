@@ -65,6 +65,24 @@ export function isDemoMode() {
   return (demoFlag = import.meta.env.VITE_DEMO_MODE === "1");
 }
 
+// ?demo=1&auto=1 : la piece d'identite est jointe et envoyee par la
+// demonstration elle-meme, au lieu d'attendre qu'on la choisisse dans
+// l'explorateur Windows -- c'est ce qui permet de tourner la video sans
+// personne devant l'ecran (scripts/enregistrer_demo.py --auto). Retenu pour
+// la session, pour la meme raison que demoFlag.
+let autoUploadFlag = null;
+
+export function isAutoUploadMode() {
+  if (autoUploadFlag !== null) return autoUploadFlag;
+  if (typeof window === "undefined" || !isDemoMode()) return (autoUploadFlag = false);
+  const hashQuery = window.location.hash.includes("?")
+    ? window.location.hash.slice(window.location.hash.indexOf("?"))
+    : "";
+  const flag =
+    new URLSearchParams(window.location.search).get("auto") ?? new URLSearchParams(hashQuery).get("auto");
+  return (autoUploadFlag = flag === "1");
+}
+
 /** Remet le scenario au premier tour -- appele au montage de la page, pour
  *  qu'un simple rechargement suffise a refaire une prise. */
 export function resetDemo() {
