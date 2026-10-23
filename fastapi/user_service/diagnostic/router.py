@@ -20,6 +20,9 @@ from .services.compliance import resolve_compliance_hold
 from .services.deletion import resolve_account_deletion
 from .services.kyc import resolve_kyc_status
 from .services.parental_consent import resolve_parental_consent
+from .services.account_extras import (
+    resolve_account_warnings, resolve_certification, resolve_ngoni_card, resolve_ngoni_plus, resolve_payout_destination, resolve_phone_verification, resolve_referral,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -87,3 +90,66 @@ def parental_consent(payload: DiagnosticInvocationRequest, db: Session = Depends
         payload.session_id, payload.trace_id, payload.user_id,
     )
     return _log_outcome("parental_consent", payload, resolve_parental_consent(db, payload.user_id))
+
+
+@router.post("/certification")
+def certification(payload: DiagnosticInvocationRequest, db: Session = Depends(get_db)):
+    logger.info(
+        "[DIAG][USER_SERVICE] session=%s trace_id=%s stage=endpoint_in endpoint=certification user=%s",
+        payload.session_id, payload.trace_id, payload.user_id,
+    )
+    return _log_outcome("certification", payload, resolve_certification(db, payload.user_id))
+
+
+@router.post("/ngoni_plus")
+def ngoni_plus(payload: DiagnosticInvocationRequest, db: Session = Depends(get_db)):
+    logger.info(
+        "[DIAG][USER_SERVICE] session=%s trace_id=%s stage=endpoint_in endpoint=ngoni_plus user=%s",
+        payload.session_id, payload.trace_id, payload.user_id,
+    )
+    return _log_outcome("ngoni_plus", payload, resolve_ngoni_plus(db, payload.user_id))
+
+
+@router.post("/phone")
+def phone(payload: DiagnosticInvocationRequest, db: Session = Depends(get_db)):
+    logger.info(
+        "[DIAG][USER_SERVICE] session=%s trace_id=%s stage=endpoint_in endpoint=phone user=%s",
+        payload.session_id, payload.trace_id, payload.user_id,
+    )
+    return _log_outcome("phone", payload, resolve_phone_verification(db, payload.user_id))
+
+
+@router.post("/payout_destination")
+def payout_destination(payload: DiagnosticInvocationRequest, db: Session = Depends(get_db)):
+    logger.info(
+        "[DIAG][USER_SERVICE] session=%s trace_id=%s stage=endpoint_in endpoint=payout_destination user=%s",
+        payload.session_id, payload.trace_id, payload.user_id,
+    )
+    return _log_outcome("payout_destination", payload, resolve_payout_destination(db, payload.user_id))
+
+
+@router.post("/ngoni_card")
+def ngoni_card(payload: DiagnosticInvocationRequest, db: Session = Depends(get_db)):
+    logger.info(
+        "[DIAG][USER_SERVICE] session=%s trace_id=%s stage=endpoint_in endpoint=ngoni_card user=%s",
+        payload.session_id, payload.trace_id, payload.user_id,
+    )
+    return _log_outcome("ngoni_card", payload, resolve_ngoni_card(db, payload.user_id))
+
+
+@router.post("/referral")
+def referral(payload: DiagnosticInvocationRequest, db: Session = Depends(get_db)):
+    logger.info(
+        "[DIAG][USER_SERVICE] session=%s trace_id=%s stage=endpoint_in endpoint=referral user=%s",
+        payload.session_id, payload.trace_id, payload.user_id,
+    )
+    return _log_outcome("referral", payload, resolve_referral(db, payload.user_id))
+
+
+@router.post("/warnings")
+def warnings(payload: DiagnosticInvocationRequest, db: Session = Depends(get_db)):
+    logger.info(
+        "[DIAG][USER_SERVICE] session=%s trace_id=%s stage=endpoint_in endpoint=warnings user=%s",
+        payload.session_id, payload.trace_id, payload.user_id,
+    )
+    return _log_outcome("warnings", payload, resolve_account_warnings(db, payload.user_id))

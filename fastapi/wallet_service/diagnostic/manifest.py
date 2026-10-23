@@ -214,5 +214,123 @@ MANIFEST = CapabilityManifest(
                 "UNKNOWN_STATUS",
             ],
         ),
+        ProblemDefinition(
+            id="wallet_frozen",
+            label='Portefeuille gelé ou inutilisable',
+            description=(
+                "Le portefeuille NGONI de l'utilisateur est gelé : il ne peut plus envoyer, retirer ni utiliser son solde, et ne sait pas pourquoi."
+            ),
+            example_phrases=[
+                'Mon portefeuille NGONI est gelé.',
+                'Je ne peux plus utiliser mon solde, le portefeuille est verrouillé.',
+                'Pourquoi mon wallet est gelé ?',
+                'Mon portefeuille est suspendu, je ne peux rien faire avec mon argent.',
+                'Toutes les opérations de mon portefeuille sont bloquées.',
+            ],
+            keywords=['portefeuille gelé', 'wallet gelé', 'portefeuille verrouillé'],
+            endpoint=DiagnosticEndpoint(method="POST", path="/diagnostic/wallet_frozen"),
+            required_fields=[],
+            optional_fields=[],
+            resolution_causes=[
+                ResolutionCause(code="WALLET_ACTIVE", action="reassure_active"),
+            ],
+            escalation_causes=['WALLET_NOT_FOUND', 'WALLET_FROZEN'],
+        ),
+        ProblemDefinition(
+            id="pending_balance",
+            label='Fonds en attente sur le solde',
+            description=(
+                "Une partie de l'argent de l'utilisateur apparaît en attente (solde en attente, gains pas encore disponibles) et il ne comprend pas quand il pourra l'utiliser."
+            ),
+            example_phrases=[
+                "J'ai de l'argent en attente sur mon solde, pourquoi ?",
+                'Mes gains sont marqués en attente, quand seront-ils disponibles ?',
+                'Pourquoi mon solde disponible est plus petit que mes gains ?',
+                'Il y a un montant en attente sur mon portefeuille.',
+                'Mes revenus des lives ne sont pas encore disponibles.',
+            ],
+            keywords=['solde en attente', 'fonds en attente', 'gains en attente'],
+            endpoint=DiagnosticEndpoint(method="POST", path="/diagnostic/pending_balance"),
+            required_fields=[],
+            optional_fields=[],
+            resolution_causes=[
+                ResolutionCause(code="NO_PENDING_FUNDS", action="show_balance"),
+                ResolutionCause(code="PENDING_FUNDS", action="explain_delay"),
+            ],
+            escalation_causes=['WALLET_NOT_FOUND'],
+        ),
+        ProblemDefinition(
+            id="coin_purchase_not_credited",
+            label='Achat de coins non crédité',
+            description=(
+                "L'utilisateur a acheté des coins NGONI (monnaie virtuelle pour les cadeaux) et ne les voit pas sur son compte, ou ne sait pas si l'achat est passé."
+            ),
+            example_phrases=[
+                "J'ai acheté des coins mais je ne les ai pas reçus.",
+                "Mes coins n'apparaissent pas après le paiement.",
+                "L'achat de coins n'a pas marché.",
+                "J'ai payé des coins et mon compteur de coins n'a pas bougé.",
+                "Où sont les coins que j'ai achetés ?",
+            ],
+            keywords=['coins', 'achat de coins', 'pièces'],
+            endpoint=DiagnosticEndpoint(method="POST", path="/diagnostic/coin_purchase"),
+            required_fields=[],
+            optional_fields=[],
+            resolution_causes=[
+                ResolutionCause(code="NO_COIN_PURCHASE", action="explain_none"),
+                ResolutionCause(code="COINS_CREDITED", action="reassure_credited"),
+                ResolutionCause(code="COIN_PURCHASE_FAILED", action="explain_not_debited"),
+                ResolutionCause(code="COIN_PURCHASE_PENDING", action="reassure_wait"),
+            ],
+            escalation_causes=['WALLET_NOT_FOUND'],
+        ),
+        ProblemDefinition(
+            id="video_purchase_access",
+            label='Vidéo achetée mais toujours verrouillée',
+            description=(
+                "L'utilisateur a payé une vidéo payante d'un créateur mais la vidéo reste verrouillée ou il n'y a pas accès."
+            ),
+            example_phrases=[
+                "J'ai payé une vidéo mais elle est toujours verrouillée.",
+                "Je n'arrive pas à regarder la vidéo que j'ai achetée.",
+                "La vidéo payante ne s'est pas débloquée après l'achat.",
+                "J'ai acheté une vidéo et je n'y ai pas accès.",
+                "Le contenu premium que j'ai payé reste bloqué.",
+            ],
+            keywords=['vidéo payante', 'vidéo achetée', 'vidéo verrouillée'],
+            endpoint=DiagnosticEndpoint(method="POST", path="/diagnostic/video_purchase"),
+            required_fields=[],
+            optional_fields=[],
+            resolution_causes=[
+                ResolutionCause(code="NO_VIDEO_PURCHASE", action="explain_none"),
+                ResolutionCause(code="VIDEO_UNLOCKED", action="guide_refresh"),
+                ResolutionCause(code="VIDEO_PURCHASE_FAILED", action="explain_not_debited"),
+                ResolutionCause(code="VIDEO_PURCHASE_PENDING", action="reassure_wait"),
+            ],
+            escalation_causes=['WALLET_NOT_FOUND'],
+        ),
+        ProblemDefinition(
+            id="video_sale_revenue",
+            label='Revenus de vente de vidéos non reçus',
+            description=(
+                'Un créateur a vendu ses vidéos payantes et ne voit pas les revenus de ces ventes sur son portefeuille.'
+            ),
+            example_phrases=[
+                "J'ai vendu des vidéos mais je n'ai pas reçu l'argent.",
+                'Mes revenus de vente de vidéos ne sont pas sur mon solde.',
+                "Combien m'ont rapporté mes vidéos payantes ?",
+                'Les ventes de mes vidéos ne sont pas créditées.',
+                "Je ne vois pas l'argent de mes vidéos vendues.",
+            ],
+            keywords=['vente de vidéo', 'revenus vidéo', 'vidéos vendues'],
+            endpoint=DiagnosticEndpoint(method="POST", path="/diagnostic/video_sale"),
+            required_fields=[],
+            optional_fields=[],
+            resolution_causes=[
+                ResolutionCause(code="NO_VIDEO_SALES", action="explain_none"),
+                ResolutionCause(code="VIDEO_SALES_CREDITED", action="show_revenue"),
+            ],
+            escalation_causes=['WALLET_NOT_FOUND'],
+        ),
     ],
 )

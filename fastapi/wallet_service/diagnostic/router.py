@@ -14,6 +14,9 @@ from .manifest import MANIFEST
 from .services.gift import resolve_gift
 from .services.topup import resolve_topup
 from .services.withdrawal import resolve_withdrawal
+from .services.wallet_extras import (
+    resolve_coin_purchase, resolve_pending_balance, resolve_video_purchase, resolve_video_sale_revenue, resolve_wallet_frozen,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -87,3 +90,48 @@ def gift(payload: DiagnosticInvocationRequest, db: Session = Depends(get_db)):
         payload.session_id, payload.trace_id, payload.user_id, reference,
     )
     return _log_outcome("gift", payload, resolve_gift(db, payload.user_id, reference))
+
+
+@router.post("/wallet_frozen")
+def wallet_frozen(payload: DiagnosticInvocationRequest, db: Session = Depends(get_db)):
+    logger.info(
+        "[DIAG][WALLET_SERVICE] session=%s trace_id=%s stage=endpoint_in endpoint=wallet_frozen user=%s",
+        payload.session_id, payload.trace_id, payload.user_id,
+    )
+    return _log_outcome("wallet_frozen", payload, resolve_wallet_frozen(db, payload.user_id))
+
+
+@router.post("/pending_balance")
+def pending_balance(payload: DiagnosticInvocationRequest, db: Session = Depends(get_db)):
+    logger.info(
+        "[DIAG][WALLET_SERVICE] session=%s trace_id=%s stage=endpoint_in endpoint=pending_balance user=%s",
+        payload.session_id, payload.trace_id, payload.user_id,
+    )
+    return _log_outcome("pending_balance", payload, resolve_pending_balance(db, payload.user_id))
+
+
+@router.post("/coin_purchase")
+def coin_purchase(payload: DiagnosticInvocationRequest, db: Session = Depends(get_db)):
+    logger.info(
+        "[DIAG][WALLET_SERVICE] session=%s trace_id=%s stage=endpoint_in endpoint=coin_purchase user=%s",
+        payload.session_id, payload.trace_id, payload.user_id,
+    )
+    return _log_outcome("coin_purchase", payload, resolve_coin_purchase(db, payload.user_id))
+
+
+@router.post("/video_purchase")
+def video_purchase(payload: DiagnosticInvocationRequest, db: Session = Depends(get_db)):
+    logger.info(
+        "[DIAG][WALLET_SERVICE] session=%s trace_id=%s stage=endpoint_in endpoint=video_purchase user=%s",
+        payload.session_id, payload.trace_id, payload.user_id,
+    )
+    return _log_outcome("video_purchase", payload, resolve_video_purchase(db, payload.user_id))
+
+
+@router.post("/video_sale")
+def video_sale(payload: DiagnosticInvocationRequest, db: Session = Depends(get_db)):
+    logger.info(
+        "[DIAG][WALLET_SERVICE] session=%s trace_id=%s stage=endpoint_in endpoint=video_sale user=%s",
+        payload.session_id, payload.trace_id, payload.user_id,
+    )
+    return _log_outcome("video_sale", payload, resolve_video_sale_revenue(db, payload.user_id))

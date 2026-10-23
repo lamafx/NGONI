@@ -69,16 +69,25 @@ class _LocalEmbeddingModel:
         return array[0] if single else array
 
 
+# Textes par appel au serveur de modeles. Sans GPU, un lot de ~150 textes
+# (le catalogue de diagnostic complet) depassait REQUEST_TIMEOUT_SECONDS :
+# le registre restait alors sans aucun embedding et le routage des problemes
+# retombait sur les seuls mots-cles.
+BATCH_SIZE = 16
+
+
 def _embed_via_model(texts: List[str]) -> List[List[float]]:
     if not texts:
         return []
-    response = requests.post(
-        MODEL_URL,
-        json={"model": MODEL_NAME, "input": texts, "keep_alive": "30m"},
-        timeout=REQUEST_TIMEOUT_SECONDS,
-    )
-    response.raise_for_status()
-    embeddings = response.json()["embeddings"]
+    embeddings: List[List[float]] = []
+    for start in range(0, len(texts), BATCH_SIZE):
+        response = requests.post(
+            MODEL_URL,
+            json={"model": MODEL_NAME, "input": texts[start:start + BATCH_SIZE], "keep_alive": "30m"},
+            timeout=REQUEST_TIMEOUT_SECONDS,
+        )
+        response.raise_for_status()
+        embeddings.extend(response.json()["embeddings"])
     if any(len(v) != EMBEDDING_DIM for v in embeddings):
         raise RuntimeError(
             f"Le modele d'embeddings a renvoye une dimension inattendue "

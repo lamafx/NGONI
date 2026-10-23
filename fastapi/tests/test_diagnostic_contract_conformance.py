@@ -50,7 +50,7 @@ class TestRealManifestsConformToContract:
         # pas seulement un exemple fige dans examples/valid/.
         manifest = CapabilityManifest.model_validate(response.json())
         assert manifest.service == "wallet"
-        assert len(manifest.problems) == 3
+        assert len(manifest.problems) == 8
 
     def test_user_manifest_is_a_valid_capability_manifest(self, user_client):
         response = user_client.get(
@@ -60,7 +60,7 @@ class TestRealManifestsConformToContract:
 
         manifest = CapabilityManifest.model_validate(response.json())
         assert manifest.service == "user"
-        assert len(manifest.problems) == 5
+        assert len(manifest.problems) == 12
 
 
 class TestRealResponsesConformToEnvelope:
