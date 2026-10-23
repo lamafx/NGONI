@@ -105,3 +105,12 @@ docker compose up -d --build
   Avant : renseigner .env, placer chatbotdb.dump dans docker\postgres\ et
   copier rasa\models\ (le modèle entraîné n'est pas dans git).
   Le premier lancement télécharge images et modèles (~2 Go, 20 à 40 min).
+
+
+
+Comptes (mot de passe ngoni2026)
+Identifiant	Rôle
+adou	client
+awa.kone	conseiller
+yao.kouassi	conseiller (pour montrer le transfert)
+fatou.diarra	administration

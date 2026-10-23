@@ -1,0 +1,180 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1466" height="630" viewBox="0 0 1466 630" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+<defs><filter id="sh" x="-20%" y="-40%" width="140%" height="200%"><feDropShadow dx="0" dy="1" stdDeviation="1.1" flood-color="#1e3a5f" flood-opacity="0.28"/></filter><linearGradient id="barg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#356a9e"/><stop offset="1" stop-color="#2f6091"/></linearGradient></defs>
+<rect x="0" y="0" width="1466" height="630" fill="#ffffff"/>
+<rect x="16" y="16" width="1434" height="70" rx="8" fill="#f3f7fb" stroke="#d3ddea"/>
+<rect x="16" y="16" width="5" height="70" rx="2.5" fill="#274a72"/>
+<rect x="38" y="39" width="26" height="24" rx="3" fill="none" stroke="#274a72" stroke-width="2"/><rect x="38" y="39" width="26" height="8" rx="3" fill="#274a72"/><line x1="45" y1="36" x2="45" y2="42" stroke="#274a72" stroke-width="2" stroke-linecap="round"/><line x1="57" y1="36" x2="57" y2="42" stroke="#274a72" stroke-width="2" stroke-linecap="round"/><circle cx="45" cy="52" r="1.4" fill="#274a72"/><circle cx="51" cy="52" r="1.4" fill="#274a72"/><circle cx="57" cy="52" r="1.4" fill="#274a72"/><circle cx="45" cy="58" r="1.4" fill="#274a72"/><circle cx="51" cy="58" r="1.4" fill="#274a72"/><circle cx="57" cy="58" r="1.4" fill="#274a72"/>
+<text x="74" y="47" font-size="15" font-weight="700" fill="#1e3a5f">8 JUIN 2026</text>
+<text x="74" y="62" font-size="10.5" letter-spacing="0.6" fill="#64748b">DATE DE DÉBUT</text>
+<rect x="376" y="39" width="26" height="24" rx="3" fill="none" stroke="#274a72" stroke-width="2"/><rect x="376" y="39" width="26" height="8" rx="3" fill="#274a72"/><line x1="383" y1="36" x2="383" y2="42" stroke="#274a72" stroke-width="2" stroke-linecap="round"/><line x1="395" y1="36" x2="395" y2="42" stroke="#274a72" stroke-width="2" stroke-linecap="round"/><circle cx="383" cy="52" r="1.4" fill="#274a72"/><circle cx="389" cy="52" r="1.4" fill="#274a72"/><circle cx="395" cy="52" r="1.4" fill="#274a72"/><circle cx="383" cy="58" r="1.4" fill="#274a72"/><circle cx="389" cy="58" r="1.4" fill="#274a72"/><circle cx="395" cy="58" r="1.4" fill="#274a72"/>
+<text x="412" y="47" font-size="15" font-weight="700" fill="#1e3a5f">8 SEPTEMBRE 2026</text>
+<text x="412" y="62" font-size="10.5" letter-spacing="0.6" fill="#64748b">DATE DE FIN</text>
+<circle cx="789" cy="49" r="12" fill="none" stroke="#274a72" stroke-width="2"/><circle cx="789" cy="49" r="7" fill="none" stroke="#274a72" stroke-width="2"/><circle cx="789" cy="49" r="2.4" fill="#274a72"/>
+<text x="812" y="44" font-size="12.5" font-weight="700" letter-spacing="0.6" fill="#1e3a5f">OBJECTIF</text>
+<text x="812" y="58" font-size="10.5" fill="#64748b">Assurer le déploiement complet du projet et le démarrage</text>
+<text x="812" y="71" font-size="10.5" fill="#64748b">d'une production continue jusqu'au 8 septembre 2026.</text>
+<rect x="16" y="100" width="1434" height="514" rx="8" fill="#ffffff" stroke="#d3ddea"/>
+<rect x="16" y="100" width="454" height="64" fill="#1e3a5f"/>
+<text x="92.0" y="136.0" font-size="12" font-weight="700" letter-spacing="0.8" fill="#ffffff" text-anchor="middle">PHASE</text>
+<text x="319.0" y="136.0" font-size="12" font-weight="700" letter-spacing="0.8" fill="#ffffff" text-anchor="middle">TÂCHES</text>
+<rect x="470" y="100" width="210" height="30" fill="#1e3a5f"/>
+<rect x="470" y="100" width="210" height="30" fill="none" stroke="#31517a"/>
+<text x="575.0" y="119.0" font-size="11.5" font-weight="700" letter-spacing="0.6" fill="#ffffff" text-anchor="middle">JUIN 2026</text>
+<rect x="680" y="100" width="280" height="30" fill="#1e3a5f"/>
+<rect x="680" y="100" width="280" height="30" fill="none" stroke="#31517a"/>
+<text x="820.0" y="119.0" font-size="11.5" font-weight="700" letter-spacing="0.6" fill="#ffffff" text-anchor="middle">JUILLET 2026</text>
+<rect x="960" y="100" width="350" height="30" fill="#1e3a5f"/>
+<rect x="960" y="100" width="350" height="30" fill="none" stroke="#31517a"/>
+<text x="1135.0" y="119.0" font-size="11.5" font-weight="700" letter-spacing="0.6" fill="#ffffff" text-anchor="middle">AOÛT 2026</text>
+<rect x="1310" y="100" width="140" height="30" fill="#1e3a5f"/>
+<rect x="1310" y="100" width="140" height="30" fill="none" stroke="#31517a"/>
+<text x="1380.0" y="119.0" font-size="11.5" font-weight="700" letter-spacing="0.6" fill="#ffffff" text-anchor="middle">SEPTEMBRE 2026</text>
+<rect x="470" y="130" width="70" height="34" fill="#eef3f9" stroke="#e3e9f1"/>
+<text x="505.0" y="145" font-size="9.5" font-weight="600" fill="#1f2a37" text-anchor="middle">8–14</text>
+<text x="505.0" y="157" font-size="9" fill="#64748b" text-anchor="middle">juin</text>
+<rect x="540" y="130" width="70" height="34" fill="#eef3f9" stroke="#e3e9f1"/>
+<text x="575.0" y="145" font-size="9.5" font-weight="600" fill="#1f2a37" text-anchor="middle">15–21</text>
+<text x="575.0" y="157" font-size="9" fill="#64748b" text-anchor="middle">juin</text>
+<rect x="610" y="130" width="70" height="34" fill="#eef3f9" stroke="#e3e9f1"/>
+<text x="645.0" y="145" font-size="9.5" font-weight="600" fill="#1f2a37" text-anchor="middle">22–28</text>
+<text x="645.0" y="157" font-size="9" fill="#64748b" text-anchor="middle">juin</text>
+<rect x="680" y="130" width="70" height="34" fill="#eef3f9" stroke="#e3e9f1"/>
+<text x="715.0" y="145" font-size="9.5" font-weight="600" fill="#1f2a37" text-anchor="middle">29 juin</text>
+<text x="715.0" y="157" font-size="9" fill="#64748b" text-anchor="middle">5 juil.</text>
+<rect x="750" y="130" width="70" height="34" fill="#eef3f9" stroke="#e3e9f1"/>
+<text x="785.0" y="145" font-size="9.5" font-weight="600" fill="#1f2a37" text-anchor="middle">6–12</text>
+<text x="785.0" y="157" font-size="9" fill="#64748b" text-anchor="middle">juil.</text>
+<rect x="820" y="130" width="70" height="34" fill="#eef3f9" stroke="#e3e9f1"/>
+<text x="855.0" y="145" font-size="9.5" font-weight="600" fill="#1f2a37" text-anchor="middle">13–19</text>
+<text x="855.0" y="157" font-size="9" fill="#64748b" text-anchor="middle">juil.</text>
+<rect x="890" y="130" width="70" height="34" fill="#eef3f9" stroke="#e3e9f1"/>
+<text x="925.0" y="145" font-size="9.5" font-weight="600" fill="#1f2a37" text-anchor="middle">20–26</text>
+<text x="925.0" y="157" font-size="9" fill="#64748b" text-anchor="middle">juil.</text>
+<rect x="960" y="130" width="70" height="34" fill="#eef3f9" stroke="#e3e9f1"/>
+<text x="995.0" y="145" font-size="9.5" font-weight="600" fill="#1f2a37" text-anchor="middle">27 juil.</text>
+<text x="995.0" y="157" font-size="9" fill="#64748b" text-anchor="middle">2 août</text>
+<rect x="1030" y="130" width="70" height="34" fill="#eef3f9" stroke="#e3e9f1"/>
+<text x="1065.0" y="145" font-size="9.5" font-weight="600" fill="#1f2a37" text-anchor="middle">3–9</text>
+<text x="1065.0" y="157" font-size="9" fill="#64748b" text-anchor="middle">août</text>
+<rect x="1100" y="130" width="70" height="34" fill="#eef3f9" stroke="#e3e9f1"/>
+<text x="1135.0" y="145" font-size="9.5" font-weight="600" fill="#1f2a37" text-anchor="middle">10–16</text>
+<text x="1135.0" y="157" font-size="9" fill="#64748b" text-anchor="middle">août</text>
+<rect x="1170" y="130" width="70" height="34" fill="#eef3f9" stroke="#e3e9f1"/>
+<text x="1205.0" y="145" font-size="9.5" font-weight="600" fill="#1f2a37" text-anchor="middle">17–23</text>
+<text x="1205.0" y="157" font-size="9" fill="#64748b" text-anchor="middle">août</text>
+<rect x="1240" y="130" width="70" height="34" fill="#eef3f9" stroke="#e3e9f1"/>
+<text x="1275.0" y="145" font-size="9.5" font-weight="600" fill="#1f2a37" text-anchor="middle">24–30</text>
+<text x="1275.0" y="157" font-size="9" fill="#64748b" text-anchor="middle">août</text>
+<rect x="1310" y="130" width="70" height="34" fill="#eef3f9" stroke="#e3e9f1"/>
+<text x="1345.0" y="145" font-size="9.5" font-weight="600" fill="#1f2a37" text-anchor="middle">31 août</text>
+<text x="1345.0" y="157" font-size="9" fill="#64748b" text-anchor="middle">6 sept.</text>
+<rect x="1380" y="130" width="70" height="34" fill="#eef3f9" stroke="#e3e9f1"/>
+<text x="1415.0" y="145" font-size="9.5" font-weight="600" fill="#1f2a37" text-anchor="middle">7–8</text>
+<text x="1415.0" y="157" font-size="9" fill="#64748b" text-anchor="middle">sept.</text>
+<rect x="470" y="164" width="980" height="30" fill="#f5f8fc"/>
+<line x1="16" y1="164" x2="1450" y2="164" stroke="#e3e9f1"/>
+<line x1="16" y1="194" x2="1450" y2="194" stroke="#e3e9f1"/>
+<rect x="470" y="224" width="980" height="30" fill="#f5f8fc"/>
+<line x1="16" y1="224" x2="1450" y2="224" stroke="#e3e9f1"/>
+<line x1="16" y1="254" x2="1450" y2="254" stroke="#e3e9f1"/>
+<rect x="470" y="284" width="980" height="30" fill="#f5f8fc"/>
+<line x1="16" y1="284" x2="1450" y2="284" stroke="#e3e9f1"/>
+<line x1="16" y1="314" x2="1450" y2="314" stroke="#e3e9f1"/>
+<rect x="470" y="344" width="980" height="30" fill="#f5f8fc"/>
+<line x1="16" y1="344" x2="1450" y2="344" stroke="#e3e9f1"/>
+<line x1="16" y1="374" x2="1450" y2="374" stroke="#e3e9f1"/>
+<rect x="470" y="404" width="980" height="30" fill="#f5f8fc"/>
+<line x1="16" y1="404" x2="1450" y2="404" stroke="#e3e9f1"/>
+<line x1="16" y1="434" x2="1450" y2="434" stroke="#e3e9f1"/>
+<rect x="470" y="464" width="980" height="30" fill="#f5f8fc"/>
+<line x1="16" y1="464" x2="1450" y2="464" stroke="#e3e9f1"/>
+<line x1="16" y1="494" x2="1450" y2="494" stroke="#e3e9f1"/>
+<rect x="470" y="524" width="980" height="30" fill="#f5f8fc"/>
+<line x1="16" y1="524" x2="1450" y2="524" stroke="#e3e9f1"/>
+<line x1="16" y1="554" x2="1450" y2="554" stroke="#e3e9f1"/>
+<rect x="470" y="584" width="980" height="30" fill="#f5f8fc"/>
+<line x1="16" y1="584" x2="1450" y2="584" stroke="#e3e9f1"/>
+<line x1="470" y1="164" x2="470" y2="614" stroke="#e3e9f1"/>
+<line x1="540" y1="164" x2="540" y2="614" stroke="#e3e9f1"/>
+<line x1="610" y1="164" x2="610" y2="614" stroke="#e3e9f1"/>
+<line x1="680" y1="164" x2="680" y2="614" stroke="#e3e9f1"/>
+<line x1="750" y1="164" x2="750" y2="614" stroke="#e3e9f1"/>
+<line x1="820" y1="164" x2="820" y2="614" stroke="#e3e9f1"/>
+<line x1="890" y1="164" x2="890" y2="614" stroke="#e3e9f1"/>
+<line x1="960" y1="164" x2="960" y2="614" stroke="#e3e9f1"/>
+<line x1="1030" y1="164" x2="1030" y2="614" stroke="#e3e9f1"/>
+<line x1="1100" y1="164" x2="1100" y2="614" stroke="#e3e9f1"/>
+<line x1="1170" y1="164" x2="1170" y2="614" stroke="#e3e9f1"/>
+<line x1="1240" y1="164" x2="1240" y2="614" stroke="#e3e9f1"/>
+<line x1="1310" y1="164" x2="1310" y2="614" stroke="#e3e9f1"/>
+<line x1="1380" y1="164" x2="1380" y2="614" stroke="#e3e9f1"/>
+<line x1="1450" y1="164" x2="1450" y2="614" stroke="#e3e9f1"/>
+<line x1="168" y1="100" x2="168" y2="614" stroke="#d3ddea"/>
+<line x1="470" y1="100" x2="470" y2="614" stroke="#d3ddea"/>
+<rect x="16" y="164" width="152" height="120" fill="#274a72"/>
+<rect x="16" y="164" width="4" height="120" fill="#1e3a5f"/>
+<text x="28" y="221.0" font-size="9.3" font-weight="700" letter-spacing="0.3" fill="#ffffff">1. LANCEMENT</text>
+<text x="28" y="233.0" font-size="9.3" font-weight="700" letter-spacing="0.3" fill="#ffffff">ET PLANIFICATION</text>
+<rect x="16" y="284" width="152" height="60" fill="#2f5680"/>
+<rect x="16" y="284" width="4" height="60" fill="#1e3a5f"/>
+<text x="28" y="311.0" font-size="9.3" font-weight="700" letter-spacing="0.3" fill="#ffffff">2. CONCEPTION</text>
+<text x="28" y="323.0" font-size="9.3" font-weight="700" letter-spacing="0.3" fill="#ffffff">DE LA SOLUTION</text>
+<rect x="16" y="344" width="152" height="90" fill="#274a72"/>
+<rect x="16" y="344" width="4" height="90" fill="#1e3a5f"/>
+<text x="28" y="386.0" font-size="9.3" font-weight="700" letter-spacing="0.3" fill="#ffffff">3. DÉVELOPPEMENT</text>
+<text x="28" y="398.0" font-size="9.3" font-weight="700" letter-spacing="0.3" fill="#ffffff">ET INTÉGRATION</text>
+<rect x="16" y="434" width="152" height="120" fill="#2f5680"/>
+<rect x="16" y="434" width="4" height="120" fill="#1e3a5f"/>
+<text x="28" y="491.0" font-size="9.3" font-weight="700" letter-spacing="0.3" fill="#ffffff">4. TESTS</text>
+<text x="28" y="503.0" font-size="9.3" font-weight="700" letter-spacing="0.3" fill="#ffffff">ET VALIDATION</text>
+<rect x="16" y="554" width="152" height="60" fill="#274a72"/>
+<rect x="16" y="554" width="4" height="60" fill="#1e3a5f"/>
+<text x="28" y="581.0" font-size="9.3" font-weight="700" letter-spacing="0.3" fill="#ffffff">5. DÉPLOIEMENT</text>
+<text x="28" y="593.0" font-size="9.3" font-weight="700" letter-spacing="0.3" fill="#ffffff">ET MISE EN PRODUCTION</text>
+<circle cx="180" cy="179.0" r="3" fill="#2f6091"/>
+<text x="192" y="182.8" font-size="11" fill="#1f2a37">Cadrage du projet et objectifs</text>
+<rect x="476" y="171.5" width="58" height="15" rx="5" fill="url(#barg)" stroke="#244d76" stroke-width="0.8" filter="url(#sh)"/>
+<circle cx="180" cy="209.0" r="3" fill="#2f6091"/>
+<text x="192" y="212.8" font-size="11" fill="#1f2a37">Planification détaillée</text>
+<rect x="546" y="201.5" width="58" height="15" rx="5" fill="url(#barg)" stroke="#244d76" stroke-width="0.8" filter="url(#sh)"/>
+<circle cx="180" cy="239.0" r="3" fill="#2f6091"/>
+<text x="192" y="242.8" font-size="11" fill="#1f2a37">Analyse des besoins</text>
+<rect x="616" y="231.5" width="58" height="15" rx="5" fill="url(#barg)" stroke="#244d76" stroke-width="0.8" filter="url(#sh)"/>
+<circle cx="180" cy="269.0" r="3" fill="#2f6091"/>
+<text x="192" y="272.8" font-size="11" fill="#1f2a37">Conception de l'architecture (microservices)</text>
+<rect x="616" y="261.5" width="128" height="15" rx="5" fill="url(#barg)" stroke="#244d76" stroke-width="0.8" filter="url(#sh)"/>
+<circle cx="180" cy="299.0" r="3" fill="#2f6091"/>
+<text x="192" y="302.8" font-size="11" fill="#1f2a37">Conception du flux conversationnel et des intents</text>
+<rect x="686" y="291.5" width="198" height="15" rx="5" fill="url(#barg)" stroke="#244d76" stroke-width="0.8" filter="url(#sh)"/>
+<circle cx="180" cy="329.0" r="3" fill="#2f6091"/>
+<text x="192" y="332.8" font-size="11" fill="#1f2a37">Conception de la base de données et schéma FAQ</text>
+<rect x="756" y="321.5" width="128" height="15" rx="5" fill="url(#barg)" stroke="#244d76" stroke-width="0.8" filter="url(#sh)"/>
+<circle cx="180" cy="359.0" r="3" fill="#2f6091"/>
+<text x="192" y="362.8" font-size="11" fill="#1f2a37">Développement des microservices (API &amp; backend)</text>
+<rect x="826" y="351.5" width="198" height="15" rx="5" fill="url(#barg)" stroke="#244d76" stroke-width="0.8" filter="url(#sh)"/>
+<circle cx="180" cy="389.0" r="3" fill="#2f6091"/>
+<text x="192" y="392.8" font-size="11" fill="#1f2a37">Intégration Rasa (NLU &amp; actions)</text>
+<rect x="966" y="381.5" width="128" height="15" rx="5" fill="url(#barg)" stroke="#244d76" stroke-width="0.8" filter="url(#sh)"/>
+<circle cx="180" cy="419.0" r="3" fill="#2f6091"/>
+<text x="192" y="422.8" font-size="11" fill="#1f2a37">Intégration avec les autres microservices (via API)</text>
+<rect x="1036" y="411.5" width="128" height="15" rx="5" fill="url(#barg)" stroke="#244d76" stroke-width="0.8" filter="url(#sh)"/>
+<circle cx="180" cy="449.0" r="3" fill="#2f6091"/>
+<text x="192" y="452.8" font-size="11" fill="#1f2a37">Tests unitaires et d'intégration</text>
+<rect x="1106" y="441.5" width="128" height="15" rx="5" fill="url(#barg)" stroke="#244d76" stroke-width="0.8" filter="url(#sh)"/>
+<circle cx="180" cy="479.0" r="3" fill="#2f6091"/>
+<text x="192" y="482.8" font-size="11" fill="#1f2a37">Tests fonctionnels (scénarios métier)</text>
+<rect x="1176" y="471.5" width="128" height="15" rx="5" fill="url(#barg)" stroke="#244d76" stroke-width="0.8" filter="url(#sh)"/>
+<circle cx="180" cy="509.0" r="3" fill="#2f6091"/>
+<text x="192" y="512.8" font-size="11" fill="#1f2a37">Corrections et optimisations</text>
+<rect x="1246" y="501.5" width="58" height="15" rx="5" fill="url(#barg)" stroke="#244d76" stroke-width="0.8" filter="url(#sh)"/>
+<circle cx="180" cy="539.0" r="3" fill="#2f6091"/>
+<text x="192" y="542.8" font-size="11" fill="#1f2a37">Validation finale avant mise en production</text>
+<rect x="1246" y="531.5" width="128" height="15" rx="5" fill="url(#barg)" stroke="#244d76" stroke-width="0.8" filter="url(#sh)"/>
+<circle cx="180" cy="569.0" r="3" fill="#2f6091"/>
+<text x="192" y="572.8" font-size="11" fill="#1f2a37">Déploiement des services</text>
+<rect x="1316" y="561.5" width="58" height="15" rx="5" fill="url(#barg)" stroke="#244d76" stroke-width="0.8" filter="url(#sh)"/>
+<circle cx="180" cy="599.0" r="3" fill="#2f6091"/>
+<text x="192" y="602.8" font-size="11" fill="#1f2a37">Mise en production</text>
+<rect x="1316" y="591.5" width="128" height="15" rx="5" fill="url(#barg)" stroke="#244d76" stroke-width="0.8" filter="url(#sh)"/>
+<rect x="16" y="100" width="1434" height="514" rx="8" fill="none" stroke="#d3ddea"/>
+</svg>
