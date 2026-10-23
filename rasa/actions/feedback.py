@@ -141,12 +141,28 @@ class ActionAcknowledgeComplaint(Action):
         return []
 
 
+_NEGATIVE_MARKERS = (
+    "pas utile", "inutile", "n'aide pas", "aide pas", "ne repond pas", "repond pas", "pas clair",
+    "rien compris", "pas compris", "ne m'aide", "nul", "bof", "mauvais", "toujours pas", "ca ne sert",
+)
+
+
+def _negative_rating(text: Text) -> bool:
+    """Avis tape au clavier (pas de bouton) : negatif s'il contient une
+    tournure de rejet. Le classifieur a deja etabli qu'il s'agit d'un avis
+    sur la reponse ; ne reste qu'a en lire le sens."""
+    import unicodedata
+
+    plain = unicodedata.normalize("NFKD", text.lower())
+    plain = "".join(c for c in plain if not unicodedata.combining(c)).replace("’", "'")
+    return any(marker in plain for marker in _NEGATIVE_MARKERS)
+
+
 class ActionRecordResponseRating(Action):
     # Declenchee par les boutons "Utile"/"Pas utile" affiches apres une
     # reponse FAQ (voir ActionFaqSearch, faq.py), via les payloads structures
-    # /rate_response_useful et /rate_response_not_useful -- une seule action
-    # pour les deux, qui lit l'intention du tour courant pour savoir laquelle
-    # a ete cliquee, plutot que deux actions quasi identiques.
+    # /rate_response{"rating": ...} -- le sens de l'avis est lu dans l'entite
+    # `rating`, ou deduit du texte tape, plutot que deux actions quasi identiques.
     #
     # Audit robustesse : lit desormais rating_ref (entite du payload, voir
     # _present_answer/faq.py) pour retrouver LA notation precise dans le dict
@@ -198,8 +214,10 @@ class ActionRecordResponseRating(Action):
 
         # Meme convention que le reste du pipeline diagnostic/reclamation
         # pour lire l'intention du tour courant (voir diagnostic.py).
-        intent_name = (tracker.latest_message.get("intent") or {}).get("name")
-        is_useful = intent_name == "rate_response_useful"
+        # Intention unique `rate_response` (2026-10-23) : le sens vient de
+        # l'entite `rating` des boutons, sinon du texte tape.
+        rating = next((e["value"] for e in entities if e.get("entity") == "rating"), None)
+        is_useful = rating == "useful" if rating else not _negative_rating(tracker.latest_message.get("text") or "")
 
         payload = {
             "interaction_type": interaction_type,

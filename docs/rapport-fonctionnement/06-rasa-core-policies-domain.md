@@ -20,8 +20,10 @@ personnalisée appeler côté serveur Actions (port 5055).
 19 intents déclarés : `ask_faq`, `greet`, `goodbye`, `bot_challenge`,
 `create_reclamation`, `diagnostic`, `affirm`, `deny`, `out_of_scope`,
 `inappropriate_language`, `suggestion`, `plainte`, `ask_capabilities`,
-`rate_response_useful`, `rate_response_not_useful`, `browse_faq`,
-`select_faq_category`, `select_faq_question`, `ask_complaint_status`.
+`rate_response`, `browse_faq`, `select_faq`, `ask_complaint_status`,
+`request_human_agent`, `cancel_human_agent_request`. (2026-10-23 : `rate_response`
+regroupe les avis utile / pas utile, sens porté par l'entité `rating` ; `select_faq`
+regroupe le choix d'un thème et d'une question de la FAQ.)
 
 25 actions personnalisées (voir chapitres 7 à 11 pour le détail des plus
 importantes) et 1 formulaire, `reclamation_form` (voir

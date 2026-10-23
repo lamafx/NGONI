@@ -16,6 +16,8 @@ import { AdminTicketsPage } from "./pages/AdminTicketsPage";
 import { AdminDiagnosticsPage } from "./pages/AdminDiagnosticsPage";
 import { AdminAgentsPage } from "./pages/AdminAgentsPage";
 import { AdminCapabilitiesPage } from "./pages/AdminCapabilitiesPage";
+import { LoginPage } from "./pages/LoginPage";
+import { RequireRole } from "./components/layout/RequireRole";
 
 export default function App() {
   return (
@@ -28,23 +30,24 @@ export default function App() {
               final s'affiche alors que la supervision est encore visible). */}
           <DemoOverlay />
           <Routes>
-            <Route path="/" element={<Navigate to="/chat" replace />} />
-            <Route path="/chat" element={<ChatPage />} />
-            <Route path="/agent" element={<AgentPage />} />
+            <Route path="/" element={<Navigate to="/login" replace />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/chat" element={<RequireRole roles={["client"]}><ChatPage /></RequireRole>} />
+            <Route path="/agent" element={<RequireRole roles={["conseiller", "admin"]}><AgentPage /></RequireRole>} />
             {/* Poste conseiller REEL (file du moteur, prise en charge, reponse
                 humaine). /agent reste la scene rejouee de la demonstration. */}
-            <Route path="/agent/live" element={<AgentLivePage />} />
-            <Route path="/admin" element={<AdminPage />} />
-            <Route path="/admin/settings" element={<AdminSettingsPage />} />
-            <Route path="/admin/statistiques" element={<AdminStatsPage />} />
-            <Route path="/admin/base-connaissances" element={<AdminKnowledgePage />} />
-            <Route path="/admin/utilisateurs" element={<AdminUsersPage />} />
-            <Route path="/admin/conversations" element={<AdminConversationsPage mode="all" />} />
-            <Route path="/admin/escalades" element={<AdminConversationsPage mode="escalated" />} />
-            <Route path="/admin/demandes" element={<AdminTicketsPage />} />
-            <Route path="/admin/diagnostics" element={<AdminDiagnosticsPage />} />
-            <Route path="/admin/agents" element={<AdminAgentsPage />} />
-            <Route path="/admin/capacites" element={<AdminCapabilitiesPage />} />
+            <Route path="/agent/live" element={<RequireRole roles={["conseiller", "admin"]}><AgentLivePage /></RequireRole>} />
+            <Route path="/admin" element={<RequireRole roles={["admin"]}><AdminPage /></RequireRole>} />
+            <Route path="/admin/settings" element={<RequireRole roles={["admin"]}><AdminSettingsPage /></RequireRole>} />
+            <Route path="/admin/statistiques" element={<RequireRole roles={["admin"]}><AdminStatsPage /></RequireRole>} />
+            <Route path="/admin/base-connaissances" element={<RequireRole roles={["admin"]}><AdminKnowledgePage /></RequireRole>} />
+            <Route path="/admin/utilisateurs" element={<RequireRole roles={["admin"]}><AdminUsersPage /></RequireRole>} />
+            <Route path="/admin/conversations" element={<RequireRole roles={["admin"]}><AdminConversationsPage mode="all" /></RequireRole>} />
+            <Route path="/admin/escalades" element={<RequireRole roles={["admin"]}><AdminConversationsPage mode="escalated" /></RequireRole>} />
+            <Route path="/admin/demandes" element={<RequireRole roles={["admin"]}><AdminTicketsPage /></RequireRole>} />
+            <Route path="/admin/diagnostics" element={<RequireRole roles={["admin"]}><AdminDiagnosticsPage /></RequireRole>} />
+            <Route path="/admin/agents" element={<RequireRole roles={["admin"]}><AdminAgentsPage /></RequireRole>} />
+            <Route path="/admin/capacites" element={<RequireRole roles={["admin"]}><AdminCapabilitiesPage /></RequireRole>} />
           </Routes>
         </div>
       </HashRouter>

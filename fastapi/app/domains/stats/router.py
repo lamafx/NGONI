@@ -8,10 +8,10 @@ from sqlalchemy.orm import Session
 
 try:
     from app.database import get_db
-    from app.shared.admin_auth import require_admin_auth
+    from app.shared.admin_auth import require_admin_role
 except ImportError:  # pragma: no cover - support running as `main`
     from database import get_db
-    from shared.admin_auth import require_admin_auth
+    from shared.admin_auth import require_admin_role
 
 from .schemas import StatsOverviewResponse
 from .service import DEFAULT_PERIOD_DAYS, StatsService
@@ -19,7 +19,7 @@ from .service import DEFAULT_PERIOD_DAYS, StatsService
 router = APIRouter(
     prefix="/admin/stats",
     tags=["admin"],
-    dependencies=[Depends(require_admin_auth)],
+    dependencies=[Depends(require_admin_role)],
 )
 
 

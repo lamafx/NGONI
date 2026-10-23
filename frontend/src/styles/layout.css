@@ -2363,3 +2363,40 @@
   .cf-body { grid-template-columns: 1fr; }
 }
 .cf-followup{display:flex;flex-direction:column;gap:8px;padding-top:10px;border-top:1px solid var(--line);}
+
+/* ---------------------------------------------------------------------------
+   Page de connexion (pages/LoginPage.jsx)
+   ------------------------------------------------------------------------- */
+.login-page {
+  flex: 1; min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  padding: 24px 16px; background: var(--bg);
+}
+.login-card {
+  width: min(440px, 100%); display: flex; flex-direction: column; gap: 10px;
+  padding: 28px; background: var(--surface); border: 1px solid var(--line);
+  border-radius: 18px; box-shadow: var(--shadow-md);
+}
+.login-brand { display: flex; align-items: center; gap: 14px; margin-bottom: 10px; }
+.login-brand img { width: 48px; height: 48px; border-radius: 12px; object-fit: cover; }
+.login-title { font-weight: 800; font-size: 1.15rem; }
+.login-sub { font-size: 0.84rem; color: var(--ink-muted); }
+.login-label { font-size: 0.78rem; font-weight: 600; color: var(--ink-muted); margin-top: 4px; }
+.login-input {
+  padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line);
+  background: var(--surface); color: var(--ink); font-family: inherit; font-size: 0.9rem;
+}
+.login-input:focus { outline: 2px solid var(--brand-soft); border-color: var(--brand); }
+.login-submit { margin-top: 8px; justify-content: center; }
+.login-error { font-size: 0.82rem; color: var(--risk); }
+.login-info { font-size: 0.82rem; color: var(--ink-muted); background: var(--surface-2); padding: 10px 12px; border-radius: 10px; }
+.login-demo { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); display: flex; flex-direction: column; gap: 8px; }
+.login-demo-title { font-size: 0.76rem; color: var(--ink-faint); }
+.login-demo-list { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.login-demo-btn {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 2px; text-align: left;
+  padding: 9px 11px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface-2);
+  font-family: inherit; font-size: 0.82rem; color: var(--ink); cursor: pointer;
+}
+.login-demo-btn span { font-size: 0.72rem; color: var(--ink-muted); }
+.login-demo-btn:hover { border-color: var(--brand); }
+.link-btn { background: none; border: none; padding: 0; font: inherit; color: var(--brand-strong, var(--brand)); cursor: pointer; text-decoration: underline; }

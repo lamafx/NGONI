@@ -123,7 +123,12 @@ def post_agent_message(
     prise en charge."""
     agent_id = payload.agent_id or admin_id
     try:
-        message = _service(db).post_agent_message(conversation_id, payload.text, agent_id)
+        message = _service(db).post_agent_message(
+            conversation_id,
+            payload.text,
+            agent_id,
+            metadata={"attachment": payload.attachment.model_dump()} if payload.attachment else None,
+        )
     except ConversationNotFoundError as exc:
         raise HTTPException(status_code=404, detail="Conversation introuvable") from exc
     except ConversationStateError as exc:

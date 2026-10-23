@@ -25,9 +25,11 @@ from sqlalchemy.orm import Session
 try:
     from app.database import get_db
     from app.domains.complaints.schemas import ComplaintResponse
+    from app.shared.admin_auth import require_client
 except ImportError:  # pragma: no cover - support running as `main`
     from database import get_db
     from domains.complaints.schemas import ComplaintResponse
+    from shared.admin_auth import require_client
 
 from .schemas import (
     ConversationDetailResponse,
@@ -121,12 +123,11 @@ def conversation_memory(
     )
 
 
-# Identite en header X-User-ID, meme convention que GET /complaints/mine :
-# pas d'authentification dans ce perimetre (docs/13-limitations.md 13.1),
-# l'appelant declare le compte dont il lit l'historique.
+# Identite tiree du jeton de session du client connecte (domains/auth) :
+# jamais d'un en-tete que le navigateur pourrait choisir.
 @router.get("/mine", response_model=List[ConversationSummaryResponse])
 def my_conversations(
-    x_user_id: str = Header(..., alias="X-User-ID", min_length=1, max_length=200),
+    x_user_id: str = Depends(require_client),
     limit: int = Query(30, ge=1, le=100),
     db: Session = Depends(get_db),
 ):
@@ -138,7 +139,7 @@ def my_conversations(
 # pour un identifiant de conversation.
 @router.get("/mine/tickets", response_model=List[ComplaintResponse])
 def my_tickets(
-    x_user_id: str = Header(..., alias="X-User-ID", min_length=1, max_length=200),
+    x_user_id: str = Depends(require_client),
     db: Session = Depends(get_db),
 ):
     """Reclamations de l'usager, toutes conversations confondues (page
@@ -149,7 +150,7 @@ def my_tickets(
 @router.get("/mine/{conversation_id}", response_model=ConversationDetailResponse)
 def my_conversation(
     conversation_id: str,
-    x_user_id: str = Header(..., alias="X-User-ID", min_length=1, max_length=200),
+    x_user_id: str = Depends(require_client),
     db: Session = Depends(get_db),
 ):
     try:

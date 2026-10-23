@@ -16,6 +16,11 @@ import os
 
 from fastapi import Header, HTTPException
 
+try:
+    from app.domains.auth.security import claims_from_header
+except ImportError:  # pragma: no cover - support running as `main`
+    from domains.auth.security import claims_from_header
+
 logger = logging.getLogger(__name__)
 
 # Valeurs manifestement non-securisees : les memes que celles deja utilisees
@@ -50,19 +55,61 @@ def warn_if_admin_secret_missing() -> None:
         )
 
 
+def _service_call(x_internal_secret: str | None) -> bool:
+    """Appel de service a service (actions Rasa, scripts, tests) : secret
+    partage. Ferme par defaut -- si ADMIN_INTERNAL_SECRET n'est pas configure
+    (ou vaut un placeholder connu, voir _INSECURE_PLACEHOLDER_VALUES), aucun
+    secret n'est jamais accepte."""
+    return bool(x_internal_secret) and admin_secret_is_configured() and x_internal_secret == ADMIN_INTERNAL_SECRET
+
+
 def require_admin_auth(
-    x_internal_secret: str = Header(..., alias="X-Internal-Secret"),
-) -> None:
-    """Dependance FastAPI a appliquer sur chaque route admin (voir
-    contracts/diagnostic/README.md §5 pour la meme convention deja utilisee
-    entre le Diagnostic Engine et les microservices : Depends(require_admin_auth)
-    sur le router entier, comme fastify.addHook('preHandler', assertInternalAuth)
-    cote ngoni-core-service). Ferme par defaut : si ADMIN_INTERNAL_SECRET
-    n'est pas configure (ou vaut un placeholder connu, voir
-    _INSECURE_PLACEHOLDER_VALUES), AUCUNE requete n'est jamais acceptee --
-    pas de repli permissif possible."""
-    if not admin_secret_is_configured() or x_internal_secret != ADMIN_INTERNAL_SECRET:
+    x_internal_secret: str | None = Header(None, alias="X-Internal-Secret"),
+    authorization: str | None = Header(None),
+) -> dict:
+    """Routes du support (file des conseillers, dossier client, demandes) :
+    jeton de session d'un conseiller ou d'un administrateur (navigateur), ou
+    secret partage (appel de service). Le secret ne transite plus par le
+    navigateur : l'interface s'authentifie par jeton (voir domains/auth)."""
+    if _service_call(x_internal_secret):
+        return {"role": "service"}
+    claims = claims_from_header(authorization)
+    if claims and claims.get("role") in ("conseiller", "admin"):
+        return claims
+    raise HTTPException(status_code=401, detail="UNAUTHORIZED")
+
+
+def require_admin_role(
+    x_internal_secret: str | None = Header(None, alias="X-Internal-Secret"),
+    authorization: str | None = Header(None),
+) -> dict:
+    """Routes d'administration pure (parametres, statistiques, tableau de bord,
+    usagers) : administrateur uniquement -- un conseiller recoit 403."""
+    if _service_call(x_internal_secret):
+        return {"role": "service"}
+    claims = claims_from_header(authorization)
+    if claims is None:
         raise HTTPException(status_code=401, detail="UNAUTHORIZED")
+    if claims.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Réservé à l'administration.")
+    return claims
+
+
+def require_client(authorization: str | None = Header(None)) -> str:
+    """Compte NGONI de l'usager connecte (routes « mes conversations », « mes
+    pieces »...). L'identite vient du jeton signe, jamais d'un en-tete que le
+    navigateur pourrait choisir."""
+    claims = claims_from_header(authorization)
+    if claims is None or claims.get("role") != "client" or not claims.get("user_id"):
+        raise HTTPException(status_code=401, detail="Connexion client requise.")
+    return claims["user_id"]
+
+
+def optional_client(authorization: str | None = Header(None)) -> str | None:
+    claims = claims_from_header(authorization)
+    if claims and claims.get("role") == "client":
+        return claims.get("user_id")
+    return None
 
 
 def get_admin_id(x_user_id: str | None = Header(None, alias="X-User-ID")) -> str | None:

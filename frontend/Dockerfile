@@ -10,12 +10,8 @@ RUN npm ci
 
 COPY . .
 
-# Lu par Vite AU MOMENT DU BUILD (import.meta.env) : doit valoir
-# ADMIN_INTERNAL_SECRET cote FastAPI, sinon les pages d'administration sont
-# refusees (401). Passe par docker-compose.yml depuis le .env racine.
-ARG VITE_ADMIN_SECRET=dev-admin-secret-change-me
-ENV VITE_ADMIN_SECRET=$VITE_ADMIN_SECRET
-
+# Aucun secret embarque : l'interface s'authentifie par jeton de session
+# (connexion sur /login, voir src/services/auth.js).
 RUN npm run build
 
 FROM nginx:1.27-alpine

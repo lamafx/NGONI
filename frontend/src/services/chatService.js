@@ -11,6 +11,7 @@
 import { delay, nextId, nowLabel } from "./mockLatency";
 import { callRasa, fetchTracker, parseMessage } from "./rasaClient";
 import { fetchConversationUpdates, recordConversationTurn, requestHumanAgent } from "./engineClient";
+import { currentAccount } from "./auth";
 
 // Le tracker Rasa est persisté côté serveur (SQL, voir docker-compose.yml)
 // et survit à un redémarrage de Rasa -- si on envoyait toujours "conv-1"
@@ -50,6 +51,9 @@ export function isAccountId(value) {
 
 let memoryUserId = null;
 export function stableUserId() {
+  // Client connecte : son compte NGONI, tel que signe dans son jeton.
+  const account = currentAccount();
+  if (account?.role === "client" && account.user_id) return account.user_id;
   if (memoryUserId) return memoryUserId;
   // ?compte=<uuid> dans l'adresse (avant le #) : choisi une fois, retenu.
   const fromUrl = new URLSearchParams(window.location.search).get("compte");
@@ -187,15 +191,13 @@ const ACTION_BY_INTENT = {
   ask_capabilities: "Capability Registry → capacités dynamiques",
   ask_faq: "Recherche sémantique → FAQ",
   browse_faq: "Recherche sémantique → FAQ",
-  select_faq_category: "Recherche sémantique → FAQ",
-  select_faq_question: "Recherche sémantique → FAQ",
+  select_faq: "Recherche sémantique → FAQ",
   diagnostic: "Moteur de diagnostic → analyse du problème signalé",
   create_reclamation: "Formulaire de réclamation → création de ticket",
   plainte: "Formulaire de réclamation → création de ticket",
   ask_complaint_status: "Consultation du statut de réclamation",
   suggestion: "Enregistrement du retour utilisateur",
-  rate_response_useful: "Enregistrement du retour utilisateur",
-  rate_response_not_useful: "Enregistrement du retour utilisateur",
+  rate_response: "Enregistrement du retour utilisateur",
   affirm: "Confirmation du dialogue en cours",
   deny: "Confirmation du dialogue en cours",
   out_of_scope: "Filtre hors-sujet → recadrage",

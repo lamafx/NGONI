@@ -16,11 +16,9 @@ intents:
   - suggestion
   - plainte
   - ask_capabilities
-  - rate_response_useful
-  - rate_response_not_useful
+  - rate_response
   - browse_faq
-  - select_faq_category
-  - select_faq_question
+  - select_faq
   - ask_complaint_status
 
 entities:
@@ -52,6 +50,8 @@ entities:
   # payload des boutons "Utile"/"Pas utile" -- voir pending_ratings plus bas
   # (audit robustesse, fluidite de la conversation).
   - rating_ref
+  # Sens d'un avis (useful / not_useful), porte par le payload des boutons.
+  - rating
 
 slots:
   category:
@@ -82,12 +82,10 @@ slots:
           - ask_capabilities
           - suggestion
           - plainte
-          - rate_response_useful
-          - rate_response_not_useful
+          - rate_response
           - ask_faq
           - browse_faq
-          - select_faq_category
-          - select_faq_question
+          - select_faq
           - inappropriate_language
           - out_of_scope
         conditions:
@@ -652,6 +650,7 @@ actions:
   - action_browse_faq
   - action_select_faq_category
   - action_select_faq_question
+  - action_select_faq
   - action_consult_complaints
   - action_cancel_human_agent_request
  

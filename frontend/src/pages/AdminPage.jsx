@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AdminShell, ADMIN_USER } from "../components/layout/AdminShell";
+import { currentAccount } from "../services/auth";
 import { Avatar } from "../components/ui/Avatar";
 import { Icon } from "../components/ui/Icon";
 import { StatCard } from "../components/ui/StatCard";
@@ -377,7 +378,8 @@ export function AdminPage() {
 // Conseiller effectuant l'action, tant qu'aucune authentification n'existe
 // cote moteur (voir api_admin_a_developper.md section 1) -- meme constante et
 // meme raison que dans AgentLivePage.jsx.
-const ACTING_AGENT_ID = import.meta.env.VITE_AGENT_ID || "conseiller-1";
+// Ticket attribue a la personne connectee (son identifiant de conseiller).
+const actingAgentId = () => currentAccount()?.agent_id || import.meta.env.VITE_AGENT_ID || "conseiller-1";
 
 function TicketRow({ ticket, dispatch, navigate, demo = true, onChanged }) {
   const [open, setOpen] = useState(false);
@@ -456,7 +458,7 @@ function TicketRow({ ticket, dispatch, navigate, demo = true, onChanged }) {
                       // « Prendre en charge une reclamation » : le moteur
                       // attribue le ticket ET le passe en cours (un seul
                       // geste, voir complaints/admin_router.py).
-                      await assignComplaint(ticket.id, ACTING_AGENT_ID);
+                      await assignComplaint(ticket.id, actingAgentId());
                       await onChanged?.();
                     } catch (err) {
                       console.error("[AdminPage] prise en charge du ticket :", err);

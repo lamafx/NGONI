@@ -107,8 +107,8 @@ def _present_answer(
     dispatcher.utter_message(
         text=f"{answer}\n\nCette réponse vous a-t-elle été utile ?",
         buttons=[
-            {"title": "👍 Utile", "payload": f'/rate_response_useful{{"rating_ref": "{rating_ref}"}}'},
-            {"title": "👎 Pas utile", "payload": f'/rate_response_not_useful{{"rating_ref": "{rating_ref}"}}'},
+            {"title": "👍 Utile", "payload": f'/rate_response{{"rating": "useful", "rating_ref": "{rating_ref}"}}'},
+            {"title": "👎 Pas utile", "payload": f'/rate_response{{"rating": "not_useful", "rating_ref": "{rating_ref}"}}'},
         ],
     )
     return [{"event": "slot", "name": "pending_ratings", "value": json.dumps(pending_ratings, ensure_ascii=False)}]
@@ -162,7 +162,7 @@ def _present_faq_answer(
                 buttons=[
                     {
                         "title": suggestion["question"],
-                        "payload": f'/select_faq_question{{"faq_slug": "{suggestion["slug"]}"}}',
+                        "payload": f'/select_faq{{"faq_slug": "{suggestion["slug"]}"}}',
                     }
                     for suggestion in suggestions
                 ],
@@ -257,7 +257,7 @@ def fetch_faq_category_buttons(
     buttons = [
         {
             "title": FAQ_CATEGORY_LABELS.get(group["category"], group["category"]),
-            "payload": f'/select_faq_category{{"faq_category": "{group["category"]}"}}',
+            "payload": f'/select_faq{{"faq_category": "{group["category"]}"}}',
         }
         for group in categories
         if group.get("questions")
@@ -336,7 +336,7 @@ class ActionSelectFaqCategory(Action):
         buttons = [
             {
                 "title": question["question"],
-                "payload": f'/select_faq_question{{"faq_slug": "{question["slug"]}"}}',
+                "payload": f'/select_faq{{"faq_slug": "{question["slug"]}"}}',
             }
             for question in questions
         ]
@@ -411,3 +411,20 @@ class ActionSelectFaqQuestion(Action):
             return []
 
         return _present_answer(dispatcher, tracker, question_text, answer_text)
+
+
+class ActionSelectFaq(Action):
+    """Intention unique `select_faq` (fusion de select_faq_category et
+    select_faq_question, 2026-10-23) : une question precise si le message
+    porte un `faq_slug` (bouton de question), sinon un theme (`faq_category`,
+    bouton ou texte libre). Les deux comportements restent ceux des actions
+    d'origine, simplement aiguilles ici."""
+
+    def name(self) -> Text:
+        return "action_select_faq"
+
+    def run(self, dispatcher: CollectingDispatcher, tracker: Tracker, domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
+        entities = tracker.latest_message.get("entities") or []
+        if any(e.get("entity") == "faq_slug" for e in entities):
+            return ActionSelectFaqQuestion().run(dispatcher, tracker, domain)
+        return ActionSelectFaqCategory().run(dispatcher, tracker, domain)

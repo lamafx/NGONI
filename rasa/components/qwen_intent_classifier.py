@@ -130,12 +130,10 @@ INTENT_DESCRIPTIONS = {
     "blagues, poemes, politique, maths, geographie, culture generale...)",
     "inappropriate_language": "insulte, grossierete ou propos meprisant envers l'assistant ou le service "
     "(\"t'es nul\", \"idiot\", \"bete\")",
-    "rate_response_useful": "juge utile la reponse precedente de l'assistant, ou l'en remercie",
-    "rate_response_not_useful": "juge que la reponse precedente de l'assistant n'aide pas ou ne repond "
-    "pas a la question -- ce n'est PAS un simple \"non\"",
+    "rate_response": "donne son avis sur la reponse precedente de l'assistant : la juge utile ou l'en "
+    "remercie, ou au contraire dit qu'elle n'aide pas ou ne repond pas -- ce n'est PAS un simple oui ou non",
     "browse_faq": "demande a VOIR ou parcourir les questions frequentes, sans question precise",
-    "select_faq_category": "demande les questions frequentes d'un theme precis (retraits, compte, KYC...)",
-    "select_faq_question": "identifiant technique de question (boutons uniquement, jamais tape)",
+    "select_faq": "demande les questions frequentes d'un theme precis (retraits, compte, KYC...)",
 }
 
 # Nom sous lequel certaines intentions sont PRESENTEES au modele, retraduit en
@@ -150,7 +148,7 @@ PROMPT_LABELS = {
     "ask_capabilities": "competences_de_l_assistant",
     "out_of_scope": "hors_sujet",
     "browse_faq": "parcourir_la_faq",
-    "select_faq_category": "faq_d_un_theme",
+    "select_faq": "faq_d_un_theme",
 }
 _LABEL_TO_INTENT = {label: intent for intent, label in PROMPT_LABELS.items()}
 

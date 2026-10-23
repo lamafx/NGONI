@@ -46,6 +46,7 @@ try:
     from .domains.users.admin_router import router as users_admin_router
     from .domains.identity_documents.router import router as identity_documents_router
     from .domains.support.router import router as support_router
+    from .domains.auth.router import ensure_demo_accounts, router as auth_router
     from .domains.nlu.engines import DEFAULT_ENGINE, predict as nlu_predict
     from .domains.nlu.router import router as nlu_router
     from .shared.admin_auth import warn_if_admin_secret_missing
@@ -76,6 +77,7 @@ except ImportError:  # pragma: no cover - support running as `uvicorn main:app`
     from domains.users.admin_router import router as users_admin_router
     from domains.identity_documents.router import router as identity_documents_router
     from domains.support.router import router as support_router
+    from domains.auth.router import ensure_demo_accounts, router as auth_router
     from domains.nlu.engines import DEFAULT_ENGINE, predict as nlu_predict
     from domains.nlu.router import router as nlu_router
     from shared.admin_auth import warn_if_admin_secret_missing
@@ -112,6 +114,7 @@ app.include_router(agents_admin_router)
 app.include_router(users_admin_router)
 app.include_router(identity_documents_router)
 app.include_router(support_router)
+app.include_router(auth_router)
 app.include_router(embeddings_router)
 app.include_router(nlu_router)
 
@@ -124,6 +127,17 @@ async def startup():
     global _registry_poll_task
     logger.info("Starting service initialization...")
     warn_if_admin_secret_missing()
+    # Comptes de connexion de demonstration (client, conseillers, admin) --
+    # crees s'ils manquent, voir domains/auth/router.py.
+    try:
+        from app.database import SessionLocal as _SessionLocal
+    except ImportError:  # pragma: no cover - support running as `main`
+        from database import SessionLocal as _SessionLocal
+    try:
+        with _SessionLocal() as _db:
+            ensure_demo_accounts(_db)
+    except Exception as error:  # base indisponible : le reste du moteur demarre quand meme
+        logger.warning("[AUTH] comptes de demonstration non verifies : %s", error)
     await wait_for_rasa()
 
     # Le modele d'embeddings et le Capability Registry se chargeaient jusqu'ici
@@ -431,7 +445,7 @@ def chat_page():
     }
 
     // Boutons Rasa (buttons: [{title, payload}]) : ex. les categories/
-    // questions FAQ (voir action_greet_with_time, action_select_faq_category,
+    // questions FAQ (voir action_greet_with_time, action_select_faq,
     // rasa/actions/faq.py). Un clic envoie le payload exactement comme s'il
     // avait ete tape au clavier -- meme chemin que la saisie libre, aucune
     // logique dupliquee. Desactives apres le premier clic pour eviter un
@@ -494,7 +508,7 @@ def chat_page():
     // suivre exactement le meme chemin (/api/parse puis /api/chat) pour que
     // cliquer une question suggeree se comporte comme si elle avait ete tapee.
     // `payload` est ce qui est envoye a Rasa (peut etre une commande technique
-    // du type /select_faq_question{"faq_slug": "..."} pour un c lic de bouton) ;
+    // du type /select_faq{"faq_slug": "..."} pour un c lic de bouton) ;
     // `displayText` est ce qui est affiche dans la bulle utilisateur -- le
     // titre lisible du bouton (la vraie question), jamais le payload. Pour
     // une saisie clavier, displayText est absent et on retombe sur payload
@@ -592,7 +606,7 @@ class ChatRequest(BaseModel):
 async def parse_message(request: ParseRequest):
     text = request.text
 
-    # Payload structure (clic sur un bouton, ex. "/select_faq_question{...}",
+    # Payload structure (clic sur un bouton, ex. "/select_faq{...}",
     # voir frontend/pages/chat/chat-view.js::addButtons) : deja une intention
     # pre-classifiee cote frontend -- contourne entierement le selecteur de
     # modele, interroge Rasa directement comme avant son introduction.
@@ -718,7 +732,7 @@ async def send_to_bot(request: ChatRequest, db=Depends(get_db)):
 
     if not is_structured_payload:
         # Egalite stricte (pas "faq" in normalized_intent) : ce test large
-        # capturait aussi browse_faq/select_faq_category/select_faq_question
+        # capturait aussi browse_faq/select_faq
         # (voir rasa/actions/faq.py), qui doivent passer par le webhook Rasa
         # normal ci-dessous (boutons de categorie, cache de suggestions) et
         # non par ce court-circuit de recherche semantique -- celui-ci

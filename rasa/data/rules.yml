@@ -383,7 +383,7 @@ rules:
   # formulaire etait un jour mal classee ask_faq. pending_field:null
   # (2026-07-30, meme correctif que "Bot presentation response"/"Suggestion
   # response"/etc. -- trou de couverture trouve par revue de rules.yml :
-  # ask_faq/browse_faq/select_faq_category/select_faq_question etaient les
+  # ask_faq/browse_faq/select_faq etaient les
   # SEULES intentions "meta" sans variante "while diagnostic is pending",
   # laissant un diagnostic en cours silencieusement abandonne des qu'une
   # vraie question FAQ etait posee au milieu) : variante juste en dessous.
@@ -427,7 +427,7 @@ rules:
   - action: reclamation_form
   - active_loop: reclamation_form
 
-- rule: FAQ response rated useful
+- rule: FAQ response rated
   # action_record_response_rating (feedback.py) lit le NOM de l'intention
   # courante (tracker.get_intent_of_latest_message) pour savoir si la
   # notation est positive ou negative -- une seule action pour les deux
@@ -439,41 +439,21 @@ rules:
   - slot_was_set:
     - pending_field: null
   steps:
-  - intent: rate_response_useful
+  - intent: rate_response
   - action: action_record_response_rating
 
-- rule: FAQ response rated useful while diagnostic is pending
+- rule: FAQ response rated while diagnostic is pending
   condition:
   - active_loop: null
   - slot_was_set:
     - pending_field
   steps:
-  - intent: rate_response_useful
+  - intent: rate_response
   - action: action_record_response_rating
   - action: action_reask_pending_diagnostic_field
   - action: action_listen
 
-- rule: FAQ response rated not useful
-  condition:
-  - active_loop: null
-  - slot_was_set:
-    - pending_field: null
-  steps:
-  - intent: rate_response_not_useful
-  - action: action_record_response_rating
-
-- rule: FAQ response rated not useful while diagnostic is pending
-  condition:
-  - active_loop: null
-  - slot_was_set:
-    - pending_field
-  steps:
-  - intent: rate_response_not_useful
-  - action: action_record_response_rating
-  - action: action_reask_pending_diagnostic_field
-  - action: action_listen
-
-- rule: FAQ response rated useful while reclamation form is active
+- rule: FAQ response rated while reclamation form is active
   # Audit robustesse : les deux regles de notation ci-dessus exigent
   # active_loop: null -- un clic sur un vieux bouton "Utile"/"Pas utile" en
   # plein formulaire de reclamation (payload structure, jamais reclassifie
@@ -483,16 +463,7 @@ rules:
   condition:
   - active_loop: reclamation_form
   steps:
-  - intent: rate_response_useful
-  - action: action_record_response_rating
-  - action: reclamation_form
-  - active_loop: reclamation_form
-
-- rule: FAQ response rated not useful while reclamation form is active
-  condition:
-  - active_loop: reclamation_form
-  steps:
-  - intent: rate_response_not_useful
+  - intent: rate_response
   - action: action_record_response_rating
   - action: reclamation_form
   - active_loop: reclamation_form
@@ -532,7 +503,7 @@ rules:
   - action: reclamation_form
   - active_loop: reclamation_form
 
-- rule: Select FAQ category
+- rule: Select FAQ
   # active_loop:null : meme raison que "FAQ semantic search" ci-dessus.
   # pending_field:null (2026-07-30) : meme correctif que "FAQ semantic
   # search" ci-dessus.
@@ -541,10 +512,10 @@ rules:
   - slot_was_set:
     - pending_field: null
   steps:
-  - intent: select_faq_category
-  - action: action_select_faq_category
+  - intent: select_faq
+  - action: action_select_faq
 
-- rule: Select FAQ category while diagnostic is pending
+- rule: Select FAQ while diagnostic is pending
   # Meme mecanique que "FAQ semantic search while diagnostic is pending"
   # (2026-07-30).
   condition:
@@ -552,53 +523,18 @@ rules:
   - slot_was_set:
     - pending_field
   steps:
-  - intent: select_faq_category
-  - action: action_select_faq_category
+  - intent: select_faq
+  - action: action_select_faq
   - action: action_reask_pending_diagnostic_field
   - action: action_listen
 
-- rule: Select FAQ category while reclamation form is active
+- rule: Select FAQ while reclamation form is active
   # Meme mecanique que "FAQ semantic search while reclamation form is active".
   condition:
   - active_loop: reclamation_form
   steps:
-  - intent: select_faq_category
-  - action: action_select_faq_category
-  - action: reclamation_form
-  - active_loop: reclamation_form
-
-- rule: Select FAQ question
-  # active_loop:null : meme raison que "FAQ semantic search" ci-dessus.
-  # pending_field:null (2026-07-30) : meme correctif que "FAQ semantic
-  # search" ci-dessus.
-  condition:
-  - active_loop: null
-  - slot_was_set:
-    - pending_field: null
-  steps:
-  - intent: select_faq_question
-  - action: action_select_faq_question
-
-- rule: Select FAQ question while diagnostic is pending
-  # Meme mecanique que "FAQ semantic search while diagnostic is pending"
-  # (2026-07-30).
-  condition:
-  - active_loop: null
-  - slot_was_set:
-    - pending_field
-  steps:
-  - intent: select_faq_question
-  - action: action_select_faq_question
-  - action: action_reask_pending_diagnostic_field
-  - action: action_listen
-
-- rule: Select FAQ question while reclamation form is active
-  # Meme mecanique que "FAQ semantic search while reclamation form is active".
-  condition:
-  - active_loop: reclamation_form
-  steps:
-  - intent: select_faq_question
-  - action: action_select_faq_question
+  - intent: select_faq
+  - action: action_select_faq
   - action: reclamation_form
   - active_loop: reclamation_form
 

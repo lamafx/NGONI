@@ -429,7 +429,7 @@ def _conversation_is_free(tracker: Tracker) -> bool:
     """True si aucun flux structure (formulaire de reclamation, champ de
     diagnostic en attente) n'est actif -- a verifier avant d'attacher
     QUICK_ACTION_BUTTONS a une reponse. Plusieurs intents (ask_capabilities,
-    suggestion, plainte, rate_response_useful/not_useful) ont deja leur
+    suggestion, plainte, rate_response) ont deja leur
     propre variante de regle "while reclamation form is active"/"while
     diagnostic is pending" (rules.yml) qui relance le formulaire ou rappelle
     la question de diagnostic juste apres, dans le MEME tour -- y afficher en

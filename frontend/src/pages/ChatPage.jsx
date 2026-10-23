@@ -16,11 +16,11 @@ import {
   publishVideo,
   sendMessage,
   conversationKey,
-  setStableUserId,
   stableUserId,
   verifyIdentity,
 } from "../services/chatService";
 import { analyzeIdentityDocument } from "../services/engineClient";
+import { logout } from "../services/auth";
 import { FaqView, HistoryView, ProfileView } from "../components/client/ClientViews";
 import { NotificationBell } from "../components/ui/NotificationBell";
 import { useNotifications } from "../hooks/useNotifications";
@@ -247,6 +247,25 @@ export function ChatPage() {
               text: message.text,
               time: nowLabel(),
             });
+            // Piece jointe envoyee par le conseiller (image ou PDF).
+            const sent = message.metadata?.attachment;
+            if (sent) {
+              pushMessage({
+                id: `${message.id}-pj`,
+                sender: "agent",
+                senderName: message.agent_id ?? "Conseiller",
+                variant: "attachment",
+                attachment: {
+                  name: sent.name,
+                  type: sent.content_type,
+                  kind: sent.content_type === "application/pdf" ? "Document · PDF" : "Image",
+                  size: "envoyé par votre conseiller",
+                  dataUrl: sent.data_url,
+                },
+                text: sent.name,
+                time: nowLabel(),
+              });
+            }
             // Le client ne regarde pas le fil (autre vue ou autre onglet) :
             // la cloche le previent.
             if (viewRef.current !== "chat" || document.hidden) {
@@ -747,7 +766,7 @@ export function ChatPage() {
     setDraft("");
     // displayText : ce que l'utilisateur a réellement vu et cliqué (le
     // libellé du bouton), distinct du payload technique envoyé à Rasa
-    // ("/select_faq_question{...}") -- n'afficher jamais ce payload brut
+    // ("/select_faq{...}") -- n'afficher jamais ce payload brut
     // dans la bulle utilisateur.
     pushMessage({ id: nextId("msg"), sender: "user", text: displayText ?? text, time: nowLabel() });
 
@@ -1011,14 +1030,11 @@ export function ChatPage() {
               userId={accountId}
               photo={clientPhoto}
               onOpenHistory={() => setView("historique")}
-              onChangeAccount={(userId) => {
-                if (!setStableUserId(userId)) return;
-                setAccountId(userId);
-                // Nouveau compte = nouvelle conversation : on vide le fil
-                // local puis on recharge (identifiant Rasa neuf, voir
-                // rasaSenderId). Le delai laisse DemoStore persister le vide.
+              onLogout={() => {
+                // Fin de session : fil local vide, retour a la connexion.
+                logout();
                 dispatch({ type: "RESET" });
-                setTimeout(() => window.location.reload(), 150);
+                navigate("/login");
               }}
             />
           )}
@@ -1162,6 +1178,11 @@ export function ChatPage() {
                           <span className="ns-file-sub">
                             {m.attachment.kind} · {m.attachment.size}
                           </span>
+                          {!isUser && m.attachment.dataUrl && (
+                            <a className="ns-file-download" href={m.attachment.dataUrl} download={m.attachment.name}>
+                              Télécharger
+                            </a>
+                          )}
                         </span>
                       </span>
                     )}

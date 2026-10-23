@@ -17,7 +17,7 @@ import {
   listMyTickets,
   searchFaq,
 } from "../../services/engineClient";
-import { DEFAULT_CLIENT_USER_ID, isAccountId } from "../../services/chatService";
+import { currentAccount } from "../../services/auth";
 
 const FAQ_CATEGORY_LABELS = {
   ACCOUNT: "Compte",
@@ -351,15 +351,13 @@ export function FaqView({ onAsk }) {
 
 /* -------------------------------------------------------------------- Profil */
 
-export function ProfileView({ userId, photo, onChangeAccount, onOpenHistory }) {
+export function ProfileView({ userId, photo, onLogout, onOpenHistory }) {
   const [tickets, setTickets] = useState(null);
   const [conversations, setConversations] = useState(null);
   const [error, setError] = useState(null);
-  const [draft, setDraft] = useState(userId);
-  const [formError, setFormError] = useState(null);
+  const account = currentAccount();
 
   useEffect(() => {
-    setDraft(userId);
     let cancelled = false;
     Promise.all([listMyTickets(userId), listMyConversations(userId)])
       .then(([ticketRows, conversationRows]) => {
@@ -377,16 +375,6 @@ export function ProfileView({ userId, photo, onChangeAccount, onOpenHistory }) {
     };
   }, [userId]);
 
-  function submit(event) {
-    event.preventDefault();
-    if (!isAccountId(draft)) {
-      setFormError("Identifiant invalide : un identifiant de compte Ngoni a la forme xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx.");
-      return;
-    }
-    setFormError(null);
-    onChangeAccount(draft.trim().toLowerCase());
-  }
-
   const openTickets = (tickets ?? []).filter((t) => t.status === "OPEN" || t.status === "IN_PROGRESS").length;
 
   return (
@@ -396,7 +384,8 @@ export function ProfileView({ userId, photo, onChangeAccount, onOpenHistory }) {
       <div className="ns-profile-card">
         <Avatar name="Compte Ngoni" src={photo} size={64} />
         <div className="ns-profile-who">
-          <div className="ns-profile-name">Compte Ngoni connecté</div>
+          <div className="ns-profile-name">{account?.display_name ?? "Compte Ngoni connecté"}</div>
+          {account?.login && <div className="ns-view-sub">Identifiant de connexion : {account.login}</div>}
           <code className="ns-profile-id">{userId}</code>
           <div className="ns-view-sub">
             C'est ce compte que l'assistant interroge lorsqu'il vérifie un retrait, une recharge ou votre statut KYC.
@@ -445,23 +434,15 @@ export function ProfileView({ userId, photo, onChangeAccount, onOpenHistory }) {
       </section>
 
       <section className="ns-section">
-        <h2 className="ns-section-title">Changer de compte</h2>
-        <form className="ns-account-form" onSubmit={submit}>
-          <input value={draft} onChange={(event) => setDraft(event.target.value)} spellCheck={false} />
-          <button type="submit" className="ns-btn-primary" disabled={draft.trim().toLowerCase() === userId}>
-            Utiliser ce compte
-          </button>
-          {userId !== DEFAULT_CLIENT_USER_ID && (
-            <button type="button" className="ns-btn-outline" onClick={() => onChangeAccount(DEFAULT_CLIENT_USER_ID)}>
-              Compte par défaut
-            </button>
-          )}
-        </form>
-        {formError && <Notice tone="error">{formError}</Notice>}
+        <h2 className="ns-section-title">Session</h2>
         <p className="ns-view-sub">
-          Aucune authentification dans cet environnement : le compte se choisit ici. Changer de compte démarre une nouvelle
-          conversation.
+          Connecté de façon sécurisée : votre identité est vérifiée par le serveur à chaque demande.
         </p>
+        <div>
+          <button type="button" className="ns-btn-outline" onClick={onLogout}>
+            Se déconnecter
+          </button>
+        </div>
       </section>
     </div>
   );

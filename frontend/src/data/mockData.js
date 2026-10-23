@@ -298,9 +298,9 @@ export function buildDashboardStats(escalatedCount, now = new Date()) {
 
 // Repartition des intentions detectees -- regroupement des 19 intentions
 // REELLES du pipeline NLU (rasa/domain.yml, verifie : diagnostic, ask_faq +
-// browse_faq/select_faq_category/select_faq_question, create_reclamation +
+// browse_faq/select_faq, create_reclamation +
 // plainte/ask_complaint_status, greet/goodbye/bot_challenge/affirm/deny/
-// ask_capabilities/suggestion/rate_response_useful/rate_response_not_useful,
+// ask_capabilities/suggestion/rate_response,
 // out_of_scope/inappropriate_language). Le NOMBRE d'intentions (19) est
 // reel ; les POURCENTAGES de volume sont illustratifs -- aucune telemetrie
 // d'usage agregee n'existe encore cote FastAPI/Rasa pour ce projet (voir

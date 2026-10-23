@@ -2364,7 +2364,10 @@ nlu:
     - Quelles sont tes competences au juste
     - A quoi tu sers exactement dans cette appli
 
-- intent: rate_response_useful
+- intent: rate_response
+  # Fusion (2026-10-23) de rate_response_useful et rate_response_not_useful :
+  # le sens de l'avis est porte par l'entite `rating` (boutons) ou deduit du
+  # texte tape (ActionRecordResponseRating, feedback.py).
   examples: |
     - Oui c'était utile
     - Utile, merci
@@ -2419,8 +2422,6 @@ nlu:
     - excellent merci, c'était très clair
     - nickel, très clair merci bien
     - super clair cette réponse, merci beaucoup
-- intent: rate_response_not_useful
-  examples: |
     - Non ce n'est pas utile
     - Pas utile
     - Ça ne répond pas à ma question
@@ -2438,7 +2439,7 @@ nlu:
     - Ça ne m'a pas aidé
     - Non, pas ça
 
-    # Meme etoffage que rate_response_useful ci-dessus, meme constat (16,7%
+    # Meme etoffage que les avis positifs ci-dessus, meme constat (16,7%
     # de precision en texte libre avant cet ajout).
     #
     # Retire ensuite (audit "tests 400 diagnostic", 2026-07-18) : plusieurs
@@ -2480,8 +2481,7 @@ nlu:
 # bouton (payload structure /intent{"entite": "valeur"}, voir faq.py), pas
 # tapees au clavier -- ces exemples existent uniquement pour satisfaire
 # l'exigence d'entrainement de Rasa (au moins quelques exemples par
-# intention), meme convention deja appliquee a rate_response_useful/
-# rate_response_not_useful ci-dessus.
+# intention), meme convention deja appliquee a rate_response ci-dessus.
 - intent: browse_faq
   examples: |
     - Montre-moi des questions fréquentes
@@ -2507,12 +2507,15 @@ nlu:
     - peux-tu me lister des questions types
     - suggère-moi quelques questions fréquentes
 
-- intent: select_faq_category
+- intent: select_faq
+  # Fusion (2026-10-23) de select_faq_category et select_faq_question : un
+  # theme (entite faq_category, texte libre ou bouton) ou une question precise
+  # (entite faq_slug, boutons uniquement) -- ActionSelectFaq aiguille.
   # Rapport 18-rapport-competences.md, proposition P1 : ce flux est
   # principalement pilote par des boutons (payload
   # /select_faq_category{"faq_category": "..."}, voir
   # fetch_faq_category_buttons dans faq.py) mais accepte aussi du texte libre
-  # -- contrairement a select_faq_question ci-dessous. Couverture etendue aux
+  # -- contrairement aux questions precises (faq_slug). Couverture etendue aux
   # 12 valeurs reelles de core.FaqCategory (04-services.md/06-api-reference.md,
   # FAQ_CATEGORY_LABELS dans faq.py) : seules WALLET/ACCOUNT/KYC/NGONI_PLUS
   # avaient un exemple avant cet ajout, les 8 autres n'avaient donc aucune
@@ -2534,19 +2537,6 @@ nlu:
     - Je veux contacter l'[assistance](faq_category:ASSISTANCE)
     - Je veux des questions [générales](faq_category:GENERAL)
     - Montre-moi des questions [générales](faq_category:GENERAL) sur NGONI
-
-- intent: select_faq_question
-  # Rapport 18-rapport-competences.md, proposition P1 : intentionnellement
-  # sans equivalent texte libre, contrairement a select_faq_category ci-dessus
-  # -- un `faq_slug` (ex. "comment-recevoir-des-revenus-sur-ngoni-abc12345")
-  # est un identifiant technique genere cote FastAPI (/faq/suggestions), pas
-  # un mot que redigerait un utilisateur reel. Ce flux est et reste
-  # exclusivement pilote par le payload du bouton envoye par
-  # ActionSelectFaqCategory (voir faq.py) ; les deux exemples ci-dessous ne
-  # servent qu'a entrainer l'extraction de l'entite sur ce format de payload,
-  # pas a reconnaitre une formulation naturelle -- ajouter plus d'exemples
-  # n'aurait aucun effet utile ici, a la difference de select_faq_category.
-  examples: |
     - [comment-recevoir-des-revenus-sur-ngoni-abc12345](faq_slug)
     - [quest-ce-que-ngoni-plus-def67890](faq_slug)
 

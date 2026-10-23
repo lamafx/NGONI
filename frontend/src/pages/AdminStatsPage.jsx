@@ -87,8 +87,7 @@ export function AdminStatsPage() {
           <br />
           Le moteur FastAPI doit être démarré sur le port 8000 (
           <code>.venv\Scripts\python.exe -m uvicorn app.main:app --port 8000</code> depuis{" "}
-          <code>fastapi/</code>) et <code>ADMIN_INTERNAL_SECRET</code> doit correspondre à{" "}
-          <code>VITE_ADMIN_SECRET</code>.
+          <code>fastapi/</code>) et votre session doit être valide (reconnectez-vous si besoin).
         </div>
       </AdminShell>
     );

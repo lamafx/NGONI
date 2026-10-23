@@ -8,7 +8,7 @@ lisible, affichee telle quelle a l'usager :
   3. l'OCR puis le filtre : SEULES une carte nationale d'identite ou un
      passeport passent a l'extraction des champs (voir analyzer.py).
 
-Quand l'appelant declare le compte (en-tete X-User-ID), la piece est
+Quand un client connecte envoie la piece (jeton de session), elle est
 enregistree (ia.identity_documents) pour le conseiller humain qui devra la
 valider : l'image seulement si la piece est ACCEPTEE, et une soumission KYC
 « en attente » est ouverte cote user_service. Rien n'est journalise dans les
@@ -31,9 +31,11 @@ from sqlalchemy.orm import Session
 try:
     from app.database import get_db
     from app.domains.support import client as support_client
+    from app.shared.admin_auth import optional_client, require_client
 except ImportError:  # pragma: no cover - support running as `main`
     from database import get_db
     from domains.support import client as support_client
+    from shared.admin_auth import optional_client, require_client
 
 from .analyzer import DOCUMENT_LABELS, analyze_lines
 from .models import REVIEW_NOT_APPLICABLE, REVIEW_PENDING, IdentityDocument, document_summary
@@ -66,7 +68,7 @@ def _refuse(reason: str, check_label: str, check_value: str, started: float) -> 
 @router.post("/analyze", response_model=DocumentAnalysisResponse)
 async def analyze_document(
     payload: DocumentAnalysisRequest,
-    x_user_id: Optional[str] = Header(None, alias="X-User-ID", max_length=200),
+    x_user_id: Optional[str] = Depends(optional_client),
     db: Session = Depends(get_db),
 ):
     result, data = await _analyze(payload)
@@ -109,7 +111,7 @@ async def analyze_document(
 
 @router.get("/mine")
 def my_documents(
-    x_user_id: str = Header(..., alias="X-User-ID", min_length=1, max_length=200),
+    x_user_id: str = Depends(require_client),
     db: Session = Depends(get_db),
 ):
     """Pieces envoyees par ce compte et leur examen (notifications du client)."""

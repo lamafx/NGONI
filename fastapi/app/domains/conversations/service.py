@@ -386,7 +386,7 @@ class ConversationService:
         return self._summary(self.repository.save(conversation))
 
     def post_agent_message(
-        self, conversation_id: str, text: str, agent_id: Optional[str]
+        self, conversation_id: str, text: str, agent_id: Optional[str], metadata: Optional[Dict[str, Any]] = None
     ) -> MessageResponse:
         conversation = self._require(conversation_id)
         if conversation.status != STATUS_ASSIGNED:
@@ -394,7 +394,7 @@ class ConversationService:
                 "Prenez d'abord la conversation en charge avant d'y répondre"
             )
         message = self.repository.add_message(
-            conversation_id, sender_role="agent", text=text, agent_id=agent_id
+            conversation_id, sender_role="agent", text=text, agent_id=agent_id, metadata=metadata
         )
         conversation.message_count = (conversation.message_count or 0) + 1
         conversation.last_message_at = _now()

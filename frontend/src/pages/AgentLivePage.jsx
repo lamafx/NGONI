@@ -20,6 +20,7 @@ import { Avatar } from "../components/ui/Avatar";
 import { Icon } from "../components/ui/Icon";
 import { MessageBubble } from "../components/chat/MessageBubble";
 import { CustomerFile } from "../components/agent/CustomerFile";
+import { currentAccount, logout } from "../services/auth";
 import { NotificationBell } from "../components/ui/NotificationBell";
 import { useNotifications } from "../hooks/useNotifications";
 import { loadAgentNotifications } from "../services/notificationSources";
@@ -41,7 +42,11 @@ const POLL_INTERVAL_MS = 5000;
 // pas de session, pas de rôle, pas d'identité vérifiée) -- surchargeable par
 // variable d'environnement pour qu'un second poste de démonstration puisse
 // se présenter sous un autre nom sans modifier le code.
-const ACTING_AGENT_ID = import.meta.env.VITE_AGENT_ID || "conseiller-1";
+// Conseiller connecte : son identifiant vient de son jeton de session (voir
+// services/auth.js) -- plus de valeur figee « conseiller-1 ».
+function actingAgentId() {
+  return currentAccount()?.agent_id || import.meta.env.VITE_AGENT_ID || "conseiller-1";
+}
 
 const STATUS_LABELS = {
   BOT: { label: "Assistant", tone: "badge-neutral" },
@@ -96,16 +101,21 @@ function relativeLabel(iso) {
 
 /** Les rôles du moteur (user/bot/agent) vers ceux de MessageBubble. */
 function toBubble(message) {
+  const attachment = message.metadata?.attachment;
   return {
     id: message.id,
     sender: message.sender_role === "bot" ? "ai" : message.sender_role,
     senderName: message.agent_id ?? undefined,
-    text: message.text,
+    text: attachment ? `${message.text}\n📎 ${attachment.name}` : message.text,
     time: timeLabel(message.created_at),
   };
 }
 
+const MAX_ATTACHMENT_BYTES = 4 * 1024 * 1024;
+
 export function AgentLivePage() {
+  const ACTING_AGENT_ID = actingAgentId();
+  const account = currentAccount();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const view = VIEWS[searchParams.get("vue")] ? searchParams.get("vue") : "attente";
@@ -128,6 +138,9 @@ export function AgentLivePage() {
   // conversation et non par compte : le dossier s'ouvre une fois le detail
   // charge, y compris depuis une notification « piece a verifier ».
   const [fileFor, setFileFor] = useState(null);
+  const [attachment, setAttachment] = useState(null);
+  const [transferTo, setTransferTo] = useState("");
+  const attachmentInputRef = useRef(null);
   const [error, setError] = useState(null);
   const threadEndRef = useRef(null);
   const activeIdRef = useRef(null);
@@ -146,7 +159,7 @@ export function AgentLivePage() {
       }
     } catch (err) {
       setError(
-        "Moteur injoignable (:8000). Vérifiez qu'il tourne et que VITE_ADMIN_SECRET correspond à ADMIN_INTERNAL_SECRET."
+        "Moteur injoignable (:8000) ou session expirée."
       );
       console.error("[AgentLivePage] file des conversations :", err);
     }
@@ -224,10 +237,38 @@ export function AgentLivePage() {
   }
 
   function submitReply() {
-    const text = reply.trim();
+    const text = reply.trim() || (attachment ? `Je vous envoie : ${attachment.name}` : "");
     if (!text) return;
+    const sending = attachment;
     setReply("");
-    return run(() => sendAgentMessage(activeIdRef.current, text, ACTING_AGENT_ID));
+    setAttachment(null);
+    return run(() => sendAgentMessage(activeIdRef.current, text, ACTING_AGENT_ID, sending));
+  }
+
+  function pickAttachment(event) {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+    if (!/^(image\/(png|jpeg|webp|gif)|application\/pdf)$/.test(file.type)) {
+      setError("Pièce jointe refusée : image (PNG, JPEG, WebP) ou PDF uniquement.");
+      return;
+    }
+    if (file.size > MAX_ATTACHMENT_BYTES) {
+      setError("Pièce jointe trop volumineuse (4 Mo maximum).");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => setAttachment({ name: file.name, content_type: file.type, data_url: String(reader.result) });
+    reader.readAsDataURL(file);
+  }
+
+  /** Confie la conversation a un autre conseiller : il en devient le
+   *  titulaire (le moteur refuse sinon qu'un second conseiller reponde). */
+  function transfer() {
+    if (!transferTo) return;
+    const target = transferTo;
+    setTransferTo("");
+    return run(() => assignConversation(activeIdRef.current, target, { force: true }));
   }
 
   function closeConversation() {
@@ -272,10 +313,22 @@ export function AgentLivePage() {
         ]}
         footer={
           <div className="sidebar-user">
-            <Avatar kind="agent" name={ACTING_AGENT_ID} size={32} />
+            <Avatar kind="agent" name={account?.display_name ?? ACTING_AGENT_ID} size={32} />
             <div className="who">
-              <div className="name">{ACTING_AGENT_ID}</div>
-              <div className="role">conseiller</div>
+              <div className="name">{account?.display_name ?? ACTING_AGENT_ID}</div>
+              <div className="role">
+                {account?.role === "admin" ? "administration" : "conseiller"} ·{" "}
+                <button
+                  type="button"
+                  className="link-btn"
+                  onClick={() => {
+                    logout();
+                    navigate("/login");
+                  }}
+                >
+                  déconnexion
+                </button>
+              </div>
             </div>
           </div>
         }
@@ -428,6 +481,29 @@ export function AgentLivePage() {
                     {heldBySomeoneElse ? "Reprendre à " + detail.assigned_to : "Prendre en charge"}
                   </button>
                 )}
+                {isMine && agents.some((agent) => agent.agent_id !== ACTING_AGENT_ID) && (
+                  <span style={{ display: "inline-flex", gap: 6, alignItems: "center" }}>
+                    <select
+                      value={transferTo}
+                      onChange={(event) => setTransferTo(event.target.value)}
+                      aria-label="Transférer à un autre conseiller"
+                      style={{ padding: "5px 8px", borderRadius: 8, border: "1px solid var(--line)", fontFamily: "inherit", fontSize: "0.8rem" }}
+                    >
+                      <option value="">Transférer à…</option>
+                      {agents
+                        .filter((agent) => agent.agent_id !== ACTING_AGENT_ID)
+                        .map((agent) => (
+                          <option key={agent.agent_id} value={agent.agent_id}>
+                            {agent.display_name}
+                            {agent.status === "online" ? "" : " (hors ligne)"}
+                          </option>
+                        ))}
+                    </select>
+                    <button className="btn btn-secondary btn-sm" type="button" disabled={busy || !transferTo} onClick={transfer}>
+                      <Icon name="forward" size={14} /> Transférer
+                    </button>
+                  </span>
+                )}
                 {isMine && (
                   <button
                     className="btn btn-secondary btn-sm"
@@ -483,11 +559,36 @@ export function AgentLivePage() {
                   }}
                 />
               </div>
-              <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 8 }}>
+              <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", gap: 8, marginTop: 8 }}>
+                <input
+                  ref={attachmentInputRef}
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp,image/gif,application/pdf"
+                  onChange={pickAttachment}
+                  style={{ display: "none" }}
+                  tabIndex={-1}
+                />
+                {attachment && (
+                  <span className="badge badge-info" style={{ marginRight: "auto" }}>
+                    <Icon name="paperclip" size={12} /> {attachment.name}
+                    <button type="button" className="link-btn" onClick={() => setAttachment(null)} style={{ marginLeft: 6 }}>
+                      retirer
+                    </button>
+                  </span>
+                )}
+                <button
+                  className="btn btn-ghost btn-sm"
+                  type="button"
+                  disabled={!isMine || busy}
+                  onClick={() => attachmentInputRef.current?.click()}
+                  title="Joindre une image ou un PDF"
+                >
+                  <Icon name="paperclip" size={14} /> Pièce jointe
+                </button>
                 <button
                   className="btn btn-primary btn-sm"
                   type="button"
-                  disabled={!isMine || busy || !reply.trim()}
+                  disabled={!isMine || busy || (!reply.trim() && !attachment)}
                   onClick={submitReply}
                 >
                   <Icon name="send" size={14} /> Envoyer

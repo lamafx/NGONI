@@ -1,3 +1,5 @@
+import { authHeader, logout } from "./auth";
+
 // Client HTTP vers le moteur FastAPI (:8000), via le proxy Vite `/engine`
 // en developpement (voir vite.config.js). En build de production, definir
 // VITE_ENGINE_URL pour pointer directement vers le moteur.
@@ -7,13 +9,9 @@
 
 const BASE = import.meta.env.VITE_ENGINE_URL || "/engine";
 
-// Les routes /admin/* du moteur sont protegees par un secret partage
-// (shared/admin_auth.py). Ce n'est PAS une authentification : pas d'identite,
-// pas de role, pas de session. La valeur de developpement est reprise ici
-// pour que les ecrans fonctionnent en local ; en deploiement reel il faudra
-// une vraie authentification cote moteur (voir api_admin_a_developper.md §1).
-const ADMIN_SECRET = import.meta.env.VITE_ADMIN_SECRET || "dev-admin-secret-change-me";
-
+// Les routes /admin/* et « mes ... » du moteur exigent le jeton de session de
+// l'utilisateur connecte (voir services/auth.js) : plus aucun secret dans le
+// code de la page.
 const TIMEOUT_MS = 15000;
 
 async function request(path, { method = "GET", body, admin = false, userId, timeoutMs = TIMEOUT_MS } = {}) {
@@ -25,13 +23,17 @@ async function request(path, { method = "GET", body, admin = false, userId, time
       signal: controller.signal,
       headers: {
         ...(body ? { "Content-Type": "application/json" } : {}),
-        ...(admin ? { "X-Internal-Secret": ADMIN_SECRET } : {}),
-        // Compte de l'usager cote client (meme convention que Kong ->
-        // microservices, voir GET /complaints/mine).
-        ...(userId ? { "X-User-ID": userId } : {}),
+        // Jeton de session : il porte le role et l'identite (compte client
+        // ou conseiller), verifies et signes par le moteur.
+        ...authHeader(),
       },
       ...(body ? { body: JSON.stringify(body) } : {}),
     });
+    if (res.status === 401 && (admin || userId !== undefined)) {
+      // Session expiree ou absente : retour a la page de connexion.
+      logout();
+      window.dispatchEvent(new CustomEvent("ngoni-session-expired"));
+    }
     if (!res.ok) {
       // Le motif renvoye par le moteur (`detail`) est fait pour etre lu.
       let detail = "";
@@ -162,11 +164,13 @@ export function assignConversation(conversationId, agentId, { force = false } = 
   });
 }
 
-export function sendAgentMessage(conversationId, text, agentId) {
+/** `attachment` : { name, content_type, data_url } -- image ou PDF (4 Mo max). */
+export function sendAgentMessage(conversationId, text, agentId, attachment) {
   return request(`/admin/conversations/${encodeURIComponent(conversationId)}/messages`, {
     method: "POST",
     admin: true,
-    body: { text, agent_id: agentId },
+    body: { text, agent_id: agentId, ...(attachment ? { attachment } : {}) },
+    timeoutMs: 60000,
   });
 }
 
@@ -405,7 +409,7 @@ export function addCustomerNote(userId, { agentId, text, conversationId }) {
  *  URL.revokeObjectURL). */
 export async function fetchDocumentImage(documentId) {
   const res = await fetch(`${BASE}/admin/support/documents/${encodeURIComponent(documentId)}/image`, {
-    headers: { "X-Internal-Secret": ADMIN_SECRET },
+    headers: authHeader(),
   });
   if (!res.ok) throw new Error(`image ${documentId} → ${res.status}`);
   return URL.createObjectURL(await res.blob());

@@ -400,7 +400,7 @@ export const DEMO_TURNS = [
     // FORMULATION CONTRAINTE PAR LE CLASSIFIEUR -- ne pas remettre "super."
     // en tete. Mesure du 28/08 :
     //   "super. et du coup c'est valide ? j'ai un live ce soir a 20h"
-    //                              -> rate_response_useful  (le "super." lu
+    //                              -> rate_response         (le "super." lu
     //                                 comme un retour positif)
     //   "c'est valide maintenant ? j'ai un live ce soir a 20h"
     //                              -> affirm

@@ -728,3 +728,4 @@ button.ns-stat:hover{border-color:var(--ns-orange-soft);}
 }
 .ns-wait-hint{font-size:0.74rem;color:var(--ns-ink-faint);margin-top:4px;}
 .ns-new-chat{justify-content:center;margin:0 0 18px;padding:11px 16px;}
+.ns-file-download{font-size:0.76rem;font-weight:700;color:var(--ns-orange-strong);}

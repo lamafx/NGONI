@@ -8,6 +8,7 @@ import { useDemoStore } from "../../state/DemoStore";
 import { AGENTS } from "../../data/mockData";
 import { getDashboardSummary } from "../../services/engineClient";
 import { isDemoMode } from "../../services/demoDirector";
+import { currentAccount, logout } from "../../services/auth";
 import { NotificationBell } from "../ui/NotificationBell";
 import { useNotifications } from "../../hooks/useNotifications";
 import { loadAdminNotifications } from "../../services/notificationSources";
@@ -39,7 +40,22 @@ function demoAdminNotifications(state, agentRoute) {
 // Personne connectee a l'espace ADMINISTRATION -- distincte du conseiller qui
 // traite les escalades dans l'espace Agent (Ibrahim Traoré, AGENTS[0]). Ce
 // sont deux roles differents : l'un supervise, l'autre traite les dossiers.
-const ADMIN_USER = { name: "Awa Koné", role: "Conseillère support" };
+// Personne connectee (jeton de session, voir services/auth.js).
+function adminUser() {
+  const account = currentAccount();
+  return {
+    name: account?.display_name ?? "Administration",
+    role: account?.role === "admin" ? "Administration" : "Conseiller support",
+  };
+}
+const ADMIN_USER = {
+  get name() {
+    return adminUser().name;
+  },
+  get role() {
+    return adminUser().role;
+  },
+};
 
 /**
  * Coquille commune (sidebar + en-tête) partagée par toutes les pages de
@@ -181,7 +197,13 @@ export function AdminShell({ active, title, subtitle, children }) {
                   </button>
                   {/* Aucune session cote moteur (secret partage, pas de compte) :
                       « Déconnexion » quitte simplement l'espace d'administration. */}
-                  <button type="button" onClick={() => navigate("/chat")}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      logout();
+                      navigate("/login");
+                    }}
+                  >
                     <Icon name="log-out" size={15} /> Déconnexion
                   </button>
                 </div>

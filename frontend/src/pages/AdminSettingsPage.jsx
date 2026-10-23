@@ -16,7 +16,12 @@ import { adminAct, demoParametersReady, isDemoMode, wait } from "../services/dem
 
 const PARAM_BY_ID = Object.fromEntries(SYSTEM_PARAMETERS.flatMap((g) => g.items).map((item) => [item.id, item]));
 
-const [DEFAULT_FIRST_NAME, DEFAULT_LAST_NAME = ""] = ADMIN_USER.name.split(" ");
+// Nom de la personne connectee, lu au moment ou la page s'affiche (la
+// session n'existe pas encore au chargement du module).
+const defaultName = () => {
+  const [first, ...rest] = ADMIN_USER.name.split(" ");
+  return { firstName: first, lastName: rest.join(" ") };
+};
 
 function formatValue(value, format) {
   if (format === "pct") return `${Math.round(value * 100)} %`;
@@ -263,7 +268,7 @@ export function AdminSettingsPage() {
     // 6. Confirmation. L'ecriture part avec le nom de la personne connectee.
     await clickTarget(demoModalConfirm.current, cfg.cursorTravelMs);
     if (!alive()) return;
-    latest.current.applyPendingChange({ firstName: DEFAULT_FIRST_NAME, lastName: DEFAULT_LAST_NAME });
+    latest.current.applyPendingChange(defaultName());
     await wait(cfg.afterConfirm);
     if (!alive()) return;
 
@@ -470,8 +475,8 @@ export function AdminSettingsPage() {
 }
 
 function TraceabilityModal({ change, format, confirmRef, onCancel, onConfirm }) {
-  const [firstName, setFirstName] = useState(DEFAULT_FIRST_NAME ?? "");
-  const [lastName, setLastName] = useState(DEFAULT_LAST_NAME ?? "");
+  const [firstName, setFirstName] = useState(() => defaultName().firstName ?? "");
+  const [lastName, setLastName] = useState(() => defaultName().lastName ?? "");
   const canSubmit = firstName.trim().length > 0 && lastName.trim().length > 0;
 
   return (

@@ -21,12 +21,12 @@ from sqlalchemy.orm import Session
 try:
     from app.database import get_db
     from app.domains.diagnostic.registry import SERVICES_REGISTRY_PATH, _load_services_from_yaml
-    from app.shared.admin_auth import require_admin_auth
+    from app.shared.admin_auth import require_admin_role
     from app.shared.rasa_client import RASA_PARSE_URL
 except ImportError:  # pragma: no cover - support running as `main`
     from database import get_db
     from domains.diagnostic.registry import SERVICES_REGISTRY_PATH, _load_services_from_yaml
-    from shared.admin_auth import require_admin_auth
+    from shared.admin_auth import require_admin_role
     from shared.rasa_client import RASA_PARSE_URL
 
 from .dashboard_schemas import (
@@ -48,7 +48,7 @@ logger = logging.getLogger(__name__)
 # Meme serveur que RASA_PARSE_URL (seule adresse Rasa configuree cote moteur).
 RASA_STATUS_URL = RASA_PARSE_URL.rsplit("/model/parse", 1)[0] + "/status"
 
-router = APIRouter(prefix="/admin", tags=["admin"], dependencies=[Depends(require_admin_auth)])
+router = APIRouter(prefix="/admin", tags=["admin"], dependencies=[Depends(require_admin_role)])
 
 # Sonde volontairement courte : la page d'administration ne doit pas rester
 # bloquee plusieurs secondes parce qu'un microservice ne repond plus -- ne

@@ -1,6 +1,6 @@
 """Routes d'ecriture pour l'espace Admin > Parametres (voir
 frontfolder/src/pages/AdminSettingsPage.jsx). Protegees par
-require_admin_auth, meme convention que domains/complaints/admin_router.py.
+require_admin_role, meme convention que domains/complaints/admin_router.py.
 
 Ecrire ici trace l'intention et l'identite de qui a demande le changement.
 Pour les seuils de LIVE_PARAMETERS (service.py), c'est aussi ce qui change
@@ -16,10 +16,10 @@ from sqlalchemy.orm import Session
 
 try:
     from app.database import get_db
-    from app.shared.admin_auth import require_admin_auth
+    from app.shared.admin_auth import require_admin_role
 except ImportError:  # pragma: no cover - support running as `main`
     from database import get_db
-    from shared.admin_auth import require_admin_auth
+    from shared.admin_auth import require_admin_role
 
 from . import live
 from .schemas import SystemParameterHistoryResponse, SystemParameterResponse, SystemParameterUpdateRequest
@@ -28,7 +28,7 @@ from .service import ParameterOutOfRangeError, SystemParameterService, UnknownPa
 router = APIRouter(
     prefix="/admin/settings",
     tags=["admin"],
-    dependencies=[Depends(require_admin_auth)],
+    dependencies=[Depends(require_admin_role)],
 )
 
 # Lecture seule, SANS require_admin_auth : c'est le conteneur Rasa qui

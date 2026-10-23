@@ -99,6 +99,8 @@ services:
       WALLET_SERVICE_INTERNAL_SECRET: ${SERVICES_INTERNAL_SECRET:-test-secret}
       USER_SERVICE_INTERNAL_SECRET: ${SERVICES_INTERNAL_SECRET:-test-secret}
       ADMIN_INTERNAL_SECRET: ${ADMIN_INTERNAL_SECRET:-dev-admin-secret-change-me}
+      # Signature des jetons de session (connexion aux interfaces).
+      AUTH_SECRET: ${AUTH_SECRET:-dev-auth-secret-change-me}
       REGISTRY_POLL_INTERVAL_SECONDS: ${REGISTRY_POLL_INTERVAL_SECONDS:-300}
     ports:
       - "8000:8000"
@@ -254,9 +256,6 @@ services:
   frontend:
     build:
       context: ./frontend
-      args:
-        # Doit valoir ADMIN_INTERNAL_SECRET : fige dans l'application au build.
-        VITE_ADMIN_SECRET: ${ADMIN_INTERNAL_SECRET:-dev-admin-secret-change-me}
     # Meme adresse qu'en developpement : http://localhost:5173 (et
     # http://localhost:5173/?demo=1#/chat pour la demonstration).
     ports:

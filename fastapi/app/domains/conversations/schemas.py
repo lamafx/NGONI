@@ -80,6 +80,19 @@ class AssignRequest(BaseModel):
     agent_id: str = Field(min_length=1, max_length=200)
 
 
+class AgentAttachment(BaseModel):
+    """Piece jointe envoyee par un conseiller (image ou PDF), stockee dans les
+    metadonnees du message : le client la recoit par le meme rattrapage que
+    le texte."""
+
+    model_config = {"extra": "forbid"}
+
+    name: str = Field(min_length=1, max_length=200)
+    content_type: str = Field(pattern=r"^(image/(png|jpeg|webp|gif)|application/pdf)$")
+    # data URL (base64) -- 4 Mo de fichier au plus, une fois encode.
+    data_url: str = Field(min_length=1, max_length=5_600_000)
+
+
 class AgentMessageRequest(BaseModel):
     model_config = {"extra": "forbid"}
 
@@ -87,6 +100,7 @@ class AgentMessageRequest(BaseModel):
     # conseiller traverse exactement le meme fil que celle du bot.
     text: str = Field(min_length=1, max_length=4000)
     agent_id: Optional[str] = Field(default=None, max_length=200)
+    attachment: Optional[AgentAttachment] = None
 
 
 class ResolveRequest(BaseModel):

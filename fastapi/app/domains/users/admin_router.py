@@ -11,10 +11,10 @@ from sqlalchemy.orm import Session
 
 try:
     from app.database import get_db
-    from app.shared.admin_auth import require_admin_auth
+    from app.shared.admin_auth import require_admin_role
 except ImportError:  # pragma: no cover - support running as `main`
     from database import get_db
-    from shared.admin_auth import require_admin_auth
+    from shared.admin_auth import require_admin_role
 
 from .schemas import SupportUserDetailResponse, SupportUserResponse
 from .service import UserService
@@ -22,7 +22,7 @@ from .service import UserService
 router = APIRouter(
     prefix="/admin/users",
     tags=["admin"],
-    dependencies=[Depends(require_admin_auth)],
+    dependencies=[Depends(require_admin_role)],
 )
 
 
