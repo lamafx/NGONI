@@ -15,8 +15,15 @@ import {
   isLocalOnlyTrigger,
   publishVideo,
   sendMessage,
+  setStableUserId,
+  stableUserId,
   verifyIdentity,
 } from "../services/chatService";
+import { analyzeIdentityDocument } from "../services/engineClient";
+import { FaqView, HistoryView, ProfileView } from "../components/client/ClientViews";
+import { NotificationBell } from "../components/ui/NotificationBell";
+import { useNotifications } from "../hooks/useNotifications";
+import { loadClientNotifications } from "../services/notificationSources";
 import { delay, nextId, nowLabel } from "../services/mockLatency";
 import {
   consumeTurn as demoConsumeTurn,
@@ -39,7 +46,7 @@ import {
   resetDemoParameters,
   wait,
 } from "../services/demoDirector";
-import { DEMO_ATTACHMENT, DEMO_ID_EXTRACTION, DEMO_PRECHECK } from "../data/demoScenario1";
+import { DEMO_ATTACHMENT, DEMO_ID_EXTRACTION, DEMO_PRECHECK, DEMO_SCAN_MS } from "../data/demoScenario1";
 import { clearOverlay, showOverlay } from "../services/demoOverlay";
 import { resetAdminTour } from "../hooks/useDemoAdminTour";
 // Piece d'identite fournie dans demo/, copiee dans les assets pour etre
@@ -61,7 +68,7 @@ const HANDOFF_REPLIES = [
 const CONVERSATION_ID = "conv-1";
 
 const NAV_ITEMS = [
-  { key: "chat", label: "Chat", active: true, icon: "M2.5 4.5h15v10h-9L4.5 17.5v-3H2.5v-10Z" },
+  { key: "chat", label: "Chat", icon: "M2.5 4.5h15v10h-9L4.5 17.5v-3H2.5v-10Z" },
   { key: "historique", label: "Historique", icon: "M4 10a6 6 0 1 0 1.8-4.3M4 10V5m0 5H2M10 7v3.3l2.3 1.3" },
   { key: "faq", label: "FAQ", icon: "M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm0-5v-.5c0-1 .6-1.4 1.3-1.9.7-.5 1.2-1 1.2-1.9A2.5 2.5 0 0 0 10 6a2.5 2.5 0 0 0-2.45 2M10 14.2h.01" },
   { key: "profil", label: "Profil", icon: "M10 6.6a3.2 3.2 0 1 0 0 6.4 3.2 3.2 0 0 0 0-6.4ZM3.8 17c.7-3.2 3.2-5 6.2-5s5.5 1.8 6.2 5" },
@@ -81,6 +88,44 @@ function StrokeIcon({ d, size = 18, ...rest }) {
       <path d={d} />
     </svg>
   );
+}
+
+/** Une image servie par URL (asset Vite) en data URL -- ce que le moteur
+ *  d'analyse attend. Les fichiers choisis a la main en sont deja une. */
+async function toDataUrl(src) {
+  if (!src || src.startsWith("data:")) return src;
+  const blob = await (await fetch(src)).blob();
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result));
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
+
+function mimeOf(dataUrl) {
+  return /^data:([^;,]+)/.exec(dataUrl ?? "")?.[1] ?? "";
+}
+
+function describeFileKind(type, name) {
+  if (type === "application/pdf") return "Document · PDF";
+  if (type.startsWith("image/")) return `Image · ${type.slice(6).toUpperCase()}`;
+  const ext = name.includes(".") ? name.split(".").pop().toUpperCase() : "";
+  return ext ? `Fichier · ${ext}` : "Fichier";
+}
+
+/** Champs extraits a afficher : ceux de l'analyse REELLE de la piece. En
+ *  demonstration, un champ n'est coche « confronté au compte » que si sa
+ *  valeur lue est bien celle attendue pour le compte (DEMO_ID_EXTRACTION) --
+ *  jamais par principe. */
+function extractionFields(analysis) {
+  if (!analysis?.fields?.length) return DEMO_ID_EXTRACTION.fields;
+  return analysis.fields.map((field) => {
+    const expected = DEMO_ID_EXTRACTION.fields.find((f) => f.label === field.label);
+    const matched =
+      isDemoMode() && Boolean(expected?.matched) && expected.value.toUpperCase() === field.value.toUpperCase();
+    return { label: field.label, value: field.value, matched };
+  });
 }
 
 export function ChatPage() {
@@ -116,6 +161,26 @@ export function ChatPage() {
   // text, intent, confidence, ranking, action, latencyMs } -- alimenté par
   // de vrais appels réseau (voir handleSend), jamais de valeur inventée.
   const [inspector, setInspector] = useState(null);
+  // Vue de la barre laterale : "chat" | "historique" | "faq" | "profil".
+  const [view, setView] = useState("chat");
+  const [accountId, setAccountId] = useState(() => stableUserId());
+  // Notifications du client : statut de ses reclamations, prise en charge par
+  // un conseiller (moteur), plus les messages de conseiller recus pendant
+  // qu'il consulte une autre vue (voir pull ci-dessous). Rien en
+  // demonstration : le scenario rejoue n'a pas de compte reel derriere lui.
+  const notifications = useNotifications({
+    scope: `client:${accountId}`,
+    load: () => loadClientNotifications(accountId),
+    enabled: !isDemoMode(),
+  });
+  const notificationsRef = useRef(notifications);
+  notificationsRef.current = notifications;
+  const viewRef = useRef(view);
+  viewRef.current = view;
+  // Resultat de la verification de la DERNIERE piece acceptee -- relu par les
+  // cartes de scan/extraction, qui affichent donc ce qui a vraiment ete lu.
+  const documentAnalysisRef = useRef(null);
+  const [checkingDocument, setCheckingDocument] = useState(false);
   const threadEndRef = useRef(null);
   // Champ de saisie : on lui donne le focus pendant la frappe simulee, pour
   // que le curseur de texte clignote comme dans une vraie conversation.
@@ -160,14 +225,27 @@ export function ChatPage() {
         updates.messages
           .filter((message) => message.sender_role === "agent")
           .forEach((message) =>
+          {
             pushMessage({
               id: message.id,
               sender: "agent",
               senderName: message.agent_id ?? "Conseiller",
               text: message.text,
               time: nowLabel(),
-            })
-          );
+            });
+            // Le client ne regarde pas le fil (autre vue ou autre onglet) :
+            // la cloche le previent.
+            if (viewRef.current !== "chat" || document.hidden) {
+              notificationsRef.current.push({
+                id: `msg:${message.id}`,
+                at: message.created_at ?? new Date().toISOString(),
+                title: `Nouveau message de ${message.agent_id ?? "votre conseiller"}`,
+                body: message.text,
+                tone: "info",
+                action: { view: "chat" },
+              });
+            }
+          });
         if (updates.handoff) {
           setHandoffPhase("connected");
           if (active.status !== "escalated") {
@@ -267,7 +345,8 @@ export function ChatPage() {
       setPickedFile({
         name: file.name,
         size: formatFileSize(file.size),
-        kind: file.type === "application/pdf" ? "Document · PDF" : "Image · JPEG",
+        type: file.type,
+        kind: describeFileKind(file.type, file.name),
         dataUrl: String(reader.result),
       });
     };
@@ -279,9 +358,14 @@ export function ChatPage() {
    *  etre passe explicitement (envoi automatique, voir autoAttachDocument) :
    *  depuis la boucle de demonstration, l'etat `pickedFile` lu ici serait
    *  celui du rendu ou la boucle a demarre, donc toujours vide. */
-  function sendPickedAttachment(file = pickedFile) {
-    if (!file) return;
-    uploadedImageRef.current = file.dataUrl;
+  //
+  // Toute piece passe d'abord par le moteur (POST /identity-documents/analyze) :
+  // controle du fichier, OCR, puis filtre -- SEULES une carte nationale
+  // d'identite ou un passeport debloquent la suite. Tout autre fichier recoit
+  // une reponse explicite (« Ce fichier n'est pas adapté… ») et la demande de
+  // piece reste ouverte. Renvoie true si la piece a ete acceptee.
+  async function sendPickedAttachment(file = pickedFile) {
+    if (!file || checkingDocument) return false;
     pushMessage({
       id: nextId("msg"),
       sender: "user",
@@ -291,10 +375,61 @@ export function ChatPage() {
       time: nowLabel(),
     });
     setPickedFile(null);
+
+    setCheckingDocument(true);
+    setIsTyping(true);
+    let analysis = null;
+    try {
+      const dataUrl = await toDataUrl(file.dataUrl);
+      analysis = await analyzeIdentityDocument({ name: file.name, type: file.type || mimeOf(dataUrl), dataUrl });
+    } catch (err) {
+      console.error("[ChatPage] verification de la piece :", err);
+    } finally {
+      setIsTyping(false);
+      setCheckingDocument(false);
+    }
+
+    if (!analysis) {
+      pushMessage({
+        id: nextId("msg"),
+        sender: "ai",
+        variant: "error",
+        text: "Je n'ai pas pu vérifier ce fichier pour le moment (service de vérification injoignable). Réessayez dans un instant.",
+        time: nowLabel(),
+      });
+      return false;
+    }
+    if (!analysis.accepted) {
+      pushMessage({
+        id: nextId("msg"),
+        sender: "ai",
+        variant: "doc-refused",
+        analysis,
+        text: analysis.message,
+        time: nowLabel(),
+      });
+      return false;
+    }
+
+    documentAnalysisRef.current = analysis;
+    uploadedImageRef.current = file.dataUrl;
     setAwaitingUpload(false);
     const resolve = uploadResolveRef.current;
     uploadResolveRef.current = null;
-    resolve?.(true);
+    if (resolve) {
+      // Demonstration : le scenario reprend et affiche lui-meme le scan puis
+      // les champs -- ceux de cette analyse (voir runTurn).
+      resolve(true);
+      return true;
+    }
+
+    // Hors demonstration : la lecture reelle, sans scenario.
+    pushMessage({ id: nextId("msg"), sender: "ai", variant: "scan", image: file.dataUrl, analysis, text: "Analyse du document", time: nowLabel() });
+    await wait(DEMO_SCAN_MS);
+    pushMessage({ id: nextId("msg"), sender: "ai", variant: "extraction", analysis, text: "Données extraites du document", time: nowLabel() });
+    await wait(1200);
+    pushMessage({ id: nextId("msg"), sender: "ai", text: analysis.message, time: nowLabel() });
+    return true;
   }
 
   /** Variante sans operateur (?demo=1&auto=1) : le meme geste qu'un envoi a
@@ -328,8 +463,7 @@ export function ChatPage() {
     await wait(p.readyMs);
     if (!(await clickWithCursor(sendBtnRef.current, p.cursorTravelMs))) return false;
     stage.hideCursor();
-    sendPickedAttachment(file);
-    return true;
+    return sendPickedAttachment(file);
   }
 
   async function clickWithCursor(el, travelMs) {
@@ -535,6 +669,8 @@ export function ChatPage() {
         quickReplies: reply.quickReplies,
         // L'analyse porte sur la piece reellement soumise.
         image: reply.variant === "scan" ? uploadedImageRef.current : undefined,
+        analysis:
+          reply.variant === "scan" || reply.variant === "extraction" ? documentAnalysisRef.current : undefined,
       });
     }
 
@@ -792,7 +928,13 @@ export function ChatPage() {
         </div>
         <nav className="ns-nav">
           {NAV_ITEMS.map((item) => (
-            <button key={item.key} type="button" className={`ns-nav-item ${item.active ? "active" : ""}`}>
+            <button
+              key={item.key}
+              type="button"
+              className={`ns-nav-item ${view === item.key ? "active" : ""}`}
+              onClick={() => setView(item.key)}
+              aria-current={view === item.key ? "page" : undefined}
+            >
               <StrokeIcon d={item.icon} />
               {item.label}
             </button>
@@ -808,7 +950,39 @@ export function ChatPage() {
       </aside>
       )}
 
+      {/* VUES SECONDAIRES (Historique, FAQ, Profil) -- a la place du fil. */}
+      {view !== "chat" && (
+        <main className="ns-chat-col">
+          {view === "historique" && <HistoryView userId={accountId} onNewChat={() => setView("chat")} />}
+          {view === "faq" && (
+            <FaqView
+              onAsk={(question) => {
+                setView("chat");
+                handleSend(question);
+              }}
+            />
+          )}
+          {view === "profil" && (
+            <ProfileView
+              userId={accountId}
+              photo={clientPhoto}
+              onOpenHistory={() => setView("historique")}
+              onChangeAccount={(userId) => {
+                if (!setStableUserId(userId)) return;
+                setAccountId(userId);
+                // Nouveau compte = nouvelle conversation : on vide le fil
+                // local puis on recharge (identifiant Rasa neuf, voir
+                // rasaSenderId). Le delai laisse DemoStore persister le vide.
+                dispatch({ type: "RESET" });
+                setTimeout(() => window.location.reload(), 150);
+              }}
+            />
+          )}
+        </main>
+      )}
+
       {/* CENTER */}
+      {view === "chat" && (
       <main className="ns-chat-col">
         <header className="ns-chat-header">
           {active.status === "escalated" ? (
@@ -843,9 +1017,18 @@ export function ChatPage() {
                 {autoplayState === "running" ? "En cours" : autoplayState === "done" ? "Rejouer" : "Démo"}
               </button>
             )}
-            <button type="button" className="ns-icon-btn" aria-label="Notifications">
-              <StrokeIcon d="M6 8a4 4 0 0 1 8 0c0 4 1.5 5 1.5 5h-11S6 12 6 8Z" size={17} />
-            </button>
+            <NotificationBell
+              notifications={notifications}
+              buttonClassName="ns-icon-btn"
+              badgeClassName="ns-notif-badge"
+              iconSize={17}
+              emptyText={
+                isDemoMode()
+                  ? "Aucune notification pendant la démonstration."
+                  : "Aucune notification : le suivi de vos réclamations et les réponses des conseillers apparaîtront ici."
+              }
+              onSelect={(item) => item.action?.view && setView(item.action.view)}
+            />
             {active.status !== "escalated" && (
               <button type="button" className="ns-btn-outline" onClick={() => handleSend("Je veux parler à un conseiller humain", "Contactez-nous")}>
                 <StrokeIcon d="M2.5 5.5h15v10h-15v-10Zm0 1 7.5 5.5 7.5-5.5" size={15} />
@@ -909,7 +1092,11 @@ export function ChatPage() {
                     {m.variant === "attachment" && m.attachment && (
                       <span className="ns-file-card">
                         <span className="ns-file-thumb">
-                          <img src={m.attachment.dataUrl || cniRecto} alt="Pièce d'identité envoyée" />
+                          {!m.attachment.type || m.attachment.type.startsWith("image/") ? (
+                            <img src={m.attachment.dataUrl || cniRecto} alt="Pièce jointe envoyée" />
+                          ) : (
+                            <StrokeIcon d="M6 2.5h6l4 4V17a.5.5 0 0 1-.5.5H6a.5.5 0 0 1-.5-.5V3a.5.5 0 0 1 .5-.5Zm6 0V6.5h4" size={22} />
+                          )}
                         </span>
                         <span className="ns-file-meta">
                           <span className="ns-file-name">{m.attachment.name}</span>
@@ -936,7 +1123,7 @@ export function ChatPage() {
                               au rythme du balayage -- plutôt qu'en carte
                               centrale qui vole l'attention à la pièce. */}
                           <span className="ns-scan-checks">
-                            {DEMO_PRECHECK.items.map((it, i) => (
+                            {(m.analysis?.checks ?? DEMO_PRECHECK.items).map((it, i) => (
                               <span key={it.label} style={{ animationDelay: `${0.7 + i * 0.62}s` }}>
                                 <svg width="11" height="11" viewBox="0 0 20 20" fill="none" aria-hidden="true">
                                   <path d="m4 10.4 4 4 8-9" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
@@ -946,7 +1133,9 @@ export function ChatPage() {
                             ))}
                           </span>
                         </span>
-                        <span className="ns-scan-foot">5 contrôles techniques · conformes</span>
+                        <span className="ns-scan-foot">
+                          {(m.analysis?.checks ?? DEMO_PRECHECK.items).length} contrôles techniques · conformes
+                        </span>
                       </span>
                     )}
                     {/* Lecture du document : les champs se posent un a un, au
@@ -957,7 +1146,7 @@ export function ChatPage() {
                       <span className="ns-extract">
                         <span className="ns-extract-head">{DEMO_ID_EXTRACTION.title}</span>
                         <span className="ns-extract-grid">
-                          {DEMO_ID_EXTRACTION.fields.map((f, i) => (
+                          {extractionFields(m.analysis).map((f, i) => (
                             <span
                               key={f.label}
                               className={`ns-extract-row${f.matched ? " is-matched" : ""}`}
@@ -977,12 +1166,14 @@ export function ChatPage() {
                             </span>
                           ))}
                         </span>
-                        <span
-                          className="ns-extract-match"
-                          style={{ animationDelay: `${DEMO_ID_EXTRACTION.fields.length * 0.18 + 0.2}s` }}
-                        >
-                          {DEMO_ID_EXTRACTION.matchNote}
-                        </span>
+                        {extractionFields(m.analysis).some((f) => f.matched) && (
+                          <span
+                            className="ns-extract-match"
+                            style={{ animationDelay: `${extractionFields(m.analysis).length * 0.18 + 0.2}s` }}
+                          >
+                            {DEMO_ID_EXTRACTION.matchNote}
+                          </span>
+                        )}
                         <span className="ns-extract-foot">{DEMO_ID_EXTRACTION.footnote}</span>
                       </span>
                     )}
@@ -1004,6 +1195,23 @@ export function ChatPage() {
                           </span>
                         ))}
                         <span className="ns-precheck-foot">{DEMO_PRECHECK.footnote}</span>
+                      </span>
+                    )}
+                    {m.variant === "doc-refused" && (
+                      <span className="ns-doc-refused">
+                        <span className="ns-doc-refused-title">
+                          <StrokeIcon d="M10 2.5 18 16.5H2L10 2.5Zm0 5.5v3.5m0 2.5h.01" size={15} /> Fichier non adapté
+                        </span>
+                        <span>{m.text}</span>
+                        {m.analysis?.checks?.length > 0 && (
+                          <span className="ns-doc-checks">
+                            {m.analysis.checks.map((check) => (
+                              <span key={check.label} className={check.ok ? "" : "is-ko"}>
+                                {check.ok ? "✓" : "✗"} {check.label} : {check.value}
+                              </span>
+                            ))}
+                          </span>
+                        )}
                       </span>
                     )}
                     {(!m.variant || m.variant === "verification" || m.variant === "default") && m.text}
@@ -1065,7 +1273,11 @@ export function ChatPage() {
           {pickedFile && (
             <div className="ns-composer-attachment">
               <span className="ns-file-thumb">
-                <img src={pickedFile.dataUrl} alt="" />
+                {pickedFile.type?.startsWith("image/") ? (
+                  <img src={pickedFile.dataUrl} alt="" />
+                ) : (
+                  <StrokeIcon d="M6 2.5h6l4 4V17a.5.5 0 0 1-.5.5H6a.5.5 0 0 1-.5-.5V3a.5.5 0 0 1 .5-.5Zm6 0V6.5h4" size={22} />
+                )}
               </span>
               <span className="ns-file-meta" style={{ flex: 1 }}>
                 <span className="ns-file-name">{pickedFile.name}</span>
@@ -1146,7 +1358,7 @@ export function ChatPage() {
               ref={sendBtnRef}
               type="button"
               onClick={() => (pickedFile ? sendPickedAttachment() : handleSend())}
-              disabled={pickedFile ? false : isTyping}
+              disabled={pickedFile ? checkingDocument : isTyping}
               aria-label={pickedFile ? "Envoyer la pièce jointe" : "Envoyer"}
             >
               <StrokeIcon d="M4 10h11m0 0-4.5-4.5M15 10l-4.5 4.5" size={17} stroke="#ffffff" strokeWidth="1.9" />
@@ -1154,6 +1366,7 @@ export function ChatPage() {
           </div>
         </div>
       </main>
+      )}
 
       {/* RIGHT PANEL -- prise en charge humaine (prioritaire, persiste tant
           que la conversation reste escaladée), sinon panneau normal, ou
@@ -1165,7 +1378,7 @@ export function ChatPage() {
           largeur au fil. Il réapparaît au moment de l'escalade -- c'est là
           qu'il porte enfin quelque chose, la mise en relation puis la carte
           du conseiller. */}
-      {(!isDemoMode() || active.status === "escalated") && (
+      {view === "chat" && (!isDemoMode() || active.status === "escalated") && (
       <aside className="ns-right-panel">
         {active.status === "escalated" ? (
           <HandoffPanel phase={handoffPhase} advisorName={active.assignedAgent} onCancel={handleCancelHandoff} />

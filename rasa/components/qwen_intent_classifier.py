@@ -478,7 +478,10 @@ class QwenIntentClassifier(GraphComponent, IntentClassifier):
 
         try:
             response = requests.post(
-                self.component_config["ollama_url"],
+                # OLLAMA_CHAT_URL prime sur la config figee dans le modele
+                # entraine : sous Docker Compose, Ollama est le service
+                # `ollama`, pas l'hote (voir docker-compose.yml).
+                os.getenv("OLLAMA_CHAT_URL") or self.component_config["ollama_url"],
                 json={
                     "model": self.component_config["model"],
                     "messages": [{"role": "user", "content": self._build_prompt(text, context_block)}],

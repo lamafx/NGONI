@@ -144,6 +144,18 @@ class ConversationRepository:
         )
         return self.session.execute(stmt).scalars().first()
 
+    def last_message(self, conversation_id: str) -> tuple[Optional[str], Optional[str]]:
+        """(texte, role de l'auteur) du dernier message -- le role permet aux
+        notifications du conseiller d'ignorer ses propres reponses."""
+        stmt = (
+            select(ConversationMessage.text, ConversationMessage.sender_role)
+            .where(ConversationMessage.conversation_id == conversation_id)
+            .order_by(ConversationMessage.created_at.desc())
+            .limit(1)
+        )
+        row = self.session.execute(stmt).first()
+        return (row[0], row[1]) if row else (None, None)
+
     def count_by_role(self, conversation_id: str) -> Dict[str, int]:
         stmt = (
             select(ConversationMessage.sender_role, func.count())

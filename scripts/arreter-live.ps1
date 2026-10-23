@@ -17,6 +17,22 @@ if (Test-Path $FichierPids) {
     Write-Host "   aucun processus enregistre par demarrer-live.ps1"
 }
 
+# Serveurs lances a la main (utils.txt) : reperes par leur ligne de commande,
+# avec leurs processus enfants -- le rechargeur de `--reload` laisse sinon un
+# processus qui garde le port 8000 ouvert.
+$serveurs = @(Get-CimInstance Win32_Process | Where-Object {
+        $_.CommandLine -match 'uvicorn (app|wallet_stub|user_stub)\.main:app' -or
+        ($_.Name -eq 'node.exe' -and $_.CommandLine -match 'vite')
+    })
+if ($serveurs) {
+    $ids = $serveurs.ProcessId
+    $enfants = @(Get-CimInstance Win32_Process | Where-Object { $ids -contains $_.ParentProcessId })
+    foreach ($p in $serveurs + $enfants) {
+        Stop-Process -Id $p.ProcessId -Force -ErrorAction SilentlyContinue
+        Write-Host "   arrete : $($p.Name) (pid $($p.ProcessId))"
+    }
+}
+
 Push-Location $Racine
-try { docker compose stop rasa actions } finally { Pop-Location }
+try { docker compose -f docker-compose.local.yml stop } finally { Pop-Location }
 Write-Host "Pile NGONI arretee." -ForegroundColor Green

@@ -8,6 +8,33 @@ import { useDemoStore } from "../../state/DemoStore";
 import { AGENTS } from "../../data/mockData";
 import { getDashboardSummary } from "../../services/engineClient";
 import { isDemoMode } from "../../services/demoDirector";
+import { NotificationBell } from "../ui/NotificationBell";
+import { useNotifications } from "../../hooks/useNotifications";
+import { loadAdminNotifications } from "../../services/notificationSources";
+
+/** Notifications de la scene rejouee : escalades et tickets du DemoStore. */
+function demoAdminNotifications(state, agentRoute) {
+  return [
+    ...state.conversations
+      .filter((c) => c.status === "escalated")
+      .map((c) => ({
+        id: `demo-escalade:${c.id}`,
+        title: `Escalade — ${c.userName ?? c.id}`,
+        body: c.subject ?? c.summary ?? undefined,
+        tone: "warn",
+        action: { path: agentRoute },
+      })),
+    ...state.tickets
+      .filter((t) => t.status === "nouveau")
+      .map((t) => ({
+        id: `demo-ticket:${t.id}`,
+        title: `Nouvelle demande ${t.id}`,
+        body: [t.userName, t.subject].filter(Boolean).join(" · "),
+        tone: "info",
+        action: { path: "/admin" },
+      })),
+  ];
+}
 
 // Personne connectee a l'espace ADMINISTRATION -- distincte du conseiller qui
 // traite les escalades dans l'espace Agent (Ibrahim Traoré, AGENTS[0]). Ce
@@ -31,6 +58,10 @@ export function AdminShell({ active, title, subtitle, children }) {
   // porte deja ces quatre COUNT -- voir domains/stats/dashboard_service.py).
   const [counters, setCounters] = useState(null);
   const demo = isDemoMode();
+  // Hors demonstration, tout ce qui ouvre une conversation pointe vers le
+  // poste conseiller REEL (/agent/live) ; en demonstration, vers la scene
+  // rejouee (/agent).
+  const agentRoute = demo ? "/agent" : "/agent/live";
 
   useEffect(() => {
     if (demo) return;
@@ -58,7 +89,13 @@ export function AdminShell({ active, title, subtitle, children }) {
   const ticketsCount = demo ? state.tickets.length : counters?.tickets_open ?? 0;
   const agentsCount = demo ? AGENTS.length : counters?.agents_online ?? 0;
   const usersCount = demo ? undefined : counters?.users_total ?? 0;
-  const notifCount = pendingTickets + liveEscalations;
+  // Hors demonstration : escalades en attente, demandes ouvertes, services
+  // en panne et diagnostics escalades (moteur, voir notificationSources.js).
+  const notifications = useNotifications({
+    scope: demo ? "admin-demo" : "admin",
+    load: demo ? async () => demoAdminNotifications(state, agentRoute) : loadAdminNotifications,
+    intervalMs: demo ? 3000 : 30000,
+  });
 
   useEffect(() => {
     function onClickOutside(e) {
@@ -68,18 +105,16 @@ export function AdminShell({ active, title, subtitle, children }) {
     return () => document.removeEventListener("mousedown", onClickOutside);
   }, []);
 
-  // Hors demonstration, tout ce qui ouvre une conversation pointe vers le
-  // poste conseiller REEL (/agent/live) ; en demonstration, vers la scene
-  // rejouee (/agent).
-  const agentRoute = demo ? "/agent" : "/agent/live";
 
   const NAV_ITEMS = [
     { key: "dashboard", icon: "grid", label: "Tableau de bord", onClick: () => navigate("/admin") },
-    { key: "conversations", icon: "message", label: "Conversations", count: conversationsCount, onClick: () => navigate(agentRoute) },
-    { key: "demandes", icon: "file", label: "Demandes", count: ticketsCount },
-    { key: "diagnostics", icon: "activity", label: "Diagnostics" },
-    { key: "escalades", icon: "alert", label: "Escalades", count: liveEscalations || undefined, onClick: () => navigate(agentRoute) },
-    { key: "agents", icon: "user-check", label: "Agents", count: agentsCount },
+    // En demonstration, Conversations/Escalades restent la scene rejouee de
+    // l'espace Agent ; sinon, les pages de supervision branchees sur le moteur.
+    { key: "conversations", icon: "message", label: "Conversations", count: conversationsCount, onClick: () => navigate(demo ? agentRoute : "/admin/conversations") },
+    { key: "demandes", icon: "file", label: "Demandes", count: ticketsCount, onClick: () => navigate("/admin/demandes") },
+    { key: "diagnostics", icon: "activity", label: "Diagnostics", onClick: () => navigate("/admin/diagnostics") },
+    { key: "escalades", icon: "alert", label: "Escalades", count: liveEscalations || undefined, onClick: () => navigate(demo ? agentRoute : "/admin/escalades") },
+    { key: "agents", icon: "user-check", label: "Agents", count: agentsCount, onClick: () => navigate("/admin/agents") },
     { key: "statistiques", icon: "bar-chart", label: "Statistiques", onClick: () => navigate("/admin/statistiques") },
     { key: "utilisateurs", icon: "users", label: "Utilisateurs", count: usersCount, onClick: () => navigate("/admin/utilisateurs") },
     { key: "base-connaissances", icon: "book", label: "Base de connaissances", onClick: () => navigate("/admin/base-connaissances") },
@@ -123,10 +158,12 @@ export function AdminShell({ active, title, subtitle, children }) {
             {subtitle && <div className="admin-topbar-sub">{subtitle}</div>}
           </div>
           <div className="admin-topbar-right">
-            <button className="btn btn-ghost btn-icon admin-notif-btn" type="button" aria-label="Notifications">
-              <Icon name="bell" size={18} />
-              {notifCount > 0 && <span className="notif-count">{notifCount}</span>}
-            </button>
+            <NotificationBell
+              notifications={notifications}
+              buttonClassName="btn btn-ghost btn-icon admin-notif-btn"
+              emptyText="Rien à signaler : aucune escalade en attente, aucune demande ouverte, tous les services répondent."
+              onSelect={(item) => item.action?.path && navigate(item.action.path)}
+            />
             <div className="admin-user-menu" ref={userMenuRef}>
               <button type="button" className="admin-user-trigger" onClick={() => setUserMenuOpen((o) => !o)}>
                 <Avatar name={ADMIN_USER.name} size={38} />
@@ -141,7 +178,9 @@ export function AdminShell({ active, title, subtitle, children }) {
                   <button type="button" onClick={() => navigate(agentRoute)}>
                     <Icon name="message" size={15} /> Espace conseiller
                   </button>
-                  <button type="button">
+                  {/* Aucune session cote moteur (secret partage, pas de compte) :
+                      « Déconnexion » quitte simplement l'espace d'administration. */}
+                  <button type="button" onClick={() => navigate("/chat")}>
                     <Icon name="log-out" size={15} /> Déconnexion
                   </button>
                 </div>

@@ -1,16 +1,184 @@
+# Pile complete de ngoni-ia-service sous Docker -- voir README.md.
+#
+#   docker compose up -d --build        # premier lancement (long : images + modeles)
+#   docker compose up -d                # lancements suivants
+#   docker compose down                 # arret (les donnees restent)
+#
+# Reglages et secrets : .env a la racine (modele : .env.example).
+# Entre conteneurs, chaque service se joint par son NOM (http://fastapi:8000,
+# http://ollama:11434...) -- plus aucun host.docker.internal.
+
 name: pfe
+
+x-moteur-env: &moteur-env
+  # Mot de passe sans @ : / ni % -- il est insere tel quel dans l'URL.
+  DATABASE_URL: postgresql+psycopg://${APP_DB_USER:-chatbot_user}:${APP_DB_PASSWORD}@postgres:5432/${APP_DB_NAME:-chatbotdb}
+  WALLET_STUB_INTERNAL_SECRET: ${STUBS_INTERNAL_SECRET:-test-secret}
+  USER_STUB_INTERNAL_SECRET: ${STUBS_INTERNAL_SECRET:-test-secret}
+
+x-moteur-build: &moteur-build
+  context: ./fastapi
+  # Une seule image pour le moteur et les deux stubs (meme code).
+x-moteur-image: &moteur-image ngoni-ia/fastapi:local
 
 services:
 
+  # ---------------------------------------------------------------- donnees
+  postgres:
+    # PostgreSQL 17 + pgvector : meme version que l'installation Windows dont
+    # vient chatbotdb.dump.
+    image: pgvector/pgvector:pg17
+    environment:
+      # `postgres` et non le compte applicatif : les objets du dump
+      # appartiennent aussi a `postgres` (voir docker/postgres/initdb/).
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      APP_DB_USER: ${APP_DB_USER:-chatbot_user}
+      APP_DB_PASSWORD: ${APP_DB_PASSWORD}
+      APP_DB_NAME: ${APP_DB_NAME:-chatbotdb}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./docker/postgres/initdb:/docker-entrypoint-initdb.d:ro
+      - ./docker/postgres:/seed:ro
+    # 5433 cote hote : 5432 est souvent deja pris par un PostgreSQL installe
+    # sous Windows.
+    ports:
+      - "${POSTGRES_HOST_PORT:-5433}:5432"
+    healthcheck:
+      # Par TCP : pendant la restauration initiale, le serveur temporaire
+      # n'ecoute que sur le socket local -- le conteneur n'est donc declare
+      # pret qu'une fois la base restauree.
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U postgres -d ${APP_DB_NAME:-chatbotdb}"]
+      interval: 5s
+      timeout: 5s
+      retries: 60
+    restart: unless-stopped
+
+  # ------------------------------------------------------------ modeles IA
+  ollama:
+    image: ollama/ollama:0.40.8
+    environment:
+      # Modeles gardes en memoire indefiniment : par defaut Ollama les
+      # decharge apres 5 min d'inactivite, et chaque reprise recoutait le
+      # chargement + la lecture du prompt (1 a 2 min sans GPU, au-dela du
+      # delai du classifieur Rasa).
+      OLLAMA_KEEP_ALIVE: "-1"
+    volumes:
+      - ollama:/root/.ollama
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+    restart: unless-stopped
+
+  # Telecharge les deux modeles au premier lancement (~2 Go), puis s'arrete.
+  # Les lancements suivants les retrouvent dans le volume `ollama`.
+  ollama-init:
+    image: ollama/ollama:0.40.8
+    entrypoint: ["/bin/sh", "-c"]
+    command: ["ollama pull qwen3:1.7b && ollama pull qwen3-embedding:0.6b"]
+    environment:
+      OLLAMA_HOST: ollama:11434
+    depends_on:
+      ollama:
+        condition: service_healthy
+    restart: "no"
+
+  # ------------------------------------------------------- moteur + stubs
+  fastapi:
+    build: *moteur-build
+    image: *moteur-image
+    environment:
+      <<: *moteur-env
+      RASA_PARSE_URL: http://rasa:5005/model/parse
+      RASA_WEBHOOK_URL: http://rasa:5005/webhooks/rest/webhook
+      OLLAMA_EMBED_URL: http://ollama:11434/api/embed
+      WALLET_SERVICE_BASE_URL: http://wallet_stub:3103/api/v1
+      USER_SERVICE_BASE_URL: http://user_stub:3104/api/v1
+      WALLET_SERVICE_INTERNAL_SECRET: ${STUBS_INTERNAL_SECRET:-test-secret}
+      USER_SERVICE_INTERNAL_SECRET: ${STUBS_INTERNAL_SECRET:-test-secret}
+      ADMIN_INTERNAL_SECRET: ${ADMIN_INTERNAL_SECRET:-dev-admin-secret-change-me}
+      REGISTRY_POLL_INTERVAL_SECONDS: ${REGISTRY_POLL_INTERVAL_SECONDS:-300}
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      ollama-init:
+        condition: service_completed_successfully
+      wallet_stub:
+        condition: service_started
+      user_stub:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/docs', timeout=5)"]
+      interval: 10s
+      timeout: 10s
+      retries: 30
+      start_period: 30s
+    restart: unless-stopped
+
+  wallet_stub:
+    build: *moteur-build
+    image: *moteur-image
+    command: ["uvicorn", "wallet_stub.main:app", "--host", "0.0.0.0", "--port", "3103"]
+    environment: *moteur-env
+    ports:
+      - "3103:3103"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  user_stub:
+    build: *moteur-build
+    image: *moteur-image
+    command: ["uvicorn", "user_stub.main:app", "--host", "0.0.0.0", "--port", "3104"]
+    environment: *moteur-env
+    ports:
+      - "3104:3104"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ---------------------------------------------------------------- dialogue
   rasa:
     build: ./rasa
     ports:
       - "5005:5005"
     volumes:
+      # Code, donnees d'entrainement et modeles montes depuis le depot : un
+      # modele entraine (voir README, « Entrainer Rasa ») est pris en compte
+      # au redemarrage, sans reconstruire l'image.
       - ./rasa:/app
       - ./rasa/models:/app/models
-    env_file:
-      - ./rasa/.env
+    environment:
+      TRACKER_DB_HOST: postgres
+      TRACKER_DB_PORT: "5432"
+      TRACKER_DB_USER: ${APP_DB_USER:-chatbot_user}
+      TRACKER_DB_PASSWORD: ${APP_DB_PASSWORD}
+      TRACKER_DB_NAME: ${APP_DB_NAME:-chatbotdb}
+      OLLAMA_CHAT_URL: http://ollama:11434/api/chat
+      ENGINE_SETTINGS_URL: http://fastapi:8000/settings/engine
+      NLU_CONTEXT_ENABLED: ${NLU_CONTEXT_ENABLED:-false}
+      NLU_CONTEXT_MAX_TURNS: ${NLU_CONTEXT_MAX_TURNS:-4}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      ollama-init:
+        condition: service_completed_successfully
+      actions:
+        condition: service_started
+    healthcheck:
+      # /status ne repond qu'une fois le modele charge.
+      test: ["CMD", "curl", "-sf", "http://localhost:5005/status"]
+      interval: 15s
+      timeout: 10s
+      retries: 40
+      start_period: 60s
+    restart: unless-stopped
 
   actions:
     build: ./rasa/actions
@@ -18,54 +186,90 @@ services:
       - "5055:5055"
     volumes:
       - ./rasa/actions:/app/actions
-    env_file:
-      - ./rasa/actions/.env
-
-  postgres:
-    image: postgres:15-alpine
     environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./fastapi/init_db.sql:/docker-entrypoint-initdb.d/init_db.sql
+      FAQ_SERVICE_URL: http://fastapi:8000/faq/search
+      FAQ_SUGGESTIONS_SERVICE_URL: http://fastapi:8000/faq/suggestions
+      FAQ_BY_SLUG_SERVICE_URL: http://fastapi:8000/faq/by-slug
+      TICKET_SERVICE_URL: http://fastapi:8000/tickets/create
+      TICKET_LIST_SERVICE_URL: http://fastapi:8000/complaints/mine
+      FEEDBACK_SERVICE_URL: http://fastapi:8000/feedback
+      DIAGNOSTIC_SERVICE_URL: http://fastapi:8000/diagnostic/resolve
+      DIAGNOSTIC_CAPABILITIES_URL: http://fastapi:8000/diagnostic/capabilities
+      EMBEDDING_SERVICE_URL: http://fastapi:8000/embeddings/query
+      EMBEDDING_BATCH_SERVICE_URL: http://fastapi:8000/embeddings/query/batch
+      AGENT_ACTION_AUDIT_URL: http://fastapi:8000/audit/actions
+      WITHDRAW_SERVICE_URL: http://fastapi:8000/conversations/withdraw
+      MEMORY_SERVICE_URL: http://fastapi:8000/conversations/memory
+      OLLAMA_CHAT_URL: http://ollama:11434/api/chat
+      LLM_REPLY_ENABLED: ${LLM_REPLY_ENABLED:-false}
+      LLM_REPLY_MODEL: qwen3:1.7b
+      LLM_REPLY_TIMEOUT: "20"
+      SUPPORT_CONTACT_EMAIL: ${SUPPORT_CONTACT_EMAIL:-support@ngoni.com}
+      SUPPORT_CONTACT_PHONE: ${SUPPORT_CONTACT_PHONE:-+225 00 00 00 00}
+    restart: unless-stopped
 
+  # Prechauffage, une fois Rasa et FastAPI prets, puis s'arrete (meme role que
+  # l'etape 7 de scripts/demarrer-live.ps1). Sans GPU, le premier appel au
+  # LLM charge le modele et lit tout le prompt du classifieur : il depasse le
+  # delai de Rasa (90 s) et le message part en nlu_fallback. Ces appels-ci
+  # absorbent ce cout et remplissent le cache du prompt -- les vrais messages
+  # partent ensuite en 10 a 35 s. Echecs tolores : on reessaie jusqu'au succes.
+  prechauffage:
+    image: *moteur-image
+    command:
+      - python
+      - -c
+      - |
+        import json, time, urllib.request
+        def post(url, corps):
+            req = urllib.request.Request(url, data=json.dumps(corps).encode(), headers={"Content-Type": "application/json"})
+            return json.load(urllib.request.urlopen(req, timeout=300))
+        post("http://fastapi:8000/embeddings/query", {"text": "bonjour"})
+        print("embeddings prets", flush=True)
+        for phrase in ["Bonjour", "Comment retirer mes revenus ?", "ma verification est bloquee"]:
+            for essai in range(6):
+                t = time.time()
+                intent = post("http://rasa:5005/model/parse", {"text": phrase})["intent"]["name"]
+                print(f"{phrase!r} -> {intent} ({time.time() - t:.0f} s)", flush=True)
+                if intent != "nlu_fallback":
+                    break
+        print("prechauffage termine", flush=True)
+    depends_on:
+      fastapi:
+        condition: service_healthy
+      rasa:
+        condition: service_healthy
+    restart: "no"
+
+  # ---------------------------------------------------------------- interface
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        # Doit valoir ADMIN_INTERNAL_SECRET : fige dans l'application au build.
+        VITE_ADMIN_SECRET: ${ADMIN_INTERNAL_SECRET:-dev-admin-secret-change-me}
+    # Meme adresse qu'en developpement : http://localhost:5173 (et
+    # http://localhost:5173/?demo=1#/chat pour la demonstration).
+    ports:
+      - "5173:80"
+    depends_on:
+      - fastapi
+      - rasa
+    restart: unless-stopped
+
+  # ------------------------------------------------- outil (optionnel)
+  # docker compose --profile outils up -d pgadmin  ->  http://localhost:5050
   pgadmin:
     image: dpage/pgadmin4:8.14
+    profiles: ["outils"]
     environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-admin@example.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-changeme}
     ports:
       - "5050:80"
     depends_on:
       - postgres
 
-  # NOTE (docs/16-audit-faq-nlu-2026-07.md 16.3, docs/10-deploiement.md 10.2) :
-  # ce service, `postgres` et `pgadmin` ne sont PAS utilises tels quels dans
-  # le fonctionnement reel de ce projet -- FastAPI et Postgres tournent
-  # nativement sur l'hote (voir docs/10-deploiement.md pour la sequence de
-  # demarrage documentee), seuls `rasa`/`actions` sont dockerises en
-  # pratique. Fait maintenant fonctionnel si utilise quand meme (les deux
-  # URLs Rasa manquaient, seul DATABASE_URL etait deja correct) : lancer
-  # `docker compose up fastapi postgres` en plus des processus natifs
-  # creerait des conteneurs concurrents sur les memes ports (8000/5432),
-  # avec un etat/catalogue FAQ different (voir fastapi/seeds/faq_items.sql
-  # pour repeupler) -- a eviter, pas une garantie de parite avec l'environnement
-  # de developpement reel.
-  fastapi:
-    build: ./fastapi
-    ports:
-      - "8000:8000"
-    environment:
-      - DATABASE_URL=${DATABASE_URL}
-      - RASA_PARSE_URL=http://rasa:5005/model/parse
-      - RASA_WEBHOOK_URL=http://rasa:5005/webhooks/rest/webhook
-    depends_on:
-      - postgres
-      - rasa
-
 volumes:
-  postgres_data:
+  pgdata:
+  ollama:

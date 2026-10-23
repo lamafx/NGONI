@@ -1,0 +1,3 @@
+# Scripts executes dans des conteneurs Linux : fins de ligne LF obligatoires
+# (un CRLF ajoute par Git sous Windows casse le shebang -- « bad interpreter »).
+*.sh text eol=lf

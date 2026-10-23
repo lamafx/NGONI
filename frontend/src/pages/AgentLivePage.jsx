@@ -14,10 +14,14 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Sidebar } from "../components/layout/Sidebar";
 import { Avatar } from "../components/ui/Avatar";
 import { Icon } from "../components/ui/Icon";
 import { MessageBubble } from "../components/chat/MessageBubble";
+import { NotificationBell } from "../components/ui/NotificationBell";
+import { useNotifications } from "../hooks/useNotifications";
+import { loadAgentNotifications } from "../services/notificationSources";
 import {
   assignConversation,
   getConversation,
@@ -26,6 +30,7 @@ import {
   listConversations,
   resolveConversation,
   sendAgentMessage,
+  setAgentStatus,
 } from "../services/engineClient";
 
 const POLL_INTERVAL_MS = 5000;
@@ -42,6 +47,21 @@ const STATUS_LABELS = {
   ESCALADE_DEMANDEE: { label: "En attente", tone: "badge-warn" },
   PRISE_EN_CHARGE: { label: "Prise en charge", tone: "badge-brand" },
   RESOLUE: { label: "Résolue", tone: "badge-good" },
+};
+
+// Vues de la barre laterale -- aussi lisibles dans l'URL (#/agent/live?vue=attente),
+// pour que l'espace Admin puisse ouvrir directement la bonne file.
+const VIEWS = {
+  toutes: "Toutes les conversations",
+  attente: "En attente d'un conseiller",
+  mes: "Mes dossiers",
+  conseillers: "Conseillers",
+};
+
+const AGENT_STATUS = {
+  online: { label: "En ligne", tone: "badge-good" },
+  away: { label: "Absent", tone: "badge-warn" },
+  offline: { label: "Hors ligne", tone: "badge-neutral" },
 };
 
 function StatusBadge({ status }) {
@@ -85,8 +105,19 @@ function toBubble(message) {
 }
 
 export function AgentLivePage() {
+  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const view = VIEWS[searchParams.get("vue")] ? searchParams.get("vue") : "attente";
+  const setView = (next) => setSearchParams(next === "attente" ? {} : { vue: next }, { replace: true });
   const [conversations, setConversations] = useState([]);
-  const [activeId, setActiveId] = useState(null);
+  // Nouvelles escalades en attente et messages d'usagers dans mes dossiers.
+  const notifications = useNotifications({
+    scope: `agent:${ACTING_AGENT_ID}`,
+    load: () => loadAgentNotifications(ACTING_AGENT_ID),
+    intervalMs: 10000,
+  });
+  // ?id= : conversation ouverte depuis l'espace Admin.
+  const [activeId, setActiveId] = useState(() => searchParams.get("id"));
   const [detail, setDetail] = useState(null);
   const [context, setContext] = useState(null);
   const [agents, setAgents] = useState([]);
@@ -133,14 +164,23 @@ export function AgentLivePage() {
     }
   }, []);
 
+  const refreshAgents = useCallback(
+    () =>
+      listAgents()
+        .then(setAgents)
+        .catch((err) => console.error("[AgentLivePage] conseillers :", err)),
+    []
+  );
+
   useEffect(() => {
     refreshQueue();
-    listAgents()
-      .then(setAgents)
-      .catch((err) => console.error("[AgentLivePage] conseillers :", err));
-    const timer = setInterval(refreshQueue, POLL_INTERVAL_MS);
+    refreshAgents();
+    const timer = setInterval(() => {
+      refreshQueue();
+      refreshAgents();
+    }, POLL_INTERVAL_MS);
     return () => clearInterval(timer);
-  }, [refreshQueue]);
+  }, [refreshQueue, refreshAgents]);
 
   useEffect(() => {
     refreshActive(activeId);
@@ -190,6 +230,24 @@ export function AgentLivePage() {
   }
 
   const onlineAgents = agents.filter((agent) => agent.status !== "offline");
+  const me = agents.find((agent) => agent.agent_id === ACTING_AGENT_ID);
+
+  // La liste affichee suit la vue choisie dans la barre laterale.
+  const listed =
+    view === "attente"
+      ? waiting
+      : view === "mes"
+        ? mine
+        : conversations;
+
+  function changeMyStatus(status) {
+    setAgentStatus(ACTING_AGENT_ID, status)
+      .then(refreshAgents)
+      .catch((err) => {
+        console.error("[AgentLivePage] statut :", err);
+        setError("Impossible de changer votre statut (conseiller inconnu du moteur ?).");
+      });
+  }
 
   return (
     <div className="app-shell">
@@ -201,10 +259,11 @@ export function AgentLivePage() {
           </>
         }
         items={[
-          { icon: "message", label: "Conversations", count: conversations.length },
-          { icon: "clock", label: "En attente", count: waiting.length, active: true },
-          { icon: "folder", label: "Mes dossiers", count: mine.length },
-          { icon: "users", label: "Conseillers en ligne", count: onlineAgents.length },
+          { icon: "message", label: "Conversations", count: conversations.length, active: view === "toutes", onClick: () => setView("toutes") },
+          { icon: "clock", label: "En attente", count: waiting.length, active: view === "attente", onClick: () => setView("attente") },
+          { icon: "folder", label: "Mes dossiers", count: mine.length, active: view === "mes", onClick: () => setView("mes") },
+          { icon: "users", label: "Conseillers en ligne", count: onlineAgents.length, active: view === "conseillers", onClick: () => setView("conseillers") },
+          { icon: "grid", label: "Administration", onClick: () => navigate("/admin") },
         ]}
         footer={
           <div className="sidebar-user">
@@ -220,9 +279,23 @@ export function AgentLivePage() {
       <div className="agent-shell">
         <div className="agent-list">
           <div className="agent-list-header">
-            <div style={{ fontWeight: 700, fontSize: "0.92rem" }}>File d'attente</div>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
+              <div style={{ fontWeight: 700, fontSize: "0.92rem" }}>{VIEWS[view]}</div>
+              <NotificationBell
+                notifications={notifications}
+                buttonClassName="btn btn-ghost btn-icon btn-sm admin-notif-btn"
+                align="left"
+                emptyText="Aucun usager en attente, aucun nouveau message dans vos dossiers."
+                onSelect={(item) => {
+                  if (item.action?.view) setView(item.action.view);
+                  if (item.action?.conversationId) setActiveId(item.action.conversationId);
+                }}
+              />
+            </div>
             <div style={{ fontSize: "0.78rem", color: "var(--ink-faint)", marginTop: 2 }}>
-              {waiting.length} en attente · {mine.length} à moi
+              {view === "conseillers"
+                ? `${onlineAgents.length} en ligne sur ${agents.length}`
+                : `${waiting.length} en attente · ${mine.length} à moi`}
             </div>
           </div>
 
@@ -232,14 +305,64 @@ export function AgentLivePage() {
             </div>
           )}
 
-          {conversations.length === 0 && !error && (
-            <div style={{ padding: 16, fontSize: "0.82rem", color: "var(--ink-faint)" }}>
-              Aucune conversation enregistrée pour l'instant. Écrivez un message depuis l'espace
-              client : il apparaîtra ici.
+          {view === "conseillers" && (
+            <div style={{ display: "grid", gap: 8, padding: 12 }}>
+              {me && (
+                <div className="card card-pad" style={{ display: "grid", gap: 8 }}>
+                  <div style={{ fontSize: "0.8rem", fontWeight: 700 }}>Mon statut</div>
+                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                    {Object.entries(AGENT_STATUS).map(([status, meta]) => (
+                      <button
+                        key={status}
+                        type="button"
+                        className={`btn btn-sm ${me.declared_status === status ? "btn-primary" : "btn-secondary"}`}
+                        onClick={() => changeMyStatus(status)}
+                      >
+                        {meta.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {agents.length === 0 && (
+                <div style={{ fontSize: "0.82rem", color: "var(--ink-faint)" }}>Aucun conseiller enregistré.</div>
+              )}
+              {agents.map((agent) => {
+                const meta = AGENT_STATUS[agent.status] ?? AGENT_STATUS.offline;
+                return (
+                  <div key={agent.agent_id} className="agent-conv-item" style={{ cursor: "default" }}>
+                    <div className="row1">
+                      <span className="conv-id">
+                        {agent.display_name}
+                        {agent.agent_id === ACTING_AGENT_ID ? " (vous)" : ""}
+                      </span>
+                      <span className={`badge ${meta.tone}`}>
+                        <span className="badge-dot" />
+                        {meta.label}
+                      </span>
+                    </div>
+                    <div className="conv-user">
+                      {agent.role} · {agent.active_conversations} conversation
+                      {agent.active_conversations > 1 ? "s" : ""} · {agent.assigned_tickets} ticket
+                      {agent.assigned_tickets > 1 ? "s" : ""} · vu {relativeLabel(agent.last_seen_at)}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           )}
 
-          {conversations.map((row) => (
+          {view !== "conseillers" && listed.length === 0 && !error && (
+            <div style={{ padding: 16, fontSize: "0.82rem", color: "var(--ink-faint)" }}>
+              {view === "attente"
+                ? "Personne n'attend de conseiller pour l'instant."
+                : view === "mes"
+                  ? "Vous n'avez aucun dossier en cours. Prenez une conversation en charge depuis « En attente »."
+                  : "Aucune conversation enregistrée pour l'instant. Écrivez un message depuis l'espace client : il apparaîtra ici."}
+            </div>
+          )}
+
+          {view !== "conseillers" && listed.map((row) => (
             <div
               key={row.conversation_id}
               className={`agent-conv-item ${row.conversation_id === activeId ? "active" : ""}`}

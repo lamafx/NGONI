@@ -17,18 +17,22 @@ quelques secondes suffit a l'echelle visee.
 """
 
 from datetime import datetime
-from typing import Optional
+from typing import List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, Header, HTTPException, Query
 from sqlalchemy.orm import Session
 
 try:
     from app.database import get_db
+    from app.domains.complaints.schemas import ComplaintResponse
 except ImportError:  # pragma: no cover - support running as `main`
     from database import get_db
+    from domains.complaints.schemas import ComplaintResponse
 
 from .schemas import (
+    ConversationDetailResponse,
     ConversationMemoryResponse,
+    ConversationSummaryResponse,
     ConversationUpdatesResponse,
     EscalateRequest,
     TurnRequest,
@@ -115,6 +119,43 @@ def conversation_memory(
     return ConversationMemoryResponse(
         **ConversationService.from_session(db).memory_for_user(user_id, exclude)
     )
+
+
+# Identite en header X-User-ID, meme convention que GET /complaints/mine :
+# pas d'authentification dans ce perimetre (docs/13-limitations.md 13.1),
+# l'appelant declare le compte dont il lit l'historique.
+@router.get("/mine", response_model=List[ConversationSummaryResponse])
+def my_conversations(
+    x_user_id: str = Header(..., alias="X-User-ID", min_length=1, max_length=200),
+    limit: int = Query(30, ge=1, le=100),
+    db: Session = Depends(get_db),
+):
+    """Page « Historique » de l'espace client."""
+    return ConversationService.from_session(db).history_for_user(x_user_id, limit=limit)
+
+
+# Enregistree AVANT /mine/{conversation_id} : sinon "tickets" serait pris
+# pour un identifiant de conversation.
+@router.get("/mine/tickets", response_model=List[ComplaintResponse])
+def my_tickets(
+    x_user_id: str = Header(..., alias="X-User-ID", min_length=1, max_length=200),
+    db: Session = Depends(get_db),
+):
+    """Reclamations de l'usager, toutes conversations confondues (page
+    « Profil »)."""
+    return ConversationService.from_session(db).tickets_for_user(x_user_id)
+
+
+@router.get("/mine/{conversation_id}", response_model=ConversationDetailResponse)
+def my_conversation(
+    conversation_id: str,
+    x_user_id: str = Header(..., alias="X-User-ID", min_length=1, max_length=200),
+    db: Session = Depends(get_db),
+):
+    try:
+        return ConversationService.from_session(db).detail_for_user(x_user_id, conversation_id)
+    except ConversationNotFoundError as exc:
+        raise HTTPException(status_code=404, detail="Conversation introuvable") from exc
 
 
 @router.get("/{conversation_id}/updates", response_model=ConversationUpdatesResponse)

@@ -16,6 +16,8 @@ import clientPhoto from "../assets/demo-client-avatar.jpeg";
 import ngoniIcon from "../assets/ngoni-support-icon.jpeg";
 import { nextId, nowLabel } from "../services/mockLatency";
 import { useNavigate } from "react-router-dom";
+import { NotificationBell } from "../components/ui/NotificationBell";
+import { useNotifications } from "../hooks/useNotifications";
 import { DemoCursor, useDemoStage } from "../components/demo/DemoStage";
 import { clearOverlay, showOverlay } from "../services/demoOverlay";
 import {
@@ -55,6 +57,33 @@ export function AgentPage() {
   // l'agent passent de « en cours de vérification » a « validé ». C'est la
   // seule ecriture humaine de tout le parcours.
   const [showProfile, setShowProfile] = useState(false);
+  // Scene rejouee : les notifications sont celles du DemoStore (escalades et
+  // tickets du scenario), pas celles du moteur -- voir AgentLivePage pour le
+  // poste reel.
+  const notifications = useNotifications({
+    scope: "agent-demo",
+    intervalMs: 3000,
+    load: async () => [
+      ...state.conversations
+        .filter((c) => c.status === "escalated")
+        .map((c) => ({
+          id: `demo-escalade:${c.id}`,
+          title: `Escalade — ${c.userName ?? c.id}`,
+          body: c.subject ?? undefined,
+          tone: "warn",
+          action: { conversationId: c.id },
+        })),
+      ...state.tickets
+        .filter((t) => t.status === "nouveau")
+        .map((t) => ({
+          id: `demo-ticket:${t.id}`,
+          title: `Nouvelle demande ${t.id}`,
+          body: [t.userName, t.subject].filter(Boolean).join(" · "),
+          tone: "info",
+          action: t.conversationId ? { conversationId: t.conversationId } : undefined,
+        })),
+    ],
+  });
   const [identityValidated, setIdentityValidated] = useState(false);
   const [note, setNote] = useState("");
   const threadEndRef = useRef(null);
@@ -640,10 +669,17 @@ export function AgentPage() {
               <input type="search" placeholder="Rechercher un utilisateur..." />
             </div>
 
-            <button className="apf-bell" type="button" aria-label="Notifications">
-              <Icon name="bell" size={18} />
-              <span className="apf-badge">3</span>
-            </button>
+            <NotificationBell
+              notifications={notifications}
+              buttonClassName="apf-bell"
+              badgeClassName="apf-badge"
+              emptyText="Aucune escalade ni demande en attente."
+              onSelect={(item) => {
+                if (!item.action?.conversationId) return;
+                setShowProfile(false);
+                setActiveId(item.action.conversationId);
+              }}
+            />
 
             <div className="apf-me">
               <Avatar kind="agent" name={ACTING_AGENT.name} size={34} />

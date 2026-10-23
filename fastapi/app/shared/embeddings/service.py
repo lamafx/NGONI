@@ -29,18 +29,16 @@ precedent (mesure rapide, pas un leave-one-out complet faute de corpus dedie
 -- docs/16-audit-faq-nlu-2026-07.md, absent du depot).
 """
 
+import os
 from typing import List, Union
 
 import numpy as np
 import requests
 
-# host.docker.internal : alias Docker Desktop pour joindre l'hote depuis un
-# conteneur (voir rasa/components/, meme principe).
-# Ce module tourne nativement sur l'hote (voir docs/10-deploiement.md), donc
-# "localhost" suffirait ici -- mais les deux valent la meme adresse sur
-# Docker Desktop, host.docker.internal est gardee par coherence avec le
-# composant Rasa et pour ne rien casser si ce process est un jour dockerise.
-OLLAMA_URL = "http://localhost:11434/api/embed"
+# localhost quand FastAPI tourne nativement a cote d'Ollama ; sous Docker
+# Compose, OLLAMA_EMBED_URL vise le service ollama (http://ollama:11434,
+# voir docker-compose.yml).
+OLLAMA_URL = os.getenv("OLLAMA_EMBED_URL", "http://localhost:11434/api/embed")
 MODEL_NAME = "qwen3-embedding:0.6b"
 EMBEDDING_DIM = 1024
 REQUEST_TIMEOUT_SECONDS = 45

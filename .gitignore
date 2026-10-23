@@ -91,3 +91,6 @@ trash/
 scratchpad/
 rasa/results/
 rasa/experiment/
+
+# Export de la base (donnees reelles : conversations, KYC) -- jamais commite.
+docker/postgres/*.dump

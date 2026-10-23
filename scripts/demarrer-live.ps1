@@ -96,14 +96,17 @@ if (-not $dockerOk) { Ecrire "Impossible de continuer sans Docker." Red; exit 1 
 
 # ---------------------------------------------------------------------------
 Etape "4/7  Rasa (:5005) + serveur d'actions (:5055)"
+# docker-compose.local.yml et NON docker-compose.yml : ce dernier decrit la
+# pile 100 % Docker (ses conteneurs Rasa visent http://fastapi:8000 et
+# http://ollama:11434, et entraineraient PostgreSQL/Ollama en conteneurs).
 Push-Location $Racine
 try {
     if ($Entrainer) {
         Ecrire "   Entrainement du modele Rasa (plusieurs minutes)..."
-        docker compose run --rm rasa python -m rasa train --out models
+        docker compose -f docker-compose.local.yml run --rm rasa python -m rasa train --out models
         if ($LASTEXITCODE -ne 0) { throw "echec de l'entrainement Rasa" }
     }
-    docker compose up -d rasa actions | Out-Null
+    docker compose -f docker-compose.local.yml up -d | Out-Null
 } finally { Pop-Location }
 # /status ne repond qu'une fois le modele charge -- c'est ce qu'on attend.
 $rasaOk = Attendre-Http "http://localhost:5005/status" 300
@@ -114,13 +117,15 @@ Noter "Actions" $actionsOk $(if ($actionsOk) { "serveur d'actions pret" } else {
 # ---------------------------------------------------------------------------
 Etape "5/7  Moteur FastAPI (:8000) + stubs wallet (:3103) / user (:3104)"
 $fastapi = Join-Path $Racine "fastapi"
-$uvicorn = Join-Path $fastapi ".venv\Scripts\uvicorn.exe"
+# python -m uvicorn et NON .venv\Scripts\uvicorn.exe : ce lanceur, copie
+# d'un autre venv, execute le Python de C:\DEV\PFE (sans rapidocr...).
+$python = Join-Path $fastapi ".venv\Scripts\python.exe"
 foreach ($s in @(
         @{ Nom = "fastapi"; Module = "app.main:app"; Port = 8000 },
         @{ Nom = "wallet_stub"; Module = "wallet_stub.main:app"; Port = 3103 },
         @{ Nom = "user_stub"; Module = "user_stub.main:app"; Port = 3104 })) {
     if (Port-Ouvert $s.Port) { Ecrire "   $($s.Nom) deja en ecoute sur :$($s.Port)" }
-    else { Lancer $s.Nom $uvicorn "$($s.Module) --host localhost --port $($s.Port)" $fastapi | Out-Null }
+    else { Lancer $s.Nom $python "-m uvicorn $($s.Module) --host localhost --port $($s.Port)" $fastapi | Out-Null }
     $ok = Attendre-Http "http://localhost:$($s.Port)/docs" 90
     Noter $s.Nom $ok $(if ($ok) { "http://localhost:$($s.Port)" } else { "journal : $Etat\$($s.Nom).log.err" })
 }

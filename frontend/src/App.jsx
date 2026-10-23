@@ -11,6 +11,10 @@ import { AdminSettingsPage } from "./pages/AdminSettingsPage";
 import { AdminStatsPage } from "./pages/AdminStatsPage";
 import { AdminKnowledgePage } from "./pages/AdminKnowledgePage";
 import { AdminUsersPage } from "./pages/AdminUsersPage";
+import { AdminConversationsPage } from "./pages/AdminConversationsPage";
+import { AdminTicketsPage } from "./pages/AdminTicketsPage";
+import { AdminDiagnosticsPage } from "./pages/AdminDiagnosticsPage";
+import { AdminAgentsPage } from "./pages/AdminAgentsPage";
 
 export default function App() {
   return (
@@ -34,6 +38,11 @@ export default function App() {
             <Route path="/admin/statistiques" element={<AdminStatsPage />} />
             <Route path="/admin/base-connaissances" element={<AdminKnowledgePage />} />
             <Route path="/admin/utilisateurs" element={<AdminUsersPage />} />
+            <Route path="/admin/conversations" element={<AdminConversationsPage mode="all" />} />
+            <Route path="/admin/escalades" element={<AdminConversationsPage mode="escalated" />} />
+            <Route path="/admin/demandes" element={<AdminTicketsPage />} />
+            <Route path="/admin/diagnostics" element={<AdminDiagnosticsPage />} />
+            <Route path="/admin/agents" element={<AdminAgentsPage />} />
           </Routes>
         </div>
       </HashRouter>

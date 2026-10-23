@@ -31,6 +31,8 @@ class ConversationSummaryResponse(BaseModel):
     ticket_id: Optional[str] = None
     last_intent: Optional[str] = None
     last_message: Optional[str] = None
+    # user | bot | agent -- auteur du dernier message.
+    last_message_role: Optional[str] = None
     last_message_at: Optional[str] = None
     message_count: int = 0
     resolved_at: Optional[str] = None

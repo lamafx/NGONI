@@ -16,9 +16,9 @@ const ADMIN_SECRET = import.meta.env.VITE_ADMIN_SECRET || "dev-admin-secret-chan
 
 const TIMEOUT_MS = 15000;
 
-async function request(path, { method = "GET", body, admin = false } = {}) {
+async function request(path, { method = "GET", body, admin = false, userId, timeoutMs = TIMEOUT_MS } = {}) {
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
     const res = await fetch(`${BASE}${path}`, {
       method,
@@ -26,6 +26,9 @@ async function request(path, { method = "GET", body, admin = false } = {}) {
       headers: {
         ...(body ? { "Content-Type": "application/json" } : {}),
         ...(admin ? { "X-Internal-Secret": ADMIN_SECRET } : {}),
+        // Compte de l'usager cote client (meme convention que Kong ->
+        // microservices, voir GET /complaints/mine).
+        ...(userId ? { "X-User-ID": userId } : {}),
       },
       ...(body ? { body: JSON.stringify(body) } : {}),
     });
@@ -73,6 +76,12 @@ export function listAuditActions() {
 
 export function listCapabilities() {
   return request("/diagnostic/capabilities");
+}
+
+/** Score d'une phrase libre contre TOUT le catalogue diagnosticable (outil
+ *  de debug du moteur) -- montre vers quel probleme une formulation part. */
+export function debugClassifyDiagnostic(text) {
+  return request("/diagnostic/debug/classify", { method: "POST", body: { text }, timeoutMs: 30000 });
 }
 
 /* ---------- Parametres ---------------------------------------------------- */
@@ -240,6 +249,27 @@ export function getDiagnosticRuns(days) {
   return request(`/admin/diagnostics/runs${days ? `?days=${days}` : ""}`, { admin: true });
 }
 
+/** Bilan par probleme diagnosticable : issues et causes les plus frequentes. */
+export function getDiagnosticProblems(days) {
+  return request(`/admin/diagnostics/problems${days ? `?days=${days}` : ""}`, { admin: true });
+}
+
+export function listDiagnosticSessions({ days, status, service, problem, limit, offset } = {}) {
+  const params = new URLSearchParams();
+  if (days) params.set("days", String(days));
+  if (status) params.set("status", status);
+  if (service) params.set("service", service);
+  if (problem) params.set("problem", problem);
+  if (limit) params.set("limit", String(limit));
+  if (offset) params.set("offset", String(offset));
+  const query = params.toString();
+  return request(`/admin/diagnostics/sessions${query ? `?${query}` : ""}`, { admin: true });
+}
+
+export function getDiagnosticSession(sessionId) {
+  return request(`/admin/diagnostics/sessions/${encodeURIComponent(sessionId)}`, { admin: true });
+}
+
 /** Sonde reelle de chaque dependance (base, Rasa, microservices du registre)
  *  -- remplace la liste codee en dur qui affichait "operational" en toutes
  *  circonstances, y compris pendant une panne. */
@@ -282,6 +312,32 @@ export function recordConversationTurn(conversationId, { userText, intent, confi
         metadata: message.buttons ? { buttons: message.buttons } : {},
       })),
     },
+  });
+}
+
+/** Page « Historique » : conversations passees de ce compte. */
+export function listMyConversations(userId) {
+  return request("/conversations/mine", { userId });
+}
+
+export function getMyConversation(userId, conversationId) {
+  return request(`/conversations/mine/${encodeURIComponent(conversationId)}`, { userId });
+}
+
+/** Reclamations du compte, toutes conversations confondues (page « Profil »). */
+export function listMyTickets(userId) {
+  return request("/conversations/mine/tickets", { userId });
+}
+
+/** Verification d'une piece jointe : format, puis OCR, puis filtre -- seules
+ *  une carte nationale d'identite ou un passeport passent a l'extraction.
+ *  `dataUrl` : le fichier tel que lu par FileReader.readAsDataURL. L'OCR
+ *  prend quelques secondes, d'ou un delai plus long que les autres appels. */
+export function analyzeIdentityDocument({ name, type, dataUrl }) {
+  return request("/identity-documents/analyze", {
+    method: "POST",
+    body: { filename: name, content_type: type, data_base64: dataUrl },
+    timeoutMs: 60000,
   });
 }
 

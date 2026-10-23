@@ -31,7 +31,7 @@ try:
         Conversation,
         ConversationMessage,
     )
-    from app.domains.diagnostic.models import DiagnosticAuditLog
+    from app.domains.diagnostic.models import DiagnosticAuditLog, DiagnosticSession
 except ImportError:  # pragma: no cover - support running as `main`
     from domains.audit.models import AgentAction
     from domains.complaints.models import Complaint
@@ -42,14 +42,20 @@ except ImportError:  # pragma: no cover - support running as `main`
         Conversation,
         ConversationMessage,
     )
-    from domains.diagnostic.models import DiagnosticAuditLog
+    from domains.diagnostic.models import DiagnosticAuditLog, DiagnosticSession
 
 from .dashboard_schemas import (  # noqa: I001
     ActivityItem,
     ConversationVolumeResponse,
     DashboardSummaryResponse,
+    DiagnosticAuditEntry,
+    DiagnosticProblemsResponse,
+    DiagnosticProblemStats,
     DiagnosticRunsPoint,
     DiagnosticRunsResponse,
+    DiagnosticSessionDetail,
+    DiagnosticSessionItem,
+    DiagnosticSessionsResponse,
     IntentDistributionResponse,
     IntentSlice,
     KpiValue,
@@ -476,6 +482,163 @@ class DashboardService:
             by_outcome=by_outcome,
             points=points,
         )
+
+    def diagnostic_problems(self, days: int = DEFAULT_PERIOD_DAYS) -> DiagnosticProblemsResponse:
+        """Bilan par probleme diagnosticable (service, problem) : volume,
+        issues, et causes les plus frequentes (outcome_detail). C'est ce qui
+        montre OU le diagnostic echoue -- un taux d'escalade global ne dit
+        pas quel probleme le tire vers le haut."""
+        start = _now() - timedelta(days=days)
+        rows = (
+            self.session.query(
+                DiagnosticAuditLog.service,
+                DiagnosticAuditLog.problem,
+                DiagnosticAuditLog.outcome,
+                DiagnosticAuditLog.outcome_detail,
+                func.count(),
+                func.avg(DiagnosticAuditLog.latency_ms),
+                func.max(DiagnosticAuditLog.created_at),
+            )
+            .filter(DiagnosticAuditLog.created_at >= start)
+            .group_by(
+                DiagnosticAuditLog.service,
+                DiagnosticAuditLog.problem,
+                DiagnosticAuditLog.outcome,
+                DiagnosticAuditLog.outcome_detail,
+            )
+            .all()
+        )
+        buckets: Dict[Tuple[str, str], Dict[str, Any]] = {}
+        for service, problem, outcome, detail, count, latency, last_at in rows:
+            bucket = buckets.setdefault(
+                (service, problem),
+                {"counts": {}, "details": {}, "latency_sum": 0.0, "latency_n": 0, "last_at": None},
+            )
+            count = int(count)
+            bucket["counts"][outcome] = bucket["counts"].get(outcome, 0) + count
+            if detail:
+                key = (outcome, detail)
+                bucket["details"][key] = bucket["details"].get(key, 0) + count
+            if latency is not None:
+                bucket["latency_sum"] += float(latency) * count
+                bucket["latency_n"] += count
+            if last_at is not None and (bucket["last_at"] is None or last_at > bucket["last_at"]):
+                bucket["last_at"] = last_at
+
+        problems = []
+        for (service, problem), bucket in buckets.items():
+            counts = bucket["counts"]
+            resolved = counts.get("RESOLVED", 0)
+            escalated = counts.get("ESCALATE", 0)
+            concluded = resolved + escalated
+            top = sorted(bucket["details"].items(), key=lambda item: -item[1])[:5]
+            problems.append(
+                DiagnosticProblemStats(
+                    service=service,
+                    problem=problem,
+                    runs=sum(counts.values()),
+                    resolved=resolved,
+                    escalated=escalated,
+                    need_more_info=counts.get("NEED_MORE_INFO", 0),
+                    resolution_rate=round(resolved / concluded, 4) if concluded else None,
+                    avg_latency_ms=(
+                        int(bucket["latency_sum"] / bucket["latency_n"]) if bucket["latency_n"] else None
+                    ),
+                    top_details=[
+                        {"outcome": outcome, "detail": detail, "count": count}
+                        for (outcome, detail), count in top
+                    ],
+                    last_run_at=_iso(bucket["last_at"]),
+                )
+            )
+        problems.sort(key=lambda p: -p.runs)
+        return DiagnosticProblemsResponse(period_days=days, problems=problems)
+
+    def diagnostic_sessions(
+        self,
+        days: int = DEFAULT_PERIOD_DAYS,
+        status: Optional[str] = None,
+        service: Optional[str] = None,
+        problem: Optional[str] = None,
+        limit: int = 50,
+        offset: int = 0,
+    ) -> DiagnosticSessionsResponse:
+        query = self.session.query(DiagnosticSession).filter(
+            DiagnosticSession.updated_at >= _now() - timedelta(days=days)
+        )
+        if status:
+            query = query.filter(DiagnosticSession.status == status)
+        if service:
+            query = query.filter(DiagnosticSession.service == service)
+        if problem:
+            query = query.filter(DiagnosticSession.problem == problem)
+        total = query.count()
+        sessions = (
+            query.order_by(DiagnosticSession.updated_at.desc())
+            .limit(limit)
+            .offset(offset)
+            .all()
+        )
+        # Dernier appel de chaque session, en UNE requete (pas une par ligne).
+        latest: Dict[str, DiagnosticAuditLog] = {}
+        if sessions:
+            for log in (
+                self.session.query(DiagnosticAuditLog)
+                .filter(DiagnosticAuditLog.session_id.in_([s.session_id for s in sessions]))
+                .order_by(DiagnosticAuditLog.created_at.asc())
+                .all()
+            ):
+                latest[log.session_id] = log
+        return DiagnosticSessionsResponse(
+            total=total,
+            items=[_session_item(s, latest.get(s.session_id)) for s in sessions],
+        )
+
+    def diagnostic_session_detail(self, session_id: str) -> Optional[DiagnosticSessionDetail]:
+        session_row = self.session.query(DiagnosticSession).filter_by(session_id=session_id).first()
+        if session_row is None:
+            return None
+        calls = (
+            self.session.query(DiagnosticAuditLog)
+            .filter(DiagnosticAuditLog.session_id == session_id)
+            .order_by(DiagnosticAuditLog.created_at.asc())
+            .all()
+        )
+        item = _session_item(session_row, calls[-1] if calls else None)
+        return DiagnosticSessionDetail(
+            **item.model_dump(),
+            calls=[
+                DiagnosticAuditEntry(
+                    trace_id=call.trace_id,
+                    service=call.service,
+                    problem=call.problem,
+                    called_endpoint=call.called_endpoint,
+                    request_entities=call.request_entities,
+                    outcome=call.outcome,
+                    outcome_detail=call.outcome_detail,
+                    latency_ms=call.latency_ms,
+                    related_ticket_id=call.related_ticket_id,
+                    created_at=_iso(call.created_at),
+                )
+                for call in calls
+            ],
+        )
+
+
+def _session_item(session_row: Any, last_call: Optional[Any]) -> DiagnosticSessionItem:
+    return DiagnosticSessionItem(
+        session_id=session_row.session_id,
+        user_id=session_row.user_id,
+        service=session_row.service,
+        problem=session_row.problem,
+        status=session_row.status,
+        last_outcome=session_row.last_outcome,
+        last_outcome_detail=last_call.outcome_detail if last_call else None,
+        related_ticket_id=last_call.related_ticket_id if last_call else None,
+        turns_count=session_row.turns_count or 0,
+        created_at=_iso(session_row.created_at),
+        updated_at=_iso(session_row.updated_at),
+    )
 
 
 def _as_date(value: Any) -> date:

@@ -35,6 +35,7 @@ from .common import (
     is_superagent_mode,
     pick,
     request_with_retry,
+    stable_user_id,
 )
 
 DIAGNOSTIC_SERVICE_URL = getenv("DIAGNOSTIC_SERVICE_URL", "http://fastapi:8000/diagnostic/resolve")
@@ -1243,7 +1244,14 @@ def _call_diagnostic_engine(tracker: Tracker, state: Dict[Text, Any]) -> Dict[Te
             "POST",
             DIAGNOSTIC_SERVICE_URL,
             json=payload,
-            headers={"X-User-ID": tracker.sender_id},
+            # Le compte NGONI de l'usager (metadata.user_id envoye par le
+            # frontend), pas tracker.sender_id : ce dernier identifie la
+            # CONVERSATION ("conv-1-ab12cd"), jamais un compte -- les
+            # microservices le rejetaient systematiquement ("Identifiant
+            # utilisateur invalide", WALLET_NOT_FOUND / USER_NOT_FOUND).
+            # Repli sur sender_id pour les clients qui n'envoient pas de
+            # metadata (scripts de test qui passent un UUID comme sender).
+            headers={"X-User-ID": stable_user_id(tracker) or tracker.sender_id},
             timeout=10,
         )
         result = response.json()

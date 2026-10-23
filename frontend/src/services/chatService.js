@@ -30,22 +30,53 @@ function rasaSenderId(conversationId) {
 // ce perimetre, docs/13-limitations.md 13.1) : c'est elle qui permet a
 // l'assistant de se souvenir de la conversation precedente (accueil
 // "Ravi de vous retrouver", voir rasa/actions/greeting.py).
+//
+// C'est aussi le compte NGONI transmis au Diagnostic Engine (X-User-ID, voir
+// rasa/actions/diagnostic.py) : les microservices wallet/user ne connaissent
+// que des UUID de compte. L'ancien identifiant genere ("user-ab12cd34")
+// faisait echouer TOUT diagnostic ("Identifiant utilisateur invalide").
+// Faute d'authentification, le compte par defaut est un compte reel du clone
+// de base (VITE_CLIENT_USER_ID pour en changer) ; la page Profil permet d'en
+// choisir un autre.
 const USER_ID_STORAGE_KEY = "ngoni-user-id";
+export const DEFAULT_CLIENT_USER_ID =
+  import.meta.env.VITE_CLIENT_USER_ID || "479fb9fb-1212-481f-9eac-9083ff060bad";
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+export function isAccountId(value) {
+  return UUID_RE.test(String(value ?? "").trim());
+}
+
 let memoryUserId = null;
 export function stableUserId() {
   if (memoryUserId) return memoryUserId;
   try {
     memoryUserId = localStorage.getItem(USER_ID_STORAGE_KEY);
-    if (!memoryUserId) {
-      memoryUserId = `user-${Math.random().toString(36).slice(2, 10)}`;
+    // Identifiant de l'ancien format (non UUID) : remplace, il ne designait
+    // aucun compte.
+    if (!isAccountId(memoryUserId)) {
+      memoryUserId = DEFAULT_CLIENT_USER_ID;
       localStorage.setItem(USER_ID_STORAGE_KEY, memoryUserId);
     }
   } catch {
-    // Stockage indisponible (navigation privee...) : identite valable pour
-    // cet onglet seulement, la memoire entre conversations est alors perdue.
-    memoryUserId = memoryUserId || `user-${Math.random().toString(36).slice(2, 10)}`;
+    // Stockage indisponible (navigation privee...) : compte par defaut.
+    memoryUserId = DEFAULT_CLIENT_USER_ID;
   }
   return memoryUserId;
+}
+
+/** Changement de compte depuis la page Profil. Renvoie false si l'identifiant
+ *  n'est pas un UUID de compte. */
+export function setStableUserId(userId) {
+  const value = String(userId ?? "").trim().toLowerCase();
+  if (!isAccountId(value)) return false;
+  memoryUserId = value;
+  try {
+    localStorage.setItem(USER_ID_STORAGE_KEY, value);
+  } catch {
+    // Valable pour cet onglet seulement.
+  }
+  return true;
 }
 
 // Etat de tache transmis au classifieur : uniquement ce qui decrit la tache

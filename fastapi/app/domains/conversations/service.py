@@ -27,6 +27,7 @@ import logging
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
+from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
 from .models import (
@@ -292,6 +293,55 @@ class ConversationService:
             "checked_at": _now().isoformat(),
         }
 
+    # ---- historique cote client -------------------------------------------
+
+    def history_for_user(self, user_id: str, limit: int = 30) -> List[ConversationSummaryResponse]:
+        """Conversations passees d'un usager, la plus recente d'abord -- page
+        « Historique » de l'espace client. Meme vue liste que la file des
+        conseillers, filtree sur le compte."""
+        return [
+            self._summary(conversation)
+            for conversation in self.repository.list_for_user(user_id, limit=limit)
+        ]
+
+    def detail_for_user(self, user_id: str, conversation_id: str) -> ConversationDetailResponse:
+        """Fil complet d'une conversation, UNIQUEMENT si elle appartient a cet
+        usager : sinon la meme erreur qu'une conversation inexistante, pour ne
+        pas confirmer a un tiers qu'un identifiant existe (meme regle que
+        GET /complaints/{ticket_id})."""
+        conversation = self.repository.get(conversation_id)
+        if conversation is None or conversation.user_id != user_id:
+            raise ConversationNotFoundError(conversation_id)
+        return self.get_detail(conversation_id)
+
+    def tickets_for_user(self, user_id: str, limit: int = 50) -> List[Any]:
+        """Reclamations d'un usager. Les tickets portent aujourd'hui l'identifiant
+        de la CONVERSATION qui les a crees (rasa/actions/reclamation.py,
+        user_id=sender_id) : on les retrouve donc par ses conversations, en
+        plus de ceux deja rattaches au compte lui-meme. Meme logique de
+        rattachement que memory_for_user."""
+        try:
+            from app.domains.complaints.models import Complaint
+            from app.domains.complaints.service import _to_response
+        except ImportError:  # pragma: no cover - support running as `main`
+            from domains.complaints.models import Complaint
+            from domains.complaints.service import _to_response
+
+        conversations = self.repository.list_for_user(user_id, limit=200)
+        owners = [user_id] + [c.conversation_id for c in conversations]
+        ticket_ids = [c.ticket_id for c in conversations if c.ticket_id]
+        criteria = [Complaint.user_id.in_(owners)]
+        if ticket_ids:
+            criteria.append(Complaint.ticket_id.in_(ticket_ids))
+        complaints = (
+            self.repository.session.query(Complaint)
+            .filter(or_(*criteria))
+            .order_by(Complaint.created_at.desc())
+            .limit(limit)
+            .all()
+        )
+        return [_to_response(complaint) for complaint in complaints]
+
     # ---- flux conseiller -------------------------------------------------
 
     def list_conversations(self, **filters) -> List[ConversationSummaryResponse]:
@@ -513,6 +563,7 @@ class ConversationService:
         return conversation
 
     def _summary(self, conversation: Conversation) -> ConversationSummaryResponse:
+        last_text, last_role = self.repository.last_message(conversation.conversation_id)
         return ConversationSummaryResponse(
             conversation_id=conversation.conversation_id,
             user_id=conversation.user_id,
@@ -525,7 +576,8 @@ class ConversationService:
             assigned_at=_iso(conversation.assigned_at),
             ticket_id=conversation.ticket_id,
             last_intent=conversation.last_intent,
-            last_message=self.repository.last_message_text(conversation.conversation_id),
+            last_message=last_text,
+            last_message_role=last_role,
             last_message_at=_iso(conversation.last_message_at),
             message_count=conversation.message_count or 0,
             resolved_at=_iso(conversation.resolved_at),

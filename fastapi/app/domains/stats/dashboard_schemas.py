@@ -97,6 +97,69 @@ class DiagnosticRunsResponse(BaseModel):
     points: List[DiagnosticRunsPoint] = Field(default_factory=list)
 
 
+class DiagnosticSessionItem(BaseModel):
+    """Une session de diagnostic (ia.diagnostic_sessions) et le detail de son
+    DERNIER appel (ia.diagnostic_audit_log) -- ce qui dit pourquoi elle a
+    abouti ou ete escaladee."""
+
+    session_id: str
+    user_id: Optional[str] = None
+    service: Optional[str] = None
+    problem: Optional[str] = None
+    # IN_PROGRESS | RESOLVED | ESCALATED
+    status: str
+    last_outcome: Optional[str] = None
+    last_outcome_detail: Optional[str] = None
+    related_ticket_id: Optional[str] = None
+    turns_count: int = 0
+    created_at: Optional[str] = None
+    updated_at: Optional[str] = None
+
+
+class DiagnosticSessionsResponse(BaseModel):
+    total: int
+    items: List[DiagnosticSessionItem] = Field(default_factory=list)
+
+
+class DiagnosticAuditEntry(BaseModel):
+    trace_id: str
+    service: str
+    problem: str
+    called_endpoint: Optional[str] = None
+    request_entities: Optional[dict] = None
+    outcome: str
+    outcome_detail: Optional[str] = None
+    latency_ms: Optional[int] = None
+    related_ticket_id: Optional[str] = None
+    created_at: Optional[str] = None
+
+
+class DiagnosticSessionDetail(DiagnosticSessionItem):
+    calls: List[DiagnosticAuditEntry] = Field(default_factory=list)
+
+
+class DiagnosticProblemStats(BaseModel):
+    """Bilan d'UN probleme diagnosticable sur la periode : combien d'appels,
+    comment ils se sont termines, et les causes les plus frequentes."""
+
+    service: str
+    problem: str
+    runs: int
+    resolved: int
+    escalated: int
+    need_more_info: int
+    # None quand aucun appel n'a abouti a une issue (resolu ou escalade).
+    resolution_rate: Optional[float] = None
+    avg_latency_ms: Optional[int] = None
+    top_details: List[dict] = Field(default_factory=list)
+    last_run_at: Optional[str] = None
+
+
+class DiagnosticProblemsResponse(BaseModel):
+    period_days: int
+    problems: List[DiagnosticProblemStats] = Field(default_factory=list)
+
+
 class ServiceHealth(BaseModel):
     name: str
     # 'operational' | 'degraded' | 'down' | 'unknown'

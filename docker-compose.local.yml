@@ -1,0 +1,38 @@
+# Mode LOCAL (developpement) -- voir utils.txt.
+#
+# Seuls Rasa et son serveur d'actions tournent sous Docker ; PostgreSQL,
+# Ollama, le moteur FastAPI, les stubs et Vite tournent nativement sous
+# Windows. Les conteneurs joignent donc l'hote par host.docker.internal,
+# reglages lus dans rasa/.env et rasa/actions/.env.
+#
+#   docker compose -f docker-compose.local.yml up -d     # demarrer
+#   docker compose -f docker-compose.local.yml stop      # arreter
+#
+# Ne PAS utiliser `docker compose up -d rasa actions` sur docker-compose.yml
+# dans ce mode : ce fichier-la decrit la pile 100 % Docker (README.md), ses
+# conteneurs Rasa visent http://fastapi:8000 et http://ollama:11434, et
+# demarreraient aussi PostgreSQL et Ollama en conteneurs.
+
+name: pfe
+
+services:
+  rasa:
+    build: ./rasa
+    image: pfe-rasa
+    ports:
+      - "5005:5005"
+    volumes:
+      - ./rasa:/app
+      - ./rasa/models:/app/models
+    env_file:
+      - ./rasa/.env
+
+  actions:
+    build: ./rasa/actions
+    image: pfe-actions
+    ports:
+      - "5055:5055"
+    volumes:
+      - ./rasa/actions:/app/actions
+    env_file:
+      - ./rasa/actions/.env
