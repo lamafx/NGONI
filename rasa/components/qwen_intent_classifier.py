@@ -149,6 +149,9 @@ PROMPT_LABELS = {
     "out_of_scope": "hors_sujet",
     "browse_faq": "parcourir_la_faq",
     "select_faq": "faq_d_un_theme",
+    # Nom fusionne (2026-10-23) trop abstrait pour le modele 1.7B : les avis
+    # tapes partaient vers affirm/deny.
+    "rate_response": "avis_sur_la_reponse_precedente",
 }
 _LABEL_TO_INTENT = {label: intent for intent, label in PROMPT_LABELS.items()}
 

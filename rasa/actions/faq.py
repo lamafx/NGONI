@@ -427,4 +427,8 @@ class ActionSelectFaq(Action):
         entities = tracker.latest_message.get("entities") or []
         if any(e.get("entity") == "faq_slug" for e in entities):
             return ActionSelectFaqQuestion().run(dispatcher, tracker, domain)
-        return ActionSelectFaqCategory().run(dispatcher, tracker, domain)
+        if any(e.get("entity") == "faq_category" for e in entities):
+            return ActionSelectFaqCategory().run(dispatcher, tracker, domain)
+        # Ni theme ni question (« montre-moi les questions frequentes ») :
+        # on propose les themes, comme « parcourir la FAQ ».
+        return ActionBrowseFaq().run(dispatcher, tracker, domain)
