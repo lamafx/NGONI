@@ -115,6 +115,7 @@ export function AdminShell({ active, title, subtitle, children }) {
     { key: "diagnostics", icon: "activity", label: "Diagnostics", onClick: () => navigate("/admin/diagnostics") },
     { key: "escalades", icon: "alert", label: "Escalades", count: liveEscalations || undefined, onClick: () => navigate(demo ? agentRoute : "/admin/escalades") },
     { key: "agents", icon: "user-check", label: "Agents", count: agentsCount, onClick: () => navigate("/admin/agents") },
+    { key: "capacites", icon: "check-circle", label: "Capacités", onClick: () => navigate("/admin/capacites") },
     { key: "statistiques", icon: "bar-chart", label: "Statistiques", onClick: () => navigate("/admin/statistiques") },
     { key: "utilisateurs", icon: "users", label: "Utilisateurs", count: usersCount, onClick: () => navigate("/admin/utilisateurs") },
     { key: "base-connaissances", icon: "book", label: "Base de connaissances", onClick: () => navigate("/admin/base-connaissances") },

@@ -15,6 +15,7 @@ import { AdminConversationsPage } from "./pages/AdminConversationsPage";
 import { AdminTicketsPage } from "./pages/AdminTicketsPage";
 import { AdminDiagnosticsPage } from "./pages/AdminDiagnosticsPage";
 import { AdminAgentsPage } from "./pages/AdminAgentsPage";
+import { AdminCapabilitiesPage } from "./pages/AdminCapabilitiesPage";
 
 export default function App() {
   return (
@@ -43,6 +44,7 @@ export default function App() {
             <Route path="/admin/demandes" element={<AdminTicketsPage />} />
             <Route path="/admin/diagnostics" element={<AdminDiagnosticsPage />} />
             <Route path="/admin/agents" element={<AdminAgentsPage />} />
+            <Route path="/admin/capacites" element={<AdminCapabilitiesPage />} />
           </Routes>
         </div>
       </HashRouter>
