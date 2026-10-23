@@ -15,6 +15,7 @@ import {
   isLocalOnlyTrigger,
   publishVideo,
   sendMessage,
+  conversationKey,
   setStableUserId,
   stableUserId,
   verifyIdentity,
@@ -381,7 +382,14 @@ export function ChatPage() {
     let analysis = null;
     try {
       const dataUrl = await toDataUrl(file.dataUrl);
-      analysis = await analyzeIdentityDocument({ name: file.name, type: file.type || mimeOf(dataUrl), dataUrl });
+      analysis = await analyzeIdentityDocument({
+        name: file.name,
+        type: file.type || mimeOf(dataUrl),
+        dataUrl,
+        // Hors demonstration, la piece est enregistree pour le conseiller qui
+        // devra la valider, rattachee au compte et a cette conversation.
+        ...(isDemoMode() ? {} : { userId: accountId, conversationId: conversationKey(CONVERSATION_ID) }),
+      });
     } catch (err) {
       console.error("[ChatPage] verification de la piece :", err);
     } finally {
@@ -1030,7 +1038,22 @@ export function ChatPage() {
               onSelect={(item) => item.action?.view && setView(item.action.view)}
             />
             {active.status !== "escalated" && (
-              <button type="button" className="ns-btn-outline" onClick={() => handleSend("Je veux parler à un conseiller humain", "Contactez-nous")}>
+              <button
+                type="button"
+                className="ns-btn-outline"
+                onClick={() => {
+                  // Meme double geste que « Contactez un conseiller » (panneau
+                  // de droite, masque quand le panneau technique est ouvert) :
+                  // la phrase part au bot ET la conversation entre dans la
+                  // file des conseillers.
+                  if (!isDemoMode()) {
+                    escalateToHumanAgent(CONVERSATION_ID, "demande_utilisateur").catch((err) =>
+                      console.error("[ChatPage] escalade vers un conseiller :", err)
+                    );
+                  }
+                  handleSend("Je veux parler à un conseiller humain", "Contactez-nous");
+                }}
+              >
                 <StrokeIcon d="M2.5 5.5h15v10h-15v-10Zm0 1 7.5 5.5 7.5-5.5" size={15} />
                 Contactez-nous
               </button>

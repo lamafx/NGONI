@@ -273,3 +273,6 @@ services:
 volumes:
   pgdata:
   model:
+    # Volume existant conserve tel quel : le renommer dupliquerait ~2 Go de
+    # modeles deja telecharges.
+    name: pfe_ollama

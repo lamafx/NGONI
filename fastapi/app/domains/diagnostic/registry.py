@@ -241,7 +241,13 @@ class CapabilityRegistry:
             index[key] = RoutableProblem(
                 service=manifest.service,
                 problem=problem,
-                base_url=manifest.base_url,
+                # Adresse CONFIGUREE (celle par laquelle le manifeste vient
+                # d'etre lu), pas celle que le service declare de lui-meme :
+                # un service ne connait pas le nom sous lequel le moteur le
+                # joint. Sous Docker, le manifeste annoncait 127.0.0.1 --
+                # injoignable depuis le conteneur du moteur, d'ou des
+                # diagnostics systematiquement SERVICE_UNAVAILABLE.
+                base_url=service.base_url,
                 internal_secret=service.internal_secret,
                 embedding=embedding,
                 example_embeddings=example_embeddings,

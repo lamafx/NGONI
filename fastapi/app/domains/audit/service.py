@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 # "diagnostic_classification" : ce ne sont pas des decisions de
 # classification mais des decisions D'ACTION, avec un niveau de risque
 # different -- separables dans le journal d'activite admin.
-ALLOWED_DOMAINS = {"faq", "diagnostic_classification", "diagnostic_superagent"}
+ALLOWED_DOMAINS = {"faq", "diagnostic_classification", "diagnostic_superagent", "support_humain"}
 
 
 class AgentActionService:

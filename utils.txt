@@ -1,314 +1,91 @@
 ================================================================================
-  NGONI IA SERVICE  --  ALLUMER / ÉTEINDRE LES SERVEURS  (mode local, PowerShell)
+  NGONI IA SERVICE  --  LANCEMENT (Docker)
 ================================================================================
-  Racine du dépôt : C:\DEV\NGONI\ngoni-ia-service
-
-  SOMMAIRE
-    1. Les serveurs en un coup d'œil
-    2. ALLUMER  -- méthode rapide (un script)
-    3. ALLUMER  -- serveur par serveur
-    4. ÉTEINDRE -- méthode rapide (un script)
-    5. ÉTEINDRE -- serveur par serveur / tout éteindre
-    6. Vérifier ce qui tourne
-    7. Adresses
-    8. Problèmes fréquents
-    9. Installation (une seule fois), entraînement Rasa, tests
-
-  ⚠ DEUX FAÇONS DE FAIRE TOURNER LE PROJET -- NE JAMAIS LES MÉLANGER
-    • Mode LOCAL (ce fichier) : PostgreSQL, Model, moteur, services et frontend
-      tournent sous Windows ; seuls Rasa et son serveur d'actions sont dans
-      Docker, décrits par  docker-compose.local.yml.
-    • Mode DOCKER COMPLET (README.md) : docker-compose.yml lance TOUT dans des
-      conteneurs. Toute commande  docker compose ...  SANS
-      « -f docker-compose.local.yml » utilise ce mode-là et casse le mode local.
+  Dossier : C:\DEV\NGONI\ngoni-ia-service
+  Prérequis : Docker Desktop installé.
 
 
-================================================================================
-  1. LES SERVEURS EN UN COUP D'ŒIL
-================================================================================
+--------------------------------------------------------------------------------
+  1. ALLUMER
+--------------------------------------------------------------------------------
 
-  Port   Serveur                   Tourne où             Sert à
-  -----  ------------------------  --------------------  ---------------------------------
-  5432   PostgreSQL                service Windows       la base chatbotdb (tout en dépend)
-  11434  Model (modèles Qwen)     application Windows   classer chaque message (Rasa)
-  5005   Rasa                      Docker                comprendre les messages
-  5055   Serveur d'actions Rasa    Docker                répondre, diagnostiquer, tickets
-  8000   Moteur FastAPI            venv Python           FAQ, diagnostic, admin, OCR
-  3103   wallet_service               venv Python           diagnostic portefeuille
-  3104   user_service                 venv Python           diagnostic compte / KYC
-  5173   Frontend Vite             npm                   les pages web (chat, agent, admin)
+  Double-clic : scripts\demarrer-live.cmd
 
-  Ordre d'allumage  : PostgreSQL → Model → Docker Desktop → Rasa + actions
-                      → moteur → services → frontend
-  Ordre d'extinction : l'inverse (frontend en premier).
+  ou :
 
-
-================================================================================
-  2. ALLUMER -- MÉTHODE RAPIDE (recommandée)
-================================================================================
-
-  Double-cliquer sur :   scripts\demarrer-live.cmd
-
-  ou, dans PowerShell :
-      powershell -ExecutionPolicy Bypass -File C:\DEV\NGONI\ngoni-ia-service\scripts\demarrer-live.ps1
-
-  Le script démarre Model, Docker Desktop, Rasa + actions, le moteur, les
-  deux services et le frontend (s'ils ne tournent pas déjà), vérifie chacun,
-  préchauffe les modèles puis affiche un bilan OK / ÉCHEC.
-
-    • Durée : 5 à 8 min (Rasa met ~3 min à charger son modèle).
-    • Les serveurs tournent en arrière-plan, SANS fenêtre.
-      Journaux : %TEMP%\ngoni-live\   (fastapi.log.err, frontend.log.err...)
-    • PostgreSQL doit déjà tourner (il démarre seul avec Windows).
-    • Option : réentraîner Rasa avant de démarrer
-          powershell -ExecutionPolicy Bypass -File scripts\demarrer-live.ps1 -Entrainer
-
-
-================================================================================
-  3. ALLUMER -- SERVEUR PAR SERVEUR
-================================================================================
-  Utile pour voir les journaux en direct. Les serveurs marqués [fenêtre]
-  occupent leur propre fenêtre PowerShell : la commande ne rend pas la main.
-
-# --- 3.1 PostgreSQL (démarre normalement tout seul avec Windows) -------------
-Get-Service postgresql-x64-17                  # attendu : Status = Running
-Start-Service postgresql-x64-17                # seulement si Stopped (PowerShell ADMIN)
-
-# --- 3.2 Model -----------------------------------------------------------------
-Start-Process "$env:LOCALAPPDATA\Programs\Model\model app.exe"
-Invoke-RestMethod http://localhost:11434/api/version     # répond = prêt
-
-# --- 3.3 Docker Desktop ---------------------------------------------------------
-docker desktop start                           # 1 à 3 min
-docker info --format "{{.ServerVersion}}"      # affiche une version = prêt
-
-# --- 3.4 Rasa + serveur d'actions (Docker) --------------------------------------
-Set-Location C:\DEV\NGONI\ngoni-ia-service
-docker compose -f docker-compose.local.yml up -d
-Invoke-RestMethod http://localhost:5005/status           # prêt quand model_file est rempli (~3 min)
-docker compose -f docker-compose.local.yml logs -f rasa  # suivre le chargement (Ctrl+C pour quitter)
-
-# --- 3.5 Moteur FastAPI, port 8000                                   [fenêtre] -
-Set-Location C:\DEV\NGONI\ngoni-ia-service\fastapi
-.\.venv\Scripts\python.exe -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
-#   Prêt quand s'affiche : « Application startup complete. » (10 à 20 s)
-#   ⚠ Toujours .\.venv\Scripts\python.exe -- ni « python » seul (= Anaconda),
-#     ni .venv\Scripts\uvicorn.exe (= Python d'un autre projet). Voir § 8.
-
-# --- 3.6 Services du diagnostic, ports 3103 et 3104                [2 fenêtres] -
-#   Sans eux, le diagnostic n'a aucun service à interroger.
-Set-Location C:\DEV\NGONI\ngoni-ia-service\fastapi
-.\.venv\Scripts\python.exe -m uvicorn wallet_service.main:app --port 3103
-
-Set-Location C:\DEV\NGONI\ngoni-ia-service\fastapi
-.\.venv\Scripts\python.exe -m uvicorn user_service.main:app --port 3104
-
-# --- 3.7 Frontend Vite, port 5173                                    [fenêtre] -
-#   Sert le chat, l'espace conseiller et l'administration ; relaie /engine
-#   vers le moteur (8000) et /rasa vers Rasa (5005).
-Set-Location C:\DEV\NGONI\ngoni-ia-service\frontend
-npm run dev
-
-# --- 3.8 Variante : tout lancer d'un coup, une fenêtre VISIBLE par serveur ----
-#   À coller dans une seule console PowerShell (PostgreSQL déjà démarré).
-#   Chaque fenêtre se ferme avec Ctrl+C.
-$racine = "C:\DEV\NGONI\ngoni-ia-service"
-$python = "$racine\fastapi\.venv\Scripts\python.exe"
-Start-Process "$env:LOCALAPPDATA\Programs\Model\model app.exe"
 docker desktop start
-Set-Location $racine; docker compose -f docker-compose.local.yml up -d
-Start-Process powershell -ArgumentList "-NoExit","-Command","Set-Location '$racine\fastapi'; & '$python' -m uvicorn wallet_service.main:app --port 3103"
-Start-Process powershell -ArgumentList "-NoExit","-Command","Set-Location '$racine\fastapi'; & '$python' -m uvicorn user_service.main:app --port 3104"
-Start-Process powershell -ArgumentList "-NoExit","-Command","Set-Location '$racine\fastapi'; & '$python' -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8000"
-Start-Process powershell -ArgumentList "-NoExit","-Command","Set-Location '$racine\frontend'; npm run dev"
-
-
-================================================================================
-  4. ÉTEINDRE -- MÉTHODE RAPIDE (recommandée)
-================================================================================
-
-  Double-cliquer sur :   scripts\arreter-live.cmd
-
-  ou, dans PowerShell :
-      powershell -ExecutionPolicy Bypass -File C:\DEV\NGONI\ngoni-ia-service\scripts\arreter-live.ps1
-
-  Arrête le moteur, les services, le frontend (y compris lancés à la main) et
-  les conteneurs Rasa + actions. Laisse tourner PostgreSQL, Model et Docker
-  Desktop : pour les éteindre aussi, voir § 5.2.
-
-
-================================================================================
-  5. ÉTEINDRE -- SERVEUR PAR SERVEUR / TOUT ÉTEINDRE
-================================================================================
-
-# --- 5.1 Un serveur précis ----------------------------------------------------
-#   Serveur lancé dans une fenêtre (§ 3)  →  Ctrl+C dans sa fenêtre.
-
-#   Rasa + serveur d'actions :
 Set-Location C:\DEV\NGONI\ngoni-ia-service
-docker compose -f docker-compose.local.yml stop
+docker compose up -d
+docker compose logs -f prechauffage
 
-#   Moteur, services et frontend sans fenêtre (lancés par le script) -- avec
-#   leurs processus enfants, sinon le rechargeur de --reload garde le port
-#   8000 occupé :
-$serveurs = @(Get-CimInstance Win32_Process | Where-Object {
-    $_.CommandLine -match 'uvicorn (app|wallet_service|user_service)\.main:app' -or
-    ($_.Name -eq 'node.exe' -and $_.CommandLine -match 'vite') })
-$enfants = @(Get-CimInstance Win32_Process | Where-Object { $serveurs.ProcessId -contains $_.ParentProcessId })
-$serveurs + $enfants | ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }
+  Prêt quand « prechauffage termine » s'affiche (3 à 6 min). Ctrl+C pour
+  quitter l'affichage, les serveurs continuent de tourner.
 
-#   Model :
-Get-Process -Name 'model app','model' -ErrorAction SilentlyContinue | Stop-Process -Force
 
-#   Docker Desktop :
+--------------------------------------------------------------------------------
+  2. ÉTEINDRE
+--------------------------------------------------------------------------------
+
+  Double-clic : scripts\arreter-live.cmd
+
+  ou :
+
+Set-Location C:\DEV\NGONI\ngoni-ia-service
+docker compose stop
 docker desktop stop
 
-#   PostgreSQL (PowerShell ADMIN ; redémarre de lui-même au prochain allumage de Windows) :
-Stop-Service postgresql-x64-17
 
-# --- 5.2 TOUT éteindre d'un coup ----------------------------------------------
-#   À coller dans une console PowerShell. Seul PostgreSQL demande une console
-#   ADMIN : sinon il reste allumé (sans conséquence, il ne consomme presque rien).
-powershell -ExecutionPolicy Bypass -File C:\DEV\NGONI\ngoni-ia-service\scripts\arreter-live.ps1
-Get-Process -Name 'model app','model' -ErrorAction SilentlyContinue | Stop-Process -Force
-docker desktop stop
-Stop-Service postgresql-x64-17 -ErrorAction SilentlyContinue
+--------------------------------------------------------------------------------
+  3. ADRESSES
+--------------------------------------------------------------------------------
 
-
-================================================================================
-  6. VÉRIFIER CE QUI TOURNE
-================================================================================
-
-# Qui écoute sur quel port (port absent = serveur éteint)
-Get-NetTCPConnection -State Listen -LocalPort 5432,11434,5005,5055,8000,3103,3104,5173 -ErrorAction SilentlyContinue |
-  Select-Object LocalPort, OwningProcess -Unique | Sort-Object LocalPort
-
-# Conteneurs Rasa
-docker ps --format "{{.Names}}  {{.Status}}"
-
-# Chaque service répond-il ?
-Invoke-RestMethod http://localhost:5005/status                     # Rasa : model_file rempli
-Invoke-RestMethod http://localhost:5055/health                     # actions : status ok
-Invoke-RestMethod http://localhost:8000/diagnostic/capabilities    # moteur : liste non vide si les services tournent
-Invoke-RestMethod http://localhost:3103/api/v1/diagnostic/manifest -Headers @{ "X-Internal-Secret" = "test-secret" }
-Invoke-RestMethod http://localhost:3104/api/v1/diagnostic/manifest -Headers @{ "X-Internal-Secret" = "test-secret" }
-
-# Santé globale vue par le moteur (base, Rasa, services)
-Invoke-RestMethod http://localhost:8000/admin/system/health `
-  -Headers @{ "X-Internal-Secret" = "dev-admin-secret-change-me" } |
-  Select-Object -ExpandProperty services
-
-# Le frontend relaie bien jusqu'au moteur
-Invoke-WebRequest "http://localhost:5173/engine/faq/" -UseBasicParsing | Select-Object StatusCode
-
-# Base de données (mot de passe : DATABASE_URL dans fastapi\.env)
-& "C:\Program Files\PostgreSQL\17\bin\psql.exe" -h 127.0.0.1 -U chatbot_user -d chatbotdb -c "\dt ia.*"
+  Chat client (compte de démo)   http://localhost:5173/?compte=a40e0e00-2006-4514-8000-000000000001#/chat
+  Poste conseiller               http://localhost:5173/#/agent/live
+  Administration                 http://localhost:5173/#/admin
+  Démonstration rejouée          http://localhost:5173/?demo=1#/chat
+  API du moteur                  http://localhost:8000/docs
 
 
-================================================================================
-  7. ADRESSES
-================================================================================
+--------------------------------------------------------------------------------
+  4. COMPTE DE DÉMONSTRATION
+--------------------------------------------------------------------------------
 
-  Espace client
-    http://localhost:5173/#/chat                       Chat (+ Historique, FAQ, Profil)
-    http://localhost:5173/?demo=1#/chat                Démonstration automatique
+docker compose exec fastapi python scripts/compte_demo.py creer
+docker compose exec fastapi python scripts/compte_demo.py reinitialiser
+docker compose exec fastapi python scripts/compte_demo.py afficher
+docker compose exec fastapi python scripts/compte_demo.py creer --nouveau
 
-  Espace conseiller
-    http://localhost:5173/#/agent/live                 Poste conseiller réel (file du moteur)
-    http://localhost:5173/#/agent                      Scène rejouée de la démonstration
-
-  Administration
-    http://localhost:5173/#/admin                      Tableau de bord
-    http://localhost:5173/#/admin/conversations        Conversations
-    http://localhost:5173/#/admin/demandes             Demandes (réclamations)
-    http://localhost:5173/#/admin/diagnostics          Diagnostics
-    http://localhost:5173/#/admin/escalades            Escalades
-    http://localhost:5173/#/admin/agents               Agents
-    http://localhost:5173/#/admin/statistiques         Statistiques
-    http://localhost:5173/#/admin/utilisateurs         Utilisateurs
-    http://localhost:5173/#/admin/base-connaissances   Base de connaissances
-    http://localhost:5173/#/admin/settings             Paramètres
-
-  Moteur
-    http://localhost:8000/docs                         API du moteur (Swagger)
-
-  ?demo=1 doit être placé AVANT le # (forme /?demo=1#/chat) : placé après, il
-  disparaît à la première navigation (voir demoDirector.js).
+  reinitialiser : remet le compte dans son état de départ (à faire avant
+  chaque passage). creer --nouveau : un compte supplémentaire, son adresse
+  de chat est affichée. Parcours complet : DEMO-JURY.md.
 
 
-================================================================================
-  8. PROBLÈMES FRÉQUENTS
-================================================================================
+--------------------------------------------------------------------------------
+  5. VÉRIFIER
+--------------------------------------------------------------------------------
 
-  « [WinError 10013] An attempt was made to access a socket... »
-  ou « [WinError 10048] ... address already in use »
-    → Le port est déjà pris, en général par une ancienne instance du serveur.
-      Voir qui l'occupe (§ 6), l'éteindre (§ 5), puis relancer.
-
-  Le port 8000 reste occupé par un processus qui n'existe plus
-    → C'est le processus enfant du mode --reload : utiliser le bloc
-      « Moteur, services et frontend sans fenêtre » du § 5.1.
-
-  « No module named ... » au démarrage ou à l'analyse d'une pièce (rapidocr)
-    → Mauvais Python. Toujours :  .\.venv\Scripts\python.exe -m uvicorn ...
-      • « python » seul lance Anaconda (C:\Users\HP\anaconda3), sans les dépendances.
-      • .venv\Scripts\uvicorn.exe exécute en réalité le Python de C:\DEV\PFE.
-
-  Rasa ou les actions visent http://fastapi:8000 / http://model:11434, ou des
-  conteneurs postgres / model / fastapi apparaissent
-    → Une commande docker compose a été lancée SANS « -f docker-compose.local.yml ».
-      Set-Location C:\DEV\NGONI\ngoni-ia-service
-      docker compose stop                                              # arrête la pile Docker complète
-      docker compose -f docker-compose.local.yml up -d --force-recreate  # recrée Rasa + actions en mode local
-
-  Rasa « down » ou très lent
-    → Juste après l'allumage : le modèle se charge (~3 min).
-    → Sinon, Model est éteint (§ 3.2). Sans GPU, chaque message prend ~9 s.
-
-  Pages d'administration en erreur 401
-    → VITE_ADMIN_SECRET (frontend) doit valoir ADMIN_INTERNAL_SECRET (fastapi\.env).
-
-  Diagnostic qui répond « Identifiant utilisateur invalide »
-    → Le chat doit utiliser un compte Ngoni existant (UUID) : page Profil du
-      chat. Rasa doit tourner avec le code à jour (§ 5.1 puis § 3.4).
+docker compose ps
+Invoke-RestMethod http://localhost:8000/admin/system/health -Headers @{ "X-Internal-Secret" = "dev-admin-secret-change-me" } | Select-Object -ExpandProperty services
 
 
-================================================================================
-  9. INSTALLATION (une seule fois), ENTRAÎNEMENT RASA, TESTS
-================================================================================
+--------------------------------------------------------------------------------
+  6. APRÈS UNE MODIFICATION DU CODE
+--------------------------------------------------------------------------------
 
-# --- Installation ---------------------------------------------------------------
-Set-Location C:\DEV\NGONI\ngoni-ia-service\fastapi
-python -m venv .venv
-.\.venv\Scripts\python.exe -m pip install -r requirements.txt   # inclut rapidocr (OCR des pièces)
-Copy-Item .env.example .env                                     # puis éditer les valeurs
+docker compose up -d --build fastapi frontend
+docker compose restart actions
+docker compose restart rasa
 
-Set-Location C:\DEV\NGONI\ngoni-ia-service
-Copy-Item rasa\.env.example rasa\.env
-Copy-Item rasa\actions\.env.example rasa\actions\.env
+  fastapi : moteur + services wallet / user. actions : rasa\actions.
+  rasa : rasa\components et rasa\config.yml.
 
-Set-Location C:\DEV\NGONI\ngoni-ia-service\frontend
-npm install
 
-#   Modèles Model nécessaires
-model pull qwen3:1.7b
-model pull qwen3-embedding:0.6b
+--------------------------------------------------------------------------------
+  7. NOUVEAU POSTE (une seule fois)
+--------------------------------------------------------------------------------
 
-# --- Réentraîner Rasa (après modification de data\, domain.yml, config.yml) ----
-Set-Location C:\DEV\NGONI\ngoni-ia-service
-docker compose -f docker-compose.local.yml run --rm rasa python -m rasa train --out models
-docker compose -f docker-compose.local.yml restart rasa
+Copy-Item .env.example .env
+docker compose up -d --build
 
-# --- Après modification du code des actions (rasa\actions\*.py) ---------------
-docker compose -f docker-compose.local.yml restart actions
-
-# --- Tests ----------------------------------------------------------------------
-Set-Location C:\DEV\NGONI\ngoni-ia-service\fastapi
-.\.venv\Scripts\python.exe -m pytest tests -q
-
-Set-Location C:\DEV\NGONI\ngoni-ia-service\frontend
-npm run build
-
-Set-Location C:\DEV\NGONI\ngoni-ia-service
-docker compose -f docker-compose.local.yml exec rasa rasa test nlu --out results
-docker compose -f docker-compose.local.yml exec rasa rasa test
+  Avant : renseigner .env et placer chatbotdb.dump dans docker\postgres\.
+  Le premier lancement télécharge images et modèles (~2 Go, 20 à 40 min).

@@ -9,6 +9,8 @@ class DocumentAnalysisRequest(BaseModel):
     # largement sous la limite (8 Mo, voir router.py).
     filename: Optional[str] = Field(default=None, max_length=255)
     content_type: Optional[str] = Field(default=None, max_length=100)
+    # Conversation dans laquelle la piece a ete envoyee (identifiant moteur).
+    conversation_id: Optional[str] = Field(default=None, max_length=200)
     data_base64: str = Field(min_length=1, max_length=12 * 1024 * 1024)
 
 
@@ -37,3 +39,5 @@ class DocumentAnalysisResponse(BaseModel):
     checks: List[DocumentCheck] = Field(default_factory=list)
     mrz_valid: Optional[bool] = None
     latency_ms: int = 0
+    # Renseigne quand la piece a ete enregistree pour un compte (X-User-ID).
+    document_id: Optional[str] = None

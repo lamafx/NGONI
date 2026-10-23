@@ -12,7 +12,9 @@ import {
   listConversations,
   listDiagnosticSessions,
   listMyConversations,
+  listMyDocuments,
   listMyTickets,
+  listPendingDocuments,
 } from "./engineClient";
 
 const TICKET_TEXT = {
@@ -25,8 +27,45 @@ const TICKET_TEXT = {
 /* ---------- Espace client ------------------------------------------------- */
 
 export async function loadClientNotifications(userId) {
-  const [tickets, conversations] = await Promise.all([listMyTickets(userId), listMyConversations(userId)]);
+  const [tickets, conversations, documents] = await Promise.all([
+    listMyTickets(userId),
+    listMyConversations(userId),
+    listMyDocuments(userId),
+  ]);
   const items = [];
+
+  // Examen de la piece d'identite par un conseiller humain.
+  documents.slice(0, 5).forEach((document) => {
+    const label = document.document_type === "passport" ? "passeport" : "pièce d'identité";
+    if (document.review_status === "approved") {
+      items.push({
+        id: `doc:${document.document_id}:approved`,
+        at: document.reviewed_at,
+        title: "Votre identité a été vérifiée par un conseiller",
+        body: `Votre ${label} est validée : votre compte est désormais vérifié.`,
+        tone: "good",
+        action: { view: "profil" },
+      });
+    } else if (document.review_status === "rejected") {
+      items.push({
+        id: `doc:${document.document_id}:rejected`,
+        at: document.reviewed_at,
+        title: "Votre pièce d'identité a été refusée",
+        body: document.review_reason ? `Motif : ${document.review_reason}` : undefined,
+        tone: "risk",
+        action: { view: "chat" },
+      });
+    } else if (document.review_status === "pending") {
+      items.push({
+        id: `doc:${document.document_id}:pending`,
+        at: document.created_at,
+        title: "Pièce d'identité reçue",
+        body: "Un conseiller va la vérifier.",
+        tone: "warn",
+        action: { view: "chat" },
+      });
+    }
+  });
 
   tickets.slice(0, 15).forEach((ticket) => {
     const text = TICKET_TEXT[ticket.status] ?? { title: `Réclamation : ${ticket.status}`, tone: "info" };
@@ -77,11 +116,22 @@ export async function loadClientNotifications(userId) {
 /* ---------- Espace conseiller --------------------------------------------- */
 
 export async function loadAgentNotifications(agentId) {
-  const [waiting, mine] = await Promise.all([
+  const [waiting, mine, documents] = await Promise.all([
     listConversations({ status: "ESCALADE_DEMANDEE", limit: 30 }),
     listConversations({ status: "PRISE_EN_CHARGE", assignedTo: agentId, limit: 30 }),
+    listPendingDocuments(),
   ]);
   return [
+    ...documents.map((document) => ({
+      id: `doc-pending:${document.document_id}`,
+      at: document.created_at,
+      title: "Pièce d'identité à vérifier",
+      body: `Compte ${document.user_id}${document.conversation_id ? ` · conversation #${document.conversation_id}` : ""}`,
+      tone: "warn",
+      action: document.conversation_id
+        ? { conversationId: document.conversation_id, view: "toutes", openFile: true }
+        : undefined,
+    })),
     ...waiting.map((row) => ({
       id: `waiting:${row.conversation_id}:${row.escalated_at}`,
       at: row.escalated_at ?? row.last_message_at,

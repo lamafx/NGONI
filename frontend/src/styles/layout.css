@@ -2272,3 +2272,93 @@
   font-size:0.8rem;color:var(--ink-muted);background:var(--surface);
   border:1px solid var(--line);padding:5px 11px;border-radius:999px;
 }
+
+/* ---------------------------------------------------------------------------
+   Dossier client du conseiller (components/agent/CustomerFile.jsx)
+   ------------------------------------------------------------------------- */
+.cf-overlay {
+  position: fixed; inset: 0; z-index: 80;
+  background: rgba(15, 23, 32, 0.38);
+  display: flex; justify-content: flex-end;
+}
+.cf-drawer {
+  width: min(1180px, 100vw); height: 100%;
+  background: var(--bg); box-shadow: var(--shadow-lg);
+  display: flex; flex-direction: column; overflow: hidden;
+}
+.cf-head {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  padding: 16px 22px; background: var(--surface); border-bottom: 1px solid var(--line);
+}
+.cf-head-who { display: flex; align-items: center; gap: 14px; min-width: 0; }
+.cf-head-name { font-weight: 800; font-size: 1.08rem; }
+.cf-head-sub { font-size: 0.78rem; color: var(--ink-muted); }
+.cf-head-sub code { font-size: 0.74rem; }
+.cf-trace {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 22px; font-size: 0.76rem; color: var(--ink-muted);
+  background: var(--surface-2); border-bottom: 1px solid var(--line);
+}
+.cf-loading, .cf-error { margin: 18px 22px; font-size: 0.86rem; }
+.cf-error { color: var(--risk); }
+.cf-body {
+  flex: 1; min-height: 0; overflow-y: auto;
+  display: grid; grid-template-columns: 1.1fr 1fr; gap: 18px; padding: 18px 22px 30px;
+}
+.cf-col { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.cf-card { display: flex; flex-direction: column; gap: 12px; }
+.cf-card-title {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  font-weight: 700; font-size: 0.92rem;
+}
+.cf-source {
+  font-size: 0.7rem; font-weight: 600; color: var(--ink-faint);
+  text-transform: uppercase; letter-spacing: 0.04em;
+}
+.cf-subtitle { font-size: 0.78rem; font-weight: 700; color: var(--ink-muted); margin-top: 4px; }
+.cf-doc-image {
+  border-radius: 12px; overflow: hidden; background: var(--surface-2);
+  border: 1px solid var(--line); min-height: 160px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--ink-faint); font-size: 0.8rem;
+}
+.cf-doc-image img { width: 100%; display: block; }
+.cf-doc-meta { font-size: 0.76rem; color: var(--ink-muted); }
+.cf-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 16px; }
+.cf-field { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.cf-field-label { font-size: 0.7rem; font-weight: 600; color: var(--ink-faint); text-transform: uppercase; letter-spacing: 0.03em; }
+.cf-field-value { font-size: 0.86rem; font-weight: 600; overflow-wrap: anywhere; }
+.cf-compare { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+.cf-compare th, .cf-compare td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.cf-compare thead th { font-size: 0.7rem; color: var(--ink-faint); text-transform: uppercase; font-weight: 600; }
+.cf-compare tbody th { font-weight: 600; color: var(--ink-muted); width: 26%; }
+.cf-compare td:last-child { white-space: nowrap; font-weight: 600; }
+.cf-ok { color: var(--good); }
+.cf-ko { color: var(--risk); }
+.cf-na { color: var(--ink-faint); }
+.cf-ok svg, .cf-ko svg, .cf-na svg { vertical-align: -3px; }
+.cf-hint { margin: 0; font-size: 0.74rem; color: var(--ink-faint); }
+.cf-decision { display: flex; flex-direction: column; gap: 10px; padding-top: 6px; border-top: 1px solid var(--line); }
+.cf-decision-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.cf-refuse { display: flex; flex-direction: column; gap: 8px; }
+.cf-decided {
+  display: flex; align-items: center; gap: 8px; padding: 10px 12px;
+  border-radius: 10px; background: var(--surface-2); font-size: 0.84rem; font-weight: 600;
+}
+.cf-input {
+  width: 100%; padding: 8px 12px; border-radius: 10px; border: 1px solid var(--line);
+  background: var(--surface); color: var(--ink); font-family: inherit; font-size: 0.84rem;
+  resize: vertical;
+}
+.cf-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.cf-list li {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px;
+  padding: 7px 0; border-bottom: 1px solid var(--line); font-size: 0.8rem;
+}
+.cf-list li:last-child { border-bottom: none; }
+.cf-list li > span:first-child { color: var(--ink-faint); min-width: 92px; }
+.cf-muted { color: var(--ink-muted); }
+.cf-journal { max-height: 220px; overflow-y: auto; }
+@media (max-width: 960px) {
+  .cf-body { grid-template-columns: 1fr; }
+}

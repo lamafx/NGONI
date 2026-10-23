@@ -19,6 +19,7 @@ import { Sidebar } from "../components/layout/Sidebar";
 import { Avatar } from "../components/ui/Avatar";
 import { Icon } from "../components/ui/Icon";
 import { MessageBubble } from "../components/chat/MessageBubble";
+import { CustomerFile } from "../components/agent/CustomerFile";
 import { NotificationBell } from "../components/ui/NotificationBell";
 import { useNotifications } from "../hooks/useNotifications";
 import { loadAgentNotifications } from "../services/notificationSources";
@@ -123,6 +124,10 @@ export function AgentLivePage() {
   const [agents, setAgents] = useState([]);
   const [reply, setReply] = useState("");
   const [busy, setBusy] = useState(false);
+  // Conversation dont le dossier client est ouvert (null = ferme). Par
+  // conversation et non par compte : le dossier s'ouvre une fois le detail
+  // charge, y compris depuis une notification « piece a verifier ».
+  const [fileFor, setFileFor] = useState(null);
   const [error, setError] = useState(null);
   const threadEndRef = useRef(null);
   const activeIdRef = useRef(null);
@@ -289,6 +294,7 @@ export function AgentLivePage() {
                 onSelect={(item) => {
                   if (item.action?.view) setView(item.action.view);
                   if (item.action?.conversationId) setActiveId(item.action.conversationId);
+                  if (item.action?.openFile) setFileFor(item.action.conversationId);
                 }}
               />
             </div>
@@ -401,6 +407,16 @@ export function AgentLivePage() {
                 </div>
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                {detail?.user_id && (
+                  <button
+                    className="btn btn-secondary btn-sm"
+                    type="button"
+                    onClick={() => setFileFor(detail.conversation_id)}
+                    title="Compte, pièce d'identité, portefeuille et historique de l'usager"
+                  >
+                    <Icon name="id-card" size={14} /> Dossier client
+                  </button>
+                )}
                 {detail && !isMine && (
                   <button
                     className="btn btn-primary btn-sm"
@@ -566,6 +582,24 @@ export function AgentLivePage() {
           )}
         </div>
       </div>
+
+      {detail && fileFor === detail.conversation_id && detail.user_id && (
+        <CustomerFile
+          userId={detail.user_id}
+          conversationId={detail.conversation_id}
+          agentId={ACTING_AGENT_ID}
+          onClose={() => setFileFor(null)}
+          onDecided={(decision, reason) =>
+            // Reponse proposee au client -- le conseiller la relit et l'envoie
+            // lui-meme (rien ne part sans lui).
+            setReply(
+              decision === "approved"
+                ? "Bonne nouvelle : votre pièce d'identité est validée, votre compte est maintenant vérifié. Vous pouvez de nouveau recevoir des cadeaux sur vos lives."
+                : `Votre pièce d'identité n'a pas pu être validée (${reason}). Pouvez-vous en envoyer une nouvelle photo, nette et en entier ?`
+            )
+          }
+        />
+      )}
     </div>
   );
 }

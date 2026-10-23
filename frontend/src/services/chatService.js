@@ -36,11 +36,12 @@ function rasaSenderId(conversationId) {
 // que des UUID de compte. L'ancien identifiant genere ("user-ab12cd34")
 // faisait echouer TOUT diagnostic ("Identifiant utilisateur invalide").
 // Faute d'authentification, le compte par defaut est un compte reel du clone
-// de base (VITE_CLIENT_USER_ID pour en changer) ; la page Profil permet d'en
-// choisir un autre.
+// de base : le compte de demonstration cree par fastapi/scripts/compte_demo.py
+// (VITE_CLIENT_USER_ID pour en changer). La page Profil, ou l'adresse
+// /?compte=<uuid>#/chat, permettent d'en choisir un autre.
 const USER_ID_STORAGE_KEY = "ngoni-user-id";
 export const DEFAULT_CLIENT_USER_ID =
-  import.meta.env.VITE_CLIENT_USER_ID || "479fb9fb-1212-481f-9eac-9083ff060bad";
+  import.meta.env.VITE_CLIENT_USER_ID || "a40e0e00-2006-4514-8000-000000000001";
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export function isAccountId(value) {
@@ -50,6 +51,9 @@ export function isAccountId(value) {
 let memoryUserId = null;
 export function stableUserId() {
   if (memoryUserId) return memoryUserId;
+  // ?compte=<uuid> dans l'adresse (avant le #) : choisi une fois, retenu.
+  const fromUrl = new URLSearchParams(window.location.search).get("compte");
+  if (fromUrl && setStableUserId(fromUrl)) return memoryUserId;
   try {
     memoryUserId = localStorage.getItem(USER_ID_STORAGE_KEY);
     // Identifiant de l'ancien format (non UUID) : remplace, il ne designait

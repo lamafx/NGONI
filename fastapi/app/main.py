@@ -45,6 +45,7 @@ try:
     from .domains.agents.admin_router import router as agents_admin_router
     from .domains.users.admin_router import router as users_admin_router
     from .domains.identity_documents.router import router as identity_documents_router
+    from .domains.support.router import router as support_router
     from .domains.nlu.engines import DEFAULT_ENGINE, predict as nlu_predict
     from .domains.nlu.router import router as nlu_router
     from .shared.admin_auth import warn_if_admin_secret_missing
@@ -74,6 +75,7 @@ except ImportError:  # pragma: no cover - support running as `uvicorn main:app`
     from domains.agents.admin_router import router as agents_admin_router
     from domains.users.admin_router import router as users_admin_router
     from domains.identity_documents.router import router as identity_documents_router
+    from domains.support.router import router as support_router
     from domains.nlu.engines import DEFAULT_ENGINE, predict as nlu_predict
     from domains.nlu.router import router as nlu_router
     from shared.admin_auth import warn_if_admin_secret_missing
@@ -109,6 +111,7 @@ app.include_router(conversations_admin_router)
 app.include_router(agents_admin_router)
 app.include_router(users_admin_router)
 app.include_router(identity_documents_router)
+app.include_router(support_router)
 app.include_router(embeddings_router)
 app.include_router(nlu_router)
 

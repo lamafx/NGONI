@@ -32,7 +32,20 @@ async function request(path, { method = "GET", body, admin = false, userId, time
       },
       ...(body ? { body: JSON.stringify(body) } : {}),
     });
-    if (!res.ok) throw new Error(`${method} ${path} → ${res.status}`);
+    if (!res.ok) {
+      // Le motif renvoye par le moteur (`detail`) est fait pour etre lu.
+      let detail = "";
+      try {
+        const payload = await res.json();
+        detail = typeof payload?.detail === "string" ? ` — ${payload.detail}` : "";
+      } catch {
+        // corps vide ou non JSON
+      }
+      const error = new Error(`${method} ${path} → ${res.status}${detail}`);
+      error.status = res.status;
+      error.detail = detail.replace(/^ — /, "");
+      throw error;
+    }
     return res.status === 204 ? null : await res.json();
   } finally {
     clearTimeout(timer);
@@ -333,12 +346,69 @@ export function listMyTickets(userId) {
  *  une carte nationale d'identite ou un passeport passent a l'extraction.
  *  `dataUrl` : le fichier tel que lu par FileReader.readAsDataURL. L'OCR
  *  prend quelques secondes, d'ou un delai plus long que les autres appels. */
-export function analyzeIdentityDocument({ name, type, dataUrl }) {
+export function analyzeIdentityDocument({ name, type, dataUrl, userId, conversationId }) {
+  // userId : la piece est alors enregistree pour le conseiller qui devra la
+  // valider (sans lui -- demonstration rejouee -- rien n'est conserve).
   return request("/identity-documents/analyze", {
     method: "POST",
-    body: { filename: name, content_type: type, data_base64: dataUrl },
+    body: { filename: name, content_type: type, data_base64: dataUrl, conversation_id: conversationId ?? null },
+    userId,
     timeoutMs: 60000,
   });
+}
+
+/** Pieces envoyees par ce compte et leur examen (notifications du client). */
+export function listMyDocuments(userId) {
+  return request("/identity-documents/mine", { userId });
+}
+
+/* ---------- Dossier client (conseiller humain) ---------------------------- */
+
+/** `agentId` renseigne : la consultation est tracee au journal. */
+export function getCustomerFile(userId, { agentId, conversationId } = {}) {
+  const params = new URLSearchParams();
+  if (agentId) params.set("agent_id", agentId);
+  if (conversationId) params.set("conversation_id", conversationId);
+  const query = params.toString();
+  return request(`/admin/support/users/${encodeURIComponent(userId)}${query ? `?${query}` : ""}`, { admin: true });
+}
+
+/** Pieces d'identite en attente d'examen (file « a verifier »). */
+export function listPendingDocuments() {
+  return request("/admin/support/documents?status=pending", { admin: true });
+}
+
+export function decideIdentity(userId, { agentId, decision, reason, documentId, conversationId }) {
+  return request(`/admin/support/users/${encodeURIComponent(userId)}/identity-decision`, {
+    method: "POST",
+    admin: true,
+    body: {
+      agent_id: agentId,
+      decision,
+      reason: reason || null,
+      document_id: documentId || null,
+      conversation_id: conversationId || null,
+    },
+  });
+}
+
+export function addCustomerNote(userId, { agentId, text, conversationId }) {
+  return request(`/admin/support/users/${encodeURIComponent(userId)}/notes`, {
+    method: "POST",
+    admin: true,
+    body: { agent_id: agentId, text, conversation_id: conversationId || null },
+  });
+}
+
+/** Image d'une piece : route protegee par le secret, donc pas d'<img src>
+ *  direct -- on la telecharge puis on en fait une URL locale (a liberer avec
+ *  URL.revokeObjectURL). */
+export async function fetchDocumentImage(documentId) {
+  const res = await fetch(`${BASE}/admin/support/documents/${encodeURIComponent(documentId)}/image`, {
+    headers: { "X-Internal-Secret": ADMIN_SECRET },
+  });
+  if (!res.ok) throw new Error(`image ${documentId} → ${res.status}`);
+  return URL.createObjectURL(await res.blob());
 }
 
 /** Rattrapage des messages ecrits hors du flux de reponse normal (reponse
