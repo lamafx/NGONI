@@ -22,6 +22,6 @@ docker compose ps --format "table {{.Service}}\t{{.Status}}"
 
 Write-Host ""
 Write-Host "Pret." -ForegroundColor Green
-Write-Host "  Chat client    http://localhost:5173/?compte=a40e0e00-2006-4514-8000-000000000001#/chat"
+Write-Host "  Connexion      http://localhost:5173  (adou / awa.kone / fatou.diarra, mot de passe ngoni2026)"
 Write-Host "  Conseiller     http://localhost:5173/#/agent/live"
 Write-Host "  Administration http://localhost:5173/#/admin"

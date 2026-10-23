@@ -36,28 +36,30 @@ docker desktop stop
 
 
 --------------------------------------------------------------------------------
-  3. ADRESSES
+  3. SE CONNECTER
 --------------------------------------------------------------------------------
 
-  Chat client (compte de démo)   http://localhost:5173/?compte=a40e0e00-2006-4514-8000-000000000001#/chat
-  Poste conseiller               http://localhost:5173/#/agent/live
-  Administration                 http://localhost:5173/#/admin
-  Démonstration rejouée          http://localhost:5173/?demo=1#/chat
-  API du moteur                  http://localhost:8000/docs
+  http://localhost:5173  ->  page de connexion (comptes en un clic)
+
+  Identifiant      Rôle            Mot de passe   Ouvre
+  adou             client          ngoni2026      le chat
+  awa.kone         conseiller      ngoni2026      le poste conseiller
+  yao.kouassi      conseiller      ngoni2026      le poste conseiller
+  fatou.diarra     administration  ngoni2026      l'administration
+
+  Démonstration rejouée (sans connexion) : http://localhost:5173/?demo=1#/chat
+  API du moteur : http://localhost:8000/docs
 
 
 --------------------------------------------------------------------------------
-  4. COMPTE DE DÉMONSTRATION
+  4. COMPTE DE DÉMONSTRATION (avant chaque passage)
 --------------------------------------------------------------------------------
 
-docker compose exec fastapi python scripts/compte_demo.py creer
 docker compose exec fastapi python scripts/compte_demo.py reinitialiser
 docker compose exec fastapi python scripts/compte_demo.py afficher
-docker compose exec fastapi python scripts/compte_demo.py creer --nouveau
 
-  reinitialiser : remet le compte dans son état de départ (à faire avant
-  chaque passage). creer --nouveau : un compte supplémentaire, son adresse
-  de chat est affichée. Parcours complet : DEMO-JURY.md.
+  reinitialiser : vérification d'identité refusée, solde 45 000 FCFA,
+  aucun historique. Parcours complet : DEMO-JURY.md.
 
 
 --------------------------------------------------------------------------------
@@ -65,7 +67,7 @@ docker compose exec fastapi python scripts/compte_demo.py creer --nouveau
 --------------------------------------------------------------------------------
 
 docker compose ps
-Invoke-RestMethod http://localhost:8000/admin/system/health -Headers @{ "X-Internal-Secret" = "dev-admin-secret-change-me" } | Select-Object -ExpandProperty services
+Invoke-RestMethod http://localhost:5005/status
 
 
 --------------------------------------------------------------------------------
@@ -79,13 +81,27 @@ docker compose restart rasa
   fastapi : moteur + services wallet / user. actions : rasa\actions.
   rasa : rasa\components et rasa\config.yml.
 
+  Réentraîner Rasa (après modification de rasa\data ou rasa\domain.yml, ~5 min) :
+
+docker compose exec rasa rasa train --out models
+docker compose restart rasa
+
 
 --------------------------------------------------------------------------------
-  7. NOUVEAU POSTE (une seule fois)
+  7. SAUVEGARDER LA BASE
+--------------------------------------------------------------------------------
+
+docker compose exec postgres pg_dump -U postgres -d chatbotdb -Fc -Z 9 -f /tmp/chatbotdb.dump
+docker compose cp postgres:/tmp/chatbotdb.dump docker/postgres/chatbotdb.dump
+
+
+--------------------------------------------------------------------------------
+  8. NOUVEAU POSTE (une seule fois)
 --------------------------------------------------------------------------------
 
 Copy-Item .env.example .env
 docker compose up -d --build
 
-  Avant : renseigner .env et placer chatbotdb.dump dans docker\postgres\.
+  Avant : renseigner .env, placer chatbotdb.dump dans docker\postgres\ et
+  copier rasa\models\ (le modèle entraîné n'est pas dans git).
   Le premier lancement télécharge images et modèles (~2 Go, 20 à 40 min).
