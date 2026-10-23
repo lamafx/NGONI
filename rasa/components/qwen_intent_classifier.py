@@ -198,8 +198,14 @@ def _rescue_identity_followup(text: Text, ranking: List[Dict[Text, Any]]) -> Lis
     if not any(term in plain for term in _IDENTITY_TERMS) or any(term in plain for term in _TICKET_TERMS):
         return ranking
     logger.info("QwenIntentClassifier : suivi d'identite -> diagnostic (au lieu de ask_complaint_status)")
-    rescued = {INTENT_NAME_KEY: "diagnostic", PREDICTED_CONFIDENCE_KEY: ranking[0].get(PREDICTED_CONFIDENCE_KEY, 0.9)}
-    return [rescued] + [r for r in ranking if r.get(INTENT_NAME_KEY) != "diagnostic"]
+    confidence = ranking[0].get(PREDICTED_CONFIDENCE_KEY, 0.9)
+    rescued = {INTENT_NAME_KEY: "diagnostic", PREDICTED_CONFIDENCE_KEY: confidence}
+    # L'intention ecartee est retrogradee nettement : laissee a egalite, le
+    # DynamicFallbackClassifier (ecart < ambiguity_threshold) basculait le
+    # message en nlu_fallback -- « je n'ai pas bien saisi ».
+    demoted = {INTENT_NAME_KEY: "ask_complaint_status", PREDICTED_CONFIDENCE_KEY: round(confidence / 2, 3)}
+    others = [r for r in ranking if r.get(INTENT_NAME_KEY) not in ("diagnostic", "ask_complaint_status")]
+    return [rescued] + others + [demoted]
 
 
 @DefaultV1Recipe.register(
