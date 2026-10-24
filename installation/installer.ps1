@@ -45,8 +45,28 @@ function Installer-Winget([string]$id, [string]$nom) {
         Arret "winget absent : installer $nom a la main, puis relancer INSTALLER.cmd."
     }
     Info "installation de $nom (une fenetre Windows peut demander l'autorisation)..."
-    Lancer "installation de $nom" { winget install -e --id $id --accept-package-agreements --accept-source-agreements }
+    winget install -e --id $id --accept-package-agreements --accept-source-agreements
+    # -1978335189 : aucune mise a jour applicable ; -1978335135 : deja installe.
+    $code = $LASTEXITCODE
+    if ($code -ne 0 -and $code -ne -1978335189 -and $code -ne -1978335135) {
+        Arret "ECHEC : installation de $nom (code $code). Voir les messages ci-dessus, puis relancer INSTALLER.cmd."
+    }
     Rafraichir-Path
+}
+
+# Docker Desktop.exe : emplacement par defaut, installation par utilisateur,
+# ou deduit du docker.exe du PATH (...\Docker\Docker\resources\bin\docker.exe).
+function Trouver-DockerDesktop {
+    $candidats = @(
+        (Join-Path $env:ProgramFiles 'Docker\Docker\Docker Desktop.exe'),
+        (Join-Path $env:LOCALAPPDATA 'Programs\Docker\Docker\Docker Desktop.exe')
+    )
+    $docker = Get-Command docker -ErrorAction SilentlyContinue
+    if ($docker) {
+        $candidats += Join-Path (Split-Path (Split-Path (Split-Path $docker.Source))) 'Docker Desktop.exe'
+    }
+    foreach ($c in $candidats) { if (Test-Path $c) { return $c } }
+    return $null
 }
 
 try { Start-Transcript -Path (Join-Path $ici 'installation.log') -Append | Out-Null } catch {}
@@ -70,10 +90,12 @@ else {
     $redemarrer = $true
 }
 
-$dockerDesktop = Join-Path $env:ProgramFiles 'Docker\Docker\Docker Desktop.exe'
-if (Test-Path $dockerDesktop) { Info 'Docker Desktop : present' }
+$dockerDesktop = Trouver-DockerDesktop
+if ($dockerDesktop) { Info "Docker Desktop : present ($dockerDesktop)" }
+elseif (Get-Command docker -ErrorAction SilentlyContinue) { Info 'Docker : present' }
 else {
     Installer-Winget 'Docker.DockerDesktop' 'Docker Desktop'
+    $dockerDesktop = Trouver-DockerDesktop
     $redemarrer = $true
 }
 
@@ -83,6 +105,7 @@ if ($redemarrer) {
 }
 
 if (-not (Reussit 'docker info')) {
+    if (-not $dockerDesktop) { Arret "Docker est installe mais arrete : le demarrer a la main, attendre 'Engine running', puis relancer INSTALLER.cmd." }
     Info 'demarrage de Docker Desktop...'
     Start-Process $dockerDesktop
     $limite = (Get-Date).AddMinutes(5)
