@@ -36,6 +36,22 @@ function Lancer([string]$quoi, [scriptblock]$commande) {
     if ($LASTEXITCODE -ne 0) { Arret "ECHEC : $quoi (code $LASTEXITCODE). Voir les messages ci-dessus, puis relancer INSTALLER.cmd." }
 }
 
+# Idem, avec 3 essais : un gros telechargement d'image peut arriver corrompu
+# ("incomplete deflate data") et laisser Docker quelques instants en erreur.
+function Lancer-Avec-Reprise([string]$quoi, [scriptblock]$commande) {
+    for ($essai = 1; $essai -le 3; $essai++) {
+        & $commande
+        if ($LASTEXITCODE -eq 0) { return }
+        if ($essai -lt 3) {
+            Write-Host "    $quoi a echoue (essai $essai/3), nouvel essai dans 15 s..." -ForegroundColor Yellow
+            Start-Sleep -Seconds 15
+            $limite = (Get-Date).AddMinutes(3)
+            while (-not (Reussit 'docker info') -and (Get-Date) -lt $limite) { Start-Sleep -Seconds 5 }
+        }
+    }
+    Arret "ECHEC : $quoi apres 3 essais. Redemarrer Docker Desktop, verifier la place disque, puis relancer INSTALLER.cmd."
+}
+
 function Rafraichir-Path {
     $env:Path = [Environment]::GetEnvironmentVariable('Path', 'Machine') + ';' + [Environment]::GetEnvironmentVariable('Path', 'User')
 }
@@ -186,7 +202,9 @@ Info 'la base est restauree depuis docker\postgres\chatbotdb.dump au premier dem
 Etape '5/5 Construction et demarrage (le plus long)'
 Push-Location $Destination
 try {
-    Lancer 'docker compose up' { docker compose up -d --build }
+    # Construire avant de demarrer : prechauffage reutilise l'image de fastapi.
+    Lancer-Avec-Reprise 'construction des images' { docker compose build }
+    Lancer-Avec-Reprise 'demarrage (docker compose up)' { docker compose up -d }
     Info 'prechauffage du modele (quelques minutes)...'
     docker compose logs -f prechauffage
     $code = docker inspect pfe-prechauffage-1 --format '{{.State.ExitCode}}'

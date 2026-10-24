@@ -218,6 +218,10 @@ services:
   # partent ensuite en 10 a 35 s. Echecs tolores : on reessaie jusqu'au succes.
   prechauffage:
     image: *moteur-image
+    # Image construite par le service fastapi, jamais publiee : sans cela, un
+    # PC neuf tente de la telecharger avant de l'avoir construite (« pull
+    # access denied for ngoni-ia/fastapi »).
+    pull_policy: never
     command:
       - python
       - -c
