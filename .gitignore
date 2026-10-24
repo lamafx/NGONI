@@ -75,7 +75,10 @@ migrations/versions/__pycache__/
 /user_service/
 
 rasa/.rasa/
-rasa/models/
+# Seul le modele en service est versionne : un clone demarre Rasa sans
+# reentrainement (voir docker-compose.yml, volume ./rasa/models).
+rasa/models/*
+!rasa/models/modele-19-intentions.tar.gz
 
 # Config machine-locale (Rasa/Keras, generee automatiquement, pas du projet)
 rasa/.config/
