@@ -64,9 +64,15 @@ docker compose down       # arrêter (les données sont conservées)
 
 Ne **jamais** lancer `docker compose down -v` sans sauvegarde : `-v` efface la base et les modèles.
 
-## Sans le dossier de transfert
+## Depuis un simple clone (le plus simple)
 
-`INSTALLER.cmd` fonctionne aussi depuis un simple clone (`installation\INSTALLER.cmd`). Il génère alors un `.env` avec des mots de passe aléatoires, et **la base démarre vide**.
+Depuis le 2026-10-24, les `.env` (mots de passe de test) et `docker/postgres/chatbotdb.dump` sont versionnés. Un clone suffit donc, sans dossier de transfert :
+
+```
+git clone -b opt-embedding https://github.com/lamafx/NGONI.git C:\DEV\NGONI\ngoni-ia-service
+```
+
+puis double-clic sur `C:\DEV\NGONI\ngoni-ia-service\installation\INSTALLER.cmd`. Seuls les modèles qwen3 (volume `pfe_ollama`) sont téléchargés au lieu d'être copiés.
 
 ## En cas de problème
 
