@@ -105,6 +105,8 @@ Rien d'autre n'est à installer : ni Python, ni Node, ni PostgreSQL, ni Model.
 
 ## Démarrage rapide
 
+> **Nouveau PC, en un double-clic** : voir [installation/README.md](installation/README.md). `PREPARER-TRANSFERT.cmd` sur l'ancien PC, puis `INSTALLER.cmd` sur le nouveau : il installe Docker, clone le dépôt, restaure la base et les volumes, et lance tout.
+
 ```bash
 # 1. Configuration
 cp .env.example .env          # Windows : copy .env.example .env
